@@ -31,7 +31,7 @@ class category {
         self::$appid && $appid = self::$appid;
 
         if($appid && !is_numeric($appid)){
-            $appid = iPHP::appid($appid);
+            $appid = apps::id($appid);
          }
 
         if(empty($appid)){
@@ -268,28 +268,28 @@ class category {
 
         $C['child']  = $C['subid']?true:false;
         $C['subids'] = implode(',',(array)$C['subid']);
-
         $C['dirs']   = self::data_dirs($C['cid']);
-        $C['sappid'] = iCMS_APP_CATEGORY;
 
         $C = self::data_pic($C);
         $C = self::data_parent($C);
         $C = self::data_nav($C);
+        $C+= (array)apps_meta::data('category',$C['cid']);
 
-        $C+=(array)apps_meta::data('category',$C['cid']);
-
-        $app = apps::get_app('category');
-        $app['fields'] && formerApp::data($C['cid'],$app,'category',$C,null,$C);
-        $C['sapp'] = apps::get_app_lite($app);
+        //category 应用信息
+        $C['sappid'] = iCMS_APP_CATEGORY;
+        $ca = apps::get_app($C['sappid']);
+        $C['sapp'] = apps::get_app_lite($ca);
+        $ca['fields'] && formerApp::data($C['cid'],$ca,'category',$C,null,$C);
+        //category 绑定的应用
         $C['appid'] && $C['app'] = apps::get_app_lite($C['appid']);
 
         is_string($C['rule'])    && $C['rule']     = json_decode($C['rule'],true);
         is_string($C['template'])&& $C['template'] = json_decode($C['template'],true);
         is_string($C['config'])  && $C['config']   = json_decode($C['config'],true);
 
-        empty($C['rule'])    && $C['rule'] = array();
+        empty($C['rule'])    && $C['rule']     = array();
         empty($C['template'])&& $C['template'] = array();
-        empty($C['config'])  && $C['config'] = array();
+        empty($C['config'])  && $C['config']   = array();
 
 		return $C;
     }

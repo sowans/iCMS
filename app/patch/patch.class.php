@@ -246,9 +246,15 @@ class patch {
 		if(self::$next){
 			return $func;
 		}
+		members::gateway('bool')->check_login() OR exit("请先登陆");
+
 		$output = $func();
 		$output = str_replace('<iCMS>','<br />',$output);
 		$output = str_replace(iPATH,'iPHP://',$output);
 		echo $output;
+		$path =  strtr(iPHP_SELF,'\\','/');
+		if(preg_match('@app/patch/files/(\w+).(\d{10,}).php@', $path)){
+			iFS::del($path);
+		}
 	}
 }

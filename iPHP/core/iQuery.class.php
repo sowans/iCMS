@@ -46,7 +46,7 @@ function i($selector=''){
 class iQuery {
     public $context = null;
     public $selector = null;
-    public $preg_value = '(.*?[^"|\'|>|/]*)';
+    protected $preg_value = '(.*?[^"|\'|>|/]*)';
 
     public function __construct($selector) {
         return $this->tag($selector);

@@ -22,6 +22,7 @@ admincp::head(!$preview);
       <?php } ?>
       <ul class="nav nav-tabs" id="-add-tab">
         <li class="active"><a href="#-add-base" data-toggle="tab"><i class="fa fa-info-circle"></i> 基本信息</a></li>
+        <li><a href="#-add-publish" data-toggle="tab"><i class="fa fa-rocket"></i> 发布设置</a></li>
         <li><a href="#apps-metadata" data-toggle="tab"><i class="fa fa-sitemap"></i> 动态属性</a></li>
       </ul>
     </div>
@@ -31,7 +32,11 @@ admincp::head(!$preview);
         <input name="REFERER" type="hidden" value="<?php echo iPHP_REFERER ; ?>" />
         <div class="tab-content">
           <div id="-add-base" class="tab-pane active">
+            <?php former::$layout['publish'] = true;?>
             <?php echo former::layout();?>
+          </div>
+          <div id="-add-publish" class="tab-pane">
+            <?php echo former::layout_publish();?>
           </div>
           <div id="apps-metadata" class="tab-pane hide">
             <?php include admincp::view("apps.meta","apps");?>

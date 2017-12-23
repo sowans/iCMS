@@ -355,7 +355,7 @@ a:hover>.ui-report-icon { background-position: -71px -170px }
 .commentApp-item .comment-op-link { margin-left: .5em; color: #999; font-size: 12px; visibility: hidden; }
 .commentApp-item a.comment-op-link:hover { text-decoration: none; }
 .commentApp-item .comment-op-link>.ui-icon { margin-right: 5px; width: 11px; height: 11px; vertical-align: -1px }
-.commentApp-item.empty { color: #999; font-size: 12px; border: 0; box-shadow: none; }
+.commentApp-item.empty { color: #999; font-size: 12px; border: 0; box-shadow: none; text-align: center;}
 .commentApp-item .commentApp-form { padding: 15px }
 .commentApp-item+.commentApp-item { border-top: solid 1px #eee }
 .commentApp-item .comment-blank { display: none; }
@@ -383,7 +383,7 @@ a:hover>.ui-report-icon { background-position: -71px -170px }
 .commentApp-wrap .commentApp-wrap-ft { background: #fbfbfb; border-radius: 0 0 4px 4px; border-top: 1px solid #EEE; position: relative }
 
 /* ===========commentApp-form=========== */
-.commentApp-form { margin: 10px auto; padding: 15px; }
+.commentApp-form { margin: 10px auto; padding: 0px 15px; }
 .commentApp-form .profile-wrap .avatar { margin-top: 3px; }
 .commentApp-form .alert { margin: 10px 0px; padding: 4px 10px; font-size: 12px }
 .commentApp-form .profile { display: none }
@@ -411,7 +411,8 @@ a:hover>.ui-report-icon { background-position: -71px -170px }
 .attachment { padding: 2px 4px; outline: none; border-radius: 5px; min-width: 120px; height: 64px; border: 1px solid #EDEDED; padding-left: 80px; color: #999; margin-right: 0; line-height: 64px; text-decoration: none; background: url('../ui/attachment.png') no-repeat scroll 10px center transparent; cursor: auto; display: inline-block; font-weight: bold; }
 .tags-link {color: #333; }
 .tags-link .tag_link{ margin-right: 15px; color: #337ab7; }
-
+.content-wrap { padding: 0px; margin-right: 20px; }
+article.text-body { margin: 15px 0px 10px 0px; }
 article.text-body p { margin: 0; padding: 0; margin-top: 8px; word-wrap: break-word; text-indent: 2em; font-size: 14px; line-height: 1.75; }
 article.text-body p br{display: none;}
 article.text-body p img{max-width: 90%;}

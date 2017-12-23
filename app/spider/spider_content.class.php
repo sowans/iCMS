@@ -116,6 +116,13 @@ class spider_content {
         }
         if ($data['json_decode']) {
             $content = json_decode($content,true);
+            if(is_null($content)){
+                return self::msg(
+                    'JSON ERROR:'.json_last_error_msg(),
+                    'content.json_decode.error',
+                    $name,$rule
+                );
+            }
         }
         if ($data['htmlspecialchars_decode']) {
             $content = htmlspecialchars_decode($content);
@@ -164,17 +171,11 @@ class spider_content {
         if ($data['filter']) {
             $fwd = iPHP::callback(array("filterApp","run"),array(&$content),false);
             if($fwd){
-                $filterMsg = '['.$name.']中包含【'.$fwd.'】被系统屏蔽的字符!';
-                if(spider::$dataTest){
-                    exit('<h1>'.$filterMsg.'</h1>');
-                }
-                if(spider::$work){
-                    echo spider::errorlog($filterMsg,$rule['__url__'],'content.filter');
-                    echo "\n{$filterMsg}\n";
-                    return null;
-                }else{
-                    iUI::alert($filterMsg);
-                }
+                return self::msg(
+                    '中包含【'.$fwd.'】被系统屏蔽的字符!',
+                    'content.filter',
+                    $name,$rule
+                );
             }
         }
         if ($data['empty']) {
@@ -182,17 +183,11 @@ class spider_content {
             is_array($content) && $empty = implode('', $content);
             $empty = self::real_empty($empty);
             if(empty($empty)){
-                $emptyMsg = '['.$name.']规则设置了不允许为空.当前抓取结果为空!请检查,规则是否正确!';
-                if(spider::$dataTest){
-                    exit('<h1>'.$emptyMsg.'</h1>');
-                }
-                if(spider::$work){
-                    echo spider::errorlog($emptyMsg,$rule['__url__'],'content.empty');
-                    echo "\n{$emptyMsg}\n";
-                    return null;
-                }else{
-                    iUI::alert($emptyMsg);
-                }
+                return self::msg(
+                    '规则设置了不允许为空.当前抓取结果为空!请检查,规则是否正确!',
+                    'content.empty',
+                    $name,$rule
+                );
             }
             unset($empty);
         }
@@ -495,5 +490,18 @@ class spider_content {
             }
         }
         return $content;
+    }
+    public static function msg($msg,$type,$name,$rule){
+        $msg = '['.$name.']'.$msg;
+        if(spider::$dataTest){
+            exit('<h1>'.$msg.'</h1>');
+        }
+        if(spider::$work){
+            echo spider::errorlog($msg,$rule['__url__'],$type);
+            echo "\n{$msg}\n";
+            return null;
+        }else{
+            iUI::alert($msg);
+        }
     }
 }

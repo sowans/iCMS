@@ -123,9 +123,10 @@ a:hover { text-decoration: none; }
 
 .ui-popup-follow .iCMS_tooltip_popup { -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4); -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4); box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4); }
 .iPHP-msg { text-align: center; margin: 0px 5px; padding: 0px 4px; }
-.iPHP-msg .label { white-space: pre-wrap; padding: 8px 10px; font-size: 14px; letter-spacing: 1px; line-height: 160%; }
+.iPHP-msg .label { white-space: pre-line; padding: 8px 10px; font-size: 14px; letter-spacing: 1px; line-height: 160%; }
 .iPHP-msg pre { text-align: left; }
 .iPHP-msg i { font-size: 18px; }
+.iPHP-msg .label hr { margin: 10px 0; border-top: 1px solid #f4f4f4; border-bottom: 0px; }
 .iPHP-msg .label-success hr { margin: 10px 0; border-top: 1px solid #007202; border-bottom: 1px solid #6A946B; }
 
 /* .iPHP-msg .d-content .btn-group { position: absolute; }

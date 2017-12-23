@@ -133,9 +133,12 @@ iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
   <?php } ?>
   <div class="widget-box" id="<?php echo APP_BOXID;?>">
     <div class="widget-title">
-      <span class="icon">
+      <span class="icon" style="padding: 8px 12px 5px 12px;">
         <a href="<?php echo $this->category_uri; ?>&do=add" title="添加<?php echo $this->category_name;?>"><i class="fa fa-plus-square"></i></a>
       </span>
+      <?php if(admincp::$APP_NAME=='category'){?>
+      <span class="icon"><?php echo $apps['name'];?></span>
+      <?php } ?>
       <ul class="nav nav-tabs" id="category-tab">
         <li<?php if(admincp::$APP_DO=='tree'){ ?> class="active" <?php } ?>><a href="<?php echo $this->category_uri; ?>&do=tree"><i class="fa fa-tasks"></i> 树模式</a></li>
         <li<?php if(admincp::$APP_DO=='list'){ ?> class="active" <?php } ?>><a href="<?php echo $this->category_uri; ?>&do=list"><i class="fa fa-list"></i> 列表模式</a></li>
@@ -170,6 +173,7 @@ iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
               <th><?php echo $this->category_name;?></th>
               <th>目录</th>
               <th>父<?php echo $this->category_name;?></th>
+              <?php if(admincp::$APP_NAME=='category'){?><th style="width:40px;">APPID</th><?php } ?>
               <th style="width:40px;">记录数</th>
               <th>操作</th>
             </tr>
@@ -184,7 +188,7 @@ iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
             <tr id="<?php echo $rs[$i]['cid'] ; ?>" class="status<?php echo $rs[$i]['status'] ; ?>">
               <td><input type="checkbox" name="id[]" value="<?php echo $rs[$i]['cid'] ; ?>" /></td>
               <td><a href="<?php echo iURL::get('category',$rs[$i])->href;?>" target="_blank"><?php echo $rs[$i]['cid'] ; ?></a></td>
-              <td><input <?php if($rs[$i]['rootid']=="0"){ ?> style="font-weight:bold"<?php } ?> type="text" name="name[<?php echo $rs[$i]['cid'] ; ?>]" value="<?php echo $rs[$i]['name'] ; ?>">
+              <td><input <?php if($rs[$i]['rootid']=="0"){ ?> style="font-weight:bold"<?php } ?> class="span2" type="text" name="name[<?php echo $rs[$i]['cid'] ; ?>]" value="<?php echo $rs[$i]['name'] ; ?>">
                 <?php if(!$rs[$i]['status']){ ?>
                 <i class="fa fa-eye-slash" title="隐藏<?php echo $this->category_name;?>"></i>
                 <?php } ?>
@@ -192,9 +196,11 @@ iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
                   propAdmincp::flag($rs[$i]['pid'],$propArray,APP_DOURI.'&pid={PID}&'.$uri);
                 } ?>
               </td>
-              <td><input type="text" name="dir[<?php echo $rs[$i]['cid'] ; ?>]" value="<?php echo $rs[$i]['dir'] ; ?>" /></td>
-
+              <td><input type="text" class="span3" name="dir[<?php echo $rs[$i]['cid'] ; ?>]" value="<?php echo $rs[$i]['dir'] ; ?>" /></td>
               <td><a href="<?php echo APP_DOURI; ?>&rootid=<?php echo $rs[$i]['rootid'] ; ?>"><?php echo  $root?$root->name:'顶级'.$this->category_name ; ?></a></td>
+              <?php if(admincp::$APP_NAME=='category'){?>
+              <td><a href="<?php echo APP_DOURI; ?>&appid=<?php echo $rs[$i]['appid'] ; ?>"><?php echo $rs[$i]['appid'] ; ?></a></td>
+              <?php } ?>
               <td><?php echo $rs[$i]['count'] ; ?></td>
               <td>
                 <?php if(category::check_priv($rs[$i]['cid'],'ca') ){?>

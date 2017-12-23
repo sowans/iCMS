@@ -10,7 +10,7 @@
 class linksAdmincp{
     public static $appid = null;
     public function __construct() {
-        self::$appid = iPHP::appid(__CLASS__);
+        self::$appid = apps::id(__CLASS__);
         $this->id    = (int)$_GET['id'];
     }
     public function do_add(){

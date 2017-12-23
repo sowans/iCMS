@@ -40,6 +40,10 @@ class configAdmincp{
         $config['router']['config'] = json_decode(stripcslashes($_POST['config']['router']['config']),true);
         $config['template']['desktop']['domain'] = $config['router']['url'];
 
+        if($config['cache']['engine']!='file'){
+            iPHP::callback(array("cacheAdmincp","test"),array($config['cache']));
+        }
+
         if(json_last_error()){
             $error = json_last_error_msg();
             $error && iUI::alert("REWRITE配置出错 > JSON -{$error}");
@@ -86,14 +90,14 @@ class configAdmincp{
      * @param  integer $appid [应用ID]
      * @param  [sting] $app   [应用名]
      */
-    public static function save($appid=0,$name=null,$handler=null){
+    public static function save($appid=0,$name=null,$handler=null,$dialog=true){
         $name===null   && $name = admincp::$APP_NAME;
         empty($appid) && iUI::alert("配置程序出错缺少APPID!");
         $config = iSecurity::escapeStr($_POST['config']);
         self::set($config,$name,$appid,false);
         $handler && iPHP::callback($handler,array($config));
         configAdmincp::cache();
-        iUI::success('配置更新完成','js:1');
+        $dialog && iUI::success('配置更新完成','js:1');
     }
     /**
      * [get 获取配置]

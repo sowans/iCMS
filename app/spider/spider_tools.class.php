@@ -712,7 +712,7 @@ class spider_tools {
 	}
     public static function array_filter_key($array,$filter,$level){
         $_filter = $filter[$level];unset($filter[$level]);
-        foreach ($array as $key => $value) {
+        foreach ((array)$array as $key => $value) {
             if($key==$_filter){
                 if(empty($filter)){
                     return $value;

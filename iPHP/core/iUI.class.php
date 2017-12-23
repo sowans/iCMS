@@ -105,7 +105,7 @@ class iUI {
 	        }else{
 	            $msg = '<div class="iPHP-msg"><span class="label label-'.$label.'">';
 				$icon && $msg .= '<i class="fa fa-' . $icon . '"></i> ';
-				if (strpos($content, ':') !== false) {
+				if (strpos($content, ':') !== false &&!preg_match("/<\/([^>]+?)>/is",$content)) {
 					$lang = iUI::lang($content, false);
 					$lang && $content = $lang;
 				}

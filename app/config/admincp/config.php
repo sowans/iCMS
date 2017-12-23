@@ -354,12 +354,12 @@ function modal_tpl_index(el,a){
             <div class="input-prepend"> <span class="add-on">目录</span>
               <input type="text" name="config[router][dir]" class="span4" id="router_dir" value="<?php echo $config['router']['dir'] ; ?>"/>
             </div>
-            <span class="help-inline">网页目录，相对于admin目录。可用../表示上级目录</span>
+            <span class="help-inline">网页目录，相对于admincp目录。可用../表示上级目录</span>
             <div class="clearfloat mb10"></div>
             <div class="input-prepend"> <span class="add-on">网页后缀</span>
               <input type="text" name="config[router][ext]" class="span4" id="router_ext" value="<?php echo $config['router']['ext'] ; ?>"/>
             </div>
-            <span class="help-inline">推荐使用.html</span>
+            <span class="help-inline">{EXT} 推荐使用.html</span>
             <div class="clearfloat mb10"></div>
             <div class="input-prepend"> <span class="add-on">生成速度</span>
               <input type="text" name="config[router][speed]" class="span4" id="router_speed" value="<?php echo $config['router']['speed'] ; ?>"/>

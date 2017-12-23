@@ -38,9 +38,9 @@
                         <!--{$article.link}-->
                     </li>
                 </ul>
-                <div class="article-wrap">
+                <div class="content-wrap">
                     <h1><!--{$article.title}--></h1>
-                    <div class="article-info">
+                    <div class="info">
                         <span><a href="<!--{$site.url}-->"><!--{$site.name}--></a> <!--{$site.url}--></span>
                         <span class="pubdate"><!--{$article.pubdate|date:"Y-m-d H:i"}--></span>
                         <span class="source">出处：<!--{$article.source|default:'网络'}--> </span>
@@ -143,22 +143,22 @@
                         with(document) 0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = 'http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion=' + ~(-new Date() / 36e5)];
                         </script>
                     </div>
-                    <div class="article-like" data-param='<!--{$article.param|json_encode}-->'>
-                        <button i="vote:article:good" type="button" class="btn btn-success btn-sm" title="不错!点个赞">
+                    <div class="APP-like" data-param='<!--{$article.param|json_encode}-->'>
+                        <div i="vote:article:good" class="btn btn-success btn-sm" title="不错!点个赞">
                             <i class="fa fa-thumbs-up"></i>
                             <span i="vote_good_num" class="like-num"><!--{$article.good}--></span>
-                        </button>
-                        <button i="vote:article:bad" type="button" class="btn btn-danger btn-sm" title="太烂了!踩一下">
+                        </div>
+                        <div i="vote:article:bad" class="btn btn-danger btn-sm" title="太烂了!踩一下">
                             <i class="fa fa-thumbs-down"></i>
                             <span i="vote_bad_num" class="like-num"><!--{$article.bad}--></span>
-                        </button>
-                        <button i="favorite:article" type="button" class="btn btn-primary btn-sm" title="非常棒!收藏起来">
+                        </div>
+                        <div i="favorite:article" class="btn btn-primary btn-sm" title="非常棒!收藏起来">
                             <i class="fa fa-heart"></i>
                             <span i="favorite_num" class="favorite-num"><!--{$article.favorite}--></span>
-                        </button>
+                        </div>
                     </div>
-                    <div class="clearfix"></div>
-                    <div class="prev-next mt20">
+                    <div class="clearfix mt20"></div>
+                    <div class="prev-next">
                         <p class="prev">
                             <b>上一篇:</b>
                             <!--{iCMS:article:prev cid="$article.cid" id="$article.id"}-->

@@ -84,18 +84,23 @@ class apps {
         $menu = json_decode($json,true);
     }
     public static function menu($app){
-        $array = array();
+        $menu = array();
         if($app['config']['menu']){
-            $array = $app['menu'];
-            $array && self::menu_replace($array,$app);
-            if($app['config']['menu']!='main'){
-                $json = '[{"id": "'.$app['config']['menu'].'","children":[]}]';
-                $_array = json_decode($json,true);
-                $_array[0]['children'][]=$array[0];
-                $array = $_array;
+            $menu = $app['menu'];
+            $menu && self::menu_replace($menu,$app);
+            if($app['config']['menu']=='main'){
+                $menu = $menu[0]['children'];
+            }elseif($app['config']['menu']!='default'){
+                if(isset($menu[0]['id']) && isset($menu[0]['children']) && !isset($menu[0]['caption'])){
+                    $menu[0]['id'] = $app['config']['menu'];
+                }else{
+                    $_array = json_decode('[{"id": "'.$app['config']['menu'].'","children":[]}]',true);
+                    $_array[0]['children'][]=$menu[0];
+                    $menu = $_array;
+                }
             }
         }
-        return $array;
+        return $menu;
     }
     public static function item($rs){
         if($rs){
@@ -109,6 +114,20 @@ class apps {
             $rs['fields']&& $rs['fields']  = json_decode($rs['fields'],true);
         }
         return $rs;
+    }
+    public static function id($app=null,$trans=false) {
+        if(strpos($app,'App') !== false) {
+            $app  = substr($app,0,-3);
+        }else if(strpos($app,'Admincp') !== false) {
+            $app  = substr($app,0,-7);
+        }
+
+        $array = iPHP::$apps;
+        $trans && $array = array_flip($array);
+        if($array[$app]){
+            return $array[$app];
+        }
+        return '0';
     }
     public static function get($vars=0,$field='id'){
         if(empty($vars)) return array();

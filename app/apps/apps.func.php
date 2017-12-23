@@ -595,7 +595,7 @@ class appsFunc{
         $class = $app.'Func';
         $func  = $app.'_list';
 
-        return iPHP::callback(array($class,$func),array($vars));
+        return iPHP::callback(array($class,$func),array($vars),array());
     }
 /**
  * [apps_data description]

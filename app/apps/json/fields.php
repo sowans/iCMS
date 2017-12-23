@@ -3,6 +3,7 @@
     "id": "id=id&label=内容id&comment=主键%20自增ID&field=PRIMARY&name=id&default=&type=PRIMARY&len=10&class=span2",
     "1": "UI:BR",
     "cid": "id=cid&label=栏目&field=INT&name=cid&default=&type=category&len=10&class=span3&validate%5B%5D=empty",
+    "status": "id=status&label=状态&comment=0:草稿;1:正常;2:回收;3:审核;4:不合格&option=草稿=0;正常=1;回收=2;审核=3;不合格=4;&field=TINYINT&name=status&default=1&type=select&len=1&class=chosen-select span3",
     "3": "UI:BR",
     "ucid": "id=ucid&label=用户分类&field=INT&name=ucid&default=&type=user_category&len=10&class=span6",
     "5": "UI:BR",
@@ -39,7 +40,5 @@
     "35": "UI:BR",
     "mobile": "id=mobile&label=发布设备&comment=0:pc;1:手机&field=TINYINT&name=mobile&default=0&type=device:hidden&len=1&class=span2",
     "37": "UI:BR",
-    "postype": "id=postype&label=发布类型&comment=0:用户;1:管理员&field=TINYINT&name=postype&default=1&type=postype:hidden&len=1&class=span2",
-    "39": "UI:BR",
-    "status": "id=status&label=状态&comment=0:草稿;1:正常;2:回收;3:审核;4:不合格&option=草稿=0;正常=1;回收=2;审核=3;不合格=4;&field=TINYINT&name=status&default=1&type=select&len=1&class=chosen-select span3"
+    "postype": "id=postype&label=发布类型&comment=0:用户;1:管理员&field=TINYINT&name=postype&default=1&type=postype:hidden&len=1&class=span2"
 }

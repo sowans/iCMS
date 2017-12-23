@@ -54,10 +54,22 @@ class keywordsAdmincp{
         $this->cache();
         iUI::success($msg,'url:'.APP_URI);
     }
-    public static function insert($data){
-        if(!iDB::value("SELECT `id` FROM `#iCMS@__keywords` where `keyword` ='".$data['keyword']."'")){
-            iDB::insert('keywords',$data);
+    public static function insert($name,$url=null){
+        if(is_array($name) && empty($url)){
+            $data = $name;
+        }else{
+            $data = array();
+            $data['keyword'] = $name;
+            $data['replace'] = self::get_replace($name,$url);
+            $data['replace'] = htmlspecialchars($data['replace']);
+            array_map('addslashes', $data);
         }
+        if($data){
+            if(!iDB::value("SELECT `id` FROM `#iCMS@__keywords` where `keyword` ='".$data['keyword']."'")){
+                return iDB::insert('keywords',$data);
+            }
+        }
+        return false;
     }
     public function do_iCMS(){
         if($_GET['keywords']) {
@@ -105,6 +117,9 @@ class keywordsAdmincp{
             $array[] = array($val['keyword'],htmlspecialchars_decode($val['replace']));
         }
         iCache::set(keywordsApp::CACHE_KEY,$array,0);
+    }
+    public static function get_replace($name,$url){
+        return '<a href="'.$url.'" target="_blank" class="keywords">'.$name.'</a>';
     }
     public static function _count(){
         return iDB::value("SELECT count(*) FROM `#iCMS@__keywords`");

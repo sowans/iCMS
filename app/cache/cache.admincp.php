@@ -94,4 +94,25 @@ class cacheAdmincp{
     public function do_app($dialog=true){
         apps::cache();
     }
+    public static function test($config){
+        set_error_handler(function($errno, $errstr, $errfile, $errline){
+            $errno = $errno & error_reporting();
+            if($errno == 0) return;
+
+            $cache = $_POST['config']['cache'];
+            $encode = mb_detect_encoding($errstr, array("ASCII","UTF-8","GB2312","GBK","BIG5"));
+            $errstr= mb_convert_encoding($errstr,'UTF-8',$encode);
+            iUI::$dialog['width'] = "450";
+            iUI::dialog(
+                "warning:#:warning:#:
+                系统缓存配置出错!<br />
+                请确认服务器是否支持".$cache['engine']."或者".$cache['engine']."服务器是否正常运行
+                <hr />{$errstr}",
+            'js:1', 30000000);
+        },E_ALL & ~E_NOTICE);
+
+        $GLOBALS['iPHP_CACHE']['handle'] = null;
+        var_dump($config);
+        iCache::init($config,true)->set('cache:test',1);
+    }
 }

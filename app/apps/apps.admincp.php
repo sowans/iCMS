@@ -30,12 +30,10 @@ class appsAdmincp{
           if($rs['type']=="2"){
             $rs['apptype'] = "2";
             $rs['config']['iFormer'] = '1';
-            $rs['config']['menu']    = 'main';
+            $rs['config']['menu']    = 'default';
             $base_fields  = apps_mod::base_fields_array();
-            $rs['fields'] = get_php_file(iPHP_APP_DIR.'/apps/json/fields.php');
-            $rs['fields'] = json_decode($rs['fields'],true);
-            $rs['menu']   = get_php_file(iPHP_APP_DIR.'/apps/json/menu.php');
-            $rs['menu']   = json_decode($rs['menu'],true);
+            $rs['fields'] = json_decode(get_php_file(iPHP_APP_DIR.'/apps/json/fields.php'),true);
+            $rs['menu']   = json_decode(get_php_file(iPHP_APP_DIR.'/apps/json/menu.php'),true);
           }
         }else{
           if($rs['apptype']=="2"){
@@ -98,6 +96,7 @@ class appsAdmincp{
             if(isset($output['UI:BR'])){
               $field_array[$key] = 'UI:BR';
             }else{
+              preg_match("/[a-zA-Z0-9_\-]/",$output['name']) OR iUI::alert('['.$output['label'].'] 字段名只能由英文字母、数字或_-组成,不支持中文');
               $output['label'] OR iUI::alert('发现自定义字段中空字段名称!');
               $output['comment'] = $output['label'].($output['comment']?':'.$output['comment']:'');
               $fname = $output['name'];
@@ -155,7 +154,7 @@ class appsAdmincp{
                 // $field_array = array_merge($field_array,$addons_base_fields);
                 // $array['fields'] = addslashes(cnjson_encode($field_array));
               }
-              $table_array+=apps_meta::table_array($app,true);
+              $table_array+=apps_meta::table_array($app);
 
               $array['table']  = $table_array;
               $array['config'] = $config_array;

@@ -424,22 +424,7 @@ class apps_store {
         iUI::$dialog['cancel']     = true;
         iUI::$dialog['ok:js']      = 'top.clear_pay_notify_timer();';
         iUI::$dialog['cancel:js']  = 'top.clear_pay_notify_timer();';
-
-        iUI::dialog('
-        <div class="alert alert-info" style="font-size:16px;">
-        此'.$title.'为付费版,需要付费后才能安装!<br />
-        请使用微信扫一扫,扫描下面二维码支付.<br />
-        支付完成后,在未提示安装完成前,请勿刷新或关闭页面.<br />
-        <p class="mt10" style="text-align: center;">
-          <img class="r5" src="'.$array['pay'].'" width="150"/>
-          <br />
-          (使用微信扫一扫)
-        </p>
-        </div>
-        <hr />
-        <p class="gray">如有问题请联系:<i class="fa fa-envelope"></i> '.iPHP_APP_MAIL.'</p>
-        ','js:1',1000000);
-
+        iUI::dialog($array['dialog_html'],'js:1',1000000);
         echo '<script type="text/javascript">
         var j = '.json_encode(array($array['authkey'],$sid,$array['app'],$array['name'],$array['version'])).';
         top.pay_notify("'.$array['pay_notify'].'",j,d);

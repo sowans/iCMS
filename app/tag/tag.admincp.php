@@ -344,14 +344,8 @@ class tagAdmincp{
                 foreach($rs AS $tag){
                     $C          = (array)$categoryArray[$tag['cid']];
                     $TC         = (array)$tcategoryArray[$tag['tcid']];
-                    $iurl       = iURL::get('tag',array($tag,$C,$TC));
-                    $tag['url'] = $iurl->href;
-                    $data = array();
-                    $data['keyword'] = $tag['name'];
-                    $data['replace'] = '<a href="'.$tag['url'].'" target="_blank" class="keywords"/>'.$tag['name'].'</a>';
-                    $data['replace'] = htmlspecialchars($data['replace']);
-                    array_map('addslashes', $data);
-                    iPHP::callback(array('keywordsAdmincp','insert'),array($data));
+                    $tag['url'] = iURL::get('tag',array($tag,$C,$TC))->href;
+                    iPHP::callback(array('keywordsAdmincp','insert'),array($tag['name'],$tag['url']));
                 }
                 iUI::success('内链添加完成!','js:1');
             break;

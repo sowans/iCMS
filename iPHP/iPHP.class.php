@@ -230,9 +230,18 @@ class iPHP {
 		return (
 			$_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"||
 			$_SERVER["X-Requested-With"] == "XMLHttpRequest"||
-			isset($_GET['ajax'])||
-			isset($_GET['is_ajax'])||
-			$_GET['format']=='json'
+			isset($_GET['ajax'])||isset($_POST['ajax'])||
+			isset($_GET['is_ajax'])||isset($_POST['is_ajax'])||
+			$_GET['format']=='json'||$_POST['format']=='json'
+		);
+	}
+	public static function is_wxapp() {
+		return (
+			strpos($_SERVER['HTTP_REFERER'],'servicewechat.com') !== false
+			&&(
+				strpos($_SERVER['HTTP_USER_AGENT'],'MicroMessenger') !== false
+				||strpos($_SERVER['HTTP_USER_AGENT'],'wechatdevtools') !== false
+			)
 		);
 	}
 	public static function PG($key) {
@@ -310,18 +319,7 @@ class iPHP {
 	}
 
 	public static function appid($app=null,$trans=false) {
-		if(strpos($app,'App') !== false) {
-			$app  = substr($app,0,-3);
-		}else if(strpos($app,'Admincp') !== false) {
-			$app  = substr($app,0,-7);
-		}
-
-		$array = self::$apps;
-		$trans && $array = array_flip($array);
-        if($array[$app]){
-            return $array[$app];
-        }
-        return '0';
+        return apps::id($app,$trans);
 	}
 
     /**
@@ -521,10 +519,7 @@ class iPHP {
 		$html = str_replace('\\', '/', $html);
 		$html = str_replace(iPATH, 'iPHP://', $html);
 
-		if(strpos($_SERVER['HTTP_REFERER'],'servicewechat.com') !== false &&(
-		   strpos($_SERVER['HTTP_USER_AGENT'],'MicroMessenger') !== false ||
-		   strpos($_SERVER['HTTP_USER_AGENT'],'wechatdevtools') !== false ))
-		{
+		if(iPHP::is_wxapp()){
 	        $html = str_replace(array("\r", "\\", "\"", "\n", "<b>", "</b>", "<pre style='font-size: 14px;'>", "</pre>"), array(' ', "\\\\", "\\\"","\n", ''), $html);
             $array = array('code'=>0,'msg'=>$html);
             echo json_encode($array);
@@ -539,7 +534,7 @@ class iPHP {
 			iUI::$dialog['modal'] = true;
 			$html = str_replace("\n", '<br />', $html);
 			iUI::dialog(array(
-				"warning:#:warning-sign:#:{$html}",
+				"warning:#:warning:#:{$html}",
 				'系统错误!可发邮件到 '.iPHP_APP_MAIL.' 反馈错误!我们将及时处理'
 			), 'js:1', 30000000);
 			exit;

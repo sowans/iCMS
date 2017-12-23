@@ -139,15 +139,18 @@ $(function(){
               <span class="add-on">应用菜单</span>
               <select name="config[menu]" id="config_menu" class="chosen-select span3" data-placeholder="请选择应用类型...">
                 <option value="0">无菜单</option>
+                <option value="default">默认配置[default]</option>
                 <option value="main">主菜单[main]</option>
-                <?php
-                  foreach (menu::$menu_array as $key => $value) {
-                    if($value['caption']=='-'||$key==$rs['app']){
-                      continue;
-                    }
-                ?>
-                  <option value="<?php echo $key?>"><?php echo $value['caption']?>菜单[<?php echo $key?>]</option>
-                <?php }?>
+                <optgroup label="应用菜单">
+                  <?php
+                    foreach (menu::$menu_array as $key => $value) {
+                      if($value['caption']=='-'||$key==$rs['app']){
+                        continue;
+                      }
+                  ?>
+                    <option value="<?php echo $key?>"><?php echo $value['caption']?>菜单[<?php echo $key?>]</option>
+                  <?php }?>
+                </optgroup>
               </select>
             </div>
             <script>$(function(){iCMS.select('config_menu',"<?php echo $rs['config']['menu']?$rs['config']['menu']:'0'; ?>");})</script>

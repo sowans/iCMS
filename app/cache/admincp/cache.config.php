@@ -35,7 +35,7 @@ defined('iPHP') OR exit('What are you doing?');
   192.168.0.1:11211
   </div>
   <div class="hide redis_help">
-  Redis缓存(每行一个)<hr />
+  Redis缓存<hr />
   例:<br />unix:///tmp/redis.sock@db:1 <br />
   unix:///tmp/redis.sock@db:1@password<br />
   127.0.0.1:6379@db:1<br />

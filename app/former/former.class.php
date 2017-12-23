@@ -12,6 +12,7 @@
 
 class former {
     public static $html     = array();
+    public static $layout   = array();
     public static $validate = null;
     public static $script   = null;
     public static $error    = null;
@@ -806,9 +807,32 @@ class former {
     public static function func($func,$value,$type='input') {
         return $value;
     }
+    public static function layout_publish() {
+        return is_array(self::$layout['publish'])?implode('',self::$layout['publish']):'';
+    }
     public static function layout($id=null,$func='submit') {
         $pieces = array();
-        self::$html && $pieces[] = implode('',self::$html);
+        if(self::$html){
+            if(self::$layout['publish']){
+                self::$layout['publish'] = array();
+                $publish = array(
+                    'pubdate','sortnum','weight',
+                    'hits','hits_today','hits_yday','hits_week','hits_month',
+                    'favorite','comments','good','bad',
+                    'tpl','clink','url'
+                );
+                foreach (self::$html as $key => $value) {
+                    if(in_array($key, $publish)||($is_publish && is_object($value))){
+                        self::$layout['publish'][$key] = $value;
+                        unset(self::$html[$key]);
+                        $is_publish = true;
+                        is_object($value) && $is_publish = false;
+                    }
+                }
+            }
+            self::$html && $pieces[] = implode('',self::$html);
+        }
+
         if(self::$validate||self::$script){
             $pieces[]= '<script type="text/javascript">';
             $pieces[]= '$(function(){';

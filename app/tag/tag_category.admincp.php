@@ -28,7 +28,7 @@ class tag_categoryAdmincp extends categoryAdmincp {
          *  URL规则
          */
         $this->category_rule+= array(
-            'tag'     => array('标签','/{CDIR}/{TKEY}{EXT}','{ID},{0xID},{TKEY},{NAME},{ZH_CN}')
+            'tag'     => array('标签','/tag/{TKEY}{EXT}','{ID},{0xID},{TKEY},{NAME},{ZH_CN}')
         );
         /**
          *  URL规则选项

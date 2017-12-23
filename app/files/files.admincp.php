@@ -14,7 +14,7 @@ class filesAdmincp{
     public static $DELETE_ERROR_PIC = false;
 
     public function __construct() {
-        self::$appid = iPHP::appid(__CLASS__);
+        self::$appid    = apps::id(__CLASS__);
 	    $this->from		= iSecurity::escapeStr($_GET['from']);
 	    $this->callback	= iSecurity::escapeStr($_GET['callback']);
 		$this->click	= iSecurity::escapeStr($_GET['click']);

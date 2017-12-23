@@ -152,6 +152,8 @@ class spider_urls {
                 echo spider::errorlog($msg,$url,'url.empty',array('pid'=>$pid,'sid'=>$sid,'rid'=>$rid));
                 continue;
             }
+            $rule['list_urls_format'] && $html = spider_tools::dataClean($rule['list_urls_format'], $html);
+
             if($rule['mode']=="2"){
                 $doc       = phpQuery::newDocumentHTML($html,'UTF-8');
                 $list_area = $doc[trim($rule['list_area_rule'])];
@@ -178,6 +180,11 @@ class spider_urls {
                 //echo 'list:getDocumentID:'.$lists->getDocumentID()."\n";
             }elseif($rule['mode']=="3"){
                 $list_area = json_decode($html,true);
+                if (spider::$ruleTest && is_null($list_area)) {
+                    echo '<b>JSON ERROR:'.json_last_error_msg().'</b>';
+                    echo "<hr />";
+                }
+
                 if($rule['list_area_rule']){
                     $list_area_rule = explode('->', $rule['list_area_rule']);
                     $level = 0;
@@ -199,7 +206,6 @@ class spider_urls {
 
                 if (spider::$ruleTest) {
                     echo iSecurity::escapeStr($rule['list_area_rule']);
-    //              echo iSecurity::escapeStr($list_area);
                     echo "<hr />";
                 }
                 if ($rule['list_area_format']) {
@@ -414,7 +420,7 @@ class spider_urls {
     }
     public static function lists_item_data($lists,$rule,$url){
         $array = array();
-        foreach ($lists AS $lkey => $row) {
+        foreach ((array)$lists AS $lkey => $row) {
             $cache = array();
             $data = spider_tools::listItemData($row,$rule,$url);
             foreach ((array)$data as $key => $value) {

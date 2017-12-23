@@ -574,7 +574,7 @@ class iFS {
 		if (in_array($_ext, $ext_array)) {
 			return $ext;
 		} else {
-			self::$ERROR = self::_error(array('code' => 0, 'state' => 'TYPE'));
+			self::$ERROR = self::_error(array('code' => 0, 'state' => 'TYPE','file'=>$fn));
 			return false;
 		}
 	}
@@ -730,7 +730,7 @@ class iFS {
 			"MOVE" => "文件保存时出错",
 			"DIR_Error" => "您访问的目录有问题",
 		);
-		$msg = $stateMap[$e['state']];
+		$msg = $e['file'].$stateMap[$e['state']];
 		if (self::$ERROR_TYPE) {
 			$e['state'] = $msg;
 			if (self::$ERROR_TYPE === 'json') {

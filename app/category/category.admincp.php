@@ -43,7 +43,7 @@ class categoryAdmincp {
     public static $sappid = null;
 
     public function __construct($appid = null,$dir=null) {
-        // self::$sappid    = iPHP::appid(__CLASS__);
+        // self::$sappid    = apps::id(__CLASS__);
         $this->cid       = (int)$_GET['cid'];
         $this->appid     = null;
         $appid          && $this->appid = $appid;
@@ -374,7 +374,11 @@ class categoryAdmincp {
     public function do_list(){
         menu::$url = __ADMINCP__.'='.admincp::$APP_NAME;
         admincp::$APP_DO = 'list';
-        $sql  = " where `appid`='{$this->appid}'";
+        $sql  = " WHERE 1=1";
+        if($this->appid){
+            $sql.= " AND `appid`='{$this->appid}'";
+            $apps = apps::get($this->appid);
+        }
         $cids = category::check_priv('CIDS','s');
         $sql.= iSQL::in($cids,'cid');
 

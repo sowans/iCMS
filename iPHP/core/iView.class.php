@@ -181,7 +181,7 @@ class iView {
         $rtpl === false && iPHP::error_404('Unable to find the template file <b>iPHP:://template/' . $_tpl . '</b>', '002', 'TPL');
         return $rtpl;
     }
-    public static function tpl_exists($tpl,&$_tpl) {
+    public static function tpl_exists($tpl,&$_tpl=null) {
         $flag = iPHP_APP . ':/';
         $_tpl = $tpl;
         if (strpos($tpl, $flag) !== false) {

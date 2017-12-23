@@ -21,14 +21,17 @@ class iCache {
 	public static $handle = null;
 	protected static $config = null;
 
-	public static function init($config) {
+	public static function init($config,$reset=null) {
 		self::$config = $config;
+
+		$reset===null && $reset = $config['reset'];
+		$reset && self::destroy();
+
 		if (isset($GLOBALS['iPHP_CACHE']['handle'])) {
 			self::$handle = $GLOBALS['iPHP_CACHE']['handle'];
 			return self::$handle;
 		}
 		self::$config['engine'] OR self::$config['engine'] = 'file';
-		self::$config['reset'] && self::$handle = null;
 		self::connect();
 		return self::$handle;
 	}
@@ -141,5 +144,6 @@ class iCache {
 	}
 	public static function destroy() {
 		self::$handle = null;
+		$GLOBALS['iPHP_CACHE']['handle'] = null;
 	}
 }
