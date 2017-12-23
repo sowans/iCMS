@@ -16,7 +16,7 @@
     <!--{iCMS:public:ui}-->
 </head>
 
-<body class="articleApp" i="<!--{$iCMS.APP.NAME}-->">
+<body class="contentApp" i="<!--{$iCMS.APP.NAME}-->">
     <!--{include file="./header.htm"}-->
     <div class="body clearfix">
         <div class="body-wrap r5">
@@ -34,9 +34,9 @@
                         <!--{$content.link}-->
                     </li>
                 </ul>
-                <div class="article-wrap">
+                <div class="content-wrap">
                     <h1><!--{$content.title}--></h1>
-                    <div class="article-info">
+                    <div class="info">
                         <span><a href="<!--{$site.url}-->"><!--{$site.name}--></a> <!--{$site.url}--></span>
                         <span class="pubdate"><!--{$content.pubdate|date:"Y-m-d H:i"}--></span>
                         <!--{if $content.source}-->
@@ -49,7 +49,7 @@
                         <span id="cmt_count" class="cmt_count"></span>
                     </div>
                     <div class="clearfix"></div>
-                    <div class="article-body">
+                    <article class="text-body">
                         所有可调用变量,具体调用请自行修改
                                 <!--{foreach value="cvalue" key="ckey" from="$content"}-->
                                 <p>
@@ -57,7 +57,7 @@
                                     <!--{$cvalue|print_R}-->
                                 </p>
                                 <!--{/foreach}-->
-                    </div>
+                    </article>
 
                     <div class="clearfix mb10"></div>
                     <div class="share">
@@ -87,36 +87,50 @@
                         with(document) 0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = 'http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion=' + ~(-new Date() / 36e5)];
                         </script>
                     </div>
-                    <div class="article-like" data-param='<!--{$content.param|json_encode}-->'>
-                        <a i="vote:<!--{$apps.app}-->:good" class="like-btn">
-                            <i class="like-icon up"></i>
+                    <div class="APP-like" data-param='<!--{$content.param|json_encode}-->'>
+                        <div i="vote:<!--{$APP.app}-->:good" class="btn btn-success btn-sm" title="不错!点个赞">
+                            <i class="fa fa-thumbs-up"></i>
                             <span i="vote_good_num" class="like-num"><!--{$content.good}--></span>
-                            <span class="like-txt">赞</span>
-                        </a>
-                        <a i="vote:<!--{$apps.app}-->:bad" class="like-btn">
-                            <i class="like-icon down"></i>
+                        </div>
+                        <div i="vote:<!--{$APP.app}-->:bad" class="btn btn-danger btn-sm" title="太烂了!踩一下">
+                            <i class="fa fa-thumbs-down"></i>
                             <span i="vote_bad_num" class="like-num"><!--{$content.bad}--></span>
-                            <span class="like-txt">踩</span>
-                        </a>
+                        </div>
+                        <div i="favorite:<!--{$APP.app}-->" class="btn btn-primary btn-sm" title="非常棒!收藏起来">
+                            <i class="fa fa-heart"></i>
+                            <span i="favorite_num" class="favorite-num"><!--{$content.favorite}--></span>
+                        </div>
                     </div>
-                    <div class="clearfix"></div>
-                    <div class="article-prevnext mt10">
-                        <p class="prev"><b>上一篇:</b>
+                    <div class="clearfix mt20"></div>
+                    <div class="prev-next">
+                        <p class="prev">
+                            <b>上一篇:</b>
                             <!--{iCMS:content:prev cid="$content.cid" id="$content.id"}-->
+                            <!--{if $content_prev}-->
                             <a href="<!--{$content_prev.url}-->" class="prev" target="_self">
                                 <!--{$content_prev.title}-->
                             </a>
+                            <!--{else}-->
+                            没有了
+                            <!--{/if}-->
                         </p>
                         <p class="next">
                             <!--{iCMS:content:next cid="$content.cid" id="$content.id"}-->
+                            <!--{if $content_next}-->
                             <a href="<!--{$content_next.url}-->" class="next" target="_self">
                                 <!--{$content_next.title}-->
-                            </a><b>:下一篇</b></p>
+                            </a>
+                            <!--{else}-->
+                            没有了
+                            <!--{/if}-->
+                            <b>:下一篇</b>
+                        </p>
+                        <p class="clearfix"></p>
                     </div>
                 </div>
                 <div class="clearfix"></div>
                 <div class="related">
-                    <h3><i class="line"></i>更多 <b><!--{$category.link}--></b> 相关<!--{$apps.name}-->：</h3>
+                    <h3><i class="line"></i>更多 <b><!--{$category.link}--></b> 相关<!--{$APP.name}-->：</h3>
                     <div class="related-left">
                         <ul>
                             <!--{iCMS:content:list loop='true' row='9' cid="$category.cid"}-->

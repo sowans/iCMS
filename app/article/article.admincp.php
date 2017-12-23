@@ -836,7 +836,7 @@ class articleAdmincp{
 
         isset($_POST['iswatermark']) && files::$watermark_enable = false;
 
-        if(isset($_POST['remote'])){
+        if($_POST['remote']){
             $body = filesAdmincp::remotepic($body,true,$aid);
             $body = filesAdmincp::remotepic($body,true,$aid);
             $body = filesAdmincp::remotepic($body,true,$aid);

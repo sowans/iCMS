@@ -61,12 +61,12 @@ $(function(){
                     </div>
                 </article>
                 <div class="article-like" data-param='<!--{$content.param|json_encode}-->'>
-                    <a i="vote:<!--{$app.app}-->:good" class="like-btn">
+                    <a i="vote:<!--{$APP.app}-->:good" class="like-btn">
                         <i class="like-icon up"></i>
                         <span i="vote_good_num" class="like-num"><!--{$content.good}--></span>
                         <span class="like-txt">赞</span>
                     </a>
-                    <a i="vote:<!--{$app.app}-->:bad" class="like-btn">
+                    <a i="vote:<!--{$APP.app}-->:bad" class="like-btn">
                         <i class="like-icon down"></i>
                         <span i="vote_bad_num" class="like-num"><!--{$content.bad}--></span>
                         <span class="like-txt">踩</span>
@@ -75,13 +75,13 @@ $(function(){
                 <div class="clearfix"></div>
                 <div class="article-prevnext mt10">
                     <p class="prev"><b>上一篇:</b>
-                        <!--{iCMS:content:prev app="$app.app" cid="$content.cid" id="$content.id"}-->
+                        <!--{iCMS:content:prev cid="$content.cid" id="$content.id"}-->
                         <a href="<!--{$content_prev.url}-->" class="prev" target="_self">
                             <!--{$content_prev.title}-->
                         </a>
                     </p>
                     <p class="next">
-                        <!--{iCMS:content:next app="$app.app" cid="$content.cid" id="$content.id"}-->
+                        <!--{iCMS:content:next cid="$content.cid" id="$content.id"}-->
                         <a href="<!--{$content_next.url}-->" class="next" target="_self">
                             <!--{$content_next.title}-->
                         </a><b>:下一篇</b></p>
@@ -136,7 +136,7 @@ $(function(){
                     <h2><i class="iconfont icon-news"></i> 最新<!--{$category.name}--></h2>
                 </div>
                 <ul class="list-wrap">
-                    <!--{iCMS:content:list app="$app.app" loop="true" row="5" cid="$category.cid"}-->
+                    <!--{iCMS:content:list loop="true" row="5" cid="$category.cid"}-->
                     <!--{include file="./content.item.htm" import="true"}-->
                     <!--{/iCMS}-->
                 </ul>
@@ -148,7 +148,7 @@ $(function(){
                     <h2><i class="iconfont icon-ranking"></i> <!--{$category.name}-->排行榜</h2>
                 </div>
                 <ul class="list-wrap">
-                    <!--{iCMS:content:list app="$app.app" loop="true" row="5" orderby="week" cid="$category.cid"}-->
+                    <!--{iCMS:content:list loop="true" row="5" orderby="week" cid="$category.cid"}-->
                     <!--{include file="./content.item.htm" import="true"}-->
                     <!--{/iCMS}-->
                 </ul>

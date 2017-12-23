@@ -69,7 +69,7 @@
                             <p class="tabs-title">
                                 <a href="<!--{$site.url}-->" data-target="#tabs_c0" data-toggle="tab">全部资讯</a>
                             </p>
-                            <!--{iCMS:category:list stype='top' row="8"}-->
+                            <!--{iCMS:category:list stype='top' row="10"}-->
                             <ul class="tabs-nav">
                                 <!--{foreach key="catkey" value="catlist" from="$category_list"}-->
                                 <li>
@@ -133,26 +133,26 @@
                                     <!--{/iCMS}-->
                                 </div>
                                 <ul class="media-list">
-                                    <!--{iCMS:article:list loop="true" tags="true" sub="all" row="12" cid="$catlist.cid"}-->
+                                    <!--{iCMS:apps:list apps="$catlist.app" loop="true" tags="true" sub="all" row="12" cid="$catlist.cid"}-->
                                     <li class="media">
-                                        <!--{if $article_list.pic.url}-->
-                                        <a class="media-object" href="<!--{$article_list.url}-->">
-                                            <img class="r5 lazy" data-src="<!--{$article_list.pic.url}-->" src="<!--{$site.urls.tpl}-->/static/img/loading.gif">
+                                        <!--{if $apps_list.pic.url}-->
+                                        <a class="media-object" href="<!--{$apps_list.url}-->">
+                                            <img class="r5 lazy" data-src="<!--{$apps_list.pic.url}-->" src="<!--{$site.urls.tpl}-->/static/img/loading.gif">
                                         </a>
                                         <!--{/if}-->
                                         <div class="media-body">
                                             <h4 class="media-heading">
-                                            <a href="<!--{$article_list.url}-->" target="_blank"><!--{$article_list.title}--></a>
+                                            <a href="<!--{$apps_list.url}-->" target="_blank"><!--{$apps_list.title}--></a>
                                             </h4>
                                             <p class="media-text">
-                                                <!--{$article_list.description|cut:100:'......'}-->
-                                                <a href="<!--{$article_list.url}-->" target="_blank" class="blue">[详细]</a>
+                                                <!--{$apps_list.description|cut:100:'......'}-->
+                                                <a href="<!--{$apps_list.url}-->" target="_blank" class="blue">[详细]</a>
                                             </p>
                                             <div class="media-info">
-                                                <span class="date"><!--{$article_list.pubdate|date:'m月d日'}--></span>
-                                                <span class="category">[<!--{$article_list.category.link}-->]</span>
-                                                <!--{if $article_list.tags_link}-->
-                                                <span class="tags"><!--{$article_list.tags_link}--></span>
+                                                <span class="date"><!--{$apps_list.pubdate|date:'m月d日'}--></span>
+                                                <span class="category">[<!--{$apps_list.category.link}-->]</span>
+                                                <!--{if $apps_list.tags_link}-->
+                                                <span class="tags"><!--{$apps_list.tags_link}--></span>
                                                 <!--{/if}-->
                                             </div>
                                         </div>

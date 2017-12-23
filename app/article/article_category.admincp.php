@@ -30,7 +30,7 @@ class article_categoryAdmincp extends categoryAdmincp {
          */
         $this->category_rule+= array(
             'article' => array('文章','/{CDIR}/{YYYY}/{MM}{DD}/{ID}{EXT}','{ID},{0xID},{LINK}'),
-            'tag'     => array('标签','/{CDIR}/{TKEY}{EXT}','{ID},{0xID},{TKEY},{NAME},{ZH_CN}')
+            'tag'     => array('标签','/{CDIR}/t-{TKEY}{EXT}','{ID},{0xID},{TKEY},{NAME},{ZH_CN}')
         );
         /**
          *  URL规则选项

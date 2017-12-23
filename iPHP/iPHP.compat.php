@@ -82,7 +82,7 @@ function num10K($num){
         return round($num/10000,1) . 'K';
     }
 }
-function format_time($time, $flag = 0){
+function format_time($time, $flag = 's'){
     $value = array(
         "years" => 0, "days" => 0, "hours" => 0,
         "minutes" => 0, "seconds" => 0,

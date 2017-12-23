@@ -411,7 +411,8 @@ a:hover>.ui-report-icon { background-position: -71px -170px }
 .attachment { padding: 2px 4px; outline: none; border-radius: 5px; min-width: 120px; height: 64px; border: 1px solid #EDEDED; padding-left: 80px; color: #999; margin-right: 0; line-height: 64px; text-decoration: none; background: url('../ui/attachment.png') no-repeat scroll 10px center transparent; cursor: auto; display: inline-block; font-weight: bold; }
 .tags-link {color: #333; }
 .tags-link .tag_link{ margin-right: 15px; color: #337ab7; }
-
+.content-wrap { padding: 0px; margin-right: 20px; }
+article.text-body { margin: 15px 0px 10px 0px; }
 article.text-body p { margin: 0; padding: 0; margin-top: 8px; word-wrap: break-word; text-indent: 2em; font-size: 14px; line-height: 1.75; }
 article.text-body p br{display: none;}
 article.text-body p img{max-width: 90%;}

@@ -17,7 +17,7 @@ class contentFunc {
     * 已在 categoryApp contentApp 设置数据回调,
     * 在应用范围内可以不用设置 app="应用名/应用ID"
     **/
-    public static function __set_apps($value=null) {
+    public static function interfaced($value=null) {
         self::$apps = $value;
     }
     private static function data($vars,$func='list'){

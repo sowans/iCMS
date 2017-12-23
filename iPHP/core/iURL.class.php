@@ -56,16 +56,28 @@ class iURL {
 
     public static function rule($matches) {
     	$b	= $matches[1];
+        if(strpos($b,'RAND')!==false){
+            list($_b,$len,$is_num) = explode(',', $b);
+            empty($len) && $len = 8;
+            return random($len,$is_num);
+        }
+        $_time = 0;
+        if(strpos($b,'AUTHID,')!==false||strpos($b,'AUTHCID,')!==false){
+            list($b,$_time) = explode(',', $b);
+        }
     	list($a,$c,$tc) = self::$ARRAY;
         switch($b) {
             case 'ID':		$e = $a['id'];break;
             case '0xID':	$e = sprintf("%08s",$a['id']);break;
             case '0x3ID':	$e = substr(sprintf("%08s",$a['id']), 0, 4);break;
-            case '0x3,2ID':	$e = substr(sprintf("%08s",$a['id']), 4, 2);break;
+            case '0x3,2ID': $e = substr(sprintf("%08s",$a['id']), 4, 2);break;
+            case 'AUTHID':  $e = urlencode(auth_encode($a['id'],$_time));break;
             case 'MD5':     $e = substr(md5($c['id']),8,16);break;
+            case 'TMD5':    $e = substr(md5(time().uniqid()),8,16);break;
 
             case 'CID':     $e = $c['cid'];break;
             case '0xCID':   $e = sprintf("%08s",$c['cid']);break;
+            case 'AUTHCID': $e = urlencode(auth_encode($a['cid'],$_time));break;
             case 'CDIR':    $e = $c['dir'];break;
             case 'CDIRS':   $e = $c['dirs'];break;
 

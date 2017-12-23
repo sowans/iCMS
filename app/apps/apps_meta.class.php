@@ -9,12 +9,29 @@
 */
 
 class apps_meta {
-    public static $CREATE_TABLE = true;
     public static $data = null;
-    public static function data($app,$ids){
-        if(empty($ids)) return array();
+    public static function table($app,$check=true){
+        if(is_numeric($app)){
+            $a   = apps::get($app);
+            $app = $a['app'];
+        }
+        empty($app) && trigger_error('APP name is empty!',E_USER_ERROR);
+        $table = $app.'_meta';
 
+        if($check){
+            if(iCMS::$config['apps:meta'][$table]){
+                return $table;
+            }else{
+                return false;
+            }
+        }else{
+            return $table;
+        }
+    }
+    public static function data($app,$ids){
         $table = self::table($app);
+
+        if(empty($ids)||empty($table)) return array();
 
         list($ids,$is_multi)  = iSQL::multi_var($ids);
         $sql  = iSQL::in($ids,'id',false,true);
@@ -57,24 +74,29 @@ class apps_meta {
         }
         return $metadata;
     }
-    public static function table_array($app,$create=true){
-        self::$CREATE_TABLE = $create;
-        $table = self::table($app);
+    public static function table_array($app){
+        $table = self::create_table($app);
         return array($table=>array($table,'id',null,'动态属性'));
     }
-    public static function table($app){
-        if(is_numeric($app)){
-            $a   = apps::get($app);
-            $app = $a['app'];
-        }
-        empty($app) && trigger_error('META name is empty!',E_USER_ERROR);
+    public static function create_table($app,$create=true){
+        $table = self::table($app,false);
 
-        $table = $app.'_meta';
-        self::$CREATE_TABLE && self::create($table);
+        if($create && !iDB::check_table($table)){
+            iDB::query("
+                CREATE TABLE `#iCMS@__{$table}` (
+                  `id` int(10) unsigned NOT NULL,
+                  `data` mediumtext NOT NULL,
+                  PRIMARY KEY (`id`)
+                ) ENGINE=MyISAM DEFAULT CHARSET=".iPHP_DB_CHARSET
+            );
+            self::config($table);
+        }
         return $table;
     }
     public static function get($app,$id,$index=true){
         $table = self::table($app);
+        if(empty($table)) return false;
+
         $json = iDB::value("SELECT `data` FROM `#iCMS@__{$table}` where `id` = '$id'");
         if($json){
             $data = json_decode($json,true);
@@ -91,25 +113,21 @@ class apps_meta {
     }
     public static function save($app,$id,$data=null){
         $data===null && $data = self::post();
-
-        $table = self::table($app);
-        $check = iDB::value("SELECT `id` FROM `#iCMS@__{$table}` where `id` = '$id'");
-        if($check){
-            iDB::update($table, array('data'=>$data), array('id'=>$id));
-        }else{
-            $data && iDB::insert($table,array('id'=>$id,'data'=>$data));
+        if($data){
+            $table = self::create_table($app);
+            $check = iDB::value("SELECT `id` FROM `#iCMS@__{$table}` where `id` = '$id'");
+            if($check){
+                iDB::update($table, array('data'=>$data), array('id'=>$id));
+            }else{
+                iDB::insert($table,array('id'=>$id,'data'=>$data));
+            }
         }
     }
-    public static function create($table){
-        // if(!self::$CREATE_TABLE) return;
-        if(!iDB::check_table($table)){
-            iDB::query("
-                CREATE TABLE `#iCMS@__{$table}` (
-                  `id` int(10) unsigned NOT NULL,
-                  `data` mediumtext NOT NULL,
-                  PRIMARY KEY (`id`)
-                ) ENGINE=MyISAM DEFAULT CHARSET=".iPHP_DB_CHARSET
-            );
-        }
+
+    public static function config($table){
+        $config  = configAdmincp::get(iCMS_APP_APPS,'apps:meta');
+        $config[$table] = 1;
+        $_POST['config'] = $config;
+        configAdmincp::save(iCMS_APP_APPS,'apps:meta',null,false);
     }
 }

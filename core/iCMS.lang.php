@@ -10,8 +10,18 @@
 defined('iPHP') OR exit('What are you doing?');
 
 return array(
-	'!login' =>'请先登陆！',
-	'error'  =>'哎呀呀呀！非常抱歉,居然出错了！<br />请稍候再试试,我们的程序猿正在努力修复中...',
+	'not_found' =>'未找到相关内容<b>%s:%s</b>',
+	'!login'    =>'请先登陆！',
+	'error'     =>'哎呀呀呀！非常抱歉,居然出错了！<br />请稍候再试试,我们的程序猿正在努力修复中...',
+	'clicknext' =>'点击图片进入下一页',
+	'first'     =>'已经是第一篇',
+	'last'      =>'已经是最后一篇',
+	'empty_id'  =>'ID不能为空',
+	'!good'     =>'您已经点过赞了啦 ！',
+	'good'      =>'谢谢您的赞，我会更加努力的',
+	'!bad'      =>'您已经过踩了啦！',
+	'bad'       =>'您已经过踩了啦！',
+
 	'page'   =>array(
 		'index'        =>'首页',
 		'prev'         =>'上一页',
@@ -26,16 +36,6 @@ return array(
 		'format_left'  =>'',
 		'format_right' =>'',
 		'di'           =>'第',
-	),
-	'content'=>array(
-		'first'     =>'已经是第一篇',
-		'last'      =>'已经是最后一篇',
-		'clicknext' =>'点击图片进入下一页',
-		'empty_id'  =>'内容ID不能为空',
-		'!good'     =>'您已经点过赞了啦 ！',
-		'good'      =>'谢谢您的赞，我会更加努力的',
-		'!bad'      =>'您已经过踩了啦！',
-		'bad'       =>'您已经过踩了啦！',
 	),
 	'report'=>array(
 		'empty'   =>'请填写举报的原因！',

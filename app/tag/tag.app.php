@@ -64,13 +64,9 @@ class tagApp extends appsApp {
             $view_tpl OR $view_tpl = self::$config['tpl'];
             $view_tpl OR $view_tpl = '{iTPL}/tag.htm';
             strstr($tpl, '.htm') && $view_tpl = $tpl;
-
-            if($tag['category']['apps']['app']){
-                $view_app = $tag['category']['apps']['app'];
-            }
-
-            iView::assign('apps', $tag['category']['apps']); //绑定的应用信息
-            iView::assign('app', apps::get_app_lite($app));
+            $tag['category']['app']['app'] && $view_app = $tag['category']['app']['app'];
+            iView::assign('APP', $tag['category']['app']); //绑定的应用信息
+            iView::assign('sapp', apps::get_app_lite($app));//tag的应用信息
             iView::assign('tag_category',$tag['tag_category']);
             unset($tag['tag_category']);
         }

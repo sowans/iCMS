@@ -16,14 +16,32 @@ $(function() {
     var doc = $(document);
     //搜索
     doc.on('click', ".search-btn", function(event) {
+        event.preventDefault();
         var q = $('[name="q"]',"#search-form").val();
         if(q==""){
             iCMS.UI.alert("请输入关键词");
             return false;
         }
     });
+    scrollBox($('.pictxt','.side-col'),700);
 });
-
+function scrollBox(target,height,pos) {
+    $(window).scroll(function(event) {
+        event.preventDefault();
+        var prev       = target.prev();
+        var next_top   = $('.side-col').next().offset().top;
+        var scroll_top = $(window).scrollTop();
+        if (prev.offset().top + prev.height() <= scroll_top) {
+            if ((scroll_top + height) > next_top) {
+                target.css('top', -(scroll_top - next_top + height) + 'px');
+            }else{
+                target.css({'position': 'fixed', 'top': '5' + 'px'});
+            }
+        }else{
+            target.css({'position': 'static'});
+        }
+    });
+};
 (function($) {
     $.fn.slider = function(options) {
         var defaults = {

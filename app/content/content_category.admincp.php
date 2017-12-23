@@ -32,7 +32,8 @@ class content_categoryAdmincp extends categoryAdmincp {
          *  URL规则
          */
         $this->category_rule+= array(
-            $app['app'] => array($app['title'],'/{CDIR}/{YYYY}/{MM}{DD}/{ID}{EXT}','{ID},{0xID},{LINK}')
+            $app['app'] => array($app['title'],'/{CDIR}/{YYYY}/{MM}{DD}/{ID}{EXT}','{ID},{0xID},{LINK}'),
+            // 'tag'       => array('标签','/{CDIR}/t-{TKEY}{EXT}','{ID},{0xID},{TKEY},{NAME},{ZH_CN}')
         );
         /**
          *  URL规则选项
@@ -46,7 +47,18 @@ class content_categoryAdmincp extends categoryAdmincp {
                 array('{0x3ID}','8位ID(前3位)',fasle),
                 array('{0x3,2ID}','8位ID',fasle),
                 array('{TITLE}','标题',fasle),
-            )
+            ),
+            // 'tag' => array(
+            //     array('----'),
+            //     array('{ID}','标签ID'),
+            //     array('{0xID}','8位ID'),
+            //     array('{TKEY}','标签标识'),
+            //     array('{ZH_CN}','标签名(中文)'),
+            //     array('{NAME}','标签名'),
+            //     array('----'),
+            //     array('{TCID}','分类ID',fasle),
+            //     array('{TCDIR}','分类目录',fasle),
+            // )
         );
     }
     // public function do_add(){

@@ -70,21 +70,23 @@ class apps_common {
         iPHP::set_cookie($ackey, $_SERVER['REQUEST_TIME'], 86400);
         iUI::code(1, $name.':'. $type, 0, 'json');
     }
-    public static function render($data,$name,$tpl,$p=null) {
+    public static function render($data,$name,$tpl,$view_app=null) {
         if (!$tpl) return $data;
 
-        $p===null && $p=$name;
+        $view_app===null && $view_app=$name;
         $view_tpl = $data['tpl'];
         $view_tpl OR $view_tpl = $data['category']['template'][$name];
         strstr($tpl, '.htm') && $view_tpl = $tpl;
 
         iView::set_iVARS($data['iurl'],'iURL');
         if($data['category']){
+            iView::assign('APP', $data['category']['app']); //绑定的应用信息
+            unset($category['app']);
             iView::assign('category', $data['category']);
             unset($data['category']);
         }
         iView::assign($name, $data);
-        $view = iView::render($view_tpl,$p);
+        $view = iView::render($view_tpl,$view_app);
         if($view) return array($view,$data);
     }
     public static function custom() {

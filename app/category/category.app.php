@@ -70,14 +70,13 @@ class categoryApp{
         if($tpl) {
             iView::set_iVARS($category['iurl'],'iURL');
             $category['mode'] && iURL::page_url($category['iurl']);
-            if($category['apps']['type']=="2"){ //自定义应用模板信息
-                iPHP::callback(array("contentFunc","__set_apps"),array($category['apps']));
+            if($category['app']['type']=="2"){ //自定义应用模板信息
+                iPHP::callback(array("contentFunc","interfaced"),array($category['app']));
             }
             $view_app = "category";
-            $category['apps']['app'] && $view_app = $category['apps']['app'];
-            iView::assign('apps', $category['apps']); //绑定的应用信息
-            iView::assign('app', $category['app']);//category 信息
-            unset($category['app'],$category['apps']);
+            $category['app']['app'] && $view_app = $category['app']['app'];
+            iView::assign('APP', $category['app']); //绑定的应用信息
+            unset($category['app']);
             iView::assign('category',$category);
             if(strpos($tpl, '.htm')!==false){
             	return iView::render($tpl,$view_app);

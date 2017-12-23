@@ -154,7 +154,7 @@ class appsAdmincp{
                 // $field_array = array_merge($field_array,$addons_base_fields);
                 // $array['fields'] = addslashes(cnjson_encode($field_array));
               }
-              $table_array+=apps_meta::table_array($app,true);
+              $table_array+=apps_meta::table_array($app);
 
               $array['table']  = $table_array;
               $array['config'] = $config_array;

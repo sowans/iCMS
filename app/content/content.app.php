@@ -82,12 +82,13 @@ class contentApp {
         $this->hooked($rs);
 
         if ($tpl) {
-            $apps = apps::get_app_lite($this->data);
+            $app = apps::get_app_lite($this->data);
             //自定义应用模板信息
-            $apps['type']=="2" && iPHP::callback(array("contentFunc","__set_apps"),array($apps));
-            iView::assign('apps', $apps);
-            $content = $rs;unset($content['category']);
-            iView::assign('content', $content);unset($content);
+            $app['type']=="2" && iPHP::callback(array("contentFunc","interfaced"),array($app));
+            $content = $rs; unset($content['category']);
+            iView::assign('APP', $app);
+            iView::assign('content', $content);
+            unset($content);
         }
 
         return apps_common::render($rs,$this->app,$tpl);
