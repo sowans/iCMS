@@ -106,6 +106,7 @@ class tagApp extends appsApp {
         if($category['mode'] && stripos($tag['url'], '.php?')===false){
             iURL::page_url($tag['iurl']);
         }
+        $tag['related']  && $tag['relArray'] = explode(',', $tag['related']);
 
         apps_common::init($tag,'tag',$vars);
         apps_common::link($tag['name']);

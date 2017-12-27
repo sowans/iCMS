@@ -71,10 +71,13 @@ class patchAdmincp{
      */
     public function do_install(){
 		$this->msg.= patch::update();//更新文件
-		if(patch::$next){
-			$this->msg.= patch::run();//数据库升级
-		}
+        patch::$next = true;
 		include admincp::view("patch");
+    }
+    public function do_upgrade(){
+        $this->msg.= patch::run();//升级
+        patch::$next = false;
+        include admincp::view("patch");
     }
     //===================git=========
     /**

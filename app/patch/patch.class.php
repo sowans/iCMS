@@ -215,7 +215,7 @@ class patch {
 				iFS::del($file);
 			}
 		}
-		// var_dump($files);
+
 		if($files){
 			self::$next = true;
 			ksort($files);
@@ -252,9 +252,10 @@ class patch {
 		$output = str_replace('<iCMS>','<br />',$output);
 		$output = str_replace(iPATH,'iPHP://',$output);
 		echo $output;
-		$path =  strtr(iPHP_SELF,'\\','/');
+		$path = strtr(iPHP_SELF,'\\','/');
+		$path = ltrim($path,'/');
 		if(preg_match('@app/patch/files/(\w+).(\d{10,}).php@', $path)){
-			iFS::del($path);
+			iFS::del(iPATH.$path);
 		}
 	}
 }

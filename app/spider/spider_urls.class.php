@@ -420,10 +420,10 @@ class spider_urls {
     }
     public static function lists_item_data($lists,$rule,$url){
         $array = array();
-        foreach ((array)$lists AS $lkey => $row) {
+        if($lists)foreach ($lists AS $lkey => $row) {
             $cache = array();
             $data = spider_tools::listItemData($row,$rule,$url);
-            foreach ((array)$data as $key => $value) {
+            if($data)foreach ($data as $key => $value) {
                 if(is_numeric($key)|| strpos($key, 'var_')!==false){
                     unset($data[$key]);
                 }

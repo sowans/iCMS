@@ -64,7 +64,7 @@ admincp::head();
           <ul class="site-stats">
             <li><a href="<?php echo __ADMINCP__;?>=database&do=backup"><i class="fa fa-database"></i> <strong><?php echo iFS::sizeUnit($datasize+$indexsize) ; ?></strong> <small>数据库</small></a></li>
             <li><a href="<?php echo __ADMINCP__;?>=database&do=backup"><i class="fa fa-puzzle-piece"></i> <strong><?php echo count($iTable) ; ?></strong><small>iCMS表</small></a></li>
-            <li><a href="<?php echo __ADMINCP__;?>=database&do=backup"><i class="fa fa-puzzle-piece"></i> <strong><?php echo count($oTable) ; ?></strong> <small>其它表</small></a></li>
+            <li><a href="<?php echo __ADMINCP__;?>=database&do=backup"><i class="fa fa-puzzle-piece"></i> <strong><?php echo $oTable?count($oTable):0 ; ?></strong> <small>其它表</small></a></li>
             <li class="divider"></li>
             <li><a href="<?php echo __ADMINCP__;?>=files"><i class="fa fa-files-o"></i> <strong id="counts_fc">0</strong> <small>文件</small></a></li>
           </ul>

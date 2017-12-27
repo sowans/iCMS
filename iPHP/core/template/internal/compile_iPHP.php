@@ -17,7 +17,7 @@ function compile_iPHP($arguments, &$object){
 	foreach ($attrs as $attr_name => $attr_value){
 		switch ($attr_name){
 			case 'app':
-				$output .= "{$props}['total'] = count($attr_value);\n";
+				$output .= "{$props}['total'] = $attr_value?count($attr_value):0;\n";
 				$output .= "{$props_a}={$attr_value};unset($attr_value);\n";
 				break;
 			case 'name':

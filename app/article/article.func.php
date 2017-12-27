@@ -97,6 +97,8 @@ class articleFunc{
 		switch ($vars['orderby']) {
 	        case "id":       $order_sql = " ORDER BY `id` $by"; break;
 	        case "hot":      $order_sql = " ORDER BY `hits` $by"; break;
+	        case "today":    $order_sql = " ORDER BY `hits_today` $by"; break;
+	        case "yday":     $order_sql = " ORDER BY `hits_yday` $by"; break;
 	        case "week":     $order_sql = " ORDER BY `hits_week` $by"; break;
 	        case "month":    $order_sql = " ORDER BY `hits_month` $by"; break;
 	        case "comment":  $order_sql = " ORDER BY `comments` $by"; break;

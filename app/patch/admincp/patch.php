@@ -11,7 +11,7 @@ defined('iPHP') OR exit('What are you doing?');
 admincp::head();
 ?>
 <style>
-#log{color: #999;font-size: 12px;line-height: 20px;}
+#log{color: #999;font-size: 12px;line-height: 22px;}
 </style>
 <div class="iCMS-container">
   <div class="well iCMS-well iCMS-patch">
@@ -28,32 +28,40 @@ admincp::head();
   </div>
 </div>
 <script type="text/javascript">
-var log = "<?php echo $this->msg; ?>";
-var n = 0;
-var timer = 0;
-log = log.split('<iCMS>');
+var log = "<?php echo $this->msg; ?>".split('<iCMS>');
+var n = 0,timer = 0;
 setIntervals();
+
 function GoPlay(){
 	if (n > log.length-1) {
 		n=-1;
 		clearIntervals();
 	}
 	if (n > -1) {
-		postcheck(n);
+		log_scroll(n);
 		n++;
 	}
 }
-function postcheck(n){
-	log[n]=log[n].replace('#','<br />');
-	document.getElementById('log').innerHTML += log[n] + '<br /><a name="last"></a>';
-	document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight;
+function log_scroll(n){
+	log_msg(log[n]) ;
+    window.scrollTo(0,$(document.body).outerHeight(true));
 }
 function setIntervals(){
 	timer = setInterval('GoPlay()',100);
 }
+function log_msg(text){
+    text = text.replace('#','<hr />');
+    document.getElementById('log').innerHTML +=text+'<br /><a name="last"></a>';
+}
 function clearIntervals(){
 	clearInterval(timer);
-	// finish();
+    <?php if(patch::$next){ ?>
+    log_msg('<span class="label label-success">源码升级完成!</span>');
+    log_msg('<span class="label label-important">开始升级程序!</span>');
+    window.setTimeout(function(){
+        window.location.href = '<?php echo APP_URI;?>&do=upgrade';
+    },1000);
+    <?php } ?>
 }
 </script>
 <?php admincp::foot();?>

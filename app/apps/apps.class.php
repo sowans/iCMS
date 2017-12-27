@@ -361,7 +361,7 @@ class apps {
             }
         }
     }
-	public static function get_app($appid=1){
+	public static function get_app($appid=1,$throw=true){
 		$rs	= iCache::get('app/'.$appid);
         if(defined(ADMINCP) && empty($rs)){
             if(is_numeric($appid)){
@@ -371,12 +371,15 @@ class apps {
             }
             iCache::set('app/'.$appid,$rs,0);
         }
-        empty($rs) &&iPHP::error_throw('[appid:'.$appid.'] application no exist', '0005');
+        if(empty($rs)){
+            $rs = array();
+            $throw && iPHP::error_throw('[appid:'.$appid.'] application no exist', '0005');
+        }
        	return $rs;
 	}
 
-    public static function get_app_lite($data=null) {
-        is_array($data) OR $data = apps::get_app($data);
+    public static function get_app_lite($data=null,$throw=true) {
+        is_array($data) OR $data = apps::get_app($data,$throw);
         unset($data['table'],$data['config'],$data['fields'],$data['menu']);
         return $data;
     }
