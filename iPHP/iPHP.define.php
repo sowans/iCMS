@@ -41,15 +41,18 @@ defined('iPHP_MULTI_DOMAIN') OR define('iPHP_MULTI_DOMAIN',false);
 //defined('iPHP_TPL_DEBUG') OR define('iPHP_TPL_DEBUG',false);
 //defined('iPHP_URL_404') OR define('iPHP_URL_404','');
 //-----------------框架相关路径-----------------------
-define('iPHP_CORE', iPATH."iPHP/core");
-define('iPHP_LIB',  iPATH."iPHP/library");
+define('iPHP_CORE',   iPATH."iPHP/core");
+define('iPHP_LIB',    iPATH."iPHP/library");
+define('iPHP_VENDOR', iPATH."iPHP/library/vendor");
 //-----------------应用相关路径-----------------------
-define('iPHP_APP_DIR',	iPATH."app");
-define('iPHP_APP_CORE',	iPATH."core");
-define('iPHP_APP_CACHE',iPATH."cache");
-define('iPHP_TPL_DIR',  iPATH."template");
-define('iPHP_CONF_DIR',	iPATH."cache/conf");
-define('iPHP_TPL_CACHE',iPATH."cache/template");
+define('iPHP_APP_DIR',	  iPATH."app");
+define('iPHP_APP_CORE',   iPATH."core");
+define('iPHP_APP_LIB',    iPATH."core/library");
+define('iPHP_APP_VENDOR', iPATH."core/library/vendor");
+define('iPHP_APP_CACHE',  iPATH."cache");
+define('iPHP_TPL_DIR',    iPATH."template");
+define('iPHP_CONF_DIR',	  iPATH."cache/conf");
+define('iPHP_TPL_CACHE',  iPATH."cache/template");
 
 //---------------系统设置------------------------
 defined('iPHP_APP') OR define('iPHP_APP',"iPHP");

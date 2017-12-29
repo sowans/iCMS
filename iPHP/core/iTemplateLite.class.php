@@ -769,9 +769,19 @@ class iTemplateLite_Compiler extends iTemplateLite {
 				$_args = $this->_parse_arguments($arguments);
 				if(!isset($_args['var']) && !isset($_args['value'])){
 					$code = null;
-					foreach ($_args as $key => $value) {
-						$code.='<?php $this->assign(\'' . $this->_dequote($key) . '\', ' . $value . '); ?>';
+					if(isset($_args['array'])){
+						$_array   = array();
+						$array_key = $this->_dequote($_args['array']);
+						unset($_args['array']);
 					}
+					foreach ($_args as $key => $value) {
+						if ($array_key){
+							$_array[$this->_dequote($key)]=$this->_dequote($value);
+						}else{
+							$code.='<?php $this->assign(\'' . $this->_dequote($key) . '\', ' . $value . '); ?>';
+						}
+					}
+					$array_key && $code.='<?php $this->assign(\'' . $array_key . '\', ' . var_export($_array,true) . '); ?>';
 				}else{
 					if (!isset($_args['var'])){
 						$this->trigger_error("missing 'var' attribute in 'assign'", E_USER_ERROR, __FILE__, __LINE__);

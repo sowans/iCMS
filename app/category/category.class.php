@@ -414,7 +414,7 @@ class category {
             if($act){
                 strpos($p, ':') === false && $p = $p . ':' . $act;
             }
-            $priv = iPHP::check_priv((string) $p, members::$priv['category']);
+            $priv = check_priv((string) $p, members::$priv['category']);
         }else{
             $priv = false;
         }

@@ -128,20 +128,20 @@ class members{
             $output['do'] && $pieces['do']='do='.$output['do'];
             // $output['do'] && $pieces['do'] = $output['do'];
             $pp  = implode('&', $pieces);
-            $priv = iPHP::check_priv($pp,self::$priv['menu']);
+            $priv = check_priv($pp,self::$priv['menu']);
             //在菜单权限无权限时 查找应用权限
             if(!$priv){
                 $output['app'] = preg_replace('@(\w+)_category@is', 'category', $output['app']);
                 $pieces = array($output['app']);
                 $output['do'] && $pieces['do']=$output['do'];
                 $pp = implode('.', $pieces);
-                $priv = iPHP::check_priv($pp,self::$priv['app']);
+                $priv = check_priv($pp,self::$priv['app']);
             }
         }else{
             //一般用于判断菜单权限
-            $priv = iPHP::check_priv($p,self::$priv['menu']);
+            $priv = check_priv($p,self::$priv['menu']);
             if (!$priv){
-                $priv = iPHP::check_priv($p,self::$priv['app']);
+                $priv = check_priv($p,self::$priv['app']);
             }
         }
 

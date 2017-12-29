@@ -25,7 +25,44 @@ class iPHP {
 	public static $mobile     = false;
 	public static $time_start = false;
 	public static $callback   = array();
+	public static $autoload   = array('iPHP', 'loader');
+	public static $handler    = array(
+		'autoload' => array('iPHP', 'loader'),
+		'error'    => array('iPHP', 'error_handler'),
+	);
+	public static function Init(){
+		self::timer_start();
+		ini_set('display_errors','ON');
+		error_reporting(E_ALL & ~E_NOTICE);
+		version_compare('5.3',PHP_VERSION,'>') && die('iPHP requires PHP version 5.3 or higher. You are running version '.PHP_VERSION.'.');
+		@ini_set('magic_quotes_sybase', 0);
+		@ini_set("magic_quotes_runtime",0);
+		header('Content-Type: text/html; charset=UTF-8');
+		header('P3P: CP="CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR"');
 
+		define('iPHP_PATH',dirname(strtr(__FILE__,'\\','/')));
+		require_once iPHP_PATH.'/iPHP.version.php';
+		require_once iPHP_PATH.'/iPHP.define.php';
+		require_once iPHP_PATH.'/iPHP.compat.php';
+
+		if(function_exists('ini_get')) {
+		    $memorylimit = @ini_get('memory_limit');
+		    if($memorylimit && get_bytes($memorylimit) < 33554432 && function_exists('ini_set')) {
+		        ini_set('memory_limit', iPHP_MEMORY_LIMIT);
+		    }
+		}
+		date_default_timezone_set(iPHP_TIME_ZONE);
+		set_error_handler(self::$handler['error'],E_ALL & ~E_NOTICE);
+		spl_autoload_register(self::$handler['autoload'], true, true);
+		//waf
+		iWAF::filter();
+		//security
+		iSecurity::filter();
+		iSecurity::GP('page','GP',2);
+
+		define('iPHP_SELF',	$_SERVER['PHP_SELF']);
+		define('iPHP_REFERER', 	$_SERVER['HTTP_REFERER']);
+	}
     /**
      * Autoload
      */
@@ -72,8 +109,16 @@ class iPHP {
 			$GLOBALS['iPHP_REQ'][$key] = true;
 			require_once $path;
 		} else {
+			$_autoload_finish = true;
+			$functions = spl_autoload_functions();
+			if($functions)foreach ($functions as $key => $func) {
+				if($func!=iPHP::$handler['autoload']){
+					$_autoload_finish = false;
+					spl_autoload_register($func);
+				}
+			}
 			if (iPHP_DEBUG) {
-				self::error_throw("Unable to load class '$name',file path '$path'", 0020);
+				$_autoload_finish && self::error_throw("Unable to load class '$name',file path '$path'", 0020);
 			}else{
 				return false;
 			}
@@ -120,22 +165,19 @@ class iPHP {
 			ini_set('display_errors', 'ON');
 			error_reporting(E_ALL & ~E_NOTICE);
 		}
-
-		$timezone = $config['time']['zone'];
-		$timezone OR $timezone = 'Asia/Shanghai'; //设置中国时区
-		function_exists('date_default_timezone_set') && @date_default_timezone_set($timezone);
-
-		self::$apps = $config['apps'];
-		empty(self::$apps) && self::$apps = self::callback($call['apps']);
-		self::define_app();
 		iPHP_DB_DEBUG   && iDB::$show_errors  = true;
 		iPHP_DB_TRACE   && iDB::$show_trace   = true;
 		iPHP_DB_EXPLAIN && iDB::$show_explain = true;
+
+		$config['time']['zone'] && @date_default_timezone_set($config['time']['zone']);//设置时区
+		self::$apps = $config['apps'];
+		empty(self::$apps) && self::$apps = self::callback($call['apps']);
+		self::define_app();
 		return $config;
 	}
 	public static function define_app() {
 		foreach (self::$apps as $_app => $_appid) {
-			define(iPHP_APP.'_APP_'.strtoupper($_app),$_appid);
+			$_app && define(iPHP_APP.'_APP_'.strtoupper($_app),$_appid);
 		}
 	}
 	public static function run($app = NULL, $do = NULL, $args = NULL, $prefix = "do_") {
@@ -378,7 +420,11 @@ class iPHP {
         }
     }
 	public static function vendor($name, $args = null) {
-		iPHP::import(iPHP_LIB . '/vendor/Vendor.' . $name . '.php');
+		$vendor = '/vendor/Vendor.' . $name . '.php';
+		$path = iPHP_APP_LIB.$vendor;
+		is_file($path) OR $path = iPHP_LIB.$vendor;
+
+		iPHP::import($path);
 		if (function_exists($name)) {
 			if($args === null){
 				return $name();
@@ -426,9 +472,6 @@ class iPHP {
 		$restart && self::$time_start = $time_end;
 		return round($time_total, 4);
 	}
-    public static function check_priv($p,$priv){
-        return is_array($p)?array_intersect((string)$p,(array)$priv):in_array((string)$p,(array)$priv);
-    }
 	public static function redirect($url = '',$flag=null) {
 		if($flag){
 			//防止从重复跳转
@@ -527,7 +570,7 @@ class iPHP {
 		}
 	    if(iPHP_SHELL){
 	        $html = str_replace(array("<b>", "</b>", "<pre style='font-size: 14px;'>", "</pre>"), array("\033[31m","\033[0m",''), $html);
-	        echo $html."\n";
+	        echo $html.PHP_EOL;
 	        exit;
 	    }
 		if (isset($_GET['frame'])) {
@@ -535,7 +578,9 @@ class iPHP {
 			$html = str_replace("\n", '<br />', $html);
 			iUI::dialog(array(
 				"warning:#:warning:#:{$html}",
-				'系统错误!可发邮件到 '.iPHP_APP_MAIL.' 反馈错误!我们将及时处理'
+				'The system has been wrong!
+				You can send a message to '.iPHP_APP_MAIL.' feedback this error!
+				We will deal with it in time. Thank you.'
 			), 'js:1', 30000000);
 			exit;
 		}

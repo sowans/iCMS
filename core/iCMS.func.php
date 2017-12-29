@@ -202,3 +202,6 @@ function get_php_content($content){
     $content = str_replace("<?php defined('iPHP') OR exit('What are you doing?');?>\n", '', $content);
     return $content;
 }
+function check_priv($p,$priv){
+    return is_array($p)?array_intersect((string)$p,(array)$priv):in_array((string)$p,(array)$priv);
+}
