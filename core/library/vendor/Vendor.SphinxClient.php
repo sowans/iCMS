@@ -1,18 +1,17 @@
 <?php
 /**
- * iPHP - i PHP Framework
- * Copyright (c) 2012 iiiphp.com. All rights reserved.
- *
- * @author coolmoo <iiiphp@qq.com>
- * @website http://www.iiiphp.com
- * @license http://www.iiiphp.com/license
- * @version 2.0.0
- */
+* iCMS - i Content Management System
+* Copyright (c) 2007-2017 iCMSdev.com. All rights reserved.
+*
+* @author icmsdev <master@icmsdev.com>
+* @site https://www.icmsdev.com
+* @licence https://www.icmsdev.com/LICENSE.html
+*/
 defined('iPHP') OR exit('What are you doing?');
 defined('iPHP_LIB') OR exit('iPHP vendor need define iPHP_LIB');
-iPHP::import(iPHP_LIB.'/sphinx.class.php');
+require dirname(__FILE__) .'/SphinxClient/sphinx.class.php';
 
-function SPHINX($hosts) {
+function SphinxClient($hosts) {
 
 	if(isset($GLOBALS['iSPH'])) return $GLOBALS['iSPH'];
 	if(empty($hosts)){

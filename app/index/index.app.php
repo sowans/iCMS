@@ -32,7 +32,7 @@ class indexApp {
         $rule=='{PHP}' OR iURL::page_url($iurl);
 
         if(iCMS::$config['template']['index']['mode'] && iPHP_DEVICE=="desktop"){
-            iCMS::redirect_html($iurl);
+            appsApp::redirect_html($iurl);
         }
 
         iView::set_iVARS($iurl,'iURL');

@@ -93,7 +93,7 @@ define("COMPRESSION_SAVINGS", 0.20);
  * @author  Ryan T. Dean <rtdean@cytherianage.net>
  * @package memcached-client
  */
-class memcached_client
+class Memcached_client
 {
    // {{{ properties
    // {{{ public

@@ -46,18 +46,20 @@ class formsFunc{
         former::$config['option'] = $vars['option'];
         former::create($form);
 
-        $token = $form['token'];
-        if(empty($token)){
-            $token  = authcode($form['id'].'#'.$_SERVER['REQUEST_TIME'],'decode');
-            iPHP::set_cookie('token_time', $_SERVER['REQUEST_TIME'], 600);
-        }
+        $vendor = iPHP::vendor('Token');
+        list($token,$timestamp,$nonce) = $vendor->get();
+        empty($form['token']) && $form['token']  = $token;
+        empty($form['signature'])&& $form['signature'] = authcode($form['id'].'#'.$form['token'].'#'.$timestamp.'#'.$nonce,'decode');
+        $vendor->prefix = 'form_'.$form['id'].'_';
+        $vendor->signature($form['token'],$form['signature']);
 
         $layout = '<input name="action" type="hidden" value="save" />';
         $layout.= '<input name="fid" type="hidden" value="'.$form['id'].'" />';
-        $layout.= '<input name="token" type="hidden" value="'.$token.'" />';
+        $layout.= '<input name="signature" type="hidden" value="'.$form['signature'].'" />';
         $layout.= former::layout("#former_".$form['id']);
 
         if($vars['assign']){
+            iView::assign('form',$form);
             iView::assign($vars['assign'],$layout);
         }else{
             echo $layout;

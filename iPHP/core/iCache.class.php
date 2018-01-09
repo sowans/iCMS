@@ -39,19 +39,17 @@ class iCache {
 		if (self::$handle === null) {
 			switch (self::$config['engine']) {
 				case 'memcached':
-					require_once iPHP_CORE . '/memcached.class.php';
 					$_servers = explode("\n", str_replace(array("\r", " "), "", self::$config['host']));
-					self::$handle = new memcached_client(array(
+					self::$handle = iPHP::vendor('Memcached_client',array(
 						'servers' => $_servers,
 						'compress_threshold' => 10240,
 						'persistant' => false,
 						'debug' => false,
 						'compress' => self::$config['compress'],
-					));
+					),true);
 					unset($_servers);
 				break;
 				case 'redis':
-					require_once iPHP_CORE . '/redis.class.php';
 					list($hosts, $db, $passwd) = explode('@', trim(self::$config['host']));
 					list($host, $port) = explode(':', $hosts);
 					if (strstr($hosts, 'unix:')) {
@@ -60,13 +58,14 @@ class iCache {
 					}
 					$db = (int) str_replace('db:', '', $db);
 					$db == '' && $db = 1;
-					self::$handle = new Redis_client(array(
+
+					self::$handle = iPHP::vendor('Redis_client',array(
 						'host' => $host,
 						'port' => $port,
 						'db' => $db,
 						'passwd' => $passwd,
 						'compress' => self::$config['compress'],
-					));
+					),true);
 				break;
 				case 'file':
 					require_once iPHP_CORE . '/iFileCache.class.php';
@@ -82,7 +81,8 @@ class iCache {
 			$GLOBALS['iPHP_CACHE']['handle'] = self::$handle;
 		}
 	}
-	public static function prefix($keys, $prefix = NULL) {
+	public static function prefix($keys = null, $prefix = null) {
+		$prefix===null && $prefix = self::$config['prefix'];
 		if ($prefix) {
 			if (is_array($keys)) {
 				foreach ($keys AS $k) {
@@ -97,7 +97,7 @@ class iCache {
 	}
 	public static function get($keys, $ckey = NULL, $unserialize = true) {
 		self::connect();
-		$keys = self::prefix($keys, self::$config['prefix']);
+		$keys = self::prefix($keys);
 		$_keys = implode('', (array) $keys);
 		if (!isset($GLOBALS['iPHP_CACHE'][$_keys])) {
 			$GLOBALS['iPHP_CACHE'][$_keys] = is_array($keys) ?
@@ -108,7 +108,7 @@ class iCache {
 	}
 	public static function set($keys, $res, $cachetime = "-1") {
 		self::connect();
-		$keys = self::prefix($keys, self::$config['prefix']);
+		$keys = self::prefix($keys);
 		if (self::$config['engine'] == 'memcached') {
 			self::$handle->delete($keys);
 		}
@@ -118,7 +118,7 @@ class iCache {
 		self::delete($key,$time);
 	}
 	public static function delete($key = '', $time = 0) {
-		$key = self::prefix($key, self::$config['prefix']);
+		$key = self::prefix($key);
 		self::connect();
 		self::$handle->delete($key, $time);
 	}

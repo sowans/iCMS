@@ -168,15 +168,17 @@ class iFS {
 		return @rmdir($dir);
 	}
 	//获取文件夹下所有文件/文件夹列表
-    public static function fileList($dir){
-      $lists = array();
-      foreach(glob($dir."/*") as $value){
-        if(is_dir($value)){
-          $lists+= self::fileList($value);
-        }
-        $lists[] = $value;
-      }
-      return (array)$lists;
+    public static function fileList($dir,$pattern='*'){
+		$lists = array();
+		$dir   = trim($dir, '/');
+		foreach(glob($dir.'/'.$pattern) as $value){
+			$lists[] = $value;
+			if(is_dir($value)){
+			  $_lists = self::fileList($value,$pattern);
+			  $lists  = array_merge($lists,$_lists);
+			}
+		}
+		return (array)$lists;
     }
 	//获取文件夹列表
 	public static function folder($dir = '', $type = NULL) {

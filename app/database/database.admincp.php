@@ -145,7 +145,7 @@ class databaseAdmincp {
 	 */
 	public function do_download() {
 		$this->bakdir OR iUI::alert('请选择要下载的备份卷');
-		iPHP::import(iPHP_LIB . '/pclzip.class.php'); //加载zip操作类
+		iPHP::vendor('PclZip'); //加载zip操作类
 		$zipname = $this->bakdir . ".zip"; //压缩包的名称
 		$zipFile = iPHP_APP_CACHE . '/backup/' . $zipname; //压缩包所在路径
 		$zip = new PclZip($zipFile);

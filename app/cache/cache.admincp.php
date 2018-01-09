@@ -23,6 +23,7 @@ class cacheAdmincp{
         $this->do_category(false);
         $this->do_article_category(false);
         $this->do_tag_category(false);
+        $this->do_filecache(false);
         $this->do_tpl(false);
         iUI::success('全部缓存更新完成');
     }
@@ -94,6 +95,14 @@ class cacheAdmincp{
     public function do_app($dialog=true){
         apps::cache();
     }
+    public function do_filecache($dialog=true){
+        if(iCMS::$config['cache']['engine']=='file'){
+            @set_time_limit(0);
+            $prefix = iCache::prefix();
+            iCache::$handle->clear_all($prefix);
+            $dialog && iUI::success('过期文件类缓存清理完成');
+        }
+    }
     public static function test($config){
         set_error_handler(function($errno, $errstr, $errfile, $errline){
             $errno = $errno & error_reporting();
@@ -111,8 +120,8 @@ class cacheAdmincp{
             'js:1', 30000000);
         },E_ALL & ~E_NOTICE);
 
-        $GLOBALS['iPHP_CACHE']['handle'] = null;
-        var_dump($config);
-        iCache::init($config,true)->set('cache:test',1);
+        $cache = iCache::init($config,true);
+        $cache->set('cache_test',1);
+        $cache->delete('cache_test');
     }
 }

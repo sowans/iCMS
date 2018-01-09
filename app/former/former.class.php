@@ -277,7 +277,6 @@ class former {
                 case 'seccode':
                     $input->addClass('seccode')->attr('maxlength',"4")->attr('type','text');
                     $help = publicApp::seccode();
-                    // $input.= $seccode;
                 break;
                 case 'editor':
                     if(self::$config['gateway']=='admincp'){

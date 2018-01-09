@@ -216,7 +216,7 @@ class spider_content {
             $page_area_rule = trim($rule['page_area_rule']);
             if($page_area_rule){
                 if(strpos($page_area_rule, 'DOM::')!==false){
-                    iPHP::import(iPHP_LIB.'/phpQuery.php');
+                    iPHP::vendor('phpQuery');
                     $doc      = phpQuery::newDocumentHTML($html,'UTF-8');
                     $pq_dom   = str_replace('DOM::','', $page_area_rule);
                     $pq_array = phpQuery::pq($pq_dom);
@@ -395,7 +395,7 @@ class spider_content {
     public static function match($html,$data,$rule){
         $match_hash = array();
         if($data['dom']){
-            iPHP::import(iPHP_LIB.'/phpQuery.php');
+            iPHP::vendor('phpQuery');
             spider::$dataTest && $_GET['pq_debug'] && phpQuery::$debug =1;
             $html = preg_replace(array('/<script.+?<\/script>/is','/<style.+?<\/style>/is'),'',$html);
             $doc  = phpQuery::newDocumentHTML($html,'UTF-8');

@@ -24,7 +24,7 @@ class forms_zip {
             return self::msg("安装包不存在",false);
         }
 
-        iPHP::import(iPHP_LIB . '/pclzip.class.php'); //加载zip操作类
+        iPHP::vendor('PclZip'); //加载zip操作类
         $zip = new PclZip($zipFile);
         if (false == ($archive_files = $zip->extract(PCLZIP_OPT_EXTRACT_AS_STRING))) {
           return self::msg("ZIP包错误",false);
@@ -106,7 +106,7 @@ class forms_zip {
         if(self::$msg_mode=='alert'){
             $s OR iUI::alert($text);
         }else{
-            return $text.'......'.iUI::check($s).'<iCMS>';
+            return str_pad($text,80,'.').iUI::check($s).'<iCMS>';
         }
     }
 }

@@ -28,7 +28,7 @@ class searchApp {
         $search['iurl']    = (array)self::iurl($q);
         $q && $this->search_log($q);
         $tpl===false && $tpl = '{iTPL}/search.htm';
-        apps_common::render($search,'search',$tpl);
+        return appsApp::render($search,$tpl,'search');
     }
     public function iurl($q,$query=null,$page=true) {
         $query===null && $query = array('app'=>'search','q'=>$q);

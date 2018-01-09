@@ -135,7 +135,8 @@ class iSecurity {
 			'REQUEST_URI','REQUEST_METHOD','SCRIPT_NAME','REQUEST_TIME',
 			'SERVER_SOFTWARE','SERVER_ADDR','SERVER_PORT',
 			'X-Requested-With','HTTP_X_REQUESTED_WITH',
-			'QUERY_STRING','argv','argc'
+			'QUERY_STRING','argv','argc',
+			'Authorization','HTTP_AUTHORIZATION'
 		));
 
 	}

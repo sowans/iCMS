@@ -9,6 +9,7 @@
 */
 defined('iPHP') OR exit('What are you doing?');
 class commentFunc{
+	public static $appid = iCMS_APP_COMMENT;
 	public static function comment_array($vars){
 		$where_sql = " `status`='1'";
 		$is_multi = false;
@@ -36,8 +37,8 @@ class commentFunc{
 	}
 	private static function list_display($vars){
 		$vars['do']          = 'list';
-		$vars['page_ajax']   = 1;
-		$vars['total_cahce'] = 1;
+		$vars['page_ajax']   = 'comment_page_ajax';
+		$vars['total_cahce'] = 'G';
 		$tpl = 'list.default';
 		isset($vars['_display']) && $vars['display'] = $vars['_display'];
 		unset($vars['method'],$vars['_display']);
@@ -56,12 +57,6 @@ class commentFunc{
 		if(!iCMS::$config['comment']['enable']){
 			return;
 		}
-
-		// if(!isset($vars['ref'])){
-		// 	$_vars = iView::app_vars(true);
-		// 	$vars  = array_merge($vars,$_vars);
-		// 	unset($vars['ref'],$_vars);
-		// }
 
 		if ($vars['display'] && empty($vars['loop'])) {
 			$_vars = iView::app_vars(true);
@@ -150,20 +145,15 @@ class commentFunc{
 			$ln = ($pgconf['nowindex']-1)<0?0:$pgconf['nowindex']-1;
 
 			if($resource)foreach ($resource as $key => $value) {
-				if($vars['date_format']){
-					$value['addtime'] = get_date($value['addtime'],$vars['date_format']);
-				}
-				$value['url'] = commentApp::redirect_url($value);
+				$value = commentApp::value($value, $vars);
+
 				if($vars['by']=='ASC'){
 					$value['lou'] = $key+$ln*$maxperpage+1;
 				}else{
 					$value['lou'] = $total-($key+$ln*$maxperpage);
 				}
-				$value['content'] = nl2br($value['content']);
-				$value['user']    = user::info($value['userid'],$value['username'],$vars['facesize']);
-				$value['reply_uid'] && $value['reply'] = user::info($value['reply_uid'],$value['reply_name'],$vars['facesize']);
-
 				$value['total'] = $total;
+
 				if($vars['reply'] && $reply_array){
 					$value['reply_data'] = $reply_array[$value['reply_id']];
 					unset($reply_array[$value['reply_id']]);
@@ -171,17 +161,6 @@ class commentFunc{
 				if($vars['page']){
 					$value['page']  = array('total'=>$multi->totalpage,'perpage'=>$multi->perpage);
 				}
-		        $value['param'] = array(
-					"sappid" => iCMS_APP_COMMENT,
-					"appid"  => (int)$value['appid'],
-					"iid"    => (int)$value['iid'],
-					"id"     => (int)$value['id'],
-					"cid"    => (int)$value['cid'],
-					"userid" => (int)$value['userid'],
-					"name"   => iSecurity::escapeStr($value['username']),
-					'suid'   => (int)$value['userid'],
-					'title'  => iSecurity::escapeStr($value['title']),
-		        );
 				$resource[$key] = $value;
 			}
 			$vars['cache'] && iCache::set($cache_name,$resource,$cache_time);

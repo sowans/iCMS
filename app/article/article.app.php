@@ -8,40 +8,23 @@
 * @licence https://www.icmsdev.com/LICENSE.html
 */
 class articleApp extends appsApp {
-	public $methods = array('iCMS','article','clink', 'hits','vote', 'good', 'bad', 'like_comment', 'comment');
-    public static $config  = null;
 	public function __construct() {
 		parent::__construct('article');
-		self::$config = iCMS::$config[$this->app];
 	}
 	public function article($fvar,$page = 1,$field='id', $tpl = true) {
-		$article = iDB::row("
-			SELECT * FROM `#iCMS@__article`
-			WHERE `".$field."`='".$fvar. "'
-			AND `status` ='1' LIMIT 1;",
-		ARRAY_A);
-
-		$article OR iPHP::error_404('找不到相关文章<b>'.$field.':' . $fvar . '</b>', 10001);
-		$id = $article['id'];
-
-		if ($article['url']) {
-			if (iView::$gateway == "html") {
-				return false;
-			} else {
-				$this->API_hits($id);
-				iPHP::redirect($article['url']);
-			}
-		}
+        $article = $this->get_data($fvar,$field);
+        if ($article === false) return false;
+        $id = $article['id'];
 
 		if ($article['chapter']) {
-			$all = iDB::all("SELECT id,subtitle FROM `#iCMS@__article_data` WHERE aid='" . (int) $id . "';", ARRAY_A);
+			$all = $this->data($id,'id,subtitle');
 			foreach ($all as $akey => $value) {
 				$article_data[] = $value;
 			}
 			unset($all);
 			ksort($article_data);
 		} else {
-			$article_data = iDB::row("SELECT body,subtitle FROM `#iCMS@__article_data` WHERE aid='" . (int) $id . "' LIMIT 1;", ARRAY_A);
+			$article_data = $this->data($id,'body,subtitle');
 		}
 
 		$vars = array(
@@ -49,46 +32,18 @@ class articleApp extends appsApp {
 			'user' => true,
 		);
 		$article = $this->value($article, $article_data, $vars, $page, $tpl);
+		unset($article_data);
 		if ($article === false) {
 			return false;
 		}
-
-		$article+=(array)apps_meta::data('article',$id);
-        $app = apps::get_app('article');
-        $app['fields'] && formerApp::data($article['id'],$app,'article',$article,$vars,$article['category']);
-
-		unset($article_data);
+		self::custom_data($article,$vars);
 		self::hooked($article);
-		return apps_common::render($article,'article',$tpl);
+		return self::render($article,$tpl);
 	}
 	public static function value($article, $data = "", $vars = array(), $page = 1, $tpl = false) {
-
-		$article['appid'] = iCMS_APP_ARTICLE;
-
-		$category = categoryApp::category($article['cid'], false);
-
-		if ($tpl) {
-			$category OR iPHP::error_404('找不到该文章的栏目缓存<b>cid:' . $article['cid'] . '</b> 请更新栏目缓存或者确认栏目是否存在', 10002);
-		} else {
-			if (empty($category)) {
-				return false;
-			}
-
-		}
-
-		if ($category['status'] == 0) {
-			return false;
-		}
-        if(iCMS::check_view_html($tpl,$category,'article')){
-            return false;
-        }
-
-		$article['iurl'] = (array)iURL::get('article', array($article, $category));
-		$article['url'] = $article['iurl']['href'];
-
-		($tpl && $category['mode'] == '1') && iCMS::redirect_html($article['iurl']);
-
-		$article['category'] = categoryApp::get_lite($category);
+		$category = array();
+		$process = self::process($tpl,$category,$article);
+		if ($process === false) return false;
 
 		if ($data) {
 			$pkey = intval($page - 1);
@@ -96,7 +51,12 @@ class articleApp extends appsApp {
 				$chapterArray = $data;
 				$count = count($chapterArray);
 				$adid = $chapterArray[$pkey]['id'];
-				$data = iDB::row("SELECT body,subtitle FROM `#iCMS@__article_data` WHERE aid='" . (int) $article['id'] . "' AND id='" . (int) $adid . "' LIMIT 1;", ARRAY_A);
+				$data = iDB::row("
+					SELECT body,subtitle
+					FROM `#iCMS@__article_data`
+					WHERE aid='" . (int) $article['id'] . "'
+					AND id='" . (int) $adid . "'
+				", ARRAY_A);
 			}
 
 
@@ -133,53 +93,8 @@ class articleApp extends appsApp {
 
 		return $article;
 	}
-
-	public static function data($aids=0){
-		if(empty($aids)) return array();
-
-		list($aids,$is_multi)  = iSQL::multi_var($aids);
-		$sql  = iSQL::in($aids,'aid',false,true);
-		$data = array();
-		$rs   = iDB::all("SELECT * FROM `#iCMS@__article_data` where {$sql}");
-		if($rs){
-			$_count = count($rs);
-	        for ($i=0; $i < $_count; $i++) {
-	        	$data[$rs[$i]['aid']]= $rs[$i];
-	        }
-	        $is_multi OR $data = $data[$aids];
-		}
-        if(empty($data)){
-            return;
-        }
-	   	return $data;
-	}
-
-	public static function body_pics_page($pic_array,$article,$page,$total,$next_url){
-		$img_array = array_unique($pic_array[0]);
-		foreach ($img_array as $key => $img) {
-			if(!self::$config['img_title']){
-				$img = preg_replace('@title\s*=\s*(["\']?).*?\\1\s*@is', '', $img);
-				$img = preg_replace('@alt\s*=\s*(["\']?).*?\\1\s*@is', '', $img);
-				$img = str_replace('<img', '<img title="' . addslashes($article['title']) . '" alt="' . addslashes($article['title']) . '"', $img);
-			}
-			if (self::$config['pic_center']) {
-                $img_replace[$key] = '<p class="article_pic">'.$img.'</p>';
-			} else {
-				$img_replace[$key] = $img;
-			}
-            if(self::$config['pic_next'] && $total>1){
-                $clicknext = '<a href="'.$next_url.'"><b>'.iUI::lang('article:clicknext').' ('.$page.'/'.$total.')</b></a>';
-				$clickimg = '<a href="' . $next_url . '" title="' . $article['title'] . '" class="img">' . $img . '</a>';
-				if (self::$config['pic_center']) {
-                    $img_replace[$key] = '<p class="click2next">'.$clicknext.'</p>';
-                    $img_replace[$key].= '<p class="article_pic">'.$clickimg.'</p>';
-				} else {
-					$img_replace[$key] = '<p>' . $clicknext . '</p>';
-					$img_replace[$key] .= '<p>' . $clickimg . '</p>';
-				}
-			}
-		}
-		return str_replace($img_array, $img_replace, $article['body']);
-	}
-
+	//保留静态方法 articleFunc 中调用
+    public static function data($ids=0,$fields=null){
+        return apps_common::data($ids,'article','aid',$fields);
+    }
 }

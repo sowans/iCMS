@@ -415,7 +415,7 @@ class apps {
         }
 	}
     public static function get_zip($name,$dir,$REMOVE_PATH=null) {
-        iPHP::import(iPHP_LIB . '/pclzip.class.php'); //加载zip操作类
+        iPHP::vendor('PclZip');
         $zipFile = iPHP_APP_CACHE.'/'.$name.'.zip';
         $zip = new PclZip($zipFile);
         if($REMOVE_PATH){

@@ -19,7 +19,7 @@ class categoryApp{
         $dir = iSecurity::escapeStr($_GET['dir']);
 		if(empty($cid) && $dir){
 			$cid = categoryApp::get_cahce('dir2cid',$dir);
-            $cid OR iPHP::error_404('找不到该栏目<b>dir:'.$dir.'</b> 请更新栏目缓存或者确认栏目是否存在', 20002);
+            $cid OR iPHP::error_404(array('category:not_found','dir',$dir), 20002);
 		}
     	return $this->category($cid,$tpl,$is_list);
     }
@@ -43,9 +43,10 @@ class categoryApp{
     public static function category($cid,$tpl='index',$is_list=null) {
         $category = categoryApp::get_cahce_cid($cid);
         if(empty($category) && $tpl){
-            iPHP::error_404('找不到该栏目<b>cid:'. $cid.'</b> 请更新栏目缓存或者确认栏目是否存在', 20001);
+            iPHP::error_404(array('category:not_found','cid',$category['cid']),20001);
         }
         if($category['status']==0) return false;
+
         if($tpl){
             if(iView::$gateway=="html"){
                 $isphp = strpos($category['rule']['index'], '{PHP}');
@@ -54,7 +55,7 @@ class categoryApp{
                 }
             }
             $category['outurl'] && iPHP::redirect($category['outurl']);
-            $category['mode']=='1' && iCMS::redirect_html($category['iurl']);
+            $category['mode']=='1' && appsApp::redirect_html($category['iurl']);
         }
         self::router($category);
         $category['param'] = array(

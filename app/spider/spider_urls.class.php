@@ -119,7 +119,7 @@ class spider_urls {
 //          echo "<hr />";
 //      }
         if($rule['mode']=="2"){
-            iPHP::import(iPHP_LIB.'/phpQuery.php');
+            iPHP::vendor('phpQuery');
             spider::$ruleTest && $_GET['pq_debug'] && phpQuery::$debug =1;
         }
 

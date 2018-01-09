@@ -183,7 +183,7 @@ class spider_tools {
         return $rule;
     }
     public static function dataClean($rules, $content) {
-        iPHP::import(iPHP_LIB.'/phpQuery.php');
+        iPHP::vendor('phpQuery');
         $ruleArray = explode("\n", $rules);
         $NEED = $NOT = array();
         foreach ($ruleArray AS $key => $rule) {
@@ -228,7 +228,7 @@ class spider_tools {
                     return null;
                 }
             }else if(strpos($rule, 'DOM::')!==false){
-                iPHP::import(iPHP_LIB.'/phpQuery.php');
+                iPHP::vendor('phpQuery');
                 $doc      = phpQuery::newDocumentHTML($content,'UTF-8');
                 //echo 'dataClean:getDocumentID:'.$doc->getDocumentID()."\n";
                 $rule = str_replace('DOM::','', $rule);
@@ -411,7 +411,7 @@ class spider_tools {
     }
     public static function check_content($content,$code) {
         if(strpos($code, 'DOM::')!==false){
-            iPHP::import(iPHP_LIB.'/phpQuery.php');
+            iPHP::vendor('phpQuery');
             $doc     = phpQuery::newDocumentHTML($content,'UTF-8');
             $pq_dom  = str_replace('DOM::','', $code);
             $matches = (bool)(string)phpQuery::pq($pq_dom);

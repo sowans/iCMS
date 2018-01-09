@@ -9,12 +9,12 @@
 */
 class propApp {
 	public $methods = array('iCMS');
-	public static function value($field,$app=null) {
+	public static function value($field,$app=null,$sort=true) {
         $app && $pieces[] = $app;
         $pieces[] = $field;
         $keys = implode('/', $pieces);
 		$propArray 	= iCache::get("prop/{$keys}");
-		$propArray && sort($propArray);
+		$propArray && $sort && sort($propArray);
         return $propArray;
 	}
     public static function url($value,$url=null) {

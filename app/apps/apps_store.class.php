@@ -57,7 +57,7 @@ class apps_store {
             return self::msg("安装包不存在",false);
         }
 
-        iPHP::import(iPHP_LIB . '/pclzip.class.php'); //加载zip操作类
+        iPHP::vendor('PclZip');
         $zip = new PclZip($zip_file);
         if (false == ($archive_files = $zip->extract(PCLZIP_OPT_EXTRACT_AS_STRING))) {
           return self::msg("ZIP包错误",false);
@@ -120,7 +120,7 @@ class apps_store {
             return self::msg("安装包不存在",false);
         }
 
-        iPHP::import(iPHP_LIB . '/pclzip.class.php'); //加载zip操作类
+        iPHP::vendor('PclZip');
         $zip = new PclZip($zip_file);
         if (false == ($archive_files = $zip->extract(PCLZIP_OPT_EXTRACT_AS_STRING))) {
           return self::msg("ZIP包错误",false);

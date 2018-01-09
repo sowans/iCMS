@@ -8,11 +8,8 @@
 * @licence https://www.icmsdev.com/LICENSE.html
 */
 class tagApp extends appsApp {
-    public $methods = array('iCMS','tag','clink', 'hits','vote', 'good', 'bad', 'like_comment', 'comment');
-    public static $config  = null;
     public function __construct() {
         parent::__construct('tag');
-        self::$config = iCMS::$config[$this->app];
     }
 
     public function do_iCMS($a = null) {
@@ -34,7 +31,11 @@ class tagApp extends appsApp {
 
     public function tag($val, $field = 'name', $tpl = 'tag') {
         $val OR iPHP::error_404('TAG不能为空', 30002);
-        is_array($val) OR $tag = iDB::row("SELECT * FROM `#iCMS@__tag` where `$field`='$val' AND `status`='1'  LIMIT 1;", ARRAY_A);
+        is_array($val) OR $tag = iDB::row("
+            SELECT * FROM `#iCMS@__tag`
+            WHERE `$field`='$val'
+            AND `status`='1'
+        ", ARRAY_A);
 
         if(empty($tag)){
             if($tpl){
@@ -43,15 +44,13 @@ class tagApp extends appsApp {
                 return false;
             }
         }
+
         $tag = $this->value($tag);
         if ($tag === false) {
             return false;
         }
 
-        $tag+=(array)apps_meta::data('tag',$tag['id']);
-        $app = apps::get_app('tag');
-        $app['fields'] && formerApp::data($tag['id'],$app,'tag',$tag,$vars,$tag['category']);
-
+        self::custom_data($tag,$vars);
         self::hooked($tag);
 
         $view_tpl = $tpl;
@@ -65,12 +64,10 @@ class tagApp extends appsApp {
             $view_tpl OR $view_tpl = '{iTPL}/tag.htm';
             strstr($tpl, '.htm') && $view_tpl = $tpl;
             $tag['category']['app']['app'] && $view_app = $tag['category']['app']['app'];
-            iView::assign('APP', $tag['category']['app']); //绑定的应用信息
-            iView::assign('sapp', apps::get_app_lite($app));//tag的应用信息
             iView::assign('tag_category',$tag['tag_category']);
             unset($tag['tag_category']);
         }
-        return apps_common::render($tag,'tag',$view_tpl,$view_app);
+        return self::render($tag,$view_tpl,'tag',$view_app);
     }
     public static function value($tag,$vars=null) {
         $tag['appid'] = iCMS_APP_TAG;

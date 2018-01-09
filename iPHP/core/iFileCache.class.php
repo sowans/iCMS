@@ -79,6 +79,30 @@ class iFileCache {
 		$strrchr!==false && $key=$strrchr;
 		return $dirPath.$key.'.php';
    	}
+    public function clear_all($prefix=null){
+        $dir = $this->_dirs.$prefix;
+        $filesList = $this->file_list($dir);
+        foreach ($filesList as $key => $file) {
+            if(is_file($file)){
+                $ckey = $prefix.str_replace(array($dir,'.php'), '', $file);
+                $data = $this->get($ckey);
+                $data===false && $this->del($file);
+            }
+        }
+        return $this;
+    }
+    private function file_list($dir,$pattern='*'){
+        $lists = array();
+        $dir   = trim($dir, '/');
+        foreach(glob($dir.'/'.$pattern) as $value){
+            $lists[] = $value;
+            if(is_dir($value)){
+              $_lists = $this->file_list($value,$pattern);
+              $lists  = array_merge($lists,$_lists);
+            }
+        }
+        return (array)$lists;
+    }
     private function check($fn) {
         strpos($fn,'..')!==false && trigger_error('What are you doing?',E_USER_ERROR);
     }

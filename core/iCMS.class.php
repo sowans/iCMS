@@ -38,24 +38,26 @@ class iCMS {
                 'device' => array('iDevice','urls'),//设备网址
             )
         ));
-
+        iUI::$dialog['title'] = self::$config['site']['name'];
         iView::init(array(
             'define' => array(
                 'apps' => self::$config['apps'],
                 'func' => 'content',
             )
         ));
+        $APPID = array();
+        foreach ((array)self::$config['apps'] as $_app => $_appid) {
+            $APPID[strtoupper($_app)] = $_appid;
+        }
         iView::set_iVARS(array(
             'VERSION' => iCMS_VERSION,
             'API'     => iCMS_API,
             'SAPI'    => iCMS_API_URL,
             'DEVICE'  => iPHP_DEVICE,
             'CONFIG'  => self::$config,
-            'APPID'   => array()
+            'APPID'   => $APPID
         ));
-        foreach ((array)self::$config['apps'] as $_app => $_appid) {
-            iView::$handle->_iVARS['APPID'][strtoupper($_app)] = $_appid;
-        }
+        self::send_access_control();
         self::assign_site();
 	}
     /**
@@ -64,12 +66,20 @@ class iCMS {
      * @param string $do 动作名称
      */
     public static function run($app = NULL,$do = NULL,$args = NULL,$prefix="do_") {
-        self::send_access_control();
+        iPHP::$callback['run']['begin'] = function(){
+            iView::set_iVARS(array(
+                "MOBILE" => iPHP::$mobile,
+                'COOKIE_PRE' => iPHP_COOKIE_PRE,
+                'REFER' => iPHP_REFERER,
+                "APP" => array(
+                    'NAME' => iPHP::$app_name,
+                    'DO' => iPHP::$app_do,
+                    'METHOD' => iPHP::$app_method,
+                )
+            ));
+            iView::set_iVARS(iPHP::$app_name,'SAPI',true);
+        };
         return iPHP::run($app,$do,$args,$prefix);
-    }
-
-    public static function loader($name){
-        return iPHP::loader($name,iPHP_APP_CORE);
     }
 
     public static function API($app = NULL,$do = NULL) {
@@ -108,23 +118,18 @@ class iCMS {
             }
         }
         iView::assign('site',$site);
-        iUI::$dialog['title']  = $site['name'];
+
     }
+    //向下兼容[暂时保留]
     public static function check_view_html($tpl,$C,$key) {
         if (iView::$gateway == "html" && $tpl && (strstr($C['rule'][$key], '{PHP}') || $C['outurl'] || $C['mode'] == "0")) {
             return true;
         }
         return false;
     }
+    //向下兼容[暂时保留]
     public static function redirect_html($iurl) {
-        $fp  = $iurl['path'];
-        $url = $iurl['href'];
-
-        if(iView::$gateway=='html'||empty($url)||stristr($url, '.php?')||iPHP_DEVICE!='desktop'){
-            return false ;
-        }
-
-        is_file($fp) && iPHP::redirect($url);
+        appsApp::redirect($iurl);
     }
     //分页数缓存
     public static function page_total_cache($sql, $type = null,$cachetime=3600) {

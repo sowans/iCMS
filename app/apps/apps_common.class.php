@@ -14,83 +14,11 @@ class apps_common {
     public static $vars    = array();
     public static $name    = null;
 
-
     public static function init(&$data,$name,$vars,$primary='id') {
         self::$data    = &$data;
         self::$name    = $name;
         self::$vars    = $vars;
         self::$primary = $primary;
-    }
-    public static function getting($idkey='id') {
-        $v = (int) $_GET[$idkey];
-        $p = isset($_GET['p']) ? (int) $_GET['p'] : 1;
-        $f = $idkey;
-        if(isset($_GET['clink'])){
-            $v = iSecurity::escapeStr($_GET['clink']);
-            $f = 'clink';
-        }
-        return array($v,$p,$f);
-    }
-    public static function api_hits($name,$id=null,$primary='id',$table=null) {
-        $id===null && $id = (int)$_GET['id'];
-        if($id){
-            $sql = iSQL::update_hits();
-            $table===null && $table='`#iCMS@__'.$name.'`';
-
-            iDB::query("
-                UPDATE {$table}
-                SET {$sql}
-                WHERE `{$primary}` ='$id'
-            ");
-        }
-    }
-    public static function action_vote($name,$primary='id',$table=null) {
-        // user::get_cookie() OR iUI::code(0,'iCMS:!login',0,'json');
-        $type = $_POST['type'];
-        $iid  = (int) $_POST['iid'];
-        $iid OR iUI::code(0, $name.':empty_id', 0, 'json');
-
-        $ackey = $name.'_' . $type . '_' . $iid;
-        $vote = iPHP::get_cookie($ackey);
-        $vote && iUI::code(0, $name.':!' . $type, 0, 'json');
-
-        if ($type == 'good') {
-            $sql = '`good`=good+1';
-        } else {
-            $sql = '`bad`=bad+1';
-        }
-        $table===null && $table='`#iCMS@__'.$name.'`';
-
-        iDB::query("
-            UPDATE {$table}
-            SET {$sql}
-            WHERE `{$primary}` ='{$iid}'
-        ");
-
-        iPHP::set_cookie($ackey, $_SERVER['REQUEST_TIME'], 86400);
-        iUI::code(1, $name.':'. $type, 0, 'json');
-    }
-    public static function render($data,$name,$tpl,$view_app=null) {
-        if (!$tpl) return $data;
-
-        $view_app===null && $view_app=$name;
-        $view_tpl = $data['tpl'];
-        $view_tpl OR $view_tpl = $data['category']['template'][$name];
-        strstr($tpl, '.htm') && $view_tpl = $tpl;
-
-        iView::set_iVARS($data['iurl'],'iURL');
-        if($data['category']){
-            iView::assign('APP', $data['category']['app']); //绑定的应用信息
-            unset($category['app']);
-            iView::assign('category', $data['category']);
-            unset($data['category']);
-        }
-        iView::assign($name, $data);
-        $view = iView::render($view_tpl,$view_app);
-        if($view) return array($view,$data);
-    }
-    public static function custom() {
-
     }
     public static function link($title=null) {
         $title===null && $title = self::$data['title'];
@@ -165,5 +93,37 @@ class apps_common {
             "title" => self::$data['title'],
             "url"   => self::$data['url'],
         );
+    }
+
+    public static function data($ids=0,$table,$primary='id',$fields="*"){
+        if(empty($ids)) return array();
+        list($ids,$is_multi)  = iSQL::multi_var($ids);
+        $fields OR $fields = "*";
+        if($fields != "*"){
+            $fields_a = explode(',', $fields);
+            $fArray   = array();
+            $has_pri  = false;
+            foreach ($fields_a as $key => $f) {
+                $f = trim($f,'`');
+                $primary==$f && $has_pri = true;
+                $fArray[] = '`'.$f.'`';
+            }
+            $has_pri OR $fArray[] = '`'.$primary.'`';
+            $fields = implode(', ', $fArray);
+        }
+        $sql  = iSQL::in($ids,$primary,false,true);
+        $data = array();
+        $rs   = iDB::all("SELECT {$fields} FROM `#iCMS@__{$table}_data` where {$sql}");
+        if($rs){
+            $_count = count($rs);
+            for ($i=0; $i < $_count; $i++) {
+                $data[$rs[$i][$primary]]= $rs[$i];
+            }
+            $is_multi OR $data = $data[$ids];
+        }
+        if(empty($data)){
+            return;
+        }
+        return $data;
     }
 }

@@ -25,11 +25,13 @@ class iPHP {
 	public static $mobile     = false;
 	public static $time_start = false;
 	public static $callback   = array();
-	public static $autoload   = array('iPHP', 'loader');
+
 	public static $handler    = array(
-		'autoload' => array('iPHP', 'loader'),
+		'autoload' => array('iPHP', 'Autoload'),
 		'error'    => array('iPHP', 'error_handler'),
 	);
+	public static $reserved   = array('API','ACTION','DO','MY');
+
 	public static function Init(){
 		self::timer_start();
 		ini_set('display_errors','ON');
@@ -66,22 +68,29 @@ class iPHP {
     /**
      * Autoload
      */
-	public static function loader($name,$core=null){
+	public static function Autoload($name,$core=null){
 		//app_mo.class.php
 		if(strpos($name,'_') !== false) {
-			if(strpos($name,'Admincp') === false) {
+			list($a,$b) = explode('_', $name);
+			if(strpos($name,'Admincp') === false && !in_array($a, self::$reserved)) {
 				$file = $name.'.class';
-				list($name,) = explode('_', $name);
+				$name = $a;
 			}
 		}
 		//app.app.php
 		if(strpos($name,'App') !== false) {
 			$app  = substr($name,0,-3);
 			$file = $app.'.app';
+			if(strpos($app,'_') !== false) {
+				list($flag,$app) = explode('_', $app);
+			}
 			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
 		}else if(strpos($name,'Func') !== false) {
 			$app  = substr($name,0,-4);
 			$file = $app.'.func';
+			if(strpos($app,'_') !== false) {
+				list($flag,$app) = explode('_', $app);
+			}
 			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
 		}else if(strpos($name,'Admincp') !== false) {
 			//app.admincp.php
@@ -89,10 +98,10 @@ class iPHP {
 			$file = $app.'.admincp';
 			if(strpos($app,'_') !== false) {
 				//app_mo.admincp.php
-				list($app,) = explode('_', $name);
+				list($app,$_mo) = explode('_', $name);
 			}
 			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
-		}else if (strncmp('i', $name, 1) === 0) {
+		}else if ($name[0]=='i' && preg_match('/^[A-Z]+$/', $name[1])) {
 			//iclass.class.php
 			$core===null && $core = iPHP_CORE;
 			$path = $core.'/'.$name.'.class.php';
@@ -104,9 +113,7 @@ class iPHP {
 			// $core===null && $core = iPHP_CORE;
 			$path = iPHP_APP_CORE.'/library/'.$name.'.class.php';
 		}
-		if (file_exists($path)) {
-			$key = str_replace(iPATH, '/', $path);
-			$GLOBALS['iPHP_REQ'][$key] = true;
+		if (is_file($path)) {
 			require_once $path;
 		} else {
 			$_autoload_finish = true;
@@ -186,72 +193,72 @@ class iPHP {
 			$fi = iFS::name(iPHP_SELF);
 			$app = $fi['name'];
 		}
-		if (empty(self::$apps)) {
-			iPHP::error_404('Please update the application cache');
-		}
+
+		empty(self::$apps) && iPHP::error_404('Please update the application cache');
+
 		if (!self::$apps[$app] && iPHP_DEBUG) {
 			iPHP::error_404('Unable to find application <b>' . var_export($app,true) . '</b>', '0001');
 		}
+
 		self::$app_path = iPHP_APP_DIR . '/' . $app;
 		self::$app_file = self::$app_path . '/' . $app . '.app.php';
 		//自定义APP调用
-		if(!is_file(self::$app_file)){
-			//自定义APP调用成功会设置self::$app
-			self::callback(array('contentApp','run'),array($app));
-		}
+		//并初始化 iPHP::$app,iPHP::$app_file
+		is_file(self::$app_file) OR self::callback(array('contentApp','run'),array($app));
+
 		is_file(self::$app_file) OR iPHP::error_404('Unable to find application <b>' . $app . '.app.php</b>', '0002');
+
+		$class_name = $app.'App';
 
 		if ($do === NULL) {
 			$do = iPHP_APP;
 			$_GET['do'] && $do = iSecurity::escapeStr($_GET['do']);
 		}
 		if ($_POST['action']) {
-			$do = iSecurity::escapeStr($_POST['action']);
+			$do     = iSecurity::escapeStr($_POST['action']);
 			$prefix = 'ACTION_';
 		}
 
 		self::$app_name = $app;
 		self::$app_do = $do;
 		self::$app_method = $prefix . $do;
-		// self::$app_tpl = iPHP_APP_DIR . '/' . $app . '/template';
-		$app_vars = array(
-			"MOBILE" => iPHP::$mobile,
-			'COOKIE_PRE' => iPHP_COOKIE_PRE,
-			'REFER' => iPHP_REFERER,
-			"APP" => array(
-				'NAME' => self::$app_name,
-				'DO' => self::$app_do,
-				'METHOD' => self::$app_method,
-			),
-		);
-		iView::$handle->_iVARS['SAPI'].= self::$app_name;
-		iView::$handle->_iVARS += $app_vars;
-
 		self::callback(self::$callback['run']['begin']);
 		if(self::$app===null){
-			$obj_name = $app.'App';
-			self::$app = new $obj_name();
+			self::class_name($app,$class_name,$prefix);
+			self::$app = new $class_name();
 			self::callback(self::$callback['run']['init'],array(self::$app));
 		}
 
 		if (self::$app_do && self::$app->methods) {
-			in_array(self::$app_do, self::$app->methods) OR iPHP::error_404('Call to undefined method <b>' . $obj_name . '::'.self::$app_method.'</b>', '0003');
-			$method = self::$app_method;
+			if(!in_array(self::$app_do, self::$app->methods)){
+				iPHP::error_404('Call to undefined method <b>' . $class_name . '::'.self::$app_method.'</b>', '0003');
+			}
 			$args === null && $args = self::$app_args;
 			if ($args) {
 				if ($args === 'object') {
 					return self::$app;
 				}
-				return call_user_func_array(array(self::$app, $method), (array) $args);
+				return call_user_func_array(array(self::$app, self::$app_method), (array) $args);
 			} else {
-				method_exists(self::$app, $method) OR iPHP::error_404('Call to undefined method <b>' . $obj_name . '::'.self::$app_method.'</b>', '0004');
+
+				if(!method_exists(self::$app, self::$app_method)){
+					iPHP::error_404('Call to undefined method <b>' . $class_name . '::'.self::$app_method.'</b>', '0004');
+				}
+				$method = self::$app_method;
 				return self::$app->$method();
 			}
 		} else {
-			iPHP::error_404('Unable to find method <b>' . $obj_name . '::'.self::$app_method.'</b>', '0005');
+			iPHP::error_404('Unable to find method <b>' . $class_name . '::'.self::$app_method.'</b>', '0005');
 		}
 	}
-
+	public static function class_name($app,&$class_name,$prefix) {
+		$prefix = strtoupper($prefix);
+		$_app_file = self::$app_path . '/'.$prefix.$app.'.app.php';
+		if(is_file($_app_file)){
+			self::$app_file = $_app_file;
+			$class_name = $prefix.$app.'App';
+		}
+	}
 	public static function debug_info($tpl) {
 		if (iPHP_DEBUG && iPHP_DEBUG_TRACE) {
 			echo '<div class="well">';
@@ -393,24 +400,23 @@ class iPHP {
 
     	$reference = false;
     	if(is_array($callback)){
-	    	if (stripos($callback[1], '_FALSE') !== false) {
-	    		$return = false;
-	    	}
-	    	if (stripos($callback[1], '_TRUE') !== false) {
-	    		$return = true;
-	    	}
-	    	// //引用变量
-	    	// if ($callback[1][0]== '&') {
-	    	// 	$callback[1] = substr($callback[1], 1);
-	    	// 	$reference = true;
-	    	// }
+    		if(is_string($callback[1])){
+		    	if (stripos($callback[1], '_FALSE') !== false) {
+		    		$return = false;
+		    	}
+		    	if (stripos($callback[1], '_TRUE') !== false) {
+		    		$return = true;
+		    	}
+    		}
     	}
         if (@is_callable($callback)) {
-        	// if($reference){
-         //   		return call_user_func_array($callback,array(&$value));
-        	// }else{
-           		return call_user_func_array($callback,(array)$value);
-        	// }
+           	return call_user_func_array($callback,(array)$value);
+        }else if(is_array($callback)){
+        	$res = array();
+        	foreach ($callback as $key => $call) {
+        		@is_callable($call) && $res[$key] = call_user_func_array($call,(array)$value);
+        	}
+        	return $res;
         }else{
 	        if($return===null){
 				return $value;
@@ -419,7 +425,7 @@ class iPHP {
 	        }
         }
     }
-	public static function vendor($name, $args = null) {
+	public static function vendor($name, $args = null,$self=false) {
 		$vendor = '/vendor/Vendor.' . $name . '.php';
 		$path = iPHP_APP_LIB.$vendor;
 		is_file($path) OR $path = iPHP_LIB.$vendor;
@@ -431,7 +437,24 @@ class iPHP {
 			}
 			return call_user_func_array($name, (array)$args);
 		} else {
-			return false;
+			$class_name = 'Vendor_'.$name;
+			$flag = class_exists($class_name,false);
+			if(!$flag && $self){
+				$class_name = $name;
+				$flag = class_exists($class_name,false);
+			}
+			if($flag) {
+				if($args === null){
+					return new $class_name;
+				}
+				if (method_exists($class_name, '__initialize')){
+					return call_user_func_array(array($class_name,'__initialize'), (array)$args);
+				}else{
+					return new $class_name($args);
+				}
+			}else{
+				return false;
+			}
 		}
 	}
     //------------------------------------

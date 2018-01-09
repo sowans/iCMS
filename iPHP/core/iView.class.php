@@ -66,36 +66,54 @@ class iView {
      */
     public static function callback_func($args,$tpl) {
         is_array($args['app']) && $args['app'] = $args['app']['app'];
-        $keys = isset($args['as'])?$args['as']:$args['app'].($args['method']?'_'.$args['method']:'');
+        $keys = $args['app'].($args['method']?'_'.$args['method']:'');
+        isset($args['as']) && $keys = $args['as'];
+        //模板标签 对应>> 类::静态方法
         //iCMS:app:method >> appFunc::app_method
         if($args['method']){
-            $callback = array($args['app'].'Func',$args['app'].'_'.$args['method']);
+            $callback = array(
+                $args['app'].'Func',
+                $args['app'].'_'.$args['method']
+            );
             if(strpos($args['app'], 'App')!==false){
                 //iCMS:aaaApp:method >> aaaApp::method
                 //$aaaApp_method
-                $callback = array($args['app'],$args['method']);
+                $callback = array(
+                    $args['app'],
+                    $args['method']
+                );
             }
             if(strpos($args['app'], 'Class')!==false){
                 //iCMS:aaaClass:method >> aaa::method
                 ////$aaaClass_method
-                $callback = array(substr($args['app'], 0,-5),$args['method']);
+                $callback = array(
+                    substr($args['app'], 0,-5),
+                    $args['method']
+                );
             }
             //自定义APP模板调用
-            //iCMS:content:list app="test" >> iCMS:test:list >> contentFunc::content_list
+            //iCMS:content:list app="test" >> contentFunc::content_list
+            //iCMS:test:list >> contentFunc::content_list
             if(self::$config['define']){
                 $apps = self::$config['define']['apps'];
                 $func = self::$config['define']['func'];
                 if(!self::check_func($args['app']) && $apps[$args['app']]){
-                    // 判断 app/test/test.func.php 是否存在 的自定义APP
-                    // 不存在调用 contentFunc::content_list
-                    $callback = array($func.'Func',$func.'_'.$args['method']);
+                    // 判断自定义APP app/test/test.func.php 程序是否存在
+                    // 程序不存在调用 contentFunc::content_list
+                    $callback = array(
+                        $func.'Func',
+                        $func.'_'.$args['method']
+                    );
                 }
             }
 
             if($args['_app']){
                 //iCMS:app:method _app="aaa" >> aaaFunc::aaa_method
                 $keys     = isset($args['as'])?$args['as']:$args['_app'].'_'.$args['method'];
-                $callback = array($args['_app'].'Func',$args['_app'].'_'.$args['method']);
+                $callback = array(
+                    $args['_app'].'Func',
+                    $args['_app'].'_'.$args['method']
+                );
             }
             if(!method_exists($callback[0],$callback[1]) && strpos($callback[1], '__')===false){
                 iPHP::error_throw("Unable to find method '{$callback[0]}::{$callback[1]}'");
@@ -115,10 +133,22 @@ class iView {
             // iCMS:app:_method >> app_method::func
             // iCMS:app:_method func='aaa' >> app_method::aaa
             strpos($callback[1], '__')!==false && $callback = array('iView','callback_func_proxy');
-
+            self::callback_func_my($callback);
             $tpl->assign($keys,call_user_func_array($callback, array($args)));
         }else{
             $tpl->assign($keys,$callback($args));
+        }
+    }
+    public static function callback_func_my(&$callback=null){
+        $my = $callback;
+        $my[0] = 'MY_'.$my[0];
+        $app  = substr($callback[0],0,-4);
+        $file = 'MY_'.$app.'.func';
+        $path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
+        if(is_file($path)){
+            if(method_exists($my[0],$my[1]) && strpos($callback[1], '__')===false){
+                $callback = $my;
+            }
         }
     }
     /**
@@ -253,17 +283,18 @@ class iView {
         return self::$handle->get_template_vars($key);
     }
     public static function set_iVARS($value = null,$key=null,$append=false) {
-        if(is_array($value)){
-            if($key){
-                self::$handle->_iVARS[$key] = $value;
-            }else{
-                self::$handle->_iVARS += $value;
-            }
+        if(is_array($value) && $key===null){
+            self::$handle->_iVARS = array_merge(self::$handle->_iVARS,$value);
         }else{
+            $vars = &self::$handle->_iVARS[$key];
             if($append){
-                self::$handle->_iVARS[$key].= $value;
+                if(is_array($value)){
+                    $vars = array_merge($vars,$value);
+                }else{
+                    $vars.= $value;
+                }
             }else{
-                self::$handle->_iVARS[$key] = $value;
+                $vars = $value;
             }
         }
     }

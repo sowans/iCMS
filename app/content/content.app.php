@@ -7,8 +7,7 @@
 * @site https://www.icmsdev.com
 * @licence https://www.icmsdev.com/LICENSE.html
 */
-class contentApp {
-    public $methods = array('iCMS','clink','hits','vote', 'good', 'bad', 'like_comment', 'comment');
+class contentApp extends appsApp {
     public $appid   = null;
     public $app     = null; //应用名
     public $tables  = null;
@@ -22,52 +21,14 @@ class contentApp {
         $this->table   = reset($this->tables);
         $this->primary = $this->table['primary'];
         $this->id      = (int)$_GET[$this->primary];
+        parent::__construct('content',$this->primary,$this->table['table']);
         unset($data);
     }
-    public function do_iCMS($a = null) {
-        list($v,$p,$f) = apps_common::getting($this->primary);
-        return $this->content($v,$p,$f);
-    }
-    public function API_iCMS(){
-        return $this->do_iCMS();
-    }
-    public function do_clink($a = null) {
-        return $this->do_iCMS($a);
-    }
-    public function API_clink() {
-        return $this->do_clink();
-    }
-    public function API_search($a = null) {
-        $app = iPHP::app("search");
-        return $app->search("{iTPL}/{$this->app}.search.htm");
-    }
-    public function API_hits($id = null) {
-        apps_common::api_hits('content',$id,$this->primary,$this->table['table']);
-    }
-    public function ACTION_vote() {
-        apps_common::action_vote('content',$this->primary,$this->table['table']);
-    }
-    public function hooked(&$data){
-        iPHP::hook($this->app,$data,iCMS::$config['hooks'][$this->app]);
-    }
+
     public function content($fvar, $page = 1,$field='id',$tpl = true) {
-        $rs = iDB::row("
-            SELECT * FROM `".$this->table['table']."`
-            WHERE `".$field."`='".$fvar. "'
-            AND `status` ='1' LIMIT 1;",
-        ARRAY_A);
-
-        $rs OR iPHP::error_404('找不到'.$this->data['title'].': <b>'.$field.':' . $fvar . '</b>', 10001);
+        $rs = $this->get_data($fvar,$field);
+        if ($rs === false) return false;
         $id = $rs[$this->primary];
-
-        if ($rs['url']) {
-            if (iView::$gateway == "html") {
-                return false;
-            } else {
-                $this->API_hits($id);
-                iPHP::redirect($rs['url']);
-            }
-        }
 
         $vars = array(
             'tag'  => true,
@@ -91,35 +52,13 @@ class contentApp {
             unset($content);
         }
 
-        return apps_common::render($rs,$this->app,$tpl);
+        return self::render($rs,$tpl,$this->app);
     }
 
     public function value($rs, $vars = array(),$page = 1, $tpl = false) {
-        $rs['appid'] = $this->appid;
-        $category = categoryApp::category($rs['cid'],false);
-
-        if ($tpl) {
-            $category OR iPHP::error_404('找不到该'.$this->data['title'].'的栏目缓存<b>cid:' . $rs['cid'] . '</b> 请更新栏目缓存或者确认栏目是否存在', 10002);
-        } else {
-            if (empty($category)) {
-                return false;
-            }
-
-        }
-
-        if ($category['status'] == 0) {
-            return false;
-        }
-        if(iCMS::check_view_html($tpl,$category,$this->app)){
-            return false;
-        }
-
-        $rs['category'] = categoryApp::get_lite($category);
-
-        $rs['iurl'] = (array)iURL::get($this->app, array($rs, $category));
-        $rs['url'] OR $rs['url'] = $rs['iurl']['href'];
-
-        ($tpl && $category['mode'] == '1') && iCMS::redirect_html($rs['iurl']);
+        $category = array();
+        $process = $this->process($tpl,$category,$rs);
+        if ($process === false) return false;
 
         if($category['mode'] && stripos($rs['url'], '.php?')===false){
             iURL::page_url($rs['iurl']);

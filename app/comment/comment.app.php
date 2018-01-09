@@ -127,6 +127,27 @@ class commentApp {
 		}
 		iUI::code(1, 'iCMS:comment:success', $id, 'json');
 	}
+	public static function value($value,$vars) {
+		if($vars['date_format']){
+			$value['addtime'] = get_date($value['addtime'],$vars['date_format']);
+		}
+		$value['url'] = self::redirect_url($value);
+		$value['content'] = nl2br($value['content']);
+		$value['user']    = user::info($value['userid'],$value['username'],$vars['facesize']);
+		$value['reply_uid'] && $value['reply'] = user::info($value['reply_uid'],$value['reply_name'],$vars['facesize']);
+        $value['param'] = array(
+			"sappid" => iCMS_APP_COMMENT,
+			"appid"  => (int)$value['appid'],
+			"iid"    => (int)$value['iid'],
+			"id"     => (int)$value['id'],
+			"cid"    => (int)$value['cid'],
+			"userid" => (int)$value['userid'],
+			"name"   => iSecurity::escapeStr($value['username']),
+			'suid'   => (int)$value['userid'],
+			'title'  => iSecurity::escapeStr($value['title']),
+        );
+        return $value;
+	}
 	public static function redirect_url($var) {
 		$url = iCMS_API.'?app=comment&do=redirect&iid='.$var['iid'].'&appid='.$var['appid'].'&cid='.$var['cid'];
 		return $url;

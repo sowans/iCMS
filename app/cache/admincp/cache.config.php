@@ -24,9 +24,9 @@ defined('iPHP') OR exit('What are you doing?');
 </div>
 <span class="help-inline">
   <div class="file_help">
-  文件缓存(默认为空)<hr />
-  目录:文件层级<br />
-  例:<br />data:1
+  文件缓存目录(默认为空)<hr />
+  例:data<br />
+  推荐设置为空,缓存目录层级太多将影响性能
   </div>
   <div class="hide memcached_help">
   memcached缓存<hr />

@@ -190,7 +190,7 @@ class articleFunc{
 		$resource = array();
 		$hidden = categoryApp::get_cahce('hidden');
 		$hidden && $where_sql .= iSQL::in($hidden, 'cid', 'not');
-		$SPH = iPHP::vendor('SPHINX',iCMS::$config['sphinx']['host']);
+		$SPH = iPHP::vendor('SphinxClient',iCMS::$config['sphinx']['host']);
 		$SPH->init();
 		$SPH->SetArrayResult(true);
 		if (isset($vars['weights'])) {

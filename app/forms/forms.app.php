@@ -17,12 +17,15 @@ class formsApp {
         $this->do_iCMS();
     }
     public function ACTION_save(){
-        $fid   = (int) $_POST['fid'];
-        $time  = iPHP::get_cookie('token_time');
-        $token = $_POST['token'];
-        list($_fid,$_time) = explode("#", authcode($token));
+        $fid       = (int) $_POST['fid'];
+        $signature = $_POST['signature'];
 
-        if($_fid==$fid && $_time==$time){
+        $vendor = iPHP::vendor('Token');
+        $vendor->prefix = 'form_'.$fid.'_';
+
+        list($_fid,$token,$timestamp,$nonce) = explode("#", authcode($signature));
+        $_signature = $vendor->signature($token);
+        if($_fid==$fid && $_signature==$signature){
             $active = true;
             $forms  = forms::get($fid);
             if(empty($forms)||empty($forms['status'])){
@@ -39,6 +42,7 @@ class formsApp {
                 $array = iUI::code(1,$forms['config']['success']);
                 former::$error && $array = former::$error;
             }
+            $vendor->signature($token,'DELETE');
         }else{
             $array = iUI::code(0,'forms:error');
         }
@@ -60,17 +64,23 @@ class formsApp {
         if(empty($forms)||empty($forms['status'])){
             iPHP::error_404(array('forms:not_found_fid',$fid), 10001);
         }
+        $forms = $this->value($forms);
 
-        $forms['fieldArray']   = former::fields($forms['fields']);
-        $forms['action']       = iURL::router('forms');
-        $forms['url']          = iURL::router(array('forms:id',$forms['id']));
-        $forms['iurl']         = iDevice::urls(array('href'=>$forms['url']));
-        $forms['iurl']['href'] = $forms['url'];
-        $forms['result']       = iURL::router(array('forms:result',$forms['id']));
-        $forms['link']         = '<a href="'.$forms['url'].'" class="forms" target="_blank">'.$forms['title'].'</a>';
-        $forms['pic']          = filesApp::get_pic($forms['pic']);
-        $forms['layout_id']    = "former_".$forms['id'];
+        return appsApp::render($forms,$tpl,'forms');
+    }
+    public static function value($value,$flag=false){
+        $flag && $value = apps::item($value);
 
-        return apps_common::render($forms,'forms',$tpl);
+        $value['fieldArray']   = former::fields($value['fields']);
+        $value['action']       = iURL::router('forms');
+        $value['url']          = iURL::router(array('forms:id',$value['id']));
+        $value['iurl']         = iDevice::urls(array('href'=>$value['url']));
+        $value['iurl']['href'] = $value['url'];
+        $value['result']       = iURL::router(array('forms:result',$value['id']));
+        $value['link']         = '<a href="'.$value['url'].'" class="forms" target="_blank">'.$value['title'].'</a>';
+        $value['pic']          = filesApp::get_pic($value['pic']);
+        $value['layout_id']    = "former_".$value['id'];
+
+        return $value;
     }
 }

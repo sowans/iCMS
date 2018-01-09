@@ -303,17 +303,19 @@ class iUI {
 			$iPages->nowindex<1 && $iPages->nowindex =1;
 			$pagenav = $conf['pagenav'] ? strtoupper($conf['pagenav']) : 'NAV';
 			$pnstyle = $conf['pnstyle'] ? $conf['pnstyle'] : 0;
-			iView::$handle->_iVARS['PAGE'] = array(
-				$pagenav  => $iPages->show($pnstyle),
-				'COUNT'   => $conf['total'],
-				'TOTAL'   => $iPages->totalpage,
-				'CURRENT' => $iPages->nowindex,
-				'PN'      => $iPages->nowindex,
-				'PREV'    => $iPages->prev_page(),
-				'NEXT'    => $iPages->next_page(),
-				'LAST'    => ($iPages->nowindex>=$iPages->totalpage),
-			);
-			iView::$handle->_iVARS['PAGES'] = $iPages;
+            iView::set_iVARS(array(
+                'PAGES' => $iPages,
+                'PAGE'  => array(
+                    'COUNT'   => $conf['total'],
+                    $pagenav  => $iPages->show($pnstyle),
+                    'TOTAL'   => $iPages->totalpage,
+                    'CURRENT' => $iPages->nowindex,
+                    'PN'      => $iPages->nowindex,
+                    'PREV'    => $iPages->prev_page(),
+                    'NEXT'    => $iPages->next_page(),
+                    'LAST'    => ($iPages->nowindex>=$iPages->totalpage),
+                )
+            ));
 		}
 		return $iPages;
 	}
