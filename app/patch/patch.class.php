@@ -20,7 +20,7 @@ class patch {
 	public static $version = '';
 	public static $release = '';
 	public static $zipName = '';
-	public static $next = false;
+	public static $upgrade = false;
 	public static $test = false;
 
 	public static function init($force = false) {
@@ -147,7 +147,7 @@ class patch {
 			$msg .= '权限测试无法完成<iCMS>';
 			$msg .= '请设置好上面提示的文件写权限<iCMS>';
 			$msg .= '然后重新更新<iCMS>';
-			self::$next = false;
+			self::$upgrade = false;
 			$msg = str_replace(iPATH,'iPHP://',$msg);
 			return $msg;
 		}
@@ -159,7 +159,6 @@ class patch {
 
 		$msg .= '开始更新程序<iCMS>';
 
-		self::$next = true;
 		foreach ($archive_files as $file) {
 		    preg_match('@^app/(\w+)/@', $file['filename'], $match);
 		    if($match[1]){
@@ -193,9 +192,11 @@ class patch {
 
 		iFS::rmdir(PATCH_DIR, true, 'version.txt');
         $msg = str_replace(iPATH,'iPHP://',$msg);
+        self::get_upgrade_files() && self::$upgrade = true;
 		return $msg;
 	}
-	public static function run() {
+	public static function get_upgrade_files() {
+		$files = array();
 		$patch_dir = iPHP_APP_DIR.'/patch/files/';
 		foreach (glob($patch_dir."*.php") as $file) {
 			$d = str_replace(array($patch_dir,'db.','fs.','.php'), '', $file);
@@ -215,9 +216,12 @@ class patch {
 				iFS::del($file);
 			}
 		}
-
+		return $files;
+	}
+	public static function run() {
+		$files = self::get_upgrade_files();
 		if($files){
-			self::$next = true;
+			self::$upgrade = true;
 			ksort($files);
 			foreach ($files as $key => $file) {
 				$fname = str_replace(array('.php','.'), array('','_'), basename($file));
@@ -239,11 +243,12 @@ class patch {
 		}else {
 			$msg = '升级顺利完成!';
 		}
+		self::$upgrade = false;
 		return $msg;
 	}
 
 	public static function upgrade($func) {
-		if(self::$next){
+		if(self::$upgrade){
 			return $func;
 		}
 		members::gateway('bool')->check_login() OR exit("请先登陆");

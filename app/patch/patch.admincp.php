@@ -63,20 +63,18 @@ class patchAdmincp{
      * [下载升级包]
      */
     public function do_download(){
-		$this->msg	= patch::download();//下载文件包
+		$this->msg = patch::download();//下载文件包
 		include admincp::view("patch");
     }
     /**
      * [安装升级包]
      */
     public function do_install(){
-		$this->msg.= patch::update();//更新文件
-        patch::$next = true;
+		$this->msg = patch::update();//更新文件
 		include admincp::view("patch");
     }
     public function do_upgrade(){
-        $this->msg.= patch::run();//升级
-        patch::$next = false;
+        $this->msg = patch::run();//升级
         include admincp::view("patch");
     }
     //===================git=========

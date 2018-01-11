@@ -247,8 +247,8 @@ class weixinApp {
                 $output = ob_get_contents();
                 ob_end_clean();
             }
-            // file_put_contents(iPHP_APP_CACHE.'/weixin.api.'.$name.'.log',$output,FILE_APPEND);
-            iFS::write(iPHP_APP_CACHE.'/weixin.api.'.$name.'.log',$output."\n",1,'ab+');
+            $sub = substr(sha1(md5(iPHP_KEY).md5(iCMS_URL)), 8,16);
+            iFS::write(iPHP_APP_CACHE.'/weixin.api.'.$name.'.'.$sub.'.log',$output."\n",1,'ab+');
         }
     }
     public static function object2array($object) {

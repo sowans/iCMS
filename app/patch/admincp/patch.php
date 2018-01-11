@@ -55,7 +55,7 @@ function log_msg(text){
 }
 function clearIntervals(){
 	clearInterval(timer);
-    <?php if(patch::$next){ ?>
+    <?php if(patch::$upgrade){ ?>
     log_msg('<span class="label label-success">源码升级完成!</span>');
     log_msg('<span class="label label-important">开始升级程序!</span>');
     window.setTimeout(function(){

@@ -291,7 +291,7 @@ function modal_icms(el, a) {
             defaults = {
                 width: "360px",
                 height: "auto",
-                title: im.attr('title') || "iCMS 提示",
+                title: im.attr('title') || im.attr('data-title') || "iCMS 提示",
                 href: im.attr('href') || false,
                 target: im.attr('data-target') || "#iCMS-MODAL",
                 zIndex: im.attr('data-zIndex') || false,

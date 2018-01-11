@@ -115,6 +115,7 @@ class iView {
                     $args['_app'].'_'.$args['method']
                 );
             }
+            self::callback_func_my($callback);
             if(!method_exists($callback[0],$callback[1]) && strpos($callback[1], '__')===false){
                 iPHP::error_throw("Unable to find method '{$callback[0]}::{$callback[1]}'");
             }
@@ -133,21 +134,22 @@ class iView {
             // iCMS:app:_method >> app_method::func
             // iCMS:app:_method func='aaa' >> app_method::aaa
             strpos($callback[1], '__')!==false && $callback = array('iView','callback_func_proxy');
-            self::callback_func_my($callback);
             $tpl->assign($keys,call_user_func_array($callback, array($args)));
         }else{
             $tpl->assign($keys,$callback($args));
         }
     }
     public static function callback_func_my(&$callback=null){
-        $my = $callback;
-        $my[0] = 'MY_'.$my[0];
-        $app  = substr($callback[0],0,-4);
-        $file = 'MY_'.$app.'.func';
-        $path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
-        if(is_file($path)){
-            if(method_exists($my[0],$my[1]) && strpos($callback[1], '__')===false){
-                $callback = $my;
+        if($callback){
+            $my = $callback;
+            $my[0] = 'MY_'.$my[0];
+            $app  = substr($callback[0],0,-4);
+            $file = 'MY_'.$app.'.func';
+            $path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
+            if(is_file($path)){
+                if(method_exists($my[0],$my[1]) && strpos($callback[1], '__')===false){
+                    $callback = $my;
+                }
             }
         }
     }
