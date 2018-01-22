@@ -31,7 +31,7 @@ class iSeccode {
 	//检查验证码
 	public static function check($seccode, $destroy = false, $cookie_name = 'seccode') {
 		$_seccode = self::cookie($cookie_name);
-		$_seccode && $cookie_seccode = authcode($_seccode, 'DECODE');
+		$_seccode && $cookie_seccode = auth_decode($_seccode);
 		$destroy && self::cookie($cookie_name, '', -31536000);
 		if (empty($cookie_seccode) || strtolower($cookie_seccode) != strtolower($seccode)) {
 			return false;
@@ -47,7 +47,7 @@ class iSeccode {
         $name = 'seccode';
         $pre && $name = $pre.'_seccode';
         self::$code OR self::$code = self::mkcode();
-        self::cookie($name, authcode(self::$code, 'ENCODE'));
+        self::cookie($name, auth_encode(self::$code));
 
         if(function_exists('imagecreate') &&
           function_exists('imagecolorset') &&
@@ -163,11 +163,14 @@ class iSeccode {
         $font       = array();
         $font_size  = self::$config['size'];
         // $ttfb_box = imagettfbbox($font_size,$angle,$font_file,self::$code[0]);
+	    $ttfb_box = imagettfbbox($font_size,0,$font_file,self::$code[0]);
+	    $font_w = abs($ttfb_box[4] - $ttfb_box[0]);
+	    $font_h = abs($ttfb_box[5] - $ttfb_box[1]);
         for ($i=0; $i < self::$config['num']; $i++) {
             $x = floor(self::$config['width']/self::$config['num'])*$i+3;
-            $y = 30-rand(-3,5);
+            $y = $font_h+5;
             $text_color = imagecolorallocate(self::$im, self::$color[0], self::$color[1], self::$color[2]);
-            $angle = rand(-10, 25);
+            $angle = rand(-10, 20);
             if(self::$config['shadow']) {
                 $text_shadowcolor = imagecolorallocate(self::$im, 255 - self::$color[0], 255 - self::$color[1], 255 - self::$color[2]);
                 imagettftext(self::$im, $font_size, $angle, $x+1, $y+1, $text_shadowcolor, $font_file, self::$code[$i]);

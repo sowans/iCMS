@@ -73,7 +73,7 @@ class messageApp {
         if($setting['inbox']['receive']=='follow'){
             if($mid){
                 $mid = iSecurity::escapeStr($_POST['mid']);
-                $mid = authcode($mid);
+                $mid = auth_decode($mid);
                 // $row = iDB::row("SELECT `send_uid`,`receiv_uid` FROM `#iCMS@__message` where `id`='$mid'");
                 $muserid = iDB::value("SELECT `userid` FROM `#iCMS@__message` where `id`='$mid'");
             }

@@ -499,18 +499,22 @@ class iFS {
 			return false;
 		}
 	}
-	public static function check_image_bin($path){
+	public static function check_image_bin($path,$bin=false){
 		if(empty($path)){
 			return false;
 		}
-		if(!is_file($path)){
-			return false;
+		if($bin){
+			$head = substr($path, 0,16);
+		}else{
+			if(!is_file($path)) return false;
+
+		    $fh = fopen($path, "rb");
+		    //必须使用rb来读取文件，这样能保证跨平台二进制数据的读取安全
+		    //仅读取前面的8个字节
+		    $head = fread($fh, 16);
+		    fclose($fh);
 		}
-	    $fh = fopen($path, "rb");
-	    //必须使用rb来读取文件，这样能保证跨平台二进制数据的读取安全
-	    //仅读取前面的8个字节
-	    $head = fread($fh, 16);
-	    fclose($fh);
+
 	    $arr = unpack("C*", $head);
 	    $string = null;
 	    foreach ($arr as $k => $C) {

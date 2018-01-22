@@ -160,11 +160,11 @@ $(function(){
             <div class="input-prepend input-append"> <span class="add-on">采集顺序</span><span class="add-on">
               <label class="radio">
                 <input type="radio" name="rule[sort]" value="1"<?php if($rule['sort']=="1"){ echo ' checked="true"';};?>>
-                自下向上 </label>
+                自上向下 </label>
               </span><span class="add-on">
               <label class="radio">
                 <input type="radio" name="rule[sort]" value="2"<?php if($rule['sort']=="2"){ echo ' checked="true"';};?>>
-                自上向下 </label>
+                自下向上 </label>
               </span><span class="add-on">
               <label class="radio">
                 <input type="radio" name="rule[sort]" value="3"<?php if($rule['sort']=="3"){ echo ' checked="true"';};?>>

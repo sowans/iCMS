@@ -52,7 +52,7 @@ class members{
 
     //登陆验证
     public static function check_login() {
-//        self::$LOGIN_COUNT = (int)authcode(get_cookie('iCMS_LOGIN_COUNT'),'DECODE');
+//        self::$LOGIN_COUNT = (int)auth_decode(get_cookie('iCMS_LOGIN_COUNT'));
 //        if(self::$LOGIN_COUNT>iCMS_LOGIN_COUNT) exit();
 
         $a   = iSecurity::escapeStr($_POST['username']);
@@ -61,7 +61,7 @@ class members{
         $sep = iPHP_AUTH_IP?'#=iCMS['.$ip.']=#':'#=iCMS=#';
         if(empty($a) && empty($p)) {
             $auth       = iPHP::get_cookie(self::$AUTH);
-            list($a,$p) = explode($sep,authcode($auth,'DECODE'));
+            list($a,$p) = explode($sep,auth_decode($auth));
             $a = addslashes($a);
             $p = addslashes($p);
             $c = self::check($a,$p);
@@ -76,7 +76,7 @@ class members{
                     `logintimes`=logintimes+1
                     WHERE `uid`='".self::$userid."'
                 ");
-                iPHP::set_cookie(self::$AUTH,authcode($a.$sep.$p,'ENCODE'));
+                iPHP::set_cookie(self::$AUTH,auth_encode($a.$sep.$p));
             }
         }
         return self::result($c);

@@ -17,8 +17,12 @@ class articleApp extends appsApp {
         $id = $article['id'];
 
 		if ($article['chapter']) {
-			$all = $this->data($id,'id,subtitle');
-			foreach ($all as $akey => $value) {
+			$all = iDB::all("
+				SELECT `id`,`subtitle`
+				FROM `#iCMS@__article_data`
+				WHERE aid='" . (int) $id . "';
+			", ARRAY_A);
+			if($all)foreach ($all as $akey => $value) {
 				$article_data[] = $value;
 			}
 			unset($all);

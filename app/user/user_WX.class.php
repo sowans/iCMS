@@ -8,7 +8,7 @@ class user_WX {
 
 	public function login(){
 	    $state = md5(uniqid(rand(), TRUE)); //CSRF protection
-	    iPHP::set_cookie("WX_STATE",authcode($state,'ENCODE'));
+	    iPHP::set_cookie("WX_STATE",auth_encode($state));
 	    $login_url = "https://open.weixin.qq.com/connect/qrconnect?response_type=code"
 	        . "&appid=" . $this->appid
 	        . "&redirect_uri=" . urlencode($this->url)
@@ -17,7 +17,7 @@ class user_WX {
 	    header("Location:$login_url");
 	}
 	public function callback(){
-		$state	= authcode(iPHP::get_cookie("WX_STATE"), 'DECODE');
+		$state	= auth_decode(iPHP::get_cookie("WX_STATE"));
 		if($_GET['state']!=$state && empty($_GET['code'])){
 			$this->login();
 			exit;
@@ -31,9 +31,9 @@ class user_WX {
         $response = $this->get_url_contents($token_url);
         $token    = json_decode($response, true);
 		if ( is_array($token) && !isset($token['errcode']) ) {
-			iPHP::set_cookie("WX_ACCESS_TOKEN",	authcode($token['access_token'],'ENCODE'));
-	    	iPHP::set_cookie("WX_REFRESH_TOKEN",authcode($token['refresh_token'],'ENCODE'));
-		    iPHP::set_cookie("WX_OPENID",		authcode($token['openid'],'ENCODE'));
+			iPHP::set_cookie("WX_ACCESS_TOKEN",	auth_encode($token['access_token']));
+	    	iPHP::set_cookie("WX_REFRESH_TOKEN",auth_encode($token['refresh_token']));
+		    iPHP::set_cookie("WX_OPENID",		auth_encode($token['openid']));
 		    $this->openid = $token['openid'];
 		} else {
 			$this->login();
@@ -41,12 +41,12 @@ class user_WX {
 		}
 	}
 	public function get_openid(){
-		$this->openid  = authcode(iPHP::get_cookie("WX_OPENID"), 'DECODE');
+		$this->openid  = auth_decode(iPHP::get_cookie("WX_OPENID"));
 		return $this->openid;
 	}
 	public function get_user_info(){
-		$access_token  = authcode(iPHP::get_cookie("WX_ACCESS_TOKEN"), 'DECODE');
-		$openid        = authcode(iPHP::get_cookie("WX_OPENID"), 'DECODE');
+		$access_token  = auth_decode(iPHP::get_cookie("WX_ACCESS_TOKEN"));
+		$openid        = auth_decode(iPHP::get_cookie("WX_OPENID"));
 		$get_user_info = "https://api.weixin.qq.com/sns/userinfo?"
 	        . "access_token=" . $access_token
 	        . "&openid=" .$openid;

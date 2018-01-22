@@ -49,7 +49,7 @@ class formsFunc{
         $vendor = iPHP::vendor('Token');
         list($token,$timestamp,$nonce) = $vendor->get();
         empty($form['token']) && $form['token']  = $token;
-        empty($form['signature'])&& $form['signature'] = authcode($form['id'].'#'.$form['token'].'#'.$timestamp.'#'.$nonce,'decode');
+        empty($form['signature'])&& $form['signature'] = auth_encode($form['id'].'#'.$form['token'].'#'.$timestamp.'#'.$nonce);
         $vendor->prefix = 'form_'.$form['id'].'_';
         $vendor->signature($form['token'],$form['signature']);
 

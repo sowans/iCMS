@@ -83,7 +83,7 @@ $(function(){
               </select>
               <!-- <span class="add-on" title="继承"><input type="checkbox" name="extends" /> 继承</span> -->
               <?php }else { ?>
-              <input name="_rootid_hash" type="hidden" value="<?php echo authcode($rootid,'decode') ; ?>" />
+              <input name="_rootid_hash" type="hidden" value="<?php echo auth_encode($rootid) ; ?>" />
               <input name="rootid" id="rootid" type="hidden" value="<?php echo $rootid ; ?>" />
               <input readonly="true" value="<?php echo category::get($rootid)->name ; ?>" type="text" class="txt" />
               <?php } ?>

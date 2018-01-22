@@ -14,11 +14,11 @@ class weixin {
     public static $component   = false;
     public static $accessToken = null;
     public static $config      = array();
+    public static $API_URL     = 'https://api.weixin.qq.com/cgi-bin';
 
     protected static $appId          = null;
     protected static $appSecret      = null;
-    protected static $accessTokenKey = 'weixin/ACCESS_TOKEN';
-    protected static $API_URL         = 'https://api.weixin.qq.com/cgi-bin';
+    protected static $accessTokenKey = 'weixin/token';
 
     public static function init($config=null){
         $config && self::$config = $config;
@@ -29,13 +29,11 @@ class weixin {
 
         if(self::$component){
             self::$API_URL = iCMS_WEIXIN_COMPONENT.'/cgi-bin';
-            return;
         }
-        self::$accessTokenKey = 'weixin/ACCESS_TOKEN_'.md5(self::$appId.self::$appSecret);
+
+        self::$accessTokenKey = 'weixin/token_'.substr(md5(self::$appId.self::$appSecret), 8,16);
         self::$accessToken===null && self::$accessToken = iCache::get(self::$accessTokenKey,null,0);
         self::$accessToken OR self::get_access_token();
-
-        return;
     }
     public static function get_access_token(){
         $url = self::$API_URL.'/token?grant_type=client_credential'.
@@ -170,7 +168,7 @@ class weixin {
         return $response;
     }
 
-    public static function http($url, $POSTFIELDS=null) {
+    public static function http($url, $POSTFIELDS=null,$raw=false) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
@@ -190,6 +188,9 @@ class weixin {
 
         if(empty($response)){
             return '-100000';
+        }
+        if($raw){
+            return $response;
         }
         return json_decode($response);
     }

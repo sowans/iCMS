@@ -121,7 +121,7 @@ class categoryAdmincp {
         $config       = (array)iSecurity::escapeStr($_POST['config']);
 
         if($_rootid_hash){
-            $_rootid = authcode($_rootid_hash);
+            $_rootid = auth_decode($_rootid_hash);
             if($rootid!=$_rootid){
                 return iUI::alert('非法数据提交!');
             }else{

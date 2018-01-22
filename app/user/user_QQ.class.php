@@ -8,7 +8,7 @@ class user_QQ {
 
 	public function login(){
 	    $state = md5(uniqid(rand(), TRUE)); //CSRF protection
-	    iPHP::set_cookie("QQ_STATE",authcode($state,'ENCODE'));
+	    iPHP::set_cookie("QQ_STATE",auth_encode($state));
 	    $login_url = "https://graph.qq.com/oauth2.0/authorize?response_type=code"
 	        . "&client_id=" . $this->appid
 	        . "&redirect_uri=" . urlencode($this->url)
@@ -17,7 +17,7 @@ class user_QQ {
 	    header("Location:$login_url");
 	}
 	public function callback(){
-		$state	= authcode(iPHP::get_cookie("QQ_STATE"), 'DECODE');
+		$state	= auth_decode(iPHP::get_cookie("QQ_STATE"));
 
 		if($_GET['state']!=$state && empty($_GET['code'])){
 			$this->login();
@@ -39,11 +39,11 @@ class user_QQ {
         }
         $params = array();
         parse_str($response, $params);
-		iPHP::set_cookie("QQ_ACCESS_TOKEN",authcode($params["access_token"],'ENCODE'));
+		iPHP::set_cookie("QQ_ACCESS_TOKEN",auth_encode($params["access_token"]));
         $this->access_token($params["access_token"]);
 	}
 	public function access_token($access_token=""){
-		$access_token	= authcode(iPHP::get_cookie("QQ_ACCESS_TOKEN"), 'DECODE');
+		$access_token	= auth_decode(iPHP::get_cookie("QQ_ACCESS_TOKEN"));
 	    $graph_url = "https://graph.qq.com/oauth2.0/me?access_token=".$access_token;
 	    $str  = $this->get_url_contents($graph_url);
 	    if (strpos($str, "callback") !== false){
@@ -56,15 +56,15 @@ class user_QQ {
 	    isset($user->error) && $this->login();
 
 		$this->openid = $user->openid;
-	    iPHP::set_cookie("QQ_OPENID",authcode($user->openid,'ENCODE'));
+	    iPHP::set_cookie("QQ_OPENID",auth_encode($user->openid));
 	}
 	public function get_openid(){
-		$this->openid  = authcode(iPHP::get_cookie("QQ_OPENID"), 'DECODE');
+		$this->openid  = auth_decode(iPHP::get_cookie("QQ_OPENID"));
 		return $this->openid;
 	}
 	public function get_user_info(){
-		$this->openid  = authcode(iPHP::get_cookie("QQ_OPENID"), 'DECODE');
-		$access_token  = authcode(iPHP::get_cookie("QQ_ACCESS_TOKEN"), 'DECODE');
+		$this->openid  = auth_decode(iPHP::get_cookie("QQ_OPENID"));
+		$access_token  = auth_decode(iPHP::get_cookie("QQ_ACCESS_TOKEN"));
 		$get_user_info = "https://graph.qq.com/user/get_user_info?"
 	        . "access_token=" . $access_token
 	        . "&oauth_consumer_key=" .$this->appid

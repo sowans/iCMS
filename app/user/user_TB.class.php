@@ -9,7 +9,7 @@ class user_TB {
 
 	public function login(){
 	    $state = md5(uniqid(rand(), TRUE)); //CSRF protection
-	    iPHP::set_cookie("TB_STATE",authcode($state,'ENCODE'));
+	    iPHP::set_cookie("TB_STATE",auth_encode($state));
 	    $login_url = "https://oauth.taobao.com/authorize?response_type=code&client_id="
 	        . $this->appid . "&redirect_uri=" . urlencode(CALLBACK_URL.$this->callback)
 	        . "&state=" .$state
@@ -17,7 +17,7 @@ class user_TB {
 	    header("Location:$login_url");
 	}
 	public function callback(){
-		$state	= authcode(iPHP::get_cookie("TB_STATE"), 'DECODE');
+		$state	= auth_decode(iPHP::get_cookie("TB_STATE"));
 		if($_GET['state']!=$state && empty($_GET['code'])){
 			$this->login();
 			exit;
@@ -37,7 +37,7 @@ class user_TB {
 	    iPHP::set_cookie("TB_OPENID",$this->openid);
 	}
 	public function get_openid(){
-		$this->openid  = authcode(iPHP::get_cookie("TB_OPENID"), 'DECODE');
+		$this->openid  = auth_decode(iPHP::get_cookie("TB_OPENID"));
 		return $this->openid;
 	}
 	public function get_user_info(){

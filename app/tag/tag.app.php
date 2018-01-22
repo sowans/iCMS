@@ -122,11 +122,19 @@ class tagApp extends appsApp {
                 $rs+=(array)$multi_tag[$rs[$id]];
             }
             if(is_array($rs[$key.'_array'])){
-                $tags_fname = reset($rs[$key.'_array']);
-                $rs[$key.'_fname'] = $tags_fname['name'];
-                $rs[$key.'_ftid']  = $tags_fname['id'];
+                // sort($rs[$key.'_array']);
+                $farray = reset($rs[$key.'_array']);
+                $rs[$key.'_fname'] = $farray['name'];
+                $rs[$key.'_ftid']  = $farray['id'];
+                $rs[$key.'_furl']  = $farray['url'];
+                $rs[$key.'_farray']  = array(
+                    'id'   =>$farray['id'],
+                    'url'  =>$farray['url'],
+                    'name' =>$farray['name'],
+                );
             }
-            unset($multi_tag, $tags_fname);
+
+            unset($multi_tag, $farray);
     }
 
     public static function multi_tag($tags=null,$tkey='tags'){

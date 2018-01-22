@@ -241,9 +241,9 @@ class user {
 			}
 			return self::$COOKIE;
 		}
-		$auth     = authcode(iPHP::get_cookie(self::$AUTH));
-		$userid   = authcode(iPHP::get_cookie('userid'));
-		$nickname = authcode(iPHP::get_cookie('nickname'));
+		$auth     = auth_decode(iPHP::get_cookie(self::$AUTH));
+		$userid   = auth_decode(iPHP::get_cookie('userid'));
+		$nickname = auth_decode(iPHP::get_cookie('nickname'));
 
 		list($_userid,$_username,$_password,$_nickname) = explode(USER_AUTHASH,$auth);
 
@@ -261,9 +261,9 @@ class user {
 		return false;
 	}
 	public static function set_cookie($username,$password,$user){
-		iPHP::set_cookie(self::$AUTH, authcode((int)$user['uid'].USER_AUTHASH.$username.USER_AUTHASH.$password.USER_AUTHASH.$user['nickname'].USER_AUTHASH.$user['status'],'ENCODE'),self::$cookietime);
-		iPHP::set_cookie('userid',    authcode($user['uid'],'ENCODE'),self::$cookietime);
-		iPHP::set_cookie('nickname',  authcode($user['nickname'],'ENCODE'),self::$cookietime);
+		iPHP::set_cookie(self::$AUTH, auth_encode((int)$user['uid'].USER_AUTHASH.$username.USER_AUTHASH.$password.USER_AUTHASH.$user['nickname'].USER_AUTHASH.$user['status']),self::$cookietime);
+		iPHP::set_cookie('userid',    auth_encode($user['uid']),self::$cookietime);
+		iPHP::set_cookie('nickname',  auth_encode($user['nickname']),self::$cookietime);
 	}
 
 	public static function status($url=null,$st=null) {

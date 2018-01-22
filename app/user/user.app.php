@@ -539,7 +539,7 @@ class userApp {
 			//print_r($_POST);
 			$authcode = rawurldecode($auth);
 			$authcode = base64_decode($authcode);
-			$authcode = authcode($authcode);
+			$authcode = auth_decode($authcode);
 
 			if (empty($authcode)) {
 				iUI::code(0, 'user:findpwd:error', 'uname', 'json');
@@ -568,11 +568,10 @@ class userApp {
 			$user = user::get($uid, false);
 			$user OR iUI::code(0, 'user:findpwd:username:noexist', 'uname', 'json');
 
-			$authcode = authcode($uid .
+			$authcode = auth_encode($uid .
 				USER_AUTHASH . $user->username .
 				USER_AUTHASH . $user->password .
-				USER_AUTHASH . time(),
-				'ENCODE'
+				USER_AUTHASH . time()
 			);
 			$authcode = base64_encode($authcode);
 			$authcode = rawurlencode($authcode);
@@ -938,7 +937,7 @@ class userApp {
 		if ($auth) {
 			$authcode = rawurldecode($auth);
 			$authcode = base64_decode($authcode);
-			$authcode = authcode($authcode);
+			$authcode = auth_decode($authcode);
 
 			if (empty($authcode)) {
 				exit;

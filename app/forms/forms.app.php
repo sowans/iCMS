@@ -23,7 +23,7 @@ class formsApp {
         $vendor = iPHP::vendor('Token');
         $vendor->prefix = 'form_'.$fid.'_';
 
-        list($_fid,$token,$timestamp,$nonce) = explode("#", authcode($signature));
+        list($_fid,$token,$timestamp,$nonce) = explode("#", auth_decode($signature));
         $_signature = $vendor->signature($token);
         if($_fid==$fid && $_signature==$signature){
             $active = true;

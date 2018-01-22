@@ -10,7 +10,7 @@ class user_WB {
 
 	public function login(){
 	    $state = md5(uniqid(rand(), TRUE)); //CSRF protection
-	    iPHP::set_cookie("WB_STATE",authcode($state,'ENCODE'));
+	    iPHP::set_cookie("WB_STATE",auth_encode($state,'ENCODE'));
 	    $login_url = "https://api.weibo.com/oauth2/authorize?response_type=code&client_id="
 	        . $this->appid . "&redirect_uri=" . urlencode($this->url)
 	        . "&state=" .$state
@@ -18,7 +18,7 @@ class user_WB {
 		header("Location:$login_url");
 	}
 	public function callback(){
-		$state	= authcode(iPHP::get_cookie("WB_STATE"), 'DECODE');
+		$state	= auth_decode(iPHP::get_cookie("WB_STATE"));
 		if($_GET['state']!=$state && empty($_GET['code'])){
 			$this->login();
 			exit;
@@ -31,9 +31,9 @@ class user_WB {
 		$response = $this->postUrl('https://api.weibo.com/oauth2/access_token',$POST_FIELDS);
 		$token    = json_decode($response, true);
 		if ( is_array($token) && !isset($token['error']) ) {
-			iPHP::set_cookie("WB_ACCESS_TOKEN",	authcode($token['access_token'],'ENCODE'));
-	    	iPHP::set_cookie("WB_REFRESH_TOKEN",authcode($token['refresh_token'],'ENCODE'));
-		    iPHP::set_cookie("WB_OPENID",		authcode($token['uid'],'ENCODE'));
+			iPHP::set_cookie("WB_ACCESS_TOKEN",	auth_encode($token['access_token']));
+	    	iPHP::set_cookie("WB_REFRESH_TOKEN",auth_encode($token['refresh_token']));
+		    iPHP::set_cookie("WB_OPENID",		auth_encode($token['uid']));
 		    $this->openid = $token['uid'];
 		} else {
 			$this->login();
@@ -41,13 +41,13 @@ class user_WB {
 		}
 	}
 	public function get_openid(){
-		$this->openid  = authcode(iPHP::get_cookie("WB_OPENID"), 'DECODE');
+		$this->openid  = auth_decode(iPHP::get_cookie("WB_OPENID"));
 		return $this->openid;
 	}
 	public function get_user_info(){
-		$access_token  = authcode(iPHP::get_cookie("WB_ACCESS_TOKEN"), 'DECODE');
-		$refresh_token = authcode(iPHP::get_cookie("WB_REFRESH_TOKEN"), 'DECODE');
-		$this->openid  = authcode(iPHP::get_cookie("WB_OPENID"), 'DECODE');
+		$access_token  = auth_decode(iPHP::get_cookie("WB_ACCESS_TOKEN"));
+		$refresh_token = auth_decode(iPHP::get_cookie("WB_REFRESH_TOKEN"));
+		$this->openid  = auth_decode(iPHP::get_cookie("WB_OPENID"));
 		$url  = "https://api.weibo.com/2/users/show.json?uid=".$this->openid;
 		$info = $this->get_url_contents($url,$access_token);
 		$arr  = json_decode($info, true);

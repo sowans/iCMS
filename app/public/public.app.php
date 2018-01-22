@@ -38,6 +38,11 @@ class publicApp {
 		$url===null && $url = iSecurity::escapeStr($_GET['url']);
 		echo iPHP::callback(array("plugin_QRcode","HOOK"),$url);
 	}
+	public static function url($app,$query=null) {
+        $url = iCMS_API_URL.($app?$app:'public');
+        $query && $url = iURL::make($query,$url);
+        return $url;
+	}
 	public static function seccode() {
 		return iView::fetch('iCMS://public.seccode.htm');
 	}
