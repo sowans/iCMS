@@ -179,9 +179,20 @@ function subtitleToggle (checkedStatus) {
     $("input",".subtitle-box").attr("disabled","disabled");
     $(".chapter-title").show();
     $("input",".chapter-title").removeAttr("disabled");
+
+    var data_id = $("[name='data_id']",".subtitle-box").val();
+    $("[name='data_id[]']",".chapter-title").eq(0).val(data_id);
+    var subtitle = $("[name='subtitle']",".subtitle-box").val();
+    $("[name='chaptertitle[]']",".chapter-title").eq(0).val(subtitle);
+
   }else{
     $(".subtitle-box").show();
     $("input",".subtitle-box").removeAttr("disabled");
+    var data_id = $("[name='data_id[]']",".chapter-title").eq(0).val();
+    $("[name='data_id']",".subtitle-box").val(data_id);
+    var subtitle = $("[name='chaptertitle[]']",".chapter-title").eq(0).val();
+    $("[name='subtitle']",".subtitle-box").val(subtitle);
+
     $(".chapter-title").hide();
     $("input",".chapter-title").attr("disabled","disabled");
   }
@@ -368,15 +379,13 @@ function _modal_dialog(cancel_text){
               <textarea name="description" id="description" class="span6" style="height: 150px;"><?php echo $rs['description'] ; ?></textarea>
             </div>
             <div class="clearfloat mb10"></div>
-            <?php if(!$rs['chapter']){?>
-            <div class="subtitle-box">
-              <input name="data_id" type="hidden" value="<?php echo $adRs['id']; ?>" />
+            <div class="subtitle-box <?php if($rs['chapter']){ echo ' hide';}?>" >
+              <input name="data_id" type="hidden" value="<?php echo $adRs['id']; ?>" <?php if($rs['chapter']){ echo ' disabled="true"';}?>/>
               <div class="input-prepend "> <span class="add-on">副标题</span>
-                  <input type="text" name="subtitle" class="span6" id="subtitle" value="<?php echo $adRs['subtitle'] ; ?>" />
+                  <input type="text" name="subtitle" class="span6" id="subtitle" value="<?php echo $adRs['subtitle'] ; ?>" <?php if($rs['chapter']){ echo ' disabled="true"';}?>/>
               </div>
               <div class="clearfloat mb10"></div>
             </div>
-            <?php } ?>
               <button class="btn btn-primary" type="submit"><i class="fa fa-check"></i> 提交</button>
               <div class="input-prepend">
                 <span class="add-on"><i class="fa fa-building-o"></i> 内容</span>

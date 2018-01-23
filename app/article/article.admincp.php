@@ -519,8 +519,8 @@ class articleAdmincp{
         $scid        = implode(',', (array)$_POST['scid']);
         $pid         = implode(',', (array)$_POST['pid']);
         $status      = (int)$_POST['status'];
-        $chapter     = (int)$_POST['chapter'];
-        $sortnum    = (int)$_POST['sortnum'];
+        $_chapter    = (int)$_POST['chapter'];
+        $sortnum     = (int)$_POST['sortnum'];
         $weight      = (int)$_POST['weight'];
 
         $hits        = (int)$_POST['hits'];
@@ -641,7 +641,7 @@ class articleAdmincp{
             iMap::add($cid,$aid);
             $scid && iMap::add($scid,$aid);
 
-            $url OR $this->article_data($body,$aid,$haspic);
+            $url OR $this->article_data($body,$aid,$haspic,$_chapter);
             categoryAdmincp::update_count($cid);
             iPHP::callback(array("apps_meta","save"),array(self::$appid,$aid));
             iPHP::callback(array("formerApp","save"),array(self::$appid,$aid));
@@ -697,7 +697,7 @@ class articleAdmincp{
             iMap::diff($cid,$_cid,$aid);
             $scid && iMap::diff($scid,$_scid,$aid);
 
-            $url OR $this->article_data($body,$aid,$haspic);
+            $url OR $this->article_data($body,$aid,$haspic,$_chapter);
 
             if($_cid!=$cid) {
                 categoryAdmincp::update_count($_cid,'-');
@@ -778,9 +778,14 @@ class articleAdmincp{
         return $msg;
     }
 
-    public function article_data($bodyArray,$aid=0,$haspic=0){
+    public function article_data($bodyArray,$aid=0,$haspic=0,$_chapter=0){
+        if($_POST['_data_id']){
+            $_data_id = stripslashes($_POST['_data_id']);
+            $_data_id = json_decode($_data_id,true);
+            $_count   = count($_data_id);
+        }
         if(isset($_POST['ischapter']) || is_array($_POST['data_id'])){
-            $adidArray    = $_POST['data_id'];
+            $adidArray    = (array)$_POST['data_id'];
             $chaptertitle = $_POST['chaptertitle'];
             $chapter      = count($bodyArray);
             foreach ($bodyArray as $key => $body) {
@@ -788,14 +793,10 @@ class articleAdmincp{
                 $subtitle = iSecurity::escapeStr($chaptertitle[$key]);
                 $this->body($body,$subtitle,$aid,$adid,$haspic);
             }
-            if($_POST['_data_id']){
-                $_data_id = stripslashes($_POST['_data_id']);
-                $_data_id = json_decode($_data_id,true);
-                if($_data_id){
-                    $diff = array_diff_values($adidArray,$_data_id);
-                    if($diff['-'])foreach ($diff['-'] as $_i => $_id) {
-                        article::del_data($_id,'id');
-                    }
+            if($_data_id){
+                $diff = array_diff_values($adidArray,$_data_id);
+                if($diff['-'])foreach ($diff['-'] as $_i => $_id) {
+                    article::del_data($_id,'id');
                 }
             }
             article::update(compact('chapter'),array('id'=>$aid));
@@ -803,7 +804,17 @@ class articleAdmincp{
             $adid     = (int)$_POST['data_id'];
             $subtitle = iSecurity::escapeStr($_POST['subtitle']);
             $body     = implode('#--iCMS.PageBreak--#',$bodyArray);
-            $this->body($body,$subtitle,$aid,$adid,$haspic);
+            $adid     = $this->body($body,$subtitle,$aid,$adid,$haspic);
+
+            $dkey = array_search($adid, $_data_id);
+            if($dkey!==false && $_chapter){//撤消章节时
+                unset($_data_id[$dkey]);
+                //删除章节
+                if($_data_id)foreach ($_data_id as $_id) {
+                    $_id && article::del_data($_id,'id');
+                }
+            }
+
         }
         iPHP::callback(array("spider","callback"),array($this,$aid,'data'));
     }
@@ -852,6 +863,7 @@ class articleAdmincp{
             }
         }
         files::set_file_iid($body,$aid,self::$appid);
+        return $id;
     }
     public static function autodesc($body){
         if(self::$config['autodesc'] && self::$config['descLen']) {

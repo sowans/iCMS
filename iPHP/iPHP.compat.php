@@ -412,7 +412,7 @@ function authcode($string, $operation = 'DECODE', $key = '', $expiry = 0) {
 function str_exists($string, $find) {
     return !(strpos($string, $find) === FALSE);
 }
-function array_diff_values($N, $O){
+function array_diff_values(array $N, array $O){
  	$diff['+'] = array_diff($N, $O);
  	$diff['-'] = array_diff($O, $N);
     return $diff;

@@ -119,22 +119,25 @@ class tagApp extends appsApp {
             $value===null && $value = $rs[$key];
             if ($value) {
                 $multi_tag = self::multi_tag(array($rs[$id]=>$value),$key);
-                $rs+=(array)$multi_tag[$rs[$id]];
+                $rs+= (array)$multi_tag[$rs[$id]];
             }
             if(is_array($rs[$key.'_array'])){
-                // sort($rs[$key.'_array']);
-                $farray = reset($rs[$key.'_array']);
-                $rs[$key.'_fname'] = $farray['name'];
-                $rs[$key.'_ftid']  = $farray['id'];
-                $rs[$key.'_furl']  = $farray['url'];
+                $tagsarray = array();
+                foreach ($rs[$key.'_array'] as $tid => $value) {
+                    $tagsarray[] = $value;
+                }
+                $rs[$key.'_array'] = $tagsarray;
+                $rs[$key.'_fname'] = $tagsarray[0]['name'];
+                $rs[$key.'_ftid']  = $tagsarray[0]['id'];
+                $rs[$key.'_furl']  = $tagsarray[0]['url'];
                 $rs[$key.'_farray']  = array(
-                    'id'   =>$farray['id'],
-                    'url'  =>$farray['url'],
-                    'name' =>$farray['name'],
+                    'id'   =>$tagsarray[0]['id'],
+                    'url'  =>$tagsarray[0]['url'],
+                    'name' =>$tagsarray[0]['name'],
                 );
             }
 
-            unset($multi_tag, $farray);
+            unset($multi_tag,$tagsarray);
     }
 
     public static function multi_tag($tags=null,$tkey='tags'){

@@ -598,13 +598,11 @@ class iPHP {
 	    }
 		if (isset($_GET['frame'])) {
 			iUI::$dialog['modal'] = true;
-			$html = str_replace("\n", '<br />', $html);
-			iUI::dialog(array(
-				"warning:#:warning:#:{$html}",
-				'The system has been wrong!
-				You can send a message to '.iPHP_APP_MAIL.' feedback this error!
-				We will deal with it in time. Thank you.'
-			), 'js:1', 30000000);
+			$wrong = "The system has been wrong!\n".
+				"You can send a message to ".iPHP_APP_MAIL." feedback this error!\n".
+				"We will deal with it in time. Thank you.\n\n";
+			$html = str_replace("\n", '<br />', $wrong.$html);
+			iUI::dialog("warning:#:warning:#:{$html}",'js:1',30000000);
 			exit;
 		}
 		if ($_POST) {
