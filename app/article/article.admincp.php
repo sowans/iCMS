@@ -806,12 +806,14 @@ class articleAdmincp{
             $body     = implode('#--iCMS.PageBreak--#',$bodyArray);
             $adid     = $this->body($body,$subtitle,$aid,$adid,$haspic);
 
-            $dkey = array_search($adid, $_data_id);
-            if($dkey!==false && $_chapter){//撤消章节时
-                unset($_data_id[$dkey]);
-                //删除章节
-                if($_data_id)foreach ($_data_id as $_id) {
-                    $_id && article::del_data($_id,'id');
+            if($_data_id){
+                $dkey = array_search($adid, $_data_id);
+                if($dkey!==false && $_chapter){//撤消章节时
+                    unset($_data_id[$dkey]);
+                    //删除章节
+                    if($_data_id)foreach ($_data_id as $_id) {
+                        $_id && article::del_data($_id,'id');
+                    }
                 }
             }
 
