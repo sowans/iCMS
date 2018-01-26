@@ -104,10 +104,11 @@ class spider_tools {
                     continue;
                 }
                 //pic@@DOM::img@src
+                $content  = '';
+                $dom_key  = '';
                 if(strpos($dom_rule, '@@')!==false){
                     list($dom_key,$dom_rule) = explode("@@", $dom_rule);
                 }
-                $content  = '';
                 if(strpos($dom_rule, 'DOM::')!==false){
                     $content = self::domAttr($DOM,$dom_rule);
                     empty($dom_key) && $dom_key  = $dom_key_map[$key];

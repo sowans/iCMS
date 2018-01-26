@@ -19,7 +19,7 @@ function tpl_modifier_call($object,$method){
     if(strpos($method,'::')!==false){
         $array = array_merge((array)$object,array_slice($arg_list, 2));
         $call  = $method;
-    }else if(strpos($object,'::')!==false){
+    }else if(!is_object($object) && strpos($object,'::')!==false){
         $array = array_slice($arg_list, 1);
         $call  = $object;
     }else {

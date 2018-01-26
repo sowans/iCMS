@@ -83,8 +83,14 @@ class categoryFunc{
 	        $ids_array = iSQL::get_rand_ids('#iCMS@__category',$where_sql,$maxperpage,'cid');
 	    }
 
-		$hash = md5($where_sql.$order_sql.$limit);
+		if ($ids_array) {
+			$ids = iSQL::values($ids_array,'cid');
+			$ids = $ids ? $ids : '0';
+			$where_sql = "WHERE `#iCMS@__category`.`cid` IN({$ids})";
+			$limit = '';
+		}
 
+		$hash = md5($where_sql.$order_sql.$limit);
 		if($vars['cache']){
 			$cache_name = iPHP_DEVICE.'/category/'.$hash;
 	        $vars['page'] && $cache_name.= "/".(int)$GLOBALS['page'];
