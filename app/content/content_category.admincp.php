@@ -44,9 +44,9 @@ class content_categoryAdmincp extends categoryAdmincp {
                 array('{ID}',$app['title'].'ID'),
                 array('{0xID}','8位ID'),
                 array('{LINK}','自定义链接'),
-                array('{0x3ID}','8位ID(前3位)',fasle),
-                array('{0x3,2ID}','8位ID',fasle),
-                array('{TITLE}','标题',fasle),
+                array('{0x3ID}','8位ID(前3位)',false),
+                array('{0x3,2ID}','8位ID',false),
+                array('{TITLE}','标题',false),
             ),
             // 'tag' => array(
             //     array('----'),
@@ -56,8 +56,8 @@ class content_categoryAdmincp extends categoryAdmincp {
             //     array('{ZH_CN}','标签名(中文)'),
             //     array('{NAME}','标签名'),
             //     array('----'),
-            //     array('{TCID}','分类ID',fasle),
-            //     array('{TCDIR}','分类目录',fasle),
+            //     array('{TCID}','分类ID',false),
+            //     array('{TCDIR}','分类目录',false),
             // )
         );
     }

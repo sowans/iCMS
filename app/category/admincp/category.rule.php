@@ -25,7 +25,7 @@ defined('iPHP') OR exit('What are you doing?');
         <?php if($lv[0]=='----'){?>
         <li class="divider"></li>
         <?php }else{?>
-        <li><a href="<?php echo $lv[0];?>" data-toggle="insertContent" data-target="#<?php echo $rule_id;?>"><span class="label label-<?php echo ($lv[2]===fasle?'inverse':'important');?>"><?php echo $lv[0];?></span> <?php echo $lv[1];?></a></li>
+        <li><a href="<?php echo $lv[0];?>" data-toggle="insertContent" data-target="#<?php echo $rule_id;?>"><span class="label label-<?php echo ($lv[2]===false?'inverse':'important');?>"><?php echo $lv[0];?></span> <?php echo $lv[1];?></a></li>
         <?php }?>
       <?php }?>
       <li class="divider"></li>

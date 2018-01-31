@@ -42,8 +42,8 @@ class tag_categoryAdmincp extends categoryAdmincp {
                 array('{ZH_CN}','标签名(中文)'),
                 array('{NAME}','标签名'),
                 array('----'),
-                array('{TCID}','分类ID',fasle),
-                array('{TCDIR}','分类目录',fasle),
+                array('{TCID}','分类ID',false),
+                array('{TCDIR}','分类目录',false),
             ),
         );
     }
