@@ -351,7 +351,7 @@ class iDB{
                 }
                 return $new_array;
             } else {
-                return null;
+                return array();
             }
         }
     }

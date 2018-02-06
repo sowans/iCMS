@@ -101,7 +101,7 @@ class iPHP {
 				list($app,$_mo) = explode('_', $name);
 			}
 			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
-		}else if ($name[0]=='i' && preg_match('/^[A-Z]+$/', $name[1])) {
+		}else if (in_array($name, explode(',', iPHP_CORE_CLASS))) {
 			//iclass.class.php
 			$core===null && $core = iPHP_CORE;
 			$path = $core.'/'.$name.'.class.php';

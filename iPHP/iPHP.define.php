@@ -62,4 +62,14 @@ defined('iPHP_MEMORY_LIMIT') OR define('iPHP_MEMORY_LIMIT', '128M');
 //-----------------模板标签-----------------------
 defined('iPHP_TPL_FUN') OR define('iPHP_TPL_FUN',iPHP_APP_DIR.'/func');
 defined('iPHP_CHARSET') OR define('iPHP_CHARSET','UTF-8');
+//-----------------其它-----------------------
 defined('iPHP_SHELL') OR define('iPHP_SHELL',PHP_SAPI=='cli'?true:false);// SESSION,COOKIE,SESSION+COOKIE,
+defined('iPHP_CORE_CLASS') OR define('iPHP_CORE_CLASS',
+    'iCache,iFileCache,'.
+    'iDevice,iURL,'.
+    'iFS,iHttp,iPicture,iThumb,'.
+    'iDB,iMysql,iMysqli,iSQL,iMap,'.
+    'iUI,iPages,iView,iTemplateLite,iQuery,'.
+    'iSecurity,iWAF,'.
+    'iPinyin,iSeccode'
+);
