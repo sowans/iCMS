@@ -148,7 +148,7 @@ class patch {
 			$msg .= '请设置好上面提示的文件写权限<iCMS>';
 			$msg .= '然后重新更新<iCMS>';
 			self::$upgrade = false;
-			$msg = str_replace(iPATH,'iPHP://',$msg);
+			$msg = iSecurity::filter_path($msg);
 			return $msg;
 		}
 		$msg .= '权限测试通过<iCMS>';
@@ -191,7 +191,7 @@ class patch {
 		$msg .= '如没有特殊用处请删除此目录!<iCMS>';
 
 		iFS::rmdir(PATCH_DIR, true, 'version.txt');
-        $msg = str_replace(iPATH,'iPHP://',$msg);
+        $msg = iSecurity::filter_path($msg);
         self::get_upgrade_files() && self::$upgrade = true;
 		return $msg;
 	}
@@ -255,7 +255,7 @@ class patch {
 
 		$output = $func();
 		$output = str_replace('<iCMS>','<br />',$output);
-		$output = str_replace(iPATH,'iPHP://',$output);
+		$output = iSecurity::filter_path($output);
 		echo $output;
 		$path = strtr(iPHP_SELF,'\\','/');
 		$path = ltrim($path,'/');

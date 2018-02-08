@@ -140,7 +140,10 @@ class iSecurity {
 		));
 
 	}
-
+	public static function filter_path($text) {
+		$text = str_replace('\\', '/', $text);
+		return str_replace(iPATH,iPHP_PROTOCOL,$text);
+	}
 	/**
 	 * 路径转换
 	 * @param $fileName

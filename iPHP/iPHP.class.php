@@ -582,8 +582,7 @@ class iPHP {
 			}
 		}
 		$html .= "</pre>";
-		$html = str_replace('\\', '/', $html);
-		$html = str_replace(iPATH, 'iPHP://', $html);
+		$html = iSecurity::filter_path($html);
 
 		if(iPHP::is_wxapp()){
 	        $html = str_replace(array("\r", "\\", "\"", "\n", "<b>", "</b>", "<pre style='font-size: 14px;'>", "</pre>"), array(' ', "\\\\", "\\\"","\n", ''), $html);

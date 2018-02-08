@@ -46,14 +46,14 @@ class TBAPI {
         $this->method_name = $method_name;
     }
     function set_param($param_name, $param_vaule) {
-        $this->api_params[$param_name] = $param_vaule;
+        $this->_api_params[$param_name] = $param_vaule;
     }
     function clean_param($param_name=array()){
     	if(empty($param_name)){
-    		$this->api_params	= "";
+    		$this->_api_params	= array();
     	}else{
 	    	foreach($param_name as $p => $v) {
-	    		unset($this->api_params[$v]);
+	    		unset($this->_api_params[$v]);
 	    	}
     	}
     }
@@ -71,7 +71,7 @@ class TBAPI {
         if($session != '') {
             $sys_params['session'] = $session;
         }
-        $sys_params['sign'] = $this->sign(array_merge($sys_params, $this->api_params));
+        $sys_params['sign'] = $this->sign(array_merge($sys_params, $this->_api_params));
         $param_string = '';
         foreach($sys_params as $p => $v) {
             $param_string .= "$p=" . urlencode($v) . "&";
@@ -81,7 +81,7 @@ class TBAPI {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->api_params);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_api_params);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $postResult = curl_exec($ch);
         if (curl_errno($ch)){
@@ -95,7 +95,7 @@ class TBAPI {
         curl_close($ch);
         $res = json_decode($postResult,true);
 
-        if($res['error_response']){
+        if($res['error_response']['code']==7){
         	$this->_err_code = $res['error_response']['code'];
         	unset($this->_app_keys[$this->_app_key]);
         	$this->appkey();
@@ -126,7 +126,7 @@ class TBAPI {
                 'method'  => $this->method_name
 		);
 //		print_r($sys_params);
-		$sys_params	= array_merge($sys_params, $this->api_params);
+		$sys_params	= array_merge($sys_params, $this->_api_params);
         $param_string = '';
         foreach($sys_params as $p => $v) {
             $param_string .= "$p=" . urlencode($v) . "&";
@@ -166,7 +166,7 @@ class TBAPI {
         }
         curl_close($ch);
         $res = json_decode($postResult,true);
-        if($res['error_response']){
+        if($res['error_response']['code']==7){
             $this->_err_code = $res['error_response']['code'];
         	unset($this->_app_keys[$this->_app_key]);
         	$this->appkey();

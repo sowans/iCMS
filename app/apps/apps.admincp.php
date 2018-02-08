@@ -522,7 +522,7 @@ class appsAdmincp{
 
           $path = iPHP_APP_DIR.'/'.$store['app'];
           if(iFS::checkDir($path)){
-            $ptext = str_replace(iPATH,'iPHP://',$path);
+            $ptext = iSecurity::filter_path($path);
             iUI::alert(
               $store['name'].'['.$store['app'].'] <br />应用['.$ptext.']目录已存在,<br />程序无法继续安装',
               'js:1',1000000
@@ -541,7 +541,7 @@ class appsAdmincp{
               'version'  => $store['version'],
               'authkey'  => $store['authkey'],
           ),$sid);
-          $ptext = str_replace(iPATH,'iPHP://',$path);
+          $ptext = iSecurity::filter_path($path);
           iUI::alert(
             $store['name'].'['.$store['app'].'] <br /> 模板['.$ptext.']目录已存在,<br />程序无法继续安装',
             'js:1',1000000

@@ -478,7 +478,7 @@ class iDB{
         foreach ($backtrace as $i => $l) {
             $trace .= "\n[$i] in function <b>{$l['class']}{$l['type']}{$l['function']}</b>";
             $l['file'] = str_replace('\\', '/', $l['file']);
-            $l['file'] = str_replace(iPATH, 'iPHP://', $l['file']);
+            $l['file'] = iSecurity::filter_path($l['file']);
             $l['file'] && $trace .= " in <b>{$l['file']}</b>";
             $l['line'] && $trace .= " on line <b>{$l['line']}</b>";
         }

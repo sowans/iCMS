@@ -291,7 +291,7 @@ class apps_store {
         return rtrim($ROOTPATH,'/');
     }
     public static function msg($text,$s=0){
-        $text = str_replace(iPATH,'iPHP://',$text);
+        $text = iSecurity::filter_path($text);
         if(self::$msg_mode=='alert'){
             $s OR iUI::alert($text);
         }else{
