@@ -69,7 +69,7 @@ class iDevice {
     }
     public static function router(&$router,$deep=false) {
         $router = is_array($router) && $deep ?
-                array_map(array(self,'router'), $router) :
+                array_map(array('iDevice','router'), $router) :
                 str_replace(iPHP_ROUTER_URL, iPHP_DOMAIN, $router);
 
         return $router;

@@ -275,24 +275,6 @@ class iPHP {
 		}
 	}
 
-	public static function is_ajax() {
-		return (
-			$_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"||
-			$_SERVER["X-Requested-With"] == "XMLHttpRequest"||
-			isset($_GET['ajax'])||isset($_POST['ajax'])||
-			isset($_GET['is_ajax'])||isset($_POST['is_ajax'])||
-			$_GET['format']=='json'||$_POST['format']=='json'
-		);
-	}
-	public static function is_wxapp() {
-		return (
-			strpos($_SERVER['HTTP_REFERER'],'servicewechat.com') !== false
-			&&(
-				strpos($_SERVER['HTTP_USER_AGENT'],'MicroMessenger') !== false
-				||strpos($_SERVER['HTTP_USER_AGENT'],'wechatdevtools') !== false
-			)
-		);
-	}
 	public static function PG($key) {
 		$value = isset($_POST[$key]) ? $_POST[$key] : $_GET[$key];
 		return iSecurity::escapeStr($value);
@@ -409,12 +391,12 @@ class iPHP {
 		    	}
     		}
     	}
-        if (@is_callable($callback)) {
+        if (is_callable($callback)) {
            	return call_user_func_array($callback,(array)$value);
         }else if(is_array($callback)){
         	$res = array();
         	foreach ($callback as $key => $call) {
-        		@is_callable($call) && $res[$key] = call_user_func_array($call,(array)$value);
+        		is_callable($call) && $res[$key] = call_user_func_array($call,(array)$value);
         	}
         	return $res;
         }else{
@@ -582,47 +564,6 @@ class iPHP {
 			}
 		}
 		$html .= "</pre>";
-		$html = iSecurity::filter_path($html);
-
-		if(iPHP::is_wxapp()){
-	        $html = str_replace(array("\r", "\\", "\"", "\n", "<b>", "</b>", "<pre style='font-size: 14px;'>", "</pre>"), array(' ', "\\\\", "\\\"","\n", ''), $html);
-            $array = array('code'=>0,'msg'=>$html);
-            echo json_encode($array);
-            exit;
-		}
-	    if(iPHP_SHELL){
-	        $html = str_replace(array("<b>", "</b>", "<pre style='font-size: 14px;'>", "</pre>"), array("\033[31m","\033[0m",''), $html);
-	        echo $html.PHP_EOL;
-	        exit;
-	    }
-		if (isset($_GET['frame'])) {
-			iUI::$dialog['modal'] = true;
-			$wrong = "The system has been wrong!\n".
-				"You can send a message to ".iPHP_APP_MAIL." feedback this error!\n".
-				"We will deal with it in time. Thank you.\n\n";
-			$html = str_replace("\n", '<br />', $wrong.$html);
-			iUI::dialog("warning:#:warning:#:{$html}",'js:1',30000000);
-			exit;
-		}
-		if ($_POST) {
-	        if(iPHP::is_ajax()){
-	            $array = array('code'=>0,'msg'=>$html);
-	            echo json_encode($array);
-	        }else{
-	            $html = str_replace(array("\r", "\\", "\"", "\n", "<b>", "</b>", "<pre style='font-size: 14px;'>", "</pre>"), array(' ', "\\\\", "\\\"", '\n', ''), $html);
-	            echo '<script>top.alert("' . $html . '")</script>';
-	        }
-	        exit;
-	    }
-	    @header('HTTP/1.1 500 Internal Server Error');
-	    @header('Status: 500 Internal Server Error');
-	    @header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-	    @header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-	    @header("Cache-Control: no-store, no-cache, must-revalidate");
-	    @header("Cache-Control: post-check=0, pre-check=0", false);
-	    @header("Pragma: no-cache");
-	    @header("X-iPHP-ERROR:" . $errstr);
-		$html = str_replace("\n", '<br />', $html);
-		exit($html);
+		iUI::error($html,'system');
 	}
 }

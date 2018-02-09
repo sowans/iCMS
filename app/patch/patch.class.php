@@ -202,9 +202,12 @@ class patch {
 			$d = str_replace(array($patch_dir,'db.','fs.','.php'), '', $file);
 			$time = strtotime($d.'00');
 			$release = strtotime(iCMS_RELEASE);
+			$_GET['iCMS_RELEASE'] && $release = strtotime($_GET['iCMS_RELEASE']);
 			if($time>$release){
-				if(defined('GIT_TIME')){
-					if($time>GIT_TIME){
+				if(defined('GIT_TIME')||isset($_GET['GIT_TIME'])){
+					$git_time = GIT_TIME;
+					$_GET['GIT_TIME'] && $git_time = $_GET['GIT_TIME'];
+					if($time>$git_time){
 						$files[$d] = $file;
 					}else{
 						iFS::del($file);

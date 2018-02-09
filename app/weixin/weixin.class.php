@@ -48,7 +48,7 @@ class weixin {
     }
     public static function error($e,$method=''){
         //if(self::$debug){
-            die("<p>errcode:".$e->errcode." errmsg:".$e->errmsg.' IN '.$method."</p>\n");
+            iUI::error("<span>errcode:".$e->errcode." errmsg:".$e->errmsg.' IN '.$method."</span>");
         //}
     }
     public static function url($uri,$query=null){
@@ -272,5 +272,14 @@ class weixin {
         }else{
             return false;
         }
+    }
+    public static function is_wxapp() {
+        return (
+            strpos($_SERVER['HTTP_REFERER'],'servicewechat.com') !== false
+            &&(
+                strpos($_SERVER['HTTP_USER_AGENT'],'MicroMessenger') !== false
+                ||strpos($_SERVER['HTTP_USER_AGENT'],'wechatdevtools') !== false
+            )
+        );
     }
 }

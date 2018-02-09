@@ -28,6 +28,15 @@ class iHttp{
 
     protected static $_count  = 0;
 
+    public static function is_ajax() {
+        return (
+            $_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"||
+            $_SERVER["X-Requested-With"] == "XMLHttpRequest"||
+            isset($_GET['ajax'])||isset($_POST['ajax'])||
+            isset($_GET['is_ajax'])||isset($_POST['is_ajax'])||
+            $_GET['format']=='json'||$_POST['format']=='json'
+        );
+    }
     public static function proxy_test() {
         $options = array(
             CURLOPT_URL => 'http://www.baidu.com',

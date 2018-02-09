@@ -298,14 +298,14 @@ function sechtml($string) {
 function html2text($value) {
     $value = is_array($value) ?
         array_map('html2text', $value) :
-        preg_replace(array('/<[\/\!]*?[^<>]*?>/is','/\s*/is'),'',$value);
+        preg_replace('/<[\/\!]*?[^<>]*?>/is','',$value);
 
     return $value;
 }
 function html2js($value) {
     $value = is_array($value) ?
             array_map('html2js', $value) :
-            str_replace(array("\n","\r","\\","\""), array(' ',' ',"\\\\","\\\""), $value);
+            str_replace(array("\\","\"","\n","\r"), array("\\\\","\\\"","\\n","\\r"), $value);
 
     return $value;
 }

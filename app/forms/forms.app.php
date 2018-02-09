@@ -47,7 +47,7 @@ class formsApp {
             $array = iUI::code(0,'forms:error');
         }
 
-        if(iPHP::is_ajax()){
+        if(iHttp::is_ajax()){
             echo json_encode($array);
         }else{
             if ($array['code']){

@@ -55,11 +55,11 @@ function log_msg(text){
 }
 function clearIntervals(){
 	clearInterval(timer);
-    <?php if(patch::$upgrade){ ?>
+    <?php if($is_upgrade){ ?>
     log_msg('<span class="label label-success">源码升级完成!</span>');
     log_msg('<span class="label label-important">开始升级程序!</span>');
     window.setTimeout(function(){
-        window.location.href = '<?php echo APP_URI;?>&do=upgrade';
+        window.location.href = '<?php echo APP_URI;?>&do=upgrade&iCMS_RELEASE=<?php echo iCMS_RELEASE;?>&GIT_TIME=<?php echo GIT_TIME;?>';
     },1000);
     <?php } ?>
 }

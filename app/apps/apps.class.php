@@ -363,7 +363,7 @@ class apps {
     }
 	public static function get_app($appid=1,$throw=true){
 		$rs	= iCache::get('app/'.$appid);
-        if(defined(ADMINCP) && empty($rs)){
+        if(defined('ADMINCP') && empty($rs)){
             if(is_numeric($appid)){
                 $rs = self::get($appid);
             }else{

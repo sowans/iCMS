@@ -28,7 +28,7 @@ class iUI {
 
 		$keyArray = explode(':', $keys);
 		$count = count($keyArray);
-		list($app, $do, $key, $msg) = $keyArray;
+		list($app, $do, $key, $_msg) = $keyArray;
 
         if($app!='iCMS'){
             $path = iPHP_APP_DIR.'/'.$app.'/'.$app . '.lang.php';
@@ -143,6 +143,51 @@ class iUI {
 		echo '<script type="text/javascript">' . $code . '</script>';
 		self::$break && exit();
 	}
+    public static function error($value,$type='app') {
+        $value = iSecurity::filter_path($value);
+        if(iPHP::callback(array('weixin','is_wxapp'))){
+            $value = html2text($value);
+            $value = html2js($value);
+            self::code(0,$value,'','json');
+            echo $value;
+        }
+
+        if(iPHP_SHELL){
+            $value = str_replace(array("<b>", "</b>"), array("\033[31m","\033[0m"), $value);
+            $value = html2text($value);
+            echo $value.PHP_EOL;
+            exit;
+        }
+        if (isset($_GET['frame'])) {
+            self::$dialog['modal'] = true;
+            $type =='system' && $wrong = "The system has been wrong!\n".
+                "You can send a message to ".iPHP_APP_MAIL." feedback this error!\n".
+                "We will deal with it in time. Thank you.\n\n";
+            $value = str_replace("\n", '<br />', $wrong.$value);
+            self::dialog("warning:#:warning:#:{$value}",'js:1',30000000);
+            exit;
+        }
+        if ($_POST) {
+            if(iHttp::is_ajax()){
+                self::code(0,$value,'','json');
+            }else{
+                $value = html2text($value);
+                $value = html2js($value);
+                self::js("js:window.alert('{$value}')");
+            }
+            exit;
+        }
+        @header('HTTP/1.1 500 Internal Server Error');
+        @header('Status: 500 Internal Server Error');
+        @header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+        @header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+        @header("Cache-Control: no-store, no-cache, must-revalidate");
+        @header("Cache-Control: post-check=0, pre-check=0", false);
+        @header("Pragma: no-cache");
+        @header("X-iPHP-ERROR:" . $errstr);
+        $value = str_replace("\n", '<br />', $value);
+        exit($value);
+    }
 	public static function warning($info) {
 		return self::msg('warning:#:warning:#:' . $info);
 	}

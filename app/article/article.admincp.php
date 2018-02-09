@@ -37,7 +37,8 @@ class articleAdmincp{
      */
     public function do_add(){
         $_GET['cid'] && category::check_priv($_GET['cid'],'ca','page');//添加权限
-        $rs      = array();
+        $rs        = array();
+        $bodyArray = array();
         if($this->id){
             list($rs,$adRs) = article::data($this->id,$this->dataid);
             category::check_priv($rs['cid'],'ce','page');//编辑权限
@@ -57,7 +58,6 @@ class articleAdmincp{
             }
             iPHP::callback(array("apps_meta","get"),array(self::$appid,$this->id));
         }
-
         $bodyCount = count($bodyArray);
         $bodyCount OR $bodyCount = 1;
         $cid         = empty($rs['cid'])?(int)$_GET['cid']:$rs['cid'];

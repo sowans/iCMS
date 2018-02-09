@@ -95,7 +95,7 @@ class categoryApp{
         }
     }
     public static function router(&$category){
-        if(!$category['iDevice'] && iPHP_DOMAIN != iPHP_ROUTER_URL){
+        if($category && !$category['iDevice'] && iPHP_DOMAIN != iPHP_ROUTER_URL){
             iDevice::router($category);
             iDevice::router($category['iurl']);
             iDevice::router($category['navArray'],true);

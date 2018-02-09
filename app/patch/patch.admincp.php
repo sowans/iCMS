@@ -70,11 +70,13 @@ class patchAdmincp{
      * [安装升级包]
      */
     public function do_install(){
-		$this->msg = patch::update();//更新文件
+        $this->msg  = patch::update();//更新文件
+        $is_upgrade = patch::$upgrade;
 		include admincp::view("patch");
     }
     public function do_upgrade(){
-        $this->msg = patch::run();//升级
+        $this->msg  = patch::run();//升级
+        $is_upgrade = patch::$upgrade;
         include admincp::view("patch");
     }
     //===================git=========

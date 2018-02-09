@@ -25,10 +25,7 @@ class keywordsAdmincp{
             $rs['keyword'] = $_GET['keyword'];
             $rs['replace'] = $_GET['replace'];
         }
-        if($_GET['url']){
-            $rs['replace'] =  '<a href="'.$_GET['url'].'" target="_blank" class="keywords"/>'.$rs['keyword'].'</a>';
-            $rs['replace'] =  htmlspecialchars($rs['replace']);
-        }
+        $_GET['url'] && $rs['replace'] =  self::get_replace($rs['keyword'],$_GET['url']);
 
         include admincp::view("keywords.add");
     }
@@ -61,7 +58,6 @@ class keywordsAdmincp{
             $data = array();
             $data['keyword'] = $name;
             $data['replace'] = self::get_replace($name,$url);
-            $data['replace'] = htmlspecialchars($data['replace']);
             array_map('addslashes', $data);
         }
         if($data){
@@ -119,7 +115,7 @@ class keywordsAdmincp{
         iCache::set(keywordsApp::CACHE_KEY,$array,0);
     }
     public static function get_replace($name,$url){
-        return '<a href="'.$url.'" target="_blank" class="keywords">'.$name.'</a>';
+        return htmlspecialchars('<a href="'.$url.'" target="_blank" class="keywords">'.$name.'</a>');
     }
     public static function _count(){
         return iDB::value("SELECT count(*) FROM `#iCMS@__keywords`");
