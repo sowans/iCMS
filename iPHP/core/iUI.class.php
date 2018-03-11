@@ -423,7 +423,7 @@ class iUI {
     		iUI::alert($msg);
     		exit;
     	}
-        if(iPHP::is_ajax()){
+        if(iHttp::is_ajax()){
             $array = array('code'=>0,'msg'=>$msg);
             echo json_encode($array);
             exit;
