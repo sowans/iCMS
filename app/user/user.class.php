@@ -299,5 +299,6 @@ class user {
 		iPHP::set_cookie('userid', '',-31536000);
 		iPHP::set_cookie('nickname', '',-31536000);
 		iPHP::set_cookie('seccode', '',-31536000);
+		iPHP::set_cookie('captcha', '',-31536000);
 	}
 }

@@ -961,8 +961,8 @@ class userApp {
 	}
 	public function API_login() {
 		if ($this->config['login']['enable']) {
-			$this->openid();
 			$this->forward('r');
+			$this->openid();
 			user::status($this->forward, "login");
 			iView::display('iCMS://user/login.htm');
 		} else {
@@ -1069,6 +1069,7 @@ class userApp {
 			$open->appkey = $this->config['open'][$sign]['appkey'];
 			$redirect_uri = rtrim($this->config['open'][$sign]['redirect'], '/');
 			$open->url = user::login_uri($redirect_uri) . 'sign=' . $sign;
+			$this->forward && $open->url.='&forward='.urlencode($this->forward);
 
 			if (isset($_GET['bind']) && $_GET['bind'] == $sign) {
 				$open->get_openid();
@@ -1101,7 +1102,7 @@ class userApp {
 					$user['openid'] = $open->openid;
 					$user['platform'] = $platform;
 					user::check($user['nickname'],'nickname') && $user['nickname'] = $sign . '_' . $user['nickname'];
-
+					$open->cleancookie();
 					iView::assign('user', $user);
 					iView::assign('query', compact(array('sign', 'code', 'state', 'bind')));
 					iView::display('iCMS://user/register.htm');

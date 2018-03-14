@@ -48,6 +48,7 @@
             <!--{if $user.openid}-->
             //绑定账号 接收用户信息
             param.openid = "<!--{$user.openid}-->";
+            param.platform = "<!--{$user.platform}-->";
             <!--{/if}-->
             <!--{if $iCMS.CONFIG.user.register.seccode }-->
             //检查验证码
