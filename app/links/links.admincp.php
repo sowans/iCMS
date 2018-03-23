@@ -59,7 +59,7 @@ class linksAdmincp{
 			$sql=" WHERE `cid` = '{$_GET['cid']}'";
         }
 
-        $orderby	=$_GET['orderby']?$_GET['orderby']:"id DESC";
+        list($orderby,$orderby_option) = get_orderby();
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:20;
         $total		= iCMS::page_total_cache("SELECT count(*) FROM `#iCMS@__links` {$sql}","G");
         iUI::pagenav($total,$maxperpage,"个网站");

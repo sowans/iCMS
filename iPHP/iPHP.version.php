@@ -1,12 +1,12 @@
 <?php
 /**
  * iPHP - i PHP Framework
- * Copyright (c) 2012 iiiphp.com. All rights reserved.
+ * Copyright (c) iiiPHP.com. All rights reserved.
  *
- * @author coolmoo <iiiphp@qq.com>
+ * @author iPHPDev <master@iiiphp.com>
  * @website http://www.iiiphp.com
  * @license http://www.iiiphp.com/license
- * @version 2.0.0
+ * @version 2.1.0
  */
-define('iPHP_VER', 'V2.0.0');//当前版本
-define('iPHP_RELEASE', '20170101');
+define('iPHP_VER', 'V2.1.0');//当前版本
+define('iPHP_RELEASE', '20180208');

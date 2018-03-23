@@ -106,7 +106,12 @@ class filesAdmincp{
 
         isset($_GET['userid']) 	&& $uri.='&userid='.(int)$_GET['userid'];
 
-        $orderby	= $_GET['orderby']?iSecurity::escapeStr($_GET['orderby']):"id DESC";
+        list($orderby,$orderby_option) = get_orderby(array(
+            'id'   =>"ID",
+            'size' =>"文件大小",
+            'ext'  =>"后缀值",
+        ));
+
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:50;
 		$total		= iCMS::page_total_cache("SELECT count(*) FROM ".files::$_DATA_TABLE." {$sql}","G");
         iUI::pagenav($total,$maxperpage,"个文件");

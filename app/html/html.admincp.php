@@ -186,6 +186,16 @@ class htmlAdmincp{
      */
     public function do_article(){
         category::$appid = iCMS_APP_ARTICLE;
+        list($orderby,$orderby_option) = get_orderby(array(
+            'id'         =>"ID",
+            'hits'       =>"点击",
+            'hits_week'  =>"周点击",
+            'hits_month' =>"月点击",
+            'good'       =>"顶",
+            'postime'    =>"时间",
+            'pubdate'    =>"发布时间",
+            'comments'   =>"评论数",
+        ));
     	include admincp::view("html.article");
     }
     /**
@@ -200,7 +210,6 @@ class htmlAdmincp{
 		$endid    = $this->PG['endid'];
 		$perpage  = (int)$this->PG['perpage'];
 		$offset   = (int)$this->PG['offset'];
-		$orderby  = $this->PG['orderby'];
 		$whereSQL = "WHERE `status` ='1'";
     	$aid===null && $aid = $this->PG['aid'];
 		if($aid){
@@ -221,7 +230,19 @@ class htmlAdmincp{
 		$startid && $whereSQL.=" AND `id`>='{$startid}'";
 		$endid   && $whereSQL.=" AND `id`<='{$endid}'";
 		$perpage OR $perpage = $this->CP;
-		$orderby OR $orderby = "id DESC";
+
+        $_GET['orderby'] = $this->PG['orderby'];
+        list($orderby,$orderby_option) = get_orderby(array(
+            'id'         =>"ID",
+            'hits'       =>"点击",
+            'hits_week'  =>"周点击",
+            'hits_month' =>"月点击",
+            'good'       =>"顶",
+            'postime'    =>"时间",
+            'pubdate'    =>"发布时间",
+            'comments'   =>"评论数",
+        ));
+
 		$total     = iCMS::page_total_cache("SELECT count(*) FROM `#iCMS@__article` {$whereSQL}","G");
 		$looptimes = ceil($total/$perpage);
 		$offset    = $this->page*$perpage;

@@ -15,6 +15,9 @@ $(function(){
 	<?php if($_GET['st']){ ?>
 	iCMS.select('st',"<?php echo $_GET['st'] ; ?>");
 	<?php } ?>
+  <?php if($_GET['orderby']){ ?>
+  iCMS.select('orderby',"<?php echo $_GET['orderby'] ; ?>");
+  <?php } ?>
   <?php if($_GET['type']){ ?>
   iCMS.select('type',"<?php echo $_GET['type'] ; ?>");
   <?php } ?>
@@ -61,6 +64,14 @@ $(function(){
           </select>
         </div>
         <div class="clearfloat mb10"></div>
+        <div class="input-prepend">
+          <span class="add-on">排序</span>
+          <select name="orderby" id="orderby" class="span2 chosen-select">
+            <option value=""></option>
+            <optgroup label="降序"><?php echo $orderby_option['DESC'];?></optgroup>
+            <optgroup label="升序"><?php echo $orderby_option['ASC'];?></optgroup>
+          </select>
+        </div>
         <div class="input-prepend"> <span class="add-on">查找方式</span>
           <select name="st" id="st" class="span2 chosen-select">
             <option value="filename">文件名</option>

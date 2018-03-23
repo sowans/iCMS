@@ -51,7 +51,8 @@ class members{
     }
 
     //登陆验证
-    public static function check_login() {
+    public static function check_login($callback=null) {
+        $callback && iPHP::callback($callback);
 //        self::$LOGIN_COUNT = (int)auth_decode(get_cookie('iCMS_LOGIN_COUNT'));
 //        if(self::$LOGIN_COUNT>iCMS_LOGIN_COUNT) exit();
 

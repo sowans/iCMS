@@ -80,29 +80,12 @@ $(function(){
             <?php echo propAdmincp::get("status") ; ?>
           </select>
         </div>
-        <div class="input-prepend"> <span class="add-on">排序</span>
-          <select name="orderby" id="orderby" class="span3 chosen-select">
-            <option value="">默认排序</option>
-            <optgroup label="降序">
-            <option value="id DESC">ID[降序]</option>
-            <option value="hits DESC">点击[降序]</option>
-            <option value="hits_week DESC">周点击[降序]</option>
-            <option value="hits_month DESC">月点击[降序]</option>
-            <option value="good DESC">顶[降序]</option>
-            <option value="postime DESC">时间[降序]</option>
-            <option value="pubdate DESC">发布时间[降序]</option>
-            <option value="comments DESC">评论[降序]</option>
-            </optgroup>
-            <optgroup label="升序">
-            <option value="id ASC">ID[升序]</option>
-            <option value="hits ASC">点击[升序]</option>
-            <option value="hits_week ASC">周点击[升序]</option>
-            <option value="hits_month ASC">月点击[升序]</option>
-            <option value="good ASC">顶[升序]</option>
-            <option value="postime ASC">时间[升序]</option>
-            <option value="pubdate ASC">发布时间[降序]</option>
-            <option value="comments ASC">评论[升序]</option>
-            </optgroup>
+        <div class="input-prepend">
+          <span class="add-on">排序</span>
+          <select name="orderby" id="orderby" class="span2 chosen-select">
+            <option value=""></option>
+            <optgroup label="降序"><?php echo $orderby_option['DESC'];?></optgroup>
+            <optgroup label="升序"><?php echo $orderby_option['ASC'];?></optgroup>
           </select>
         </div>
         <div class="input-prepend input-append"> <span class="add-on">无缩略图

@@ -394,7 +394,11 @@ class categoryAdmincp {
         if(isset($_GET['rootid']) &&$_GET['rootid']!='-1') {
             $sql.=" AND `rootid`='{$_GET['rootid']}'";
         }
-        $orderby    = $_GET['orderby']?$_GET['orderby']:"cid DESC";
+        list($orderby,$orderby_option) = get_orderby(array(
+            'cid'   =>"CID",
+            'dir'   =>"目录值",
+            'count' =>"记录数",
+        ));
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:50;
         $total      = iCMS::page_total_cache("SELECT count(*) FROM `#iCMS@__category` {$sql}","G");
         iUI::pagenav($total,$maxperpage);

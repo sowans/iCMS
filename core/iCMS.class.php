@@ -12,53 +12,70 @@ defined('iPHP') OR exit('What are you doing?');
 class iCMS {
     public static $config    = array();
 
-	public static function init(){
-        self::$config = iPHP::config(array(
-            'apps' => array(__CLASS__,'default_apps')
-        ));
-
-        iDevice::init(self::$config);
+    public static function init(){
+        self::config();
 
         define('iCMS_URL',       self::$config['router']['url']);
         define('iCMS_PUBLIC_URL',self::$config['router']['public']);
         define('iCMS_USER_URL',  self::$config['router']['user']);
-        define('iCMS_FS_URL',    iFS::url(self::$config['FS']['url']));
+        define('iCMS_FS_URL',    self::$config['FS']['url']);
         define('iCMS_API',       iCMS_PUBLIC_URL.'/api.php');
         define('iCMS_API_URL',   iCMS_API.'?app=');
 
-        iFS::init(self::$config['FS']);
-        iCache::init(self::$config['cache']);
-        iURL::init(self::$config['router'],array(
-            'user_url' => iCMS_USER_URL,
-            'api_url'  => iCMS_PUBLIC_URL,
-            'tag'      => self::$config['tag'],//标签配置
-            'iurl'     => self::$config['iurl'],//应用路由定义
+        self::set_tpl_const();
+        self::send_access_control();
+        self::assign_site();
+    }
+    /**
+     * [config 对框架各系统进行配置]
+     * @return [type] [description]
+     */
+	public static function config(){
+        iPHP::$callback['config']['apps'] = array('apps','default_config');
+        //获取配置
+        $config = iPHP::config();
+        //多终端适配
+        iDevice::init($config['template'],array(
+            'redirect' => $config['router']['redirect'],
+        ));
+        //终端URL一致性
+        iDevice::identity($config['router']);
+        iDevice::identity($config['FS']);
+        //文件系统
+        iFS::init($config['FS']);
+        //缓存系统
+        iCache::init($config['cache']);
+        //路由系统
+        iURL::init($config['router'],array(
+            'user_url' => $config['router']['user'],
+            'api_url'  => $config['router']['public'],
+            'tag'      => $config['tag'],//标签配置
+            'iurl'     => $config['iurl'],//应用路由定义
             'callback'=> array(
                 "domain" => array('categoryApp','domain'),//绑定域名回调
                 'device' => array('iDevice','urls'),//设备网址
             )
         ));
-        iUI::$dialog['title'] = self::$config['site']['name'];
+        //是否移动设设备
+        define('iPHP_MOBILE', iDevice::$IS_MOBILE);
+        //设备标识
+        define('iPHP_DEVICE', iDevice::$device_name);
+        //模板系统
         iView::init(array(
+            'template' => array(
+                'device' => iDevice::$device_name,  //设备
+                'dir'    => iDevice::$device_tpl,   //模板名
+                'index'  => iDevice::$device_index, //模板首页
+            ),
             'define' => array(
-                'apps' => self::$config['apps'],
+                'apps' => $config['apps'],
                 'func' => 'content',
             )
         ));
-        $APPID = array();
-        foreach ((array)self::$config['apps'] as $_app => $_appid) {
-            $APPID[strtoupper($_app)] = $_appid;
-        }
-        iView::set_iVARS(array(
-            'VERSION' => iCMS_VERSION,
-            'API'     => iCMS_API,
-            'SAPI'    => iCMS_API_URL,
-            'DEVICE'  => iPHP_DEVICE,
-            'CONFIG'  => self::$config,
-            'APPID'   => $APPID
-        ));
-        self::send_access_control();
-        self::assign_site();
+        //UI
+        iUI::set_dialog('title',$config['site']['name']);
+
+        self::$config = $config;
 	}
     /**
      * 运行应用程序
@@ -66,9 +83,9 @@ class iCMS {
      * @param string $do 动作名称
      */
     public static function run($app = NULL,$do = NULL,$args = NULL,$prefix="do_") {
-        iPHP::$callback['run']['begin'] = function(){
+        iPHP::$callback['run']['begin'][] = function(){
             iView::set_iVARS(array(
-                "MOBILE" => iPHP::$mobile,
+                "MOBILE" => iPHP_MOBILE,
                 'COOKIE_PRE' => iPHP_COOKIE_PRE,
                 'REFER' => iPHP_REFERER,
                 "APP" => array(
@@ -82,13 +99,13 @@ class iCMS {
         return iPHP::run($app,$do,$args,$prefix);
     }
 
-    public static function API($app = NULL,$do = NULL) {
+    public static function API($app = NULL,$do = NULL,$args = NULL) {
         $app OR $app = iSecurity::escapeStr($_GET['app']);
-        return self::run($app,null,null,'API_');
+        return self::run($app,$do,$args,'API_');
     }
     public static function send_access_control() {
-        header("Access-Control-Allow-Origin: " . iCMS_URL);
-        header('Access-Control-Allow-Headers: X-Requested-With,X_Requested_With');
+        @header("Access-Control-Allow-Origin: " . iCMS_URL);
+        @header('Access-Control-Allow-Headers: X-Requested-With,X_Requested_With');
     }
     public static function assign_site(){
         $site          = self::$config['site'];
@@ -96,11 +113,11 @@ class iCMS {
         $site['404']   = iPHP_URL_404;
         $site['url']   = iCMS_URL;
         $site['murl']  = self::$config['template']['mobile']['domain'];
-        $site['tpl']   = iPHP_DEFAULT_TPL;
+        $site['tpl']   = iView::$config['template']['dir'];
         $site['page']  = isset($_GET['p'])?(int)$_GET['p']:(int)$_GET['page'];
         $site['urls']  = array(
             "template" => iCMS_URL.'/template',
-            "tpl"      => iCMS_URL.'/template/'.iPHP_DEFAULT_TPL,
+            "tpl"      => iCMS_URL.'/template/'.iView::$config['template']['dir'],
             "public"   => iCMS_PUBLIC_URL,
             "user"     => iCMS_USER_URL,
             "res"      => iCMS_FS_URL,
@@ -109,27 +126,16 @@ class iCMS {
             "mobile"   => $site['murl'],
             "desktop"  => self::$config['template']['desktop']['domain'],
         );
-        if(self::$config['template']['device']){
-            foreach (self::$config['template']['device'] as $key => $value) {
-                if($value['domain']){
-                    $name = trim($value['name']);
-                    $site['urls'][$name] = $value['domain'];
-                }
-            }
-        }
+        iDevice::domain($site['urls']);
         iView::assign('site',$site);
-
     }
     //向下兼容[暂时保留]
     public static function check_view_html($tpl,$C,$key) {
-        if (iView::$gateway == "html" && $tpl && (strstr($C['rule'][$key], '{PHP}') || $C['outurl'] || $C['mode'] == "0")) {
-            return true;
-        }
-        return false;
+        return appsApp::is_html($tpl,$C,$key);
     }
     //向下兼容[暂时保留]
     public static function redirect_html($iurl) {
-        appsApp::redirect($iurl);
+        return appsApp::redirect_html($iurl);
     }
     //分页数缓存
     public static function page_total_cache($sql, $type = null,$cachetime=3600) {
@@ -149,19 +155,19 @@ class iCMS {
         }
         return (int)$total;
     }
-    public static function default_apps() {
-        return array(
-            'admincp' => '10',
-            'config'  => '11',
-            'files'   => '12',
-            'menu'    => '13',
-            'group'   => '14',
-            'members' => '15',
-            'apps'    => '17',
-            'former'  => '18',
-            'patch'   => '19',
-            'cache'   => '23'
-        );
-    }
 
+    public static function set_tpl_const() {
+        $APPID = array();
+        foreach ((array)self::$config['apps'] as $_app => $_appid) {
+            $APPID[strtoupper($_app)] = $_appid;
+        }
+        iView::set_iVARS(array(
+            'VERSION' => iCMS_VERSION,
+            'API'     => iCMS_API,
+            'SAPI'    => iCMS_API_URL,
+            'DEVICE'  => iPHP_DEVICE,
+            'CONFIG'  => self::$config,
+            'APPID'   => $APPID
+        ));
+    }
 }

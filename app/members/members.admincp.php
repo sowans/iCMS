@@ -56,7 +56,14 @@ class membersAdmincp{
     	$sql	= "WHERE 1=1";
     	//isset($this->type)	&& $sql.=" AND `type`='$this->type'";
 		$_GET['gid'] && $sql.=" AND `gid`='{$_GET['gid']}'";
-        $orderby    = $_GET['orderby']?$_GET['orderby']:"uid DESC";
+
+        list($orderby,$orderby_option) = get_orderby(array(
+            'uid'        =>"UID",
+            'regtime'    =>"注册时间",
+            'logintimes' =>"登陆次数",
+            'post'       =>"发表数",
+        ));
+
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:20;
         $total      = iCMS::page_total_cache("SELECT count(*) FROM `#iCMS@__members` {$sql}","G");
         iUI::pagenav($total,$maxperpage,"个用户");

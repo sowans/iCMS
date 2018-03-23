@@ -23,7 +23,7 @@ class indexApp {
     private function index($a = null){
         $index_name = $a[1]?:iCMS::$config['template']['index']['name'];
         $index_name OR $index_name = 'index';
-        $index_tpl  = $a[0]?:iPHP_INDEX_TPL;
+        $index_tpl  = $a[0]?:iView::$config['template']['index'];
         $rule = '{PHP}';
         if(iView::$gateway=="html" || iCMS::$config['template']['index']['rewrite']){
             $rule = $index_name.iCMS::$config['router']['ext'];

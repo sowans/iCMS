@@ -12,6 +12,7 @@ defined('iPHP') OR exit('What are you doing?');
 define("USER_AUTHASH",'#=(iCMS@'.iPHP_KEY.'@iCMS)=#');
 
 class user {
+	public static $openid     = null;
 	public static $userid     = 0;
 	public static $username   = '';
 	public static $nickname   = '';

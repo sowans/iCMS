@@ -322,7 +322,17 @@ class contentAdmincp{
         isset($_GET['cid'])    && $uri_array['cid']     = $_GET['cid'];
         $uri_array  && $uri = http_build_query($uri_array);
 
-        $orderby    = $_GET['orderby']?$_GET['orderby']:content::$primary." DESC";
+        list($orderby,$orderby_option) = get_orderby(array(
+            content::$primary =>"ID",
+            'hits'       =>"点击",
+            'hits_week'  =>"周点击",
+            'hits_month' =>"月点击",
+            'good'       =>"顶",
+            'postime'    =>"时间",
+            'pubdate'    =>"发布时间",
+            'comments'   =>"评论数",
+        ));
+
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:20;
 
         if($map_where){

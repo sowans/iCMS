@@ -82,6 +82,9 @@ $(function(){
 <?php if($_GET['st']){ ?>
 iCMS.select('st',"<?php echo $_GET['st'] ; ?>");
 <?php } ?>
+<?php if($_GET['orderby']){ ?>
+iCMS.select('orderby',"<?php echo $_GET['orderby'] ; ?>");
+<?php } ?>
 <?php if(isset($_GET['rootid']) &&$_GET['rootid']!='-1') {  ?>
 iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
 <?php } ?>
@@ -116,6 +119,14 @@ iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
         <div class="input-prepend input-append"> <span class="add-on">每页</span>
           <input type="text" name="perpage" id="perpage" value="<?php echo $maxperpage ; ?>" style="width:36px;"/>
           <span class="add-on">条记录</span> </div>
+        <div class="input-prepend">
+          <span class="add-on">排序</span>
+          <select name="orderby" id="orderby" class="span2 chosen-select">
+            <option value=""></option>
+            <optgroup label="降序"><?php echo $orderby_option['DESC'];?></optgroup>
+            <optgroup label="升序"><?php echo $orderby_option['ASC'];?></optgroup>
+          </select>
+        </div>
         <div class="input-prepend"> <span class="add-on">查找方式</span>
           <select name="st" id="st" class="chosen-select" style="width:120px;">
             <option value="name"><?php echo $this->category_name;?>名</option>

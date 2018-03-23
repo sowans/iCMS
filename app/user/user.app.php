@@ -871,31 +871,31 @@ class userApp {
 	public function API_check() {
 		$name  = iSecurity::escapeStr($_GET['name']);
 		$value = iSecurity::escapeStr($_GET['value']);
-		$a = iUI::code(1, '', $name);
+		$a = iUI::code(1, '', $name,'array');
 		switch ($name) {
 			case 'username':
 				if (!preg_match("/^[\w\-\.]+@[\w\-]+(\.\w+)+$/i", $value)) {
-					$a = iUI::code(0, 'user:register:username:error', 'username');
+					$a = iUI::code(0, 'user:register:username:error', 'username','array');
 				} else {
 					if (user::check($value, 'username')) {
-						$a = iUI::code(0, 'user:register:username:exist', 'username');
+						$a = iUI::code(0, 'user:register:username:exist', 'username','array');
 					}
 				}
 			break;
 			case 'nickname':
 				if (preg_match("/\d/", $value[0]) || cstrlen($value) > 20 || cstrlen($value) < 4) {
-					$a = iUI::code(0, 'user:register:nickname:error', 'nickname');
+					$a = iUI::code(0, 'user:register:nickname:error', 'nickname','array');
 				} else {
 					if (user::check($value, 'nickname')) {
-						$a = iUI::code(0, 'user:register:nickname:exist', 'nickname');
+						$a = iUI::code(0, 'user:register:nickname:exist', 'nickname','array');
 					}
 				}
 			break;
 			case 'password':
-				strlen($value) < 6 && $a = iUI::code(0, 'user:password:error', 'password');
+				strlen($value) < 6 && $a = iUI::code(0, 'user:password:error', 'password','array');
 			break;
 			case 'seccode':
-				iSeccode::check($value) OR $a = iUI::code(0, 'iCMS:seccode:error', 'seccode');
+				iSeccode::check($value) OR $a = iUI::code(0, 'iCMS:seccode:error', 'seccode','array');
 			break;
 		}
 		iUI::json($a);

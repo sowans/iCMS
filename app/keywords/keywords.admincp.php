@@ -71,7 +71,8 @@ class keywordsAdmincp{
         if($_GET['keywords']) {
 			$sql=" WHERE `keyword` REGEXP '{$_GET['keywords']}'";
         }
-        $orderby	=$_GET['orderby']?$_GET['orderby']:"id DESC";
+        list($orderby,$orderby_option) = get_orderby();
+
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:20;
 		$total		= iCMS::page_total_cache("SELECT count(*) FROM `#iCMS@__keywords` {$sql}","G");
         iUI::pagenav($total,$maxperpage,"个关键词");

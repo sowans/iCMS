@@ -24,10 +24,21 @@ $(function(){
     <div class="widget-content">
       <form action="<?php echo iPHP_SELF ; ?>" method="get" class="form-inline">
         <input type="hidden" name="app" value="<?php echo admincp::$APP_NAME;?>" />
-        <div class="input-prepend input-append"> <span class="add-on">每页</span>
+        <div class="input-prepend input-append">
+          <span class="add-on">每页</span>
           <input type="text" name="perpage" id="perpage" value="<?php echo $maxperpage ; ?>" style="width:36px;"/>
-          <span class="add-on">条记录</span> </div>
-        <div class="input-prepend input-append"> <span class="add-on">关键词</span>
+          <span class="add-on">条记录</span>
+        </div>
+        <div class="input-prepend">
+          <span class="add-on">排序</span>
+          <select name="orderby" id="orderby" class="span2 chosen-select">
+            <option value=""></option>
+            <optgroup label="降序"><?php echo $orderby_option['DESC'];?></optgroup>
+            <optgroup label="升序"><?php echo $orderby_option['ASC'];?></optgroup>
+          </select>
+        </div>
+        <div class="input-prepend input-append">
+          <span class="add-on">关键词</span>
           <input type="text" name="keywords" class="span2" id="keywords" value="<?php echo $_GET['keywords'] ; ?>" />
           <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i> 搜 索</button>
         </div>

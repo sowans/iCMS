@@ -1,12 +1,12 @@
 <?php
 /**
  * iPHP - i PHP Framework
- * Copyright (c) 2012 iiiphp.com. All rights reserved.
+ * Copyright (c) iiiPHP.com. All rights reserved.
  *
- * @author icmsdev <iiiphp@qq.com>
+ * @author iPHPDev <master@iiiphp.com>
  * @website http://www.iiiphp.com
  * @license http://www.iiiphp.com/license
- * @version 2.0.0
+ * @version 2.1.0
  */
 defined('iPHP') OR exit('What are you doing?');
 
@@ -25,6 +25,7 @@ class iPHP {
 	public static $mobile     = false;
 	public static $time_start = false;
 	public static $callback   = array();
+	public static $is_callable= false;
 
 	public static $handler    = array(
 		'autoload' => array('iPHP', 'Autoload'),
@@ -42,7 +43,7 @@ class iPHP {
 		header('Content-Type: text/html; charset=UTF-8');
 		header('P3P: CP="CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR"');
 
-		define('iPHP_PATH',dirname(strtr(__FILE__,'\\','/')));
+		define('iPHP_PATH',dirname(strtr(__FILE__,'\\',DIRECTORY_SEPARATOR)));
 		require_once iPHP_PATH.'/iPHP.version.php';
 		require_once iPHP_PATH.'/iPHP.define.php';
 		require_once iPHP_PATH.'/iPHP.compat.php';
@@ -64,83 +65,50 @@ class iPHP {
 
 		define('iPHP_SELF',	$_SERVER['PHP_SELF']);
 		define('iPHP_REFERER', 	$_SERVER['HTTP_REFERER']);
+
+        define('iPHP_REQUEST_SCHEME',($_SERVER['SERVER_PORT'] == 443)?'https':'http');
+        define('iPHP_REQUEST_HOST',iPHP_REQUEST_SCHEME.'://'.($_SERVER['HTTP_X_HTTP_HOST']?$_SERVER['HTTP_X_HTTP_HOST']:$_SERVER['HTTP_HOST']));
+        define('iPHP_REQUEST_URI',$_SERVER['REQUEST_URI']);
+        define('iPHP_REQUEST_URL',iPHP_REQUEST_HOST.iPHP_REQUEST_URI);
+
 	}
     /**
      * Autoload
      */
-	public static function Autoload($name,$core=null){
-		//app_mo.class.php
-		if(strpos($name,'_') !== false) {
-			list($a,$b) = explode('_', $name);
-			if(strpos($name,'Admincp') === false && !in_array($a, self::$reserved)) {
-				$file = $name.'.class';
-				$name = $a;
-			}
-		}
-		//app.app.php
-		if(strpos($name,'App') !== false) {
-			$app  = substr($name,0,-3);
-			$file = $app.'.app';
-			if(strpos($app,'_') !== false) {
-				list($flag,$app) = explode('_', $app);
-			}
-			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
-		}else if(strpos($name,'Func') !== false) {
-			$app  = substr($name,0,-4);
-			$file = $app.'.func';
-			if(strpos($app,'_') !== false) {
-				list($flag,$app) = explode('_', $app);
-			}
-			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
-		}else if(strpos($name,'Admincp') !== false) {
-			//app.admincp.php
-			$app  = substr($name,0,-7);
-			$file = $app.'.admincp';
-			if(strpos($app,'_') !== false) {
-				//app_mo.admincp.php
-				list($app,$_mo) = explode('_', $name);
-			}
-			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
-		}else if (in_array($name, explode(',', iPHP_CORE_CLASS))) {
-			//iclass.class.php
-			$core===null && $core = iPHP_CORE;
-			$path = $core.'/'.$name.'.class.php';
-		}else if(array_key_exists($name,(array)iPHP::$apps)){
-			//app.class.php
-			$file OR $file = $name.'.class';
-			$path = iPHP_APP_DIR . '/' . $name . '/' . $file . '.php';
-		}else{
-			// $core===null && $core = iPHP_CORE;
-			$path = iPHP_APP_CORE.'/library/'.$name.'.class.php';
-		}
-		if (is_file($path)) {
-			require_once $path;
-		} else {
-			$_autoload_finish = true;
+	public static function Autoload($class,$core=null){
+		$require = self::auto_require($class);
+		if (!$require) {
+			$autoload_finish = true;
 			$functions = spl_autoload_functions();
-			if($functions)foreach ($functions as $key => $func) {
-				if($func!=iPHP::$handler['autoload']){
-					$_autoload_finish = false;
-					spl_autoload_register($func);
+			if($functions)foreach ($functions as $key => $autoload) {
+				if($autoload!=iPHP::$handler['autoload']){
+					$autoload_finish = false;
+					spl_autoload_register($autoload);
 				}
 			}
+			// iPHP::callback 不提示
+			if(self::$is_callable){
+				self::$is_callable = false;
+				return false;
+			}
 			if (iPHP_DEBUG) {
-				$_autoload_finish && self::error_throw("Unable to load class '$name',file path '$path'", 0020);
+				$autoload_finish && self::error_throw("Class '$class' not found", '0020');
 			}else{
 				return false;
 			}
 		}
 	}
-	public static function config($call=null) {
-		$site = iPHP_MULTI_SITE ? $_SERVER['HTTP_HOST'] : iPHP_APP;
-		if (iPHP_MULTI_DOMAIN) {
-			//只绑定主域
-			preg_match("/[^\.\/][\w\-]+\.[^\.\/]+$/", $site, $matches);
-			$site = $matches[0];
+	public static function config($site=null) {
+		if($site===null){
+			$site = iPHP_MULTI_SITE ? $_SERVER['HTTP_HOST'] : iPHP_APP;
+			if (iPHP_MULTI_DOMAIN) {
+				//只绑定主域
+				preg_match("/[^\.\/][\w\-]+\.[^\.\/]+$/", $site, $matches);
+				$site = $matches[0];
+			}
+			strpos($site, '..') === false OR self::error_throw('What are you doing','001');
 		}
-		strpos($site, '..') === false OR self::error_throw('What are you doing','001');
 
-		//config.php 中开启iPHP_APP_CONF后 此处设置无效,
 		define('iPHP_APP_SITE', $site);
 		define('iPHP_APP_CONF', iPHP_CONF_DIR . '/' . iPHP_APP_SITE); //网站配置目录
 		define('iPHP_APP_CONFIG', iPHP_APP_CONF . '/config.php'); //网站配置文件
@@ -153,14 +121,14 @@ class iPHP {
 		defined('iPHP_DB_DEBUG') OR define('iPHP_DB_DEBUG', $config['debug']['db']); //数据调试
 		defined('iPHP_DB_TRACE') OR define('iPHP_DB_TRACE', $config['debug']['db_trace']); //SQL跟踪
 		defined('iPHP_DB_EXPLAIN') OR define('iPHP_DB_EXPLAIN', $config['debug']['db_explain']); //SQL解释
-
 		defined('iPHP_TPL_DEBUG') OR define('iPHP_TPL_DEBUG', $config['debug']['tpl']); //模板调试
 		defined('iPHP_TPL_DEBUGGING') OR define('iPHP_TPL_DEBUGGING', $config['debug']['tpl_trace']); //模板数据调试
 
-		defined('iPHP_TIME_CORRECT') OR define('iPHP_TIME_CORRECT', $config['time']['cvtime']);
-		defined('iPHP_ROUTER_REWRITE') OR define('iPHP_ROUTER_REWRITE', $config['router']['rewrite']);
+		defined('iPHP_TIME_CORRECT') OR define('iPHP_TIME_CORRECT', (int)$config['time']['cvtime']);
 		defined('iPHP_APP_SITE') && $config['cache']['prefix'] = iPHP_APP_SITE;
 
+		define('iPHP_ROUTER_REWRITE', $config['router']['rewrite']);
+		define('iPHP_URL', $config['router']['url']);
 		define('iPHP_URL_404', $config['router']['404']); //404定义
 
 		//config.php --END--
@@ -178,13 +146,15 @@ class iPHP {
 
 		$config['time']['zone'] && @date_default_timezone_set($config['time']['zone']);//设置时区
 		self::$apps = $config['apps'];
-		empty(self::$apps) && self::$apps = self::callback($call['apps']);
+		empty(self::$apps) && self::$apps = self::callback(self::$callback['config']['apps']);
 		self::define_app();
 		return $config;
 	}
 	public static function define_app() {
-		foreach (self::$apps as $_app => $_appid) {
-			$_app && define(iPHP_APP.'_APP_'.strtoupper($_app),$_appid);
+		if(is_array(self::$apps)){
+			foreach (self::$apps as $_app => $_appid) {
+				$_app && define(iPHP_APP.'_APP_'.strtoupper($_app),$_appid);
+			}
 		}
 	}
 	public static function run($app = NULL, $do = NULL, $args = NULL, $prefix = "do_") {
@@ -194,19 +164,21 @@ class iPHP {
 			$app = $fi['name'];
 		}
 
-		empty(self::$apps) && iPHP::error_404('Please update the application cache');
+		self::$apps OR iPHP::error_404('Please update the application cache');
 
-		if (!self::$apps[$app] && iPHP_DEBUG) {
-			iPHP::error_404('Unable to find application <b>' . var_export($app,true) . '</b>', '0001');
+		$file = $app.'.app.php';
+		$dir  = $app;
+		if(strpos($app,'_') !== false) {
+			list($dir,$sub) = explode('_', $app);
 		}
+		self::$apps[$dir] OR iPHP::error_404('Unable to find application <b>' . var_export($app,true) . '</b>', '0001');
 
-		self::$app_path = iPHP_APP_DIR . '/' . $app;
-		self::$app_file = self::$app_path . '/' . $app . '.app.php';
+		self::$app_path = iPHP_APP_DIR . '/' . $dir;
+		self::$app_file = self::$app_path . '/' . $file;
 		//自定义APP调用
 		//并初始化 iPHP::$app,iPHP::$app_file
 		is_file(self::$app_file) OR self::callback(array('contentApp','run'),array($app));
-
-		is_file(self::$app_file) OR iPHP::error_404('Unable to find application <b>' . $app . '.app.php</b>', '0002');
+		is_file(self::$app_file) OR iPHP::error_404('Unable to find application <b>' . $file . '</b>', '0002');
 
 		$class_name = $app.'App';
 
@@ -225,6 +197,7 @@ class iPHP {
 		self::callback(self::$callback['run']['begin']);
 		if(self::$app===null){
 			self::class_name($app,$class_name,$prefix);
+			require_once self::$app_file;
 			self::$app = new $class_name();
 			self::callback(self::$callback['run']['init'],array(self::$app));
 		}
@@ -234,13 +207,13 @@ class iPHP {
 				iPHP::error_404('Call to undefined method <b>' . $class_name . '::'.self::$app_method.'</b>', '0003');
 			}
 			$args === null && $args = self::$app_args;
+			self::callback(self::$callback['run']['call'],array(self::$app, self::$app_method,$args));
 			if ($args) {
 				if ($args === 'object') {
 					return self::$app;
 				}
 				return call_user_func_array(array(self::$app, self::$app_method), (array) $args);
 			} else {
-
 				if(!method_exists(self::$app, self::$app_method)){
 					iPHP::error_404('Call to undefined method <b>' . $class_name . '::'.self::$app_method.'</b>', '0004');
 				}
@@ -250,6 +223,75 @@ class iPHP {
 		} else {
 			iPHP::error_404('Unable to find method <b>' . $class_name . '::'.self::$app_method.'</b>', '0005');
 		}
+	}
+	public static function auto_require($name) {
+		//app_mo.class.php
+		if(strpos($name,'_') !== false) {
+			list($a,$b) = explode('_', $name);
+			if( !(substr($name,-7,7) == 'Admincp') &&
+				!(substr($name,-3,3) == 'App') &&
+				!in_array($a, self::$reserved)
+			) {
+				$file = $name.'.class';
+				$name = $a;
+			}
+		}
+		//app.app.php
+		if(substr($name,-3,3) == 'App') {
+			$app  = substr($name,0,-3);
+			$file = $app.'.app';
+			if(strpos($app,'_') !== false) {
+				$pieces = explode('_', $app);
+				if(in_array($pieces[0], self::$reserved)){
+					//DO_app.app.php
+					list($flag,$app) = $pieces;
+				}else{
+					//app_ooxx.app.php
+					list($app,$flag) = $pieces;
+				}
+			}
+			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
+		}else if(substr($name,-4,4) == 'Func') {
+			$app  = substr($name,0,-4);
+			$file = $app.'.func';
+			if(strpos($app,'_') !== false) {
+				list($flag,$app) = explode('_', $app);
+			}
+			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
+		}else if(substr($name,-7,7) == 'Admincp') {
+			//app.admincp.php
+			$app  = substr($name,0,-7);
+			$file = $app.'.admincp';
+			if(strpos($app,'_') !== false) {
+				//app_mo.admincp.php
+				list($app,$flag) = explode('_', $name);
+			}
+			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
+		}else if (in_array($name, explode(',', iPHP_CORE_CLASS))) {
+			//iclass.class.php
+			$core===null && $core = iPHP_CORE;
+			$path = $core.'/'.$name.'.class.php';
+		}else if(array_key_exists($name,(array)iPHP::$apps)){
+			//app.class.php
+			$file OR $file = $name.'.class';
+			$path = iPHP_APP_DIR . '/' . $name . '/' . $file . '.php';
+		}else if(strpos($name,'\\') !== false) {
+			//namespace aaa\bbb
+			$path = str_replace('\\', DIRECTORY_SEPARATOR, $name);
+			$path = iPATH . $path . '.php';
+		}
+
+		if (file_exists($path)) {
+			require_once $path;
+			return true;
+		}
+		//namespace aaa\bbb
+		if(strpos($name,'\\') !== false) {
+			return false;
+		}
+
+		$path && self::error_throw("Unable to load class '$name',file path '$path'", '0021');
+		return false;
 	}
 	public static function class_name($app,&$class_name,$prefix) {
 		$prefix = strtoupper($prefix);
@@ -389,16 +431,17 @@ class iPHP {
 		    	if (stripos($callback[1], '_TRUE') !== false) {
 		    		$return = true;
 		    	}
-    		}
-    	}
-        if (is_callable($callback)) {
-           	return call_user_func_array($callback,(array)$value);
-        }else if(is_array($callback)){
-        	$res = array();
-        	foreach ($callback as $key => $call) {
-        		is_callable($call) && $res[$key] = call_user_func_array($call,(array)$value);
+    		}elseif(is_array($callback[0])||is_object($callback[0])){
+	        	$res = array();
+	        	foreach ($callback as $key => $call) {
+	        		self::is_callable($call) && $res[$key] = call_user_func_array($call,(array)$value);
+	        	}
+	        	return $res;
         	}
-        	return $res;
+    	}
+
+        if (self::is_callable($callback)) {
+	        return call_user_func_array($callback,(array)$value);
         }else{
 	        if($return===null){
 				return $value;
@@ -406,6 +449,10 @@ class iPHP {
 	        	return $return;
 	        }
         }
+    }
+    public static function is_callable($callback) {
+    	self::$is_callable = true;
+    	return is_callable($callback);
     }
 	public static function vendor($name, $args = null,$self=false) {
 		$vendor = '/vendor/Vendor.' . $name . '.php';
@@ -482,7 +529,7 @@ class iPHP {
 			//防止从重复跳转
 			$redirect_num = (int)iPHP::get_cookie('redirect_num');
 			if($redirect_num){
-				$url = iCMS_URL;
+				$url = iPHP_URL;
 				iPHP::set_cookie('redirect_num', '',-31536000);
 			}else{
 				iPHP::set_cookie('redirect_num', ++$redirect_num);
@@ -532,8 +579,11 @@ class iPHP {
 		exit();
 	}
 	public static function error_handler($errno, $errstr, $errfile, $errline) {
-		$errno = $errno & error_reporting();
-	    if($errno == 0) return;
+	    if (!(error_reporting() & $errno)) {
+	        // This error code is not included in error_reporting, so let it fall
+	        // through to the standard PHP error handler
+	        return false;
+	    }
 		defined('E_STRICT') OR define('E_STRICT', 2048);
 		defined('E_RECOVERABLE_ERROR') OR define('E_RECOVERABLE_ERROR', 4096);
 		switch ($errno) {
@@ -553,7 +603,7 @@ class iPHP {
 	        default:                   $type = "Unknown error ($errno)"; break;
 		}
 		$html = "<pre style='font-size: 14px;'>";
-		$html.= "<b>{$type}:</b> {$errstr}\n";//in <b>{$errfile}</b> on line <b>{$errline}</b>
+		$html.= "<b>{$type}:</b> {$errstr} IN <b>{$errfile}</b> on line <b>{$errline}</b>\n";
 		if (function_exists('debug_backtrace')) {
 			$backtrace = debug_backtrace();
 			foreach ($backtrace as $i => $l) {
@@ -564,6 +614,9 @@ class iPHP {
 			}
 		}
 		$html .= "</pre>";
-		iUI::error($html,'system');
+		$html = iSecurity::filter_path($html);
+
+		self::$callback['error'] OR self::$callback['error'] = array('iUI','error');
+		self::callback(self::$callback['error'],array($html,'system'));
 	}
 }

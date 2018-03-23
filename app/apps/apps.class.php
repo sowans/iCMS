@@ -469,4 +469,19 @@ class apps {
             );
         }
     }
+    public static function default_config() {
+        return array(
+            'admincp' => '10',
+            'config'  => '11',
+            'files'   => '12',
+            'menu'    => '13',
+            'group'   => '14',
+            'members' => '15',
+            'apps'    => '17',
+            'former'  => '18',
+            'patch'   => '19',
+            'cache'   => '23'
+        );
+    }
+
 }

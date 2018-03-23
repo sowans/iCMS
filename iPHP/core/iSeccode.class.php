@@ -1,16 +1,13 @@
 <?php
 /**
  * iPHP - i PHP Framework
- * Copyright (c) 2012 iiiphp.com. All rights reserved.
+ * Copyright (c) iiiPHP.com. All rights reserved.
  *
- * @author coolmoo <iiiphp@qq.com>
+ * @author iPHPDev <master@iiiphp.com>
  * @website http://www.iiiphp.com
  * @license http://www.iiiphp.com/license
- * @version 2.0.0
+ * @version 2.1.0
  */
-
-// require_once (dirname(__file__).'/../../iCMS.php');
-// iSeccode::run();
 
 class iSeccode {
     public static $config = array(
@@ -29,7 +26,7 @@ class iSeccode {
     protected static $color  = null;
 
 	//检查验证码
-	public static function check($seccode, $destroy = false, $cookie_name = 'seccode') {
+	public static function check($seccode, $destroy = false, $cookie_name = 'captcha') {
 		$_seccode = self::cookie($cookie_name);
 		$_seccode && $cookie_seccode = auth_decode($_seccode);
 		$destroy && self::cookie($cookie_name, '', -31536000);
@@ -44,8 +41,9 @@ class iSeccode {
         @header("Cache-Control: no-store, private, post-check=0, pre-check=0, max-age=0", FALSE);
         @header("Pragma: no-cache");
 
-        $name = 'seccode';
-        $pre && $name = $pre.'_seccode';
+        $name = 'captcha';
+        $pre && $name = $pre.'_captcha';
+
         self::$code OR self::$code = self::mkcode();
         self::cookie($name, auth_encode(self::$code));
 
@@ -69,7 +67,7 @@ class iSeccode {
         if($value===null){
             return iPHP::get_cookie($key);
         }else{
-            iPHP::set_cookie($key, $value,$expires);
+            return iPHP::set_cookie($key, $value,$expires);
         }
     }
 

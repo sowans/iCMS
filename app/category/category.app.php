@@ -95,12 +95,14 @@ class categoryApp{
         }
     }
     public static function router(&$category){
-        if($category && !$category['iDevice'] && iPHP_DOMAIN != iPHP_ROUTER_URL){
-            iDevice::router($category);
-            iDevice::router($category['iurl']);
-            iDevice::router($category['navArray'],true);
-            $category['parent'] && self::router($category['parent']);
-            $category['iDevice'] = true;
+        if($category && !$category['iDevice']){
+            if(!iDevice::$IS_IDENTITY_URL){
+                iDevice::router($category);
+                iDevice::router($category['iurl']);
+                iDevice::router($category['navArray'],true);
+                $category['parent'] && self::router($category['parent']);
+                $category['iDevice'] = true;
+            }
         }
     }
     public static function get_lite($category){

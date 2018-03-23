@@ -29,22 +29,22 @@ class formsApp {
             $active = true;
             $forms  = forms::get($fid);
             if(empty($forms)||empty($forms['status'])){
-                $array = iUI::code(0,array('forms:not_found_fid',$fid));
+                $array = iUI::code(0,array('forms:not_found_fid',$fid),null,'array');
                 $active = false;
             }
             if(empty($forms['config']['enable'])){
-                $array = iUI::code(0,'forms:!enable');
+                $array = iUI::code(0,'forms:!enable',null,'array');
                 $active = false;
             }
             if($active){
                 $formsAdmincp = new formsAdmincp();
                 $formsAdmincp->do_savedata(false);
-                $array = iUI::code(1,$forms['config']['success']);
+                $array = iUI::code(1,$forms['config']['success'],null,'array');
                 former::$error && $array = former::$error;
             }
             $vendor->signature($token,'DELETE');
         }else{
-            $array = iUI::code(0,'forms:error');
+            $array = iUI::code(0,'forms:error',null,'array');
         }
 
         if(iHttp::is_ajax()){

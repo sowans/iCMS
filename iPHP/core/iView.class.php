@@ -1,51 +1,56 @@
 <?php
 /**
  * iPHP - i PHP Framework
- * Copyright (c) 2012 iiiphp.com. All rights reserved.
+ * Copyright (c) iiiPHP.com. All rights reserved.
  *
- * @author coolmoo <iiiphp@qq.com>
+ * @author iPHPDev <master@iiiphp.com>
  * @website http://www.iiiphp.com
  * @license http://www.iiiphp.com/license
- * @version 2.0.0
+ * @version 2.1.0
  */
 class iView {
-    public static $handle  = NULL;
-    public static $app     = null;
-    public static $gateway = null;
-    public static $config  = array();
+    public static $handle   = NULL;
+    public static $app      = null;
+    public static $gateway  = null;
+    public static $config   = array();
+    public static $template = array();
 
     public static function init($config = array()) {
-        self::$config = $config;
-        self::$handle = new iTemplateLite();
-        self::$handle->debugging    = iPHP_TPL_DEBUGGING;
-        self::$handle->template_dir = iPHP_TPL_DIR;
-        self::$handle->compile_dir  = iPHP_TPL_CACHE;
-        self::$handle->reserved_template_varname = iPHP_APP;
-        self::$handle->error_reporting_header    = "<?php defined('iPHP') OR exit('What are you doing?');error_reporting(iPHP_TPL_DEBUG?E_ALL & ~E_NOTICE:0);?>\n";
-        self::$handle->left_delimiter  = '<!--{';
-        self::$handle->right_delimiter = '}-->';
-        self::$handle->register_modifier("date", "get_date");
-        self::$handle->register_modifier("cut", "csubstr");
-        self::$handle->register_modifier("htmlcut", "htmlcut");
-        self::$handle->register_modifier("cnlen", "cstrlen");
-        self::$handle->register_modifier("html2txt", "html2text");
-        self::$handle->register_modifier("key2num", "key2num");
-        self::$handle->register_modifier("unicode", "get_unicode");
-        self::$handle->register_modifier("random", "random");
-        self::$handle->register_modifier("fields", "select_fields");
-        self::$handle->register_modifier("pinyin",array("iPinyin", "get"));
-        self::$handle->register_modifier("thumb", array("files", "thumb"));
-        self::$handle->register_block("cache", array("iView", "block_cache"));
-        self::$handle->template_callback = array(
-            "resource" => array("iView","callback_resource"),
-            "func"     => array("iView","callback_func"),
-            "plugin"   => array("iView","callback_plugin"),
-            // "output"   => array("iView","callback_output"),
-        );
+        self::$config   = $config;
+        self::$handle = self::Template();
         self::$handle->assign('_GET', $_GET);
         self::$handle->assign('_POST', $_POST);
-        self::set_template_dir(iPHP_TPL_DIR);
+
         iPHP_TPL_DEBUG && self::$handle->clear_compiled_tpl();
+    }
+    public static function Template() {
+        $tpl = new iTemplateLite();
+        $tpl->debugging    = iPHP_TPL_DEBUGGING;
+        $tpl->template_dir = iPHP_TPL_DIR;
+        $tpl->compile_dir  = iPHP_TPL_CACHE;
+        $tpl->reserved_template_varname = iPHP_TPL_VAR;
+        $tpl->error_reporting_header    = "<?php defined('iPHP') OR exit('What are you doing?');error_reporting(iPHP_TPL_DEBUG?E_ALL & ~E_NOTICE:0);?>\n";
+        $tpl->left_delimiter  = '<!--{';
+        $tpl->right_delimiter = '}-->';
+        $tpl->register_modifier("date", "get_date");
+        $tpl->register_modifier("cut", "csubstr");
+        $tpl->register_modifier("htmlcut", "htmlcut");
+        $tpl->register_modifier("cnlen", "cstrlen");
+        $tpl->register_modifier("html2txt", "html2text");
+        $tpl->register_modifier("key2num", "key2num");
+        $tpl->register_modifier("unicode", "get_unicode");
+        $tpl->register_modifier("random", "random");
+        $tpl->register_modifier("fields", "select_fields");
+        $tpl->register_modifier("pinyin",array("iPinyin", "get"));
+        $tpl->register_modifier("thumb", array("files", "thumb"));
+        $tpl->register_block("cache", array(__CLASS__, "block_cache"));
+        $tpl->template_callback = array(
+            "resource" => array(__CLASS__,"callback_resource"),
+            "func"     => array(__CLASS__,"callback_func"),
+            "plugin"   => array(__CLASS__,"callback_plugin"),
+            // "output"   => array(__CLASS__,"callback_output"),
+        );
+        return $tpl;
     }
     public static function set_template_dir($dir) {
         self::$handle->template_dir = $dir;
@@ -60,23 +65,23 @@ class iView {
     //     }
     // }
     /**
-     * iCMS:app:method
-     * iCMS:func
-     * iCMS:aaaApp:method
+     * iPHP:app:method
+     * iPHP:func
+     * iPHP:aaaApp:method
      */
     public static function callback_func($args,$tpl) {
         is_array($args['app']) && $args['app'] = $args['app']['app'];
         $keys = $args['app'].($args['method']?'_'.$args['method']:'');
         isset($args['as']) && $keys = $args['as'];
         //模板标签 对应>> 类::静态方法
-        //iCMS:app:method >> appFunc::app_method
+        //iPHP:app:method >> appFunc::app_method
         if($args['method']){
             $callback = array(
                 $args['app'].'Func',
                 $args['app'].'_'.$args['method']
             );
             if(strpos($args['app'], 'App')!==false){
-                //iCMS:aaaApp:method >> aaaApp::method
+                //iPHP:aaaApp:method >> aaaApp::method
                 //$aaaApp_method
                 $callback = array(
                     $args['app'],
@@ -84,7 +89,7 @@ class iView {
                 );
             }
             if(strpos($args['app'], 'Class')!==false){
-                //iCMS:aaaClass:method >> aaa::method
+                //iPHP:aaaClass:method >> aaa::method
                 ////$aaaClass_method
                 $callback = array(
                     substr($args['app'], 0,-5),
@@ -92,8 +97,8 @@ class iView {
                 );
             }
             //自定义APP模板调用
-            //iCMS:content:list app="test" >> contentFunc::content_list
-            //iCMS:test:list >> contentFunc::content_list
+            //iPHP:content:list app="test" >> contentFunc::content_list
+            //iPHP:test:list >> contentFunc::content_list
             if(self::$config['define']){
                 $apps = self::$config['define']['apps'];
                 $func = self::$config['define']['func'];
@@ -108,7 +113,7 @@ class iView {
             }
 
             if($args['_app']){
-                //iCMS:app:method _app="aaa" >> aaaFunc::aaa_method
+                //iPHP:app:method _app="aaa" >> aaaFunc::aaa_method
                 $keys     = isset($args['as'])?$args['as']:$args['_app'].'_'.$args['method'];
                 $callback = array(
                     $args['_app'].'Func',
@@ -120,7 +125,7 @@ class iView {
                 iPHP::error_throw("Unable to find method '{$callback[0]}::{$callback[1]}'");
             }
         }else{
-            //iCMS:func >> iCMS_func
+            //iPHP:func >> iPHP_func
             $callback = iPHP_APP.'_' . $args['app'];
             function_exists($callback) OR require_once(iPHP_TPL_FUN."/".iPHP_APP.".".$args['app'].".php");
         }
@@ -131,8 +136,8 @@ class iView {
         }
 
         if(is_array($callback)){
-            // iCMS:app:_method >> app_method::func
-            // iCMS:app:_method func='aaa' >> app_method::aaa
+            // iPHP:app:_method >> app_method::func
+            // iPHP:app:_method func='aaa' >> app_method::aaa
             strpos($callback[1], '__')!==false && $callback = array('iView','callback_func_proxy');
             $tpl->assign($keys,call_user_func_array($callback, array($args)));
         }else{
@@ -154,8 +159,8 @@ class iView {
         }
     }
     /**
-     * iCMS:app:_method >> app_method::func
-     * iCMS:app:_method func='aaa' >> app_method::aaa
+     * iPHP:app:_method >> app_method::func
+     * iPHP:app:_method func='aaa' >> app_method::aaa
      */
     public static function callback_func_proxy($vars=null){
         $func = 'func';
@@ -177,7 +182,7 @@ class iView {
     public static function block_cache($vars, $content, $tpl) {
         $vars['id'] OR iUI::warning('cache 标签出错! 缺少"id"属性或"id"值为空.');
         $cache_time = isset($vars['time']) ? (int) $vars['time'] : -1;
-        $cache_name = iPHP_DEVICE . '/block_cache/' . $vars['id'];
+        $cache_name = self::$config['template']['device'] . '/block_cache/' . $vars['id'];
         $cache = iCache::get($cache_name);
         if (empty($cache)) {
             if ($content === null) {
@@ -218,7 +223,7 @@ class iView {
         $_tpl = $tpl;
         if (strpos($tpl, $flag) !== false) {
             // 模板名/$tpl
-            if ($_tpl = self::check_tpl($tpl, iPHP_DEFAULT_TPL)){
+            if ($_tpl = self::check_tpl($tpl, self::$config['template']['dir'])){
                 return $_tpl;
             }
             // testApp/$tpl
@@ -227,23 +232,23 @@ class iView {
                     return $_tpl;
                 }
             }
-            // iCMS/$tpl
+            // iPHP/$tpl
             if ($_tpl = self::check_tpl($tpl, iPHP_APP)) {
                 return $_tpl;
             }
-            // iCMS/设备名/$tpl
-            if ($_tpl = self::check_tpl($tpl, iPHP_APP.'/'.iPHP_DEVICE)) {
+            // iPHP/设备名/$tpl
+            if ($_tpl = self::check_tpl($tpl, iPHP_APP.'/'.self::$config['template']['device'])) {
                 return $_tpl;
             }
             // // 其它移动设备$tpl
             // if(iPHP_MOBILE){
-            //     // iCMS/mobile/$tpl
+            //     // iPHP/mobile/$tpl
             //     if ($_tpl = self::check_tpl($tpl, iPHP_APP.'/mobile')) {
             //         return $_tpl;
             //     }
             // }
-            $_tpl = str_replace($flag, iPHP_DEFAULT_TPL, $tpl);
-            // return self::check_tpl($tpl, iPHP_DEFAULT_TPL);
+            $_tpl = str_replace($flag, self::$config['template']['dir'], $tpl);
+            // return self::check_tpl($tpl, self::$config['template']['dir']);
         } elseif (strpos($tpl, '{iTPL}') !== false) {
             $flag = '{iTPL}';
             // testApp/$tpl
@@ -252,7 +257,7 @@ class iView {
                     return $_tpl;
                 }
             }
-            $_tpl = str_replace($flag, iPHP_DEFAULT_TPL, $tpl);
+            $_tpl = str_replace($flag, self::$config['template']['dir'], $tpl);
         }
 
         if (is_file(iPHP_TPL_DIR . "/" . $_tpl)) {
@@ -342,7 +347,7 @@ class iView {
             $tpl.= '.htm';
             $tpl = iSecurity::escapeDir(ltrim($tpl,'/'));
             if(iSecurity::_escapePath($tpl)){
-                $tplpath = iPHP_TPL_DIR . '/' .iPHP_DEFAULT_TPL.'/'.$tpl;
+                $tplpath = iPHP_TPL_DIR . '/' .self::$config['template']['dir'].'/'.$tpl;
                 if (is_file($tplpath)) {
                     $iTPL = '{iTPL}/'.$tpl;
                 }

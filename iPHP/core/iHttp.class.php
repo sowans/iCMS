@@ -1,12 +1,12 @@
 <?php
 /**
  * iPHP - i PHP Framework
- * Copyright (c) 2012 iiiphp.com. All rights reserved.
+ * Copyright (c) iiiPHP.com. All rights reserved.
  *
- * @author coolmoo <iiiphp@qq.com>
+ * @author iPHPDev <master@iiiphp.com>
  * @website http://www.iiiphp.com
  * @license http://www.iiiphp.com/license
- * @version 2.0.0
+ * @version 2.1.0
  */
 class iHttp{
     public static $PROXY_URL = null;
@@ -271,5 +271,28 @@ class iHttp{
             $responses = file_get_contents(urlencode($url));
         }
         return $responses;
+    }
+    public static function send($url, $POSTFIELDS=null) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+
+        if($POSTFIELDS){
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $POSTFIELDS);
+        }
+
+        $response = curl_exec ($ch);
+        // self::$debug && var_dump($response);
+        curl_close ($ch);
+
+        if(empty($response)){
+            return '-100000';
+        }
+        return json_decode($response);
     }
 }

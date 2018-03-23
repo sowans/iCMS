@@ -1,7 +1,7 @@
 <?php
 /**
  * iPHP - i PHP Framework
- * Copyright (c) 2012 iiiphp.com. All rights reserved.
+ * Copyright (c) iiiphp.com. All rights reserved.
  *
  * @author coolmoo <iiiphp@qq.com>
  * @website http://www.iiiphp.com

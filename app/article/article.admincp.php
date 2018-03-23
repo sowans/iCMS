@@ -256,6 +256,15 @@ class articleAdmincp{
         }
         if(!$dialog) return $msg.'<br />';
     }
+    public function do_check(){
+        $id    = (int)$_GET['id'];
+        $title = $_GET['title'];
+        if(self::$config['repeatitle'] && article::check($title,$id,'title')) {
+            iUI::code(0,'该标题的文章已经存在!请检查是否重复');
+        }else{
+            iUI::code(1);
+        }
+    }
     /**
      * [JSON数据]
      * @return [type] [description]
@@ -460,7 +469,17 @@ class articleAdmincp{
         isset($_GET['postype'])&& $uriArray['postype'] = $_GET['postype'];
         isset($_GET['cid'])    && $uriArray['cid']     = $_GET['cid'];
 
-        $orderby    = $_GET['orderby']?$_GET['orderby']:"id DESC";
+        list($orderby,$orderby_option) = get_orderby(array(
+            'id'         =>"ID",
+            'hits'       =>"点击",
+            'hits_week'  =>"周点击",
+            'hits_month' =>"月点击",
+            'good'       =>"顶",
+            'postime'    =>"时间",
+            'pubdate'    =>"发布时间",
+            'comments'   =>"评论数",
+        ));
+
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:20;
 
         if($map_where){

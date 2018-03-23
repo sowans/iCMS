@@ -17,7 +17,10 @@ class searchAdmincp{
 			$sql =" WHERE `search` like '%{$_GET['keywords']}%'";
         }
 
-        $orderby    = $_GET['orderby']?$_GET['orderby']:"id DESC";
+        list($orderby,$orderby_option) = get_orderby(array(
+            'id'    =>"ID",
+            'times' =>"搜索次数",
+        ));
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:20;
         $total      = iCMS::page_total_cache("SELECT count(*) FROM `#iCMS@__search_log` {$sql}","G");
         iUI::pagenav($total,$maxperpage,"条记录");

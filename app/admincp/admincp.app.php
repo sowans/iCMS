@@ -11,6 +11,34 @@ class admincpApp{
     public function __construct() {
         menu::$callback['sidebar'] = array(__CLASS__,'__sidebar');
     }
+    public static function get_seccode() {
+        iSeccode::run();
+        exit;
+    }
+    public static function check_seccode() {
+        if ($_POST['captcha'] === iPHP_KEY) {
+            return true;
+        }
+
+        if ($_POST['username'] && $_POST['password']) {
+            $seccode = iSecurity::escapeStr($_POST['captcha']);
+            iSeccode::check($seccode, true) OR iUI::code(0, 'iCMS:seccode:error', 'seccode', 'json');
+        }
+    }
+    public static function access_log() {
+        $access = array(
+            'uid'       => members::$userid,
+            'username'  => members::$nickname,
+            'app'       => admincp::$APP_NAME,
+            'uri'       => $_SERVER['REQUEST_URI'],
+            'useragent' => $_SERVER['HTTP_USER_AGENT'],
+            'ip'        => iPHP::get_ip(),
+            'method'    => $_SERVER['REQUEST_METHOD'],
+            'referer'   => $_SERVER['HTTP_REFERER'],
+            'addtime'   => $_SERVER['REQUEST_TIME'],
+        );
+        iDB::insert("access_log",$access);
+    }
     public static function __sidebar($menu){
         $history   = menu::history(null,true);
         $caption   = menu::get_caption();
@@ -42,8 +70,7 @@ class admincpApp{
         $_GET['sapp'] && $sql.=" AND `app` = '{$_GET['sapp']}'";
         $_GET['ip'] && $sql.=" AND `ip` = '{$_GET['ip']}'";
 
-
-        $orderby    =$_GET['orderby']?$_GET['orderby']:"id DESC";
+        list($orderby,$orderby_option) = get_orderby();
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:20;
         $total      = iCMS::page_total_cache("SELECT count(*) FROM `#iCMS@__access_log` {$sql}","G");
         iUI::pagenav($total,$maxperpage,"条记录");

@@ -72,7 +72,7 @@ $(function(){
       var param={
         username:$("#username").val(),
         password:$("#password").val(),
-        admincp_seccode :$("#seccode").val(),
+        captcha :$("#seccode").val(),
         gateway:'ajax'
       };
 

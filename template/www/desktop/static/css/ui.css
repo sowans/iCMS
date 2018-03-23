@@ -9,7 +9,7 @@ body { background: #eee; }
 
 /* ==user-login== */
 .top-wrap .user-login { }
-.top-wrap .user-profile { width: 360px; }
+.top-wrap .user-profile { min-width: 360px; }
 
 /*.top-wrap .user-login ul { list-style: none; margin: 0px; }*/
 .top-wrap ul.ul li { float: left; border-right: 1px dotted #CCC; padding-left: 15px; line-height: 18px; margin-top: 6px; }

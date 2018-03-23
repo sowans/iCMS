@@ -160,12 +160,14 @@ $(function(){
               <input id="sortnum" class="span1" value="<?php echo $rs['sortnum'] ; ?>" name="sortnum" type="text"/>
             </div>
             <div class="clearfloat mb10"></div>
-            <div class="input-prepend"> <span class="add-on"><?php echo $this->category_name;?>状态</span>
+            <div class="input-prepend input-append"> <span class="add-on"><?php echo $this->category_name;?>状态</span>
               <select name="status" id="status" class="chosen-select span3">
                 <option value="0">隐藏[status="0"]</option>
                 <option value="1">显示[status="1"]</option>
                 <option value="2">不调用[status="2"]</option>
+                <?php echo propAdmincp::get("status") ; ?>
               </select>
+              <?php echo propAdmincp::btn_add('添加状态');?>
             </div>
           </div>
           <div id="category-add-url" class="tab-pane hide">

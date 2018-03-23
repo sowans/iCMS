@@ -103,19 +103,12 @@ $(function(){
           <span class="add-on"><i class="fa fa-calendar"></i></span>
         </div>
         <div class="clearfloat mb10"></div>
-        <div class="input-prepend"> <span class="add-on">排序</span>
+        <div class="input-prepend">
+          <span class="add-on">排序</span>
           <select name="orderby" id="orderby" class="span2 chosen-select">
-            <option value="">默认排序</option>
-            <optgroup label="降序">
-            <option value="id DESC">ID[降序]</option>
-            <option value="pubdate DESC">时间[降序]</option>
-            <option value="`count` DESC">使用数[降序]</option>
-            </optgroup>
-            <optgroup label="升序">
-            <option value="id ASC">ID[升序]</option>
-            <option value="pubdate ASC">时间[升序]</option>
-            <option value="`count` ASC">使用数[升序]</option>
-            </optgroup>
+            <option value=""></option>
+            <optgroup label="降序"><?php echo $orderby_option['DESC'];?></optgroup>
+            <optgroup label="升序"><?php echo $orderby_option['ASC'];?></optgroup>
           </select>
         </div>
         <div class="input-prepend input-append"> <span class="add-on">每页</span>

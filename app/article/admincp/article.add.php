@@ -37,7 +37,7 @@ window.catchRemoteImageEnable = <?php echo iCMS::$config['article']['catch_remot
   var iEditor = iCMS.editor;
 <?php }?>
 $(function(){
-  $("#title").focus();
+  // $("#title").focus();
 
   iEditor.create('editor-body-1');
 	$(".editor-page").change(function(){
@@ -116,6 +116,32 @@ $(function(){
     }
     hotkey = false;
   });
+  <?php if(self::$config['repeatitle']){?>
+  $("#title").focus(function() {
+    var me = $(this);
+    var isblur = me.data('blur');
+    $("#title-help").text('');
+    console.log('isblur',Boolean(isblur));
+    if(Boolean(isblur)){
+      me.unbind('blur');
+      me.data('blur',false);
+    }
+
+    me.bind("blur",function(e){
+      me.data('blur',true);
+      var title = me.val();
+      $.getJSON("<?php echo APP_URI; ?>",{'do':'check','id':"<?php echo $this->id ; ?>",'title':title},
+        function(json) {
+          if(!json.code){
+            $("#title-help").html('<span class="label label-important">'+json.msg+'</span>');
+          }
+          me.unbind('blur');
+        }
+      );
+    });
+  });
+  <?php }?>
+
 });
 
 function mergeEditorPage(){
@@ -333,6 +359,7 @@ function _modal_dialog(cancel_text){
             <div class="input-prepend"> <span class="add-on">标 题</span>
               <input type="text" name="title" class="span6" id="title" value="<?php echo $rs['title'] ; ?>"/>
             </div>
+            <span class="help-inline" id="title-help"></span>
             <div class="clearfloat mb10"></div>
             <div class="input-prepend"> <span class="add-on">短标题</span>
               <input type="text" name="stitle" class="span6" id="stitle" value="<?php echo $rs['stitle'] ; ?>"/>

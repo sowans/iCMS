@@ -1,12 +1,12 @@
 <?php
 /**
  * iPHP - i PHP Framework
- * Copyright (c) 2012 iiiphp.com. All rights reserved.
+ * Copyright (c) iiiPHP.com. All rights reserved.
  *
- * @author coolmoo <iiiphp@qq.com>
+ * @author iPHPDev <master@iiiphp.com>
  * @website http://www.iiiphp.com
  * @license http://www.iiiphp.com/license
- * @version 2.0.0
+ * @version 2.1.0
  */
 defined('iPHP') OR exit('What are you doing?');
 
@@ -17,6 +17,9 @@ class iUI {
 	public static $break      = true;
 	public static $dialog     = array();
 
+    public static function set_dialog($key,$value) {
+        self::$dialog[$key] = $value;
+    }
 	public static function lang($keys = '', $throw = true) {
 		if (empty($keys)) {
 			return false;
@@ -30,7 +33,7 @@ class iUI {
 		$count = count($keyArray);
 		list($app, $do, $key, $_msg) = $keyArray;
 
-        if($app!='iCMS'){
+        if($app!=iPHP_APP){
             $path = iPHP_APP_DIR.'/'.$app.'/'.$app . '.lang.php';
             if (is_file($path)) {
                 $langArray = iPHP::import($path, true);
@@ -44,7 +47,7 @@ class iUI {
         }
 
         if(empty($msg)){
-            $def_path = iPHP_APP_CORE.'/iCMS.lang.php';
+            $def_path = iPHP_APP_CORE.'/'.iPHP_APP.'.lang.php';
             $langArray = iPHP::import($def_path, true);
             switch ($count) {
                 case 1:$msg = $langArray;break;
@@ -81,7 +84,7 @@ class iUI {
 		echo "<script>window.{$node}.{$callback}($json);</script>";
 		exit;
 	}
-	public static function code($code = 0, $msg = '', $forward = '', $format = '') {
+	public static function code($code = 0, $msg = '', $forward = '', $format = 'json') {
         if(is_array($msg)||@strstr($msg, ':')){
             $msg = iUI::lang($msg, false);
         }
@@ -144,14 +147,6 @@ class iUI {
 		self::$break && exit();
 	}
     public static function error($value,$type='app') {
-        $value = iSecurity::filter_path($value);
-        if(iPHP::callback(array('weixin','is_wxapp'))){
-            $value = html2text($value);
-            $value = html2js($value);
-            self::code(0,$value,'','json');
-            echo $value;
-        }
-
         if(iPHP_SHELL){
             $value = str_replace(array("<b>", "</b>"), array("\033[31m","\033[0m"), $value);
             $value = html2text($value);
@@ -169,11 +164,11 @@ class iUI {
         }
         if ($_POST) {
             if(iHttp::is_ajax()){
-                self::code(0,$value,'','json');
+                self::code(0,$value);
             }else{
                 $value = html2text($value);
                 $value = html2js($value);
-                self::js("js:window.alert('{$value}')");
+                self::js('js:window.alert("'.$value.'")');
             }
             exit;
         }

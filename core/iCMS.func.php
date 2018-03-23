@@ -205,3 +205,34 @@ function get_php_content($content){
 function check_priv($p,$priv){
     return is_array($p)?array_intersect((string)$p,(array)$priv):in_array((string)$p,(array)$priv);
 }
+
+function orderby_option($array,$by="DESC"){
+    $opt = '';
+    $byText = ($by=="ASC"?"升序":"降序");
+    foreach ($array as $key => $value) {
+        $opt.='<option value="'.$key.' '.$by.'">'.$value.'['.$byText.']</option>';
+    }
+    return $opt;
+}
+function get_orderby($array=null){
+    empty($array) && $array = array('id' =>"ID");
+
+    list($order,$by) = explode(' ', $_GET['orderby']);
+
+    if($by!='DESC' && $by!='ASC'){
+        $by ='DESC';
+    }
+
+    $default = array_keys($array);
+    $orderby = isset($array[$order])?' `'.$order.'` '.$by:$default[0]." DESC";
+    $option = array(
+        'DESC' => orderby_option($array,"DESC"),
+        'ASC'  => orderby_option($array,"ASC")
+    );
+    return array($orderby,$option);
+    //
+    // $obj = new stdClass();
+    // $obj->sql = $orderby;
+    // $obj->option = $option;
+    // return $obj;
+}

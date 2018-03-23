@@ -79,7 +79,18 @@ class userAdmincp{
             $map_sql = iSQL::select_map($map_where);
             $sql     = ",({$map_sql}) map {$sql} AND `uid` = map.`iid`";
         }
-        $orderby    = $_GET['orderby']?$_GET['orderby']:"uid DESC";
+        list($orderby,$orderby_option) = get_orderby(array(
+            'uid'        =>"UID",
+            'hits'       =>"点击",
+            'hits_week'  =>"周点击",
+            'hits_month' =>"月点击",
+            'fans'       =>"粉丝数",
+            'follow'     =>"关注数",
+            'article'    =>"文章数",
+            'favorite'   =>"收藏数",
+            'comments'   =>"评论数",
+        ));
+
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:20;
         $total      = iCMS::page_total_cache("SELECT count(*) FROM `#iCMS@__user` {$sql}","G");
         iUI::pagenav($total,$maxperpage,"个用户");

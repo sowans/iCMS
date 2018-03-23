@@ -167,9 +167,10 @@ class appsApp {
         if($view) return array($view,$data);
     }
 
-    public static function custom_data(&$data,$vars){
-        $data+=(array)apps_meta::data(self::$s_app,$data['id']);
-        $app = apps::get_app(self::$s_app);
+    public static function custom_data(&$data,$vars=null){
+        $meta = (array)apps_meta::data(self::$s_app,$data['id']);
+        $data = array_merge($data,$meta);
+        $app  = apps::get_app(self::$s_app);
         $data['sapp'] = apps::get_app_lite($app);
         $app['fields'] && formerApp::data($data['id'],$app,self::$s_app,$data,$vars,$data['category']);
     }
@@ -219,7 +220,7 @@ class appsApp {
 
         $_app = $category['app']['app'];
 
-        if(self::__ishtml($expr,$category,$_app)){
+        if(self::is_html($expr,$category,$_app)){
             return false;
         }
 
@@ -247,12 +248,7 @@ class appsApp {
 
         is_file($fp) && iPHP::redirect($url);
     }
-    private static function __redirect($expr,$mode,$iurl){
-        if($expr && $mode == '1') {
-            self::redirect_html($iurl);
-        }
-    }
-    private static function __ishtml($expr,$C,$key) {
+    public static function is_html($expr,$C,$key) {
         if (iView::$gateway == "html"
             && $expr
             && (
@@ -265,4 +261,10 @@ class appsApp {
         }
         return false;
     }
+    private static function __redirect($expr,$mode,$iurl){
+        if($expr && $mode == '1') {
+            self::redirect_html($iurl);
+        }
+    }
+
 }

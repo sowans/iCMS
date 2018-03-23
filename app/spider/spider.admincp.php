@@ -126,7 +126,7 @@ class spiderAdmincp {
 		$days && $sql.=" AND `addtime`>".strtotime('-'.$days.' day');
 		$ruleArray = $this->rule_opt(0, 'array');
 		// $postArray = $this->post_opt(0, 'array');
-		// $orderby = $_GET['orderby'] ? $_GET['orderby'] : "id DESC";
+		// list($orderby,$orderby_option) = get_orderby();
 		$maxperpage = $_GET['perpage'] > 0 ? (int) $_GET['perpage'] : 100;
 		// $total = iCMS::page_total_cache( "SELECT count(*) FROM `#iCMS@__spider_error` {$sql}", "G");
 		// iUI::pagenav($total, $maxperpage, "个网页");
@@ -191,7 +191,7 @@ class spiderAdmincp {
 
 		$ruleArray = $this->rule_opt(0, 'array');
 		$postArray = $this->post_opt(0, 'array');
-		$orderby = $_GET['orderby'] ? $_GET['orderby'] : "id DESC";
+		list($orderby,$orderby_option) = get_orderby();
 		$maxperpage = $_GET['perpage'] > 0 ? (int) $_GET['perpage'] : 20;
 		$total = iCMS::page_total_cache( "SELECT count(*) FROM `#iCMS@__spider_url` {$sql}", "G");
 		iUI::pagenav($total, $maxperpage, "个网页");
@@ -375,7 +375,7 @@ class spiderAdmincp {
 		if ($_GET['keywords']) {
 			$sql = " WHERE CONCAT(name,rule) REGEXP '{$_GET['keywords']}'";
 		}
-		$orderby = $_GET['orderby'] ? $_GET['orderby'] : "id DESC";
+		list($orderby,$orderby_option) = get_orderby();
 		$maxperpage = $_GET['perpage'] > 0 ? (int) $_GET['perpage'] : 20;
 		$total = iCMS::page_total_cache( "SELECT count(*) FROM `#iCMS@__spider_rule` {$sql}", "G");
 		iUI::pagenav($total, $maxperpage, "个规则");
@@ -503,7 +503,7 @@ class spiderAdmincp {
 		if ($_GET['keywords']) {
 			$sql = " WHERE CONCAT(name,app,post) REGEXP '{$_GET['keywords']}'";
 		}
-		$orderby = $_GET['orderby'] ? $_GET['orderby'] : "id DESC";
+		list($orderby,$orderby_option) = get_orderby();
 		$maxperpage = $_GET['perpage'] > 0 ? (int) $_GET['perpage'] : 20;
 		$total = iCMS::page_total_cache( "SELECT count(*) FROM `#iCMS@__spider_post` {$sql}", "G");
 		iUI::pagenav($total, $maxperpage, "个模块");
@@ -604,7 +604,7 @@ class spiderAdmincp {
         $_GET['endtime']   && $sql.=" AND `lastupdate`<='".str2time($_GET['endtime']." 23:59:59")."'";
 		$ruleArray = $this->rule_opt(0, 'array');
 		$postArray = $this->post_opt(0, 'array');
-		$orderby = $_GET['orderby'] ? $_GET['orderby'] : "id DESC";
+		list($orderby,$orderby_option) = get_orderby();
 		$maxperpage = $_GET['perpage'] > 0 ? (int) $_GET['perpage'] : 20;
 		$total = iCMS::page_total_cache( "SELECT count(*) FROM `#iCMS@__spider_project` {$sql}", "G");
 		iUI::pagenav($total, $maxperpage, "个方案");

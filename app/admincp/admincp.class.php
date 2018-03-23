@@ -14,7 +14,6 @@ define('ADMINCP', true);
 define('__ADMINCP__', iPHP_SELF . '?app');
 define('ACP_PATH', iPHP_APP_DIR . '/admincp');
 define('ACP_HOST', (($_SERVER['SERVER_PORT'] == 443)?'https':'http')."://" . $_SERVER['HTTP_HOST']);
-
 $git_ver_file = iPHP_APP_CORE.'/git.version.php';
 file_exists($git_ver_file) && require_once $git_ver_file;
 
@@ -33,7 +32,7 @@ class admincp {
 	public static $APP_ARGS   = NULL;
 
 	public static function init() {
-		self::check_seccode(); //验证码验证
+		($_GET['do'] == 'seccode') && admincpApp::get_seccode();
 
 		iUI::$dialog['title'] = iPHP_APP;
 		iDB::$show_errors     = true;
@@ -42,7 +41,7 @@ class admincp {
 
 		members::$LOGIN_PAGE  = ACP_PATH.'/template/admincp.login.php';
 		members::$GATEWAY     = iPHP::PG('gateway');
-		members::check_login(); //用户登陆验证
+		members::check_login(array("admincpApp","check_seccode")); //用户登陆验证
 		members::check_priv('ADMINCP','page');//检查是否有后台权限
 
 		files::init(array('userid'=> members::$userid));
@@ -57,20 +56,6 @@ class admincp {
 			"history" => array("menu","history"),
 			"priv"    => array("members","check_priv")
         );
-	}
-
-	public static function get_seccode() {
-		iSeccode::run('admincp');
-	}
-	public static function check_seccode() {
-		if ($_POST['admincp_seccode'] === iPHP_KEY) {
-			return true;
-		}
-
-		if ($_POST['username'] && $_POST['password']) {
-			$seccode = iSecurity::escapeStr($_POST['admincp_seccode']);
-			iSeccode::check($seccode, true, 'admincp_seccode') OR iUI::code(0, 'iCMS:seccode:error', 'seccode', 'json');
-		}
 	}
 
 	public static function run($app = NULL, $do = NULL, $args = NULL, $prefix = "do_") {
@@ -142,7 +127,7 @@ class admincp {
 		//检查URL权限
 		iPHP::callback(self::$callback['priv'],array(APP_DOURI,'page'));
 		//默认开启
-		iCMS::$config['debug']['access_log'] OR self::access_log();
+		iCMS::$config['debug']['access_log'] OR admincpApp::access_log();
 
 		$method = self::$APP_METHOD;
 		$args === null && $args = self::$APP_ARGS;
@@ -216,20 +201,6 @@ class admincp {
 		}
 	}
 
-	public static function access_log() {
-		$access = array(
-			'uid'       => members::$userid,
-			'username'  => members::$nickname,
-			'app'       => self::$APP_NAME,
-			'uri'       => $_SERVER['REQUEST_URI'],
-			'useragent' => $_SERVER['HTTP_USER_AGENT'],
-			'ip'        => iPHP::get_ip(),
-			'method'    => $_SERVER['REQUEST_METHOD'],
-			'referer'   => $_SERVER['HTTP_REFERER'],
-			'addtime'   => $_SERVER['REQUEST_TIME'],
-		);
-		iDB::insert("access_log",$access);
-	}
     public static function uri($q,$a){
     	$qs = $q;
     	is_array($q) OR parse_str($q, $qs);
@@ -242,6 +213,3 @@ class admincp {
 	}
 }
 
-if($_GET['do'] == 'seccode'){
-	admincp::get_seccode();
-}

@@ -267,7 +267,7 @@ class appsAdmincp{
       // if($_GET['keywords']) {
 		    // $sql=" WHERE `keyword` REGEXP '{$_GET['keywords']}'";
       // }
-      $orderby    =$_GET['orderby']?$_GET['orderby']:"id DESC";
+      list($orderby,$orderby_option) = get_orderby();
       $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:50;
       $total      = iCMS::page_total_cache("SELECT count(*) FROM `#iCMS@__apps` {$sql}","G");
       iUI::pagenav($total,$maxperpage,"个应用");

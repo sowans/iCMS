@@ -1,12 +1,12 @@
 <?php
 /**
  * iPHP - i PHP Framework
- * Copyright (c) 2012 iiiphp.com. All rights reserved.
+ * Copyright (c) iiiPHP.com. All rights reserved.
  *
- * @author coolmoo <iiiphp@qq.com>
+ * @author iPHPDev <master@iiiphp.com>
  * @website http://www.iiiphp.com
  * @license http://www.iiiphp.com/license
- * @version 2.0.0
+ * @version 2.1.0
  */
 class iMap {
 	public static $table    = 'prop';
@@ -41,7 +41,7 @@ class iMap {
     public static function del_data($iid=null,$appid=null,$table=null,$field='iid'){
         if($iid && $appid && $table){
             iDB::query("
-                DELETE FROM `#iCMS@__{$table}_map`
+                DELETE FROM `".iPHP_DB_PREFIX_TAG.$table."_map`
                 WHERE `$field`='$iid'
                 AND `appid`='$appid'
             ");

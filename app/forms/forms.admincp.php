@@ -95,8 +95,9 @@ class formsAdmincp{
         }
 
         isset($_GET['keywords'])&& $uri.='&keyword='.$_GET['keywords'];
-
-        $orderby    = $_GET['orderby']?$_GET['orderby']:"{$primary} DESC";
+        list($orderby,$orderby_option) = get_orderby(array(
+            $primary =>strtoupper($primary),
+        ));
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:20;
         $total      = iCMS::page_total_cache("SELECT count(*) FROM `{$table}` {$sql}","G");
         iUI::pagenav($total,$maxperpage,"条记录");
@@ -342,7 +343,7 @@ class formsAdmincp{
       if($_GET['keywords']) {
 		    $sql=" WHERE CONCAT(app,name,title,description) REGEXP '{$_GET['keywords']}'";
       }
-      $orderby    =$_GET['orderby']?$_GET['orderby']:"id DESC";
+      list($orderby,$orderby_option) = get_orderby();
       $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:50;
       $total      = iCMS::page_total_cache("SELECT count(*) FROM `#iCMS@__forms` {$sql}","G");
       iUI::pagenav($total,$maxperpage,"个表单");

@@ -76,7 +76,17 @@ class tagAdmincp{
             $sql     = ",({$map_sql}) map {$sql} AND `id` = map.`iid`";
         }
 
-        $orderby	= $_GET['orderby']?$_GET['orderby']:"id DESC";
+        list($orderby,$orderby_option) = get_orderby(array(
+            'id'         =>"ID",
+            'hits'       =>"点击",
+            'hits_week'  =>"周点击",
+            'hits_month' =>"月点击",
+            'count'      =>"使用数",
+            'good'       =>"顶",
+            'postime'    =>"时间",
+            'pubdate'    =>"发布时间",
+            'comments'   =>"评论数",
+        ));
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:20;
         $total		= iCMS::page_total_cache("SELECT count(*) FROM `#iCMS@__tag` {$sql}","G");
         iUI::pagenav($total,$maxperpage,"个标签");

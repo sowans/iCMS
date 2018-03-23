@@ -1,12 +1,12 @@
 <?php
 /**
  * iPHP - i PHP Framework
- * Copyright (c) 2012 iiiphp.com. All rights reserved.
+ * Copyright (c) iiiPHP.com. All rights reserved.
  *
- * @author coolmoo <iiiphp@qq.com>
+ * @author iPHPDev <master@iiiphp.com>
  * @website http://www.iiiphp.com
  * @license http://www.iiiphp.com/license
- * @version 2.0.0
+ * @version 2.1.0
  */
 class iFS {
 	public static $force_ext = false;
@@ -32,7 +32,9 @@ class iFS {
 	public static function ex($f) {
 		return @stat($f) === false ? false : true;
 	}
-
+	public static function is_url($url) {
+		return self::checkHttp($url);
+	}
 	public static function is_file($file) {
 		return @is_file($file);
 	}
@@ -144,9 +146,9 @@ class iFS {
 			return false;
 		}
 		$dirpath = rtrim($dirpath, '/') . '/';
-		if ($fp = @fopen($dirpath . 'iCMS.txt', "wb")) {
+		if ($fp = @fopen($dirpath . 'iFS.test.txt', "wb")) {
 			@fclose($fp);
-			@unlink($dirpath . 'iCMS.txt');
+			@unlink($dirpath . 'iFS.test.txt');
 			return true;
 		} else {
 			return false;

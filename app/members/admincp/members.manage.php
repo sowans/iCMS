@@ -19,6 +19,9 @@ admincp::head();
 </style>
 <script type="text/javascript">
 $(function(){
+  <?php if($_GET['orderby']){ ?>
+  iCMS.select('orderby',"<?php echo $_GET['orderby'] ; ?>");
+  <?php } ?>
 	$("#<?php echo APP_FORMID;?>").batch();
 });
 </script>
@@ -33,6 +36,14 @@ $(function(){
         <div class="input-prepend input-append"> <span class="add-on">每页</span>
           <input type="text" name="perpage" id="perpage" value="<?php echo $maxperpage ; ?>" style="width:36px;"/>
           <span class="add-on">条记录</span> </div>
+        <div class="input-prepend">
+          <span class="add-on">排序</span>
+          <select name="orderby" id="orderby" class="span2 chosen-select">
+            <option value=""></option>
+            <optgroup label="降序"><?php echo $orderby_option['DESC'];?></optgroup>
+            <optgroup label="升序"><?php echo $orderby_option['ASC'];?></optgroup>
+          </select>
+        </div>
         <div class="input-prepend input-append"> <span class="add-on">关键字</span>
           <input type="text" name="members" class="span2" id="members" value="<?php echo $_GET['members'] ; ?>" />
           <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i> 搜 索</button>

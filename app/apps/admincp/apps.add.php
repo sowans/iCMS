@@ -241,7 +241,7 @@ $(function(){
             </div>
             <div class="input-prepend">
               <span class="add-on">菜单配置</span>
-              <textarea name="menu" id="menu" class="span8" style="height:450px;"><?php echo $rs['menu']?cnjson_encode($rs['menu']):'' ; ?></textarea>
+              <textarea name="menu" id="menu" class="span8" style="height:450px;"><?php echo $rs['menu']?str_replace(array('[{"','},','}]'), array("[\n{\"","},\n","}\n]"), cnjson_encode($rs['menu'])):'' ; ?></textarea>
             </div>
             <div class="clearfloat mb10"></div>
             <div class="input-prepend">

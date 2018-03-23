@@ -63,27 +63,12 @@ $(function(){
             <?php echo propAdmincp::get("pid") ; ?>
           </select>
         </div>
-        <div class="input-prepend"> <span class="add-on">排序</span>
+        <div class="input-prepend">
+          <span class="add-on">排序</span>
           <select name="orderby" id="orderby" class="span2 chosen-select">
-            <option value="">默认排序</option>
-            <optgroup label="降序">
-            <option value="id DESC">ID[降序]</option>
-            <option value="hits DESC">总点击[降序]</option>
-            <option value="fans DESC">粉丝[降序]</option>
-            <option value="hits_month DESC">月点击[降序]</option>
-            <option value="hits_week DESC">周点击[降序]</option>
-            <option value="article DESC">文章数[降序]</option>
-            <option value="comments DESC">评论[降序]</option>
-            </optgroup>
-            <optgroup label="升序">
-            <option value="id ASC">ID[升序]</option>
-            <option value="hits ASC">总点击[升序]</option>
-            <option value="fans ASC">粉丝[升序]</option>
-            <option value="hits_month ASC">月点击[升序]</option>
-            <option value="hits_week ASC">周点击[升序]</option>
-            <option value="article ASC">文章数[降序]</option>
-            <option value="comments ASC">评论[升序]</option>
-            </optgroup>
+            <option value=""></option>
+            <optgroup label="降序"><?php echo $orderby_option['DESC'];?></optgroup>
+            <optgroup label="升序"><?php echo $orderby_option['ASC'];?></optgroup>
           </select>
         </div>
         <div class="input-prepend input-append"> <span class="add-on">每页</span>

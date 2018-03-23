@@ -387,7 +387,7 @@ class former {
                     $input.= $_input;
                 break;
                 case 'device':
-                    $value = iPHP::$mobile?'1':'0';
+                    $value = iPHP_MOBILE?'1':'0';
                     $input->val($value);
                 break;
                 case 'postype':
@@ -693,7 +693,7 @@ class former {
         if($type=='seccode'){
             $seccode = iSecurity::escapeStr($value);
             if(!iSeccode::check($seccode, true)){
-                self::$error = iUI::code(0,'iCMS:seccode:error',$fields,'json');
+                self::$error = iUI::code(0,'iCMS:seccode:error',$fields,'array');
                 return false;
             }
         }
