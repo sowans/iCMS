@@ -56,10 +56,11 @@ class iCMS {
                 'device' => array('iDevice','urls'),//设备网址
             )
         ));
-        //是否移动设设备
-        define('iPHP_MOBILE', iDevice::$IS_MOBILE);
-        //设备标识
-        define('iPHP_DEVICE', iDevice::$device_name);
+
+        iPHP::define_device(
+            iDevice::$device_name,//设备标识 iPHP_DEVICE
+            iDevice::$IS_MOBILE//是否移动设设备 iPHP_MOBILE
+        );
         //模板系统
         iView::init(array(
             'template' => array(

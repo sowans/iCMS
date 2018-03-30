@@ -219,6 +219,9 @@ class iURL {
             $d = call_user_func_array(self::$CONFIG['callback']['device'], array($i));
             $i = (object)array_merge((array)$i,$d);
         }
+        if(self::$CONFIG['callback']['url']){
+            call_user_func_array(self::$CONFIG['callback']['url'], array(&$i));
+        }
         $i->url = $i->href;
         return $i;
     }

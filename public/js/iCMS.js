@@ -20,7 +20,7 @@
             'former.js',
             'init.js',
         ],
-        baseURL = './public/js/_src/';
+        baseURL = '/public/js/_src/';
         if(window.location.href.indexOf('/public/')!="-1"){
             baseURL = './js/_src/';
         }

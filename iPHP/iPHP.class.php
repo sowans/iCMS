@@ -34,6 +34,7 @@ class iPHP {
 	public static $reserved   = array('API','ACTION','DO','MY');
 
 	public static function Init(){
+		ob_start();
 		self::timer_start();
 		ini_set('display_errors','ON');
 		error_reporting(E_ALL & ~E_NOTICE);
@@ -62,15 +63,7 @@ class iPHP {
 		//security
 		iSecurity::filter();
 		iSecurity::GP('page','GP',2);
-
-		define('iPHP_SELF',	$_SERVER['PHP_SELF']);
-		define('iPHP_REFERER', 	$_SERVER['HTTP_REFERER']);
-
-        define('iPHP_REQUEST_SCHEME',($_SERVER['SERVER_PORT'] == 443)?'https':'http');
-        define('iPHP_REQUEST_HOST',iPHP_REQUEST_SCHEME.'://'.($_SERVER['HTTP_X_HTTP_HOST']?$_SERVER['HTTP_X_HTTP_HOST']:$_SERVER['HTTP_HOST']));
-        define('iPHP_REQUEST_URI',$_SERVER['REQUEST_URI']);
-        define('iPHP_REQUEST_URL',iPHP_REQUEST_HOST.iPHP_REQUEST_URI);
-
+		iDefine::request();
 	}
     /**
      * Autoload
@@ -99,6 +92,17 @@ class iPHP {
 		}
 	}
 	public static function config($site=null) {
+		$config = self::app_config($site);
+		//config.php 中开启后 此处设置无效
+		iDefine::debug($config['debug']);
+		iDefine::datatime($config['time']);
+		iDefine::router($config['router']);
+
+		self::define_apps($config['apps']);
+		//config.php --END--
+		return $config;
+	}
+    public static function app_config($site=null) {
 		if($site===null){
 			$site = iPHP_MULTI_SITE ? $_SERVER['HTTP_HOST'] : iPHP_APP;
 			if (iPHP_MULTI_DOMAIN) {
@@ -113,50 +117,29 @@ class iPHP {
 		define('iPHP_APP_CONF', iPHP_CONF_DIR . '/' . iPHP_APP_SITE); //网站配置目录
 		define('iPHP_APP_CONFIG', iPHP_APP_CONF . '/config.php'); //网站配置文件
 		is_file(iPHP_APP_CONFIG) OR self::error_throw('Unable to find "' . iPHP_APP_SITE . '" config file ('.iPHP_APP_CONFIG.').Please install '.iPHP_APP, '0001');
-
-		$config = require iPHP_APP_CONFIG;
-		//config.php 中开启后 此处设置无效
-		defined('iPHP_DEBUG') OR define('iPHP_DEBUG', $config['debug']['php']); //程序调试模式
-		defined('iPHP_DEBUG_TRACE') OR define('iPHP_DEBUG_TRACE', $config['debug']['php_trace']); //程序调试模式
-		defined('iPHP_DB_DEBUG') OR define('iPHP_DB_DEBUG', $config['debug']['db']); //数据调试
-		defined('iPHP_DB_TRACE') OR define('iPHP_DB_TRACE', $config['debug']['db_trace']); //SQL跟踪
-		defined('iPHP_DB_EXPLAIN') OR define('iPHP_DB_EXPLAIN', $config['debug']['db_explain']); //SQL解释
-		defined('iPHP_TPL_DEBUG') OR define('iPHP_TPL_DEBUG', $config['debug']['tpl']); //模板调试
-		defined('iPHP_TPL_DEBUGGING') OR define('iPHP_TPL_DEBUGGING', $config['debug']['tpl_trace']); //模板数据调试
-
-		defined('iPHP_TIME_CORRECT') OR define('iPHP_TIME_CORRECT', (int)$config['time']['cvtime']);
+		$config = require_once iPHP_APP_CONFIG;
 		defined('iPHP_APP_SITE') && $config['cache']['prefix'] = iPHP_APP_SITE;
-
-		define('iPHP_ROUTER_REWRITE', $config['router']['rewrite']);
-		define('iPHP_URL', $config['router']['url']);
-		define('iPHP_URL_404', $config['router']['404']); //404定义
-
-		//config.php --END--
-
-		ini_set('display_errors', 'OFF');
-		error_reporting(0);
-
-		if (iPHP_DEBUG ||iPHP_DB_DEBUG||iPHP_TPL_DEBUG) {
-			ini_set('display_errors', 'ON');
-			error_reporting(E_ALL & ~E_NOTICE);
-		}
-		iPHP_DB_DEBUG   && iDB::$show_errors  = true;
-		iPHP_DB_TRACE   && iDB::$show_trace   = true;
-		iPHP_DB_EXPLAIN && iDB::$show_explain = true;
-
-		$config['time']['zone'] && @date_default_timezone_set($config['time']['zone']);//设置时区
-		self::$apps = $config['apps'];
-		empty(self::$apps) && self::$apps = self::callback(self::$callback['config']['apps']);
-		self::define_app();
 		return $config;
-	}
-	public static function define_app() {
-		if(is_array(self::$apps)){
-			foreach (self::$apps as $_app => $_appid) {
-				$_app && define(iPHP_APP.'_APP_'.strtoupper($_app),$_appid);
-			}
-		}
-	}
+    }
+    public static function define_apps($conf) {
+        self::$apps = $conf;
+        empty(self::$apps) && self::$apps = self::callback(self::$callback['config']['apps']);
+        if(is_array(self::$apps)){
+            foreach (self::$apps as $_app => $_appid) {
+                $_app && define(iPHP_APP.'_APP_'.strtoupper($_app),$_appid);
+            }
+        }
+    }
+    /**
+     * [define_device]
+     * @param  string  $device [设备标识]
+     * @param  boolean $mobile [是否移动设设备]
+     * @return [type]          [description]
+     */
+    public static function define_device($device='',$mobile=false) {
+        defined('iPHP_DEVICE') OR define('iPHP_DEVICE', $device);
+        defined('iPHP_MOBILE') OR define('iPHP_MOBILE', $mobile);
+    }
 	public static function run($app = NULL, $do = NULL, $args = NULL, $prefix = "do_") {
 		empty($app) && $app = iSecurity::escapeStr(iSecurity::getGP('app')); //单一入口
 		if (empty($app)) {
@@ -190,15 +173,15 @@ class iPHP {
 			$do     = iSecurity::escapeStr($_POST['action']);
 			$prefix = 'ACTION_';
 		}
-
 		self::$app_name = $app;
 		self::$app_do = $do;
 		self::$app_method = $prefix . $do;
+        self::define_device();
 		self::callback(self::$callback['run']['begin']);
 		if(self::$app===null){
-			self::class_name($app,$class_name,$prefix);
-			require_once self::$app_file;
-			self::$app = new $class_name();
+			self::app_init($app,$class_name,$prefix);
+			// require_once self::$app_file;
+			// self::$app = new $class_name();
 			self::callback(self::$callback['run']['init'],array(self::$app));
 		}
 
@@ -224,6 +207,24 @@ class iPHP {
 			iPHP::error_404('Unable to find method <b>' . $class_name . '::'.self::$app_method.'</b>', '0005');
 		}
 	}
+	public static function app_init($app,&$class_name,$prefix=null) {
+		$prefix = strtoupper($prefix);
+		$path   = self::$app_path . '/'.$prefix.$app.'.app.php';
+		// a/API_a.app.php
+		// a/ACTION_a.app.php
+		if(is_file($path)){
+			self::$app_file = $path;
+			$class_name = $prefix.$app.'App';
+			require_once self::$app_file;
+			self::$app = new $class_name();
+			if(!method_exists(self::$app, self::$app_method) && $prefix){
+				self::app_init($app,$class_name);
+			}
+		}else{
+			self::app_init($app,$class_name);
+		}
+	}
+
 	public static function auto_require($name) {
 		//app_mo.class.php
 		if(strpos($name,'_') !== false) {
@@ -292,14 +293,6 @@ class iPHP {
 
 		$path && self::error_throw("Unable to load class '$name',file path '$path'", '0021');
 		return false;
-	}
-	public static function class_name($app,&$class_name,$prefix) {
-		$prefix = strtoupper($prefix);
-		$_app_file = self::$app_path . '/'.$prefix.$app.'.app.php';
-		if(is_file($_app_file)){
-			self::$app_file = $_app_file;
-			$class_name = $prefix.$app.'App';
-		}
 	}
 	public static function debug_info($tpl) {
 		if (iPHP_DEBUG && iPHP_DEBUG_TRACE) {

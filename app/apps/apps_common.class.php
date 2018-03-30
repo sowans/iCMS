@@ -31,7 +31,7 @@ class apps_common {
 
     public static function comment() {
         self::$data['comment'] = array(
-            'url' => iCMS_API . "?app=".self::$name."&do=comment&appid=".self::$data['appid']."&iid=".self::$data[self::$primary]."&cid=".self::$data['cid'],
+            'url' => iURL::router('api')."?app=".self::$name."&do=comment&appid=".self::$data['appid']."&iid=".self::$data[self::$primary]."&cid=".self::$data['cid'],
             'count' => self::$data['comments'],
         );
     }
@@ -76,7 +76,7 @@ class apps_common {
     }
     public static function hits() {
         self::$data['hits']   = array(
-            'script' => iCMS_API . '?app='.self::$name.'&do=hits&cid=' . self::$data['cid'] . '&id=' . self::$data[self::$primary],
+            'script' => iURL::router('api').'?app='.self::$name.'&do=hits&cid=' . self::$data['cid'] . '&id=' . self::$data[self::$primary],
             'count'  => self::$data['hits'],
             'today'  => self::$data['hits_today'],
             'yday'   => self::$data['hits_yday'],

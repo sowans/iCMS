@@ -70,7 +70,7 @@ defined('iPHP_CORE_CLASS') OR define('iPHP_CORE_CLASS',
     'iCache,iFileCache,'.
     'iDevice,iURL,'.
     'iFS,iHttp,iPicture,iThumb,Gmagick,'.
-    'iDB,iMysql,iMysqli,iSQL,iMap,iUtils,'.
+    'iDB,iMysql,iMysqli,iSQL,iMap,iUtils,iDefine,'.
     'iUI,iPages,iView,iTemplateLite,iQuery,'.
     'iSecurity,iWAF,'.
     'iPinyin,iSeccode'

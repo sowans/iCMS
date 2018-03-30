@@ -74,3 +74,4 @@ $(function(){
   <span class="add-on" style="width:24px;">秒</span>
 </div>
 <span class="help-inline">设置分页总数缓存时间,设置此项分页性能将会有极大的提高.</span>
+<input type="hidden" name="config[cache][prefix]" id="cache_prefix" value="<?php echo iPHP_APP_SITE ?>"/>

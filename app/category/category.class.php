@@ -191,7 +191,7 @@ class category {
         gc_collect_cycles();
     }
     public static function cache_common() {
-        $rs  = iDB::all("SELECT `cid`,`rootid`,`dir`,`status`,`domain` FROM `#iCMS@__category` ORDER BY `sortnum`  ASC");
+        $rs  = iDB::all("SELECT `cid`,`rootid`,`dir`,`status`,`domain`,`rule` FROM `#iCMS@__category` ORDER BY `sortnum`  ASC");
         $hidden = array();
         foreach((array)$rs AS $C) {
             $C['status'] OR $hidden[]        = $C['cid'];
@@ -199,7 +199,6 @@ class category {
             $parent[$C['cid']]               = $C['rootid'];
             $rootid[$C['rootid']][$C['cid']] = $C['cid'];
         }
-
         iCache::set('category/dir2cid',$dir2cid,0);
         iCache::set('category/hidden', $hidden,0);
         iCache::set('category/rootid',$rootid,0);
@@ -211,8 +210,13 @@ class category {
                 $root = self::get_root($C['cid'],$rootid);
                 $root && $domain_rootid+= array_fill_keys($root, $C['cid']);
             }
+            if($C['rule']){
+                $rule = json_decode($C['rule'],true);
+                $rule && $rules[$C['cid']] = $rule;
+            }
         }
         iCache::set('category/domain_rootid',$domain_rootid,0);
+        iCache::set('category/rules',$rules,0);
         unset($rootid,$parent,$dir2cid,$hidden,$rs,$domain_rootid,$root);
     }
     public static function cache_get($cid="0",$fix=null) {

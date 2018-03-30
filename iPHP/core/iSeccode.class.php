@@ -37,6 +37,7 @@ class iSeccode {
 		}
 	}
     public static function run($pre=null){
+        ob_end_clean();
         @header("Expires: -1");
         @header("Cache-Control: no-store, private, post-check=0, pre-check=0, max-age=0", FALSE);
         @header("Pragma: no-cache");
@@ -74,13 +75,8 @@ class iSeccode {
     private static function image(){
         self::background();
         self::adulterate();
-        function_exists('imagettftext')?
-            self::ttf_font():
-            self::gif_font();
+        function_exists('imagettftext')?self::ttf_font():self::gif_font();
 
-        ob_start();
-        ob_end_clean() ;
-        ob_implicit_flush(true);
         if(function_exists('imagejpeg')) {
             header('Content-type:image/jpeg');
             $void = imagejpeg(self::$im);
@@ -93,8 +89,6 @@ class iSeccode {
         } else {
             return false;
         }
-        flush();
-        ob_flush();
         imagedestroy(self::$im);
         return $void;
     }
@@ -126,9 +120,9 @@ class iSeccode {
             self::$color[1] += $step[1];
             self::$color[2] += $step[2];
         }
-        self::$color[0] -= 20;
-        self::$color[1] -= 20;
-        self::$color[2] -= 20;
+        self::$color[0] -= 15;
+        self::$color[1] -= 15;
+        self::$color[2] -= 15;
     }
 
     private static function adulterate() {

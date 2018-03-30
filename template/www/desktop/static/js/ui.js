@@ -22,7 +22,9 @@ $(function() {
             return false;
         }
     });
-    scrollBox($('.pictxt','.side-col'),700);
+    if ($(".side-col").length > 0) {
+        scrollBox($('.pictxt','.side-col'),700);
+    }
 });
 function scrollBox(target,height,pos) {
     $(window).scroll(function(event) {
