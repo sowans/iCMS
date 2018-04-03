@@ -121,7 +121,7 @@ class members{
             isset($p['priv']) && $p = $p['priv'];
         }
         //判断当前访问链接权限
-        if (stripos($p, '?') !==false){
+        if (!is_array($p) && stripos($p, '?') !==false){
             // $p = preg_replace('@app=(\w+)_category@is', 'app=category', $p);
             $parse = parse_url($p);
             parse_str($parse['query'], $output);

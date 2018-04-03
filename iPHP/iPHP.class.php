@@ -34,7 +34,6 @@ class iPHP {
 	public static $reserved   = array('API','ACTION','DO','MY');
 
 	public static function Init(){
-		ob_start();
 		self::timer_start();
 		ini_set('display_errors','ON');
 		error_reporting(E_ALL & ~E_NOTICE);
@@ -226,6 +225,7 @@ class iPHP {
 	}
 
 	public static function auto_require($name) {
+		$o_name = $name;
 		//app_mo.class.php
 		if(strpos($name,'_') !== false) {
 			list($a,$b) = explode('_', $name);
@@ -291,7 +291,7 @@ class iPHP {
 			return false;
 		}
 
-		$path && self::error_throw("Unable to load class '$name',file path '$path'", '0021');
+		$path && self::error_throw("Unable to load class '$o_name',file path '$path'", '0021');
 		return false;
 	}
 	public static function debug_info($tpl) {

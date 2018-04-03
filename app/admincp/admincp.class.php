@@ -62,9 +62,9 @@ class admincp {
 		self::init();
 
 		$app OR $app = iSecurity::escapeStr(iSecurity::getGP('app'));
+		$do  OR $do  = iSecurity::escapeStr($_GET['do']);
 		$app OR $app = 'admincp';
-		$do OR $do = iSecurity::escapeStr($_GET['do']);
-		$do OR $do = 'iCMS';
+		$do  OR $do  = 'iCMS';
 
 		if ($_POST['action']) {
 			$do = iSecurity::escapeStr($_POST['action']);
@@ -79,14 +79,16 @@ class admincp {
 
 		self::$APP_PATH   = ACP_PATH;
 		self::$APP_TPL    = ACP_PATH . '/template';
-		self::$APP_FILE   = ACP_PATH . '/' . $app . '.app.php';
 
+		//admincp.app.php
+		self::$APP_FILE   = ACP_PATH . '/' . $app . '.app.php';
 		$obj_name = self::$APP_NAME . 'App';
 
-		//app_category.admincp.php
 		if(!is_file(self::$APP_FILE)){
+			//ooxx.admincp.php
 			$app_file = $app . '.admincp.php';
 			$obj_name = $app.'Admincp';
+			//app_category.admincp.php
 	        if(stripos($app, '_')!== false){
 	            list($app,$sapp) = explode('_', $app);
 	        }

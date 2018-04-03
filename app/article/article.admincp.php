@@ -812,7 +812,7 @@ class articleAdmincp{
                 $subtitle = iSecurity::escapeStr($chaptertitle[$key]);
                 $this->body($body,$subtitle,$aid,$adid,$haspic);
             }
-            if($_data_id){
+            if(is_array($_data_id)){
                 $diff = array_diff_values($adidArray,$_data_id);
                 if($diff['-'])foreach ($diff['-'] as $_i => $_id) {
                     article::del_data($_id,'id');
@@ -825,7 +825,7 @@ class articleAdmincp{
             $body     = implode('#--iCMS.PageBreak--#',$bodyArray);
             $adid     = $this->body($body,$subtitle,$aid,$adid,$haspic);
 
-            if($_data_id){
+            if(is_array($_data_id)){
                 $dkey = array_search($adid, $_data_id);
                 if($dkey!==false && $_chapter){//撤消章节时
                     unset($_data_id[$dkey]);

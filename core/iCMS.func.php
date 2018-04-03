@@ -203,7 +203,7 @@ function get_php_content($content){
     return $content;
 }
 function check_priv($p,$priv){
-    return is_array($p)?array_intersect((string)$p,(array)$priv):in_array((string)$p,(array)$priv);
+    return is_array($p)?array_intersect((array)$p,(array)$priv):in_array((string)$p,(array)$priv);
 }
 
 function orderby_option($array,$by="DESC"){
