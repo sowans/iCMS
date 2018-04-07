@@ -125,9 +125,18 @@ class iView {
                 iPHP::error_throw("Unable to find method '{$callback[0]}::{$callback[1]}'");
             }
         }else{
+            //iPHP:func app="ooxx"
+            $func_path = iPHP_TPL_FUN."/".iPHP_APP.".".$args['app'].".php";
+            // if($args['_app']){
+            //     //判断 iPHP.app.php是否存在 不存用检测,原设置_app
+            //     if(!is_file($func_path)){
+            //         $args['app'] = $args['_app'];
+            //         $func_path = iPHP_TPL_FUN."/".iPHP_APP.".".$args['_app'].".php";
+            //     }
+            // }
             //iPHP:func >> iPHP_func
             $callback = iPHP_APP.'_' . $args['app'];
-            function_exists($callback) OR require_once(iPHP_TPL_FUN."/".iPHP_APP.".".$args['app'].".php");
+            function_exists($callback) OR require_once($func_path);
         }
         if(isset($args['vars'])){
             $vars = $args['vars'];

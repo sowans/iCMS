@@ -38,7 +38,20 @@ class publicApp {
 		$url===null && $url = iSecurity::escapeStr($_GET['url']);
 		echo iPHP::callback(array("plugin_QRcode","HOOK"),$url);
 	}
-	public static function url($app,$query=null) {
+	public static function qrcode_url($url) {
+		$query = array(
+			'app' => 'public',
+			'do'  => 'qrcode',
+			'url' => $url
+		);
+		isset($vars['cache']) && $query['cache'] = true;
+		return iURL::make($query,'router::api');
+	}
+	public static function url($app=null,$query=null) {
+		if(empty($app)){
+			return iCMS_PUBLIC_URL;
+		}
+
         $url = iCMS_API_URL.($app?$app:'public');
         $query && $url = iURL::make($query,$url);
         return $url;

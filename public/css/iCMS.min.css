@@ -209,7 +209,7 @@ p.click2next, p.pic_center { text-indent: 0px !important; text-align: center; }
 /*iPHP-msg */
 .iPHP-msg { text-align: center; margin: 0px 5px; padding: 0px 4px; }
 .iPHP-msg .label { white-space: pre-wrap; padding: 8px 10px; font-size: 14px; letter-spacing: 1px; line-height: 160%; }
-.iPHP-msg pre { text-align: left; }
+.iPHP-msg pre { text-align: left;white-space: pre-wrap;}
 .iPHP-msg i { font-size: 18px; }
 .iPHP-msg .label-success hr { margin: 10px 0; border-top: 1px solid #007202; border-bottom: 1px solid #6A946B; }
 

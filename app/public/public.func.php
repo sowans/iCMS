@@ -24,9 +24,6 @@ class publicFunc{
 		echo $html;
 	}
 	public static function public_qrcode($vars=null){
-		$data  = $vars['data'];
-		$query = array('app'=>'public','do'=>'qrcode','url'=>$data);
-		isset($vars['cache']) && $query['cache'] = true;
-		echo iURL::make($query,'router::api');
+		echo publicApp::qrcode_url($vars['data']);
 	}
 }

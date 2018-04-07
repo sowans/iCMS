@@ -10,6 +10,9 @@ class iUtils {
                 $data = self::xmlToArray($input);
             }else{
                 $data = json_decode($input,true);
+                if(empty($data) && strpos($input,'&')!==false){
+                    parse_str($input, $data);
+                }
             }
             iSecurity::_addslashes($data);
             iWAF::check_data($data);

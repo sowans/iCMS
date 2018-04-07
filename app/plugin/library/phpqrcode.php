@@ -974,7 +974,7 @@
         }
 
         //----------------------------------------------------------------------
-        private static function image($frame, $pixelPerPoint = 4, $outerFrame = 4)
+        public static function image($frame, $pixelPerPoint = 4, $outerFrame = 4)
         {
             $h = count($frame);
             $w = strlen($frame[0]);
@@ -997,14 +997,10 @@
                 }
             }
 
-            //$target_image =ImageCreate($imgW * $pixelPerPoint, $imgH * $pixelPerPoint);
-            //ImageCopyResized($target_image, $base_image, 0, 0, 0, 0, $imgW * $pixelPerPoint, $imgH * $pixelPerPoint, $imgW, $imgH);
-            //ImageDestroy($base_image);
+            $target_image =ImageCreate($imgW * $pixelPerPoint, $imgH * $pixelPerPoint);
+            ImageCopyResized($target_image, $base_image, 0, 0, 0, 0, $imgW * $pixelPerPoint, $imgH * $pixelPerPoint, $imgW, $imgH);
+            ImageDestroy($base_image);
 
-            $targetW = defined('QRCODE_IMG_W') ? QRCODE_IMG_W : $imgW * $pixelPerPoint;
-            $targetH = defined('QRCODE_IMG_H') ? QRCODE_IMG_H : $imgH * $pixelPerPoint;
-            $target_image =ImageCreate($targetW, $targetH);
-            ImageCopyResized($target_image, $base_image, 0, 0, 0, 0, $targetW, $targetH, $imgW, $imgH);
             return $target_image;
         }
     }
