@@ -312,8 +312,10 @@ class iURL {
         }
         $query = array_merge((array)$query,(array)$output);
         $parse['query'] = http_build_query($query);
-        if(strpos($parse['query'],iPHP_PAGE_SIGN)!==false) {
-            $parse['query'] = str_replace(urlencode(iPHP_PAGE_SIGN),iPHP_PAGE_SIGN, $parse['query']);
+
+        $PAGE_SIGN = urlencode(iPHP_PAGE_SIGN);
+        if(strpos($parse['query'],$PAGE_SIGN)!==false) {
+            $parse['query'] = str_replace($PAGE_SIGN,iPHP_PAGE_SIGN, $parse['query']);
         }
         // if(strpos($parse['path'],'.php')===false) {
         //     $path = '';
