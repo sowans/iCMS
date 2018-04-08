@@ -15,10 +15,42 @@ admincp::head();
 <style>
 .app_list_desc{font-size: 14px;color: #666;}
 .nopadding .tab-content{padding: 0px;}
+.store-wrap{}
+
+.store-card { float: left; margin: 0 8px 16px; width: 48.5%; width: calc(50% - 8px); background-color: #fff; border: 1px solid #ddd; box-sizing: border-box }
+.store-card:nth-child(odd) { clear: both; margin-left: 0 }
+.store-card:nth-child(even) { margin-right: 0 }
+@media screen and (min-width:1600px) {
+  .store-card { width: 30%; width: calc(33.1% - 8px) }
+  .store-card:nth-child(odd) { clear: none; margin-left: 8px }
+  .store-card:nth-child(even) { margin-right: 8px }
+  .store-card:nth-child(3n+1) { clear: both; margin-left: 0 }
+  .store-card:nth-child(3n) { margin-right: 0 }
+}
+.store-icon { position: absolute; top: 20px; left: 20px; width: 128px; height: 128px; margin: 0 20px 20px 0 }
+.store-card h3 { margin: 0 0 12px; font-size: 18px; line-height: 1.3 }
+.store-card .desc, .store-card .name { margin-left: 148px; margin-right: 120px }
+.store-card .action-links { position: absolute; top: 20px; right: 20px; width: 130px }
+.store-card-top { position: relative; padding: 20px 20px 10px; min-height: 135px }
+.store-action-buttons { clear: right; float: right; margin-left: 2em; margin-bottom: 1em; text-align: right }
+.store-action-buttons li { margin-bottom: 10px }
+.store-card-bottom { clear: both; padding: 12px 20px; background-color: #fafafa; border-top: 1px solid #ddd; overflow: hidden }
+.store-card-bottom .star-rating { display: inline; color: #ffb900 }
+.store-card-update-failed .update-now { font-weight: 600 }
+.store-card-update-failed .notice-error { margin: 0; padding-left: 16px; box-shadow: 0 -1px 0 #ddd }
+.store-card-update-failed .store-card-bottom { display: none }
+.store-card .column-rating { line-height: 23px }
+.store-card .column-rating, .store-card .column-updated { margin-bottom: 4px }
+.store-card .column-downloaded, .store-card .column-rating { float: left; clear: left; max-width: 180px }
+.store-card .column-compatibility, .store-card .column-updated { text-align: right; float: right; clear: right; width: 65%; width: calc(100% - 180px) }
+.premium .label { font-weight: normal; padding: 4px 5px; font-size: 14px; margin-bottom: 3px;}
 </style>
 <script type="text/javascript">
 $(function(){
   $("#<?php echo APP_FORMID;?>").batch();
+  $(".install-btn").click(function(event) {
+    iCMS.success("数据下载中...请稍候!",false,10000000);
+  });
 });
 var pay_notify_timer,clear_timer;
 function pay_notify (url,j,d) {
@@ -60,9 +92,6 @@ function clear_pay_notify_timer() {
     <div class="widget-title"> <span class="icon"> <i class="fa fa-search"></i> </span>
     <h5>搜索</h5>
   </div>
-  <div class="pull-right">
-    <a style="margin: 10px;" class="btn btn-mini" href="<?php echo APP_FURI; ?>&do=cache" target="iPHP_FRAME"><i class="fa fa-refresh"></i> 更新缓存</a>
-  </div>
   <div class="widget-content">
     <form action="<?php echo iPHP_SELF ; ?>" method="get" class="form-inline">
       <input type="hidden" name="app" value="<?php echo admincp::$APP_NAME;?>" />
@@ -80,178 +109,146 @@ function clear_pay_notify_timer() {
   </div>
   <div class="widget-box" id="<?php echo APP_BOXID;?>">
     <div class="widget-title">
-      <span class="icon">
-        <i class="fa fa-bank"></i> <span><?php echo $title;?>市场</span>
-      </span>
+      <h5 class="brs"><i class="fa fa-bank"></i> <span><?php echo $title;?>市场</span></h5>
+      <ul class="nav nav-tabs" id="config-tab">
+          <li <?php if(!isset($_GET['premium'])) echo 'class="active"';?>><a href="<?php echo admincp::uri(null,$uriArray); ?>">全部</a></li>
+          <li <?php if($_GET['premium']=='0') echo 'class="active"';?>><a href="<?php echo admincp::uri("premium=0",$uriArray); ?>">免费<?php echo $title;?></a></li>
+          <li <?php if($_GET['premium']=='1') echo 'class="active"';?>><a href="<?php echo admincp::uri("premium=1",$uriArray); ?>">付费<?php echo $title;?></a></li>
+      </ul>
     </div>
-    <div class="widget-content nopadding">
+    <div class="widget-content store-wrap">
       <form action="<?php echo APP_FURI; ?>&do=batch" method="post" class="form-inline" id="<?php echo APP_FORMID;?>" target="iPHP_FRAME">
-          <table class="table table-bordered table-condensed table-hover">
-            <thead>
-              <tr>
-                <th style="width:90px;">安装/更新</th>
-                <th style="width:auto;">应用信息</th>
-              </tr>
-            </thead>
-            <tbody>
-            <?php
-            foreach ((array)$dataArray as $key => $value) {
-              $is_update = false;
-              $sid       = $value['id'];
-              $appconf   = $storeArray[$sid];
-              if($appconf){
-                version_compare($value['version'],$appconf['version'],'>') && $is_update = true;
-                ($appconf['git_time'] && $appconf['git_time']<$value['git_time']) && $is_update = true;
-                ($appconf['git_sha'] && $appconf['git_sha']!=$value['git_sha']) && $is_update = true;
-              }
-            ?>
-            <tr id="store-item-<?php echo $value['app'];?>">
-              <td style="vertical-align: middle;">
-                <?php if($appconf){?>
-                  <a
-                  <?php if($is_update){?>
-                    title="
-                    当前版本:<?php echo $appconf['version'];?>
-                    <br />
-                    安装时间:<?php echo get_date($appconf['addtime'],'Y-m-d H:i');?>
-                    <br />
-                    SHA-1:<?php echo $appconf['git_sha'];?>
-                    <hr />
-                    最新版本:v<?php echo $value['version'];?>
-                    <br />
-                    更新时间:<?php echo get_date($value['git_time'],'Y-m-d H:i');?>
-                    <br />
-                    SHA-1:<?php echo $value['git_sha'];?>
-                    "
-                    href="<?php echo APP_FURI; ?>&do=<?php echo admincp::$APP_DO; ?>_update&sid=<?php echo $sid;?>&id=<?php echo $appconf['appid'];?>&commit_id=<?php echo $appconf['git_sha'];?>"
-                  <?php }else{ ?>
-                    title="暂无可用更新"
-                    disabled="disabled"
-                    href="javascript:;"
-                  <?php } ?>
-                    target="iPHP_FRAME" class="btn btn-success btn-block tip-top">
-                    <i class="fa fa-repeat"></i> 更新
-                  </a>
-                  <p class="clearfix mt5"></p>
-                  <a href="<?php echo APP_FURI; ?>&do=<?php echo admincp::$APP_DO; ?>_uninstall&sid=<?php echo $sid;?>&id=<?php echo $appconf['appid'];?>"
-                    target="iPHP_FRAME" class="btn btn-danger btn-block tip-top"
-                    <?php if($value['type']){?>
-                    title="删除此模板文件夹下的所有文件"
-                    onclick="return confirm('确定要删除此模板?');"
-                    <?php }else{ ?>
-                    title="卸载应用会清除应用所有数据！"
-                    onclick="return confirm('卸载应用会清除应用所有数据！\n卸载应用会清除应用所有数据！\n卸载应用会清除应用所有数据！\n确定要卸载?\n确定要卸载?\n确定要卸载?');"
-                    <?php } ?>
-                  >
-                    <i class="fa fa-trash-o"></i> 卸载
-                  </a>
-                <?php }else{ ?>
-                <a href="<?php echo APP_FURI; ?>&do=<?php echo admincp::$APP_DO; ?>_install&sid=<?php echo $sid;?>"
-                  target="iPHP_FRAME" class="btn btn-primary btn-block">
-                  <i class="fa fa-download"></i>
-                  <?php if($value['premium']){?>
-                  付费安装
-                  <?php }else{ ?>
-                  立即安装
-                  <?php } ?>
-                </a>
-                <?php } ?>
-              </td>
-              <td>
-                <table class="table table-bordered">
-                  <tr>
-                    <td style="width:60px;">名称</td>
-                    <td class="span4"><a href="<?php echo $value['store_url'];?>" target="_blank" class="tip-top" title="查看详细介绍"><b><?php echo $value['title'];?></b></a></td>
-                    <td style="width:60px;">开发</td>
-                    <td><?php echo $value['author'];?></td>
-                  </tr>
-                  <?php if($value['premium']){?>
-                  <tr>
-                    <td>类型</td><td><span class="label label-inverse">付费<?php echo $title;?></span></td>
-                    <td>价格</td>
-                    <td>
-                      <?php if($value['coupon']){?>
-                      <span class="badge badge-inverse"><del>原价:<?php echo $value['price'];?><i class="fa fa-rmb"></i></del></span>
-                      <span class="badge badge-success">优惠价:<?php echo $value['coupon'];?><i class="fa fa-rmb"></i></span>
-                      <?php }else{ ?>
-                      <span class="badge badge-success"><?php echo $value['price'];?><i class="fa fa-rmb"></i></span>
-                      <?php } ?>
-                    </td>
-                  </tr>
-                  <?php }else{ ?>
-                  <tr>
-                    <td>类型</td><td colspan="3">免费<?php echo $title;?></td>
-                  </tr>
-                  <?php } ?>
-                  <tr>
-                    <td>大小</td><td><?php echo $value['size'];?></td>
-                    <td>版本</td><td><?php echo $value['version'];?></td>
-                  </tr>
-                  <tr>
-                    <td>介绍</td><td colspan="3"><?php echo $value['description'];?></td>
-                  </tr>
-                  <?php if($value['demo']){?>
-                  <tr>
-                    <td>演示</td>
-                    <td colspan="3">
-                      <a href="<?php echo $value['demo'];?>" target="_blank">
-                        <?php echo $value['demo'];?>
-                      </a>
-                    </td>
-                  </tr>
-                  <?php } ?>
-                  <?php if($appconf && $value['qq']){?>
-                  <tr>
-                    <td>技术支持</td>
-                    <td colspan="3">
-                      <a href="<?php echo $value['demo'];?>" target="_blank">
-                        QQ:<?php echo $value['qq'];?>
-                      </a>
-                    </td>
-                  </tr>
-                  <?php } ?>
-                  <?php if($value['iCMS_VERSION']||$value['iCMS_GIT_TIME']){?>
-                  <tr>
-                    <?php if($value['iCMS_VERSION']){?>
-                    <td>版本要求</td>
-                    <td<?php if(!$value['iCMS_GIT_TIME']){?> colspan="3"<?php } ?>>
-                      <span class="label label-inverse">iCMS V<?php echo $value['iCMS_VERSION'];?>[<?php echo $value['iCMS_RELEASE'];?>] 及以上版本</span>
-                    </td>
-                    <?php } ?>
-                    <?php if($value['iCMS_GIT_TIME']){?>
-                    <td>版本要求</td>
-                    <td>
-                      <span class="label label-inverse">git:<?php echo get_date($value['iCMS_GIT_TIME'],'Y-m-d H:i');?> 及以上开发版</span>
-                    </td>
-                    <?php } ?>
-                  </tr>
-                  <?php } ?>
-                  <?php if($appconf){?>
-                  <tr>
-                    <td>当前</td><td><?php echo $appconf['version'];?></td>
-                    <td>安装</td><td><?php echo get_date($appconf['addtime'],'Y-m-d H:i');?></td>
-                  </tr>
-                    <?php if($is_update){?>
-                    <tr>
-                      <td>状态</td>
-                      <td>
-                        <span class="label label-important">发现可用更新</span></td>
-                        <td>时间</td><td>
-                        <?php if($value['git_time']){?>
-                        <?php echo get_date($value['git_time'],'Y-m-d H:i');?>
+              <?php
+              foreach ((array)$dataArray as $key => $value) {
+                $is_update = false;
+                $sid       = $value['id'];
+                $appconf   = $storeArray[$sid];
+                if($appconf){
+                  version_compare($value['version'],$appconf['version'],'>')        && $is_update = true;
+                  ($appconf['git_time'] && $value['git_time']>$appconf['git_time']) && $is_update = true;
+                  ($appconf['git_sha'] && $value['git_sha']!=$appconf['git_sha'])   && $is_update = true;
+                }
+              ?>
+            <div id="store-<?php echo $value['app'];?>" class="store-card">
+              <div class="store-card-top">
+                  <div class="name column-name">
+                        <h3>
+                          <a href="<?php echo $value['store_url'];?>?modal"
+                          title="<?php echo $title;?>信息"
+                          data-toggle="modal" data-target="#iCMS-MODAL" data-meta='{"width":"700px","height":"640px"}'>
+                            <?php echo $value['title'];?>
+                            <img src="<?php echo $value['pic'];?>" class="store-icon" alt="">
+                          </a>
+                        </h3>
+                  </div>
+                  <div class="action-links">
+                      <ul class="store-action-buttons">
+                          <li>
+                            <?php if($appconf){?>
+                            <?php if($is_update){?>
+                            <a href="<?php echo APP_FURI; ?>&do=<?php echo admincp::$APP_DO; ?>_update&sid=<?php echo $sid;?>&id=<?php echo $appconf['appid'];?>&commit_id=<?php echo $appconf['git_sha'];?>"
+                              target="iPHP_FRAME" class="btn btn-success">
+                              <i class="fa fa-repeat"></i> 现在更新
+                            </a>
+                            <?php }else{ ?>
+                              <a disabled="disabled" href="javascript:;" class="btn btn-default"><i class="fa fa-repeat"></i> 暂无更新</a>
+                            <?php } ?>
+                            <p class="clearfix mt5"></p>
+                            <a href="<?php echo APP_FURI; ?>&do=<?php echo admincp::$APP_DO; ?>_uninstall&sid=<?php echo $sid;?>&id=<?php echo $appconf['appid'];?>"
+                              target="iPHP_FRAME" class="btn btn-danger tip-top"
+                              <?php if($value['type']){?>
+                              title="删除此模板文件夹下的所有文件"
+                              onclick="return confirm('确定要删除此模板?');"
+                              <?php }else{ ?>
+                              title="卸载应用会清除应用所有数据！"
+                              onclick="return confirm('卸载应用会清除应用所有数据！\n卸载应用会清除应用所有数据！\n卸载应用会清除应用所有数据！\n确定要卸载?\n确定要卸载?\n确定要卸载?');"
+                              <?php } ?>
+                            >
+                              <i class="fa fa-trash-o"></i> 卸载<?php echo $title;?>
+                            </a>
+                          <?php }else{ ?>
+                          <a href="<?php echo APP_FURI; ?>&do=<?php echo admincp::$APP_DO; ?>_install&sid=<?php echo $sid;?>"
+                            target="iPHP_FRAME" class="btn btn-primary install-btn">
+                            <i class="fa fa-download"></i>
+                            <?php if($value['premium']){?>
+                            付费安装
+                            <?php }else{ ?>
+                            现在安装
+                            <?php } ?>
+                          </a>
+                          <?php } ?>
+                          </li>
+                          <?php if($value['premium']){?>
+                          <li class="premium">
+                            <?php if($value['coupon']){?>
+                            <span class="label label-inverse"><del>原价：<i class="fa fa-rmb"></i> <?php echo $value['price'];?></del></span>
+                            <span class="label label-warning">优惠价：<i class="fa fa-rmb"></i> <?php echo $value['coupon'];?></span>
+                            <?php }else{ ?>
+                            <span class="label label-success">价格：<i class="fa fa-rmb"></i> <?php echo $value['price'];?></span>
+                            <?php } ?>
+                            </li>
+                          <?php } ?>
+                          <li>
+                          <a href="<?php echo $value['store_url'];?>?modal"
+                          title="<?php echo $title;?>信息"
+                          data-toggle="modal" data-target="#iCMS-MODAL" data-meta='{"width":"700px","height":"640px"}'>
+                          更多详情</a>
+                          </li>
+                      </ul>
+                  </div>
+                  <div class="desc column-description">
+                      <p><?php echo csubstr($value['description'],40,'...');?></p>
+                      <p class="authors">
+                        <cite>由<a href="<?php echo $value['website']?:'javascript:;';?>" target="_blank"><?php echo $value['author'];?></a>提供</cite>
+                        <?php if($appconf && $value['qq']){?>
+                        <cite>QQ:<?php echo $value['qq'];?></cite>
                         <?php } ?>
-                      </td>
-                    </tr>
-                    <?php } ?>
+                      </p>
+                  </div>
+              </div>
+              <div class="store-card-bottom">
+                  <div class="vers column-rating">
+                      <div class="star-rating">
+                        <?php for ($i=0; $i < $value['star']; $i++) { ?>
+                          <i class="fa fa-star"></i>
+                        <?php } ?>
+                      </div>
+                  </div>
+                  <div class="column-updated">
+                      <?php if($appconf['git_time']){?>
+                      <strong>安装时间：</strong> <?php echo format_date($appconf['git_time'],'Y-m-d H:i');?>
+                      <div class="clearfix"></div>
+                      <?php } ?>
+                      <strong>最近更新：</strong> <?php echo format_date($value['git_time'],'Y-m-d H:i');?>
+                  </div>
+                  <div class="column-downloaded"><?php echo $value['install'];?>个安装</div>
+                  <div class="column-compatibility">
+                      <?php $compatible ="该{$title}<strong>兼容</strong>于您当前使用的".iPHP_APP."版本"; ?>
+                      <?php if($value['iCMS_VERSION']){?>
+                        <?php if(version_compare(substr(iCMS_VERSION,1),$value['iCMS_VERSION'],'>')){?>
+                        <i class="fa fa-check"></i>
+                        <span class="compatibility-compatible"><?php echo $compatible;?></span>
+                        <?php }else{ ?>
+                        <i class="fa fa-times"></i>
+                        <span class="compatibility-untested">该<?php echo $title;?><strong>要求</strong>在<?php echo iPHP_APP?> v<?php echo $value['iCMS_VERSION'];?>及以上版本使用</span>
+                        <?php } ?>
+                      <?php }else{ ?>
+                      <i class="fa fa-check"></i>
+                      <span class="compatibility-compatible"><?php echo $compatible;?></span>
+                      <?php } ?>
+                  </div>
+                  <?php if($value['iCMS_GIT_TIME']){?>
+                  <div class="column-compatibility">
+                        <?php if(GIT_TIME<$value['iCMS_GIT_TIME']){?>
+                          <span class="compatibility-untested"><i class="fa fa-times"></i><strong>要求</strong>[git:<?php echo get_date($value['iCMS_GIT_TIME'],'Y-m-d H:i');?>]及之后的开发版本</span>
+                        <?php } ?>
+                  </div>
                   <?php } ?>
-                </table>
-              </td>
-            </tr>
-            <tr><td colspan="2" style="height:10px;padding: 0px;"></td></tr>
-            <?php } ?>
-          </tbody>
-          </table>
+              </div>
+            </div>
+              <?php } ?>
       </form>
+      <div class="clearfloat mb10"></div>
     </div>
   </div>
 <style>

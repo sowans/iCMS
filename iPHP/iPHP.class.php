@@ -290,7 +290,10 @@ class iPHP {
 		if(strpos($name,'\\') !== false) {
 			return false;
 		}
-
+		// iPHP::callback 不提示
+		if(self::$is_callable){
+			return false;
+		}
 		$path && self::error_throw("Unable to load class '$o_name',file path '$path'", '0021');
 		return false;
 	}

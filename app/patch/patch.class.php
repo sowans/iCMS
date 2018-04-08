@@ -227,19 +227,18 @@ class patch {
 			self::$upgrade = true;
 			ksort($files);
 			foreach ($files as $key => $file) {
-				$fname = str_replace(array('.php','.'), array('','_'), basename($file));
-				$fn = 'patch_'.$fname;
+				$patch_name = 'patch_'.str_replace(array('.php','.'), array('','_'), basename($file));;
 				$patch_func = require_once $file;
-				if($patch_func){
-					$msg.= '执行['.$fn.']升级程序<iCMS>';
+				if(is_callable($patch_func)){
+					$msg.= '执行['.$patch_name.']升级程序<iCMS>';
 					try {
 					    self::$test OR $msg .= $patch_func();
 						$msg.= '升级顺利完成!<iCMS>删除升级程序!<iCMS>';
 					} catch ( Exception $e ) {
-					    $msg = '['.$fn.']升级出错!<iCMS>';
+					    $msg = '['.$patch_name.']升级出错!<iCMS>';
 					}
 				}else{
-					$msg = '['.$fn.']升级出错!<iCMS>找不到升级程序<iCMS>';
+					$msg = '['.$patch_name.']升级出错!<iCMS>找不到升级程序<iCMS>';
 				}
 				iFS::del($file);
 			}

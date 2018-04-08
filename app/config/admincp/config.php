@@ -34,14 +34,6 @@ $(function(){
     tdc.appendTo(TD);
     return false;
   });
-  $("#router_rewrite").change(function(event) {
-      if(this.checked){
-        $("#router_config_wrap").show();
-      }else{
-        $("#router_config_wrap").hide();
-      }
-
-  });
 });
 function modal_tplfile(el,a){
   if(!el) return;
@@ -372,15 +364,7 @@ function modal_tpl_index(el,a){
               </div>
             </div>
             <a class="btn btn-small btn-success" href="https://www.icmsdev.com/docs/rewrite.html" target="_blank"><i class="fa fa-question-circle"></i> 查看帮助</a>
-            <span class="help-inline">此选项只对以下配置有效</span>
-            <div id="router_config_wrap" <?php if(!$config['router']['rewrite']){?>class="hide"<?php }?>>
-              <div class="clearfloat mb10"></div>
-              <div class="input-prepend">
-                <span class="add-on">REWRITE配置</span>
-                <textarea name="config[router][config]" id="router_config" class="span6" style="height:120px;"><?php echo stripcslashes(json_encode($config['router']['config']))?:'' ;?></textarea>
-              </div>
-              <span class="help-inline">REWRITE配置,如果不熟悉请勿修改.敬请等待官方推出相关编辑器</span>
-            </div>
+            <span class="help-inline">此选项只对应用的路由配置起作用</span>
           </div>
           <div id="config-cache" class="tab-pane hide">
             <?php include admincp::view("cache.config","cache");?>

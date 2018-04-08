@@ -339,7 +339,7 @@ class apps_db {
     }
     public static function fields($table) {
         $return = array();
-        $rs = iDB::all("SHOW FULL COLUMNS FROM " . self::table($table));
+        $rs = iDB::all("SHOW FULL FIELDS FROM " . self::table($table));
         foreach ( $rs as $row) {
             preg_match('~^([^( ]+)(?:\\((.+)\\))?( unsigned)?( zerofill)?$~', $row["Type"], $match);
             $return[$row["Field"]] = array(
@@ -354,7 +354,8 @@ class apps_db {
                 "on_update"      => (preg_match('~^on update (.+)~i', $row["Extra"], $match) ? $match[1] : ""), //! available since MySQL 5.1.23
                 "collation"      => $row["Collation"],
                 "privileges"     => array_flip(preg_split('~, *~', $row["Privileges"])),
-                "comment"        => $row["Comment"],
+                "comment"        => ($row["Comment"]?$row["Comment"]:strtoupper($row["Field"])),
+                // "callback"       => (preg_match('~\[F:(.+)\]~i', $row["Comment"], $match) ? $match[1] : ""),
                 "primary"        => ($row["Key"] == "PRI"),
             );
         }

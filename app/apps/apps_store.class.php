@@ -158,7 +158,12 @@ class apps_store {
             }
         }
         self::$test OR iFS::rm(self::$zip_file);
-        self::$is_update && $msg.= self::update_app_db();
+
+        if(self::$is_update){
+            $msg.= self::setup_update($app);
+        }else{
+            $msg.= self::setup_install($app);
+        }
         apps::cache() && $msg.= self::msg('更新应用缓存',true);
         menu::cache() && $msg.= self::msg('更新菜单缓存',true);
         $msg.= self::msg('应用安装完成',true);
@@ -252,36 +257,51 @@ class apps_store {
         $msg.= self::extract($archive_files,$ROOTPATH,$bakdir);
         return array($msg,true);
     }
-    public static function update_app_db(){
-        $ROOTPATH = self::rootpath();
-        foreach (glob($ROOTPATH."/update.app.db.*.php") as $filename) {
-            $d    = str_replace(array($ROOTPATH,'update.app.db.','.php'), '', $filename);
+    public static function setup_update($app){
+        $ROOTPATH = iPHP_APP_DIR.'/'.$app.'/';
+        foreach (glob($ROOTPATH."iCMS.APP.UPDATE.*.php") as $filename) {
+            $d    = str_replace(array($ROOTPATH,'iCMS.APP.UPDATE.','.php'), '', $filename);
             $time = strtotime($d.'00');
             if($time>self::$uptime){
                 $files[$d] = $filename;
             }
         }
-        // var_dump($files);
+
         if($files){
             ksort($files);
             foreach ($files as $key => $file) {
-                require_once $file;
-                $update_app_func = 'update_app_db_'.$key;
-                if(function_exists($update_app_func)){
-                    $msg.= self::msg('执行[update.app.db.'.$key.']升级程序',true);
-                    self::$test OR $msg .= $update_app_func();
-                    $msg.= self::msg('升级顺利完成!',true);
-                    $msg.= self::msg('删除升级程序!',true);
-                }else{
-                    $msg.= self::msg('[update.app.db.'.$key.']升级出错',false);
-                    $msg.= self::msg('找不到升级程序['.$update_app_func.']',false);
-                }
-                iFS::del($file);
+                $name = $app.'_'.str_replace(array('.php','.'), array('','_'), basename($file));
+                $msg.= self::setup_exec($file,$name,'升级');
             }
-        }else {
-            $msg.= self::msg('升级顺利完成!',true);
         }
         return $msg;
+    }
+    public static function setup_install($app){
+        $path = iPHP_APP_DIR.'/'.$app.'/iCMS.APP.INSTALL.php';
+        if(is_file($path)){
+            return self::setup_exec($path,$app,'安装');
+        }
+    }
+    public static function setup_exec($file,$name,$title='升级') {
+        $func = require_once $file;
+        if(is_callable($func)){
+            $msg = self::msg('执行['.$name.']'.$title.'程序',true);
+            try {
+                self::$test OR $msg .= $func();
+                $msg.= self::msg($title.'顺利完成!',true);
+                $msg.= self::msg('删除'.$title.'程序!',true);
+            } catch ( Exception $e ) {
+                $msg.= self::msg('['.$name.']'.$title.'出错',false);
+            }
+        }else{
+            $msg= self::msg('['.$name.']'.$title.'出错',false);
+            $msg.= self::msg('找不到'.$title.'程序',false);
+        }
+        iFS::del($file);
+        return $msg;
+    }
+    public static function setup_func($func) {
+        return $func;
     }
     public static function rootpath($d='APP'){
         $d=='APP' && $dir = iPHP_APP_DIR;
@@ -289,6 +309,17 @@ class apps_store {
 
         $ROOTPATH = self::$is_git?iPATH:$dir;
         return rtrim($ROOTPATH,'/');
+    }
+    public static function check_must($store){
+      if($store['iCMS_VERSION'] && $store['iCMS_RELEASE']){
+        if(version_compare($store['iCMS_VERSION'],iCMS_VERSION,'>') && $store['iCMS_RELEASE']>iCMS_RELEASE){
+          iUI::alert('该应用要求iCMS V'.$store['iCMS_VERSION'].'['.$store['iCMS_RELEASE'].']以上版本','js:1',1000000);
+        }
+      }
+
+      if($store['iCMS_GIT_TIME'] && $store['iCMS_GIT_TIME']>GIT_TIME){
+        iUI::alert('该应用要求iCMS版本更新到<br />[git:'.get_date($store['iCMS_GIT_TIME'],'Y-m-d H:i').']以上版本','js:1',1000000);
+      }
     }
     public static function msg($text,$s=0){
         $text = iSecurity::filter_path($text);
@@ -343,7 +374,55 @@ class apps_store {
         }
         return $msg;
     }
-    public static function git($do,$sid=null,$commit_id=null,$type='array') {
+    public static function get($vars=0,$field='sid'){
+        if(empty($vars)) return array();
+        if($vars=='all'){
+            $sql      = '1=1';
+            $is_multi = true;
+        }else{
+            list($vars,$is_multi)  = iSQL::multi_var($vars);
+            $sql  = iSQL::in($vars,$field,false,true);
+        }
+        $data = array();
+        $rs   = iDB::all("SELECT * FROM `#iCMS@__apps_store` where {$sql}");
+        if($rs){
+            $_count = count($rs);
+            for ($i=0; $i < $_count; $i++) {
+                $data[$rs[$i][$field]]= $rs[$i];
+            }
+            $is_multi OR $data = $data[$vars];
+        }
+        if(empty($data)){
+            return;
+        }
+        return $data;
+    }
+    public static function get_array($vars,$field="*",$orderby=''){
+        $sql = iSQL::where($vars,false);
+        $sql.= 'order by '.($orderby?$orderby:'id ASC');
+        $rs  = iDB::all("SELECT {$field} FROM `#iCMS@__apps_store` where {$sql}");
+        $_count = count($rs);
+        for ($i=0; $i < $_count; $i++) {
+            $data[$rs[$i]['sid']] = $rs[$i];
+        }
+        return $data;
+    }
+    public static function remote($url){
+        iHttp::$CURLOPT_TIMEOUT        = 60;
+        iHttp::$CURLOPT_CONNECTTIMEOUT = 10;
+        iHttp::$CURLOPT_REFERER        = $_SERVER['HTTP_REFERER'];
+        iHttp::$CURLOPT_USERAGENT      = $_SERVER['HTTP_USER_AGENT'];
+
+        $queryArray  = array(
+            'iCMS_VERSION'   => iCMS_VERSION,
+            'iCMS_RELEASE'   => iCMS_RELEASE,
+            'GIT_COMMIT'     => GIT_COMMIT,
+            'GIT_TIME'       => GIT_TIME
+        );
+        $url = iURL::make($queryArray,$url);
+        return iHttp::remote($url);
+    }
+    public static function remote_git($do,$sid=null,$commit_id=null,$type='array') {
         $commit_id===null && $commit_id = GIT_COMMIT;
         $_GET['commit_id'] && $commit_id = $_GET['commit_id'];
 
@@ -374,7 +453,7 @@ class apps_store {
           }
         }
     }
-    public static function get($sid){
+    public static function remote_get($sid){
         $time  = time();
         $host  = $_SERVER['HTTP_HOST'];
         $key   = md5(iPHP_KEY.$host.$time);
@@ -385,36 +464,17 @@ class apps_store {
         $array && $array['authkey'] = $key;
         return $array;
     }
-    public static function remote($url){
-        iHttp::$CURLOPT_TIMEOUT        = 60;
-        iHttp::$CURLOPT_CONNECTTIMEOUT = 10;
-        iHttp::$CURLOPT_REFERER        = $_SERVER['HTTP_REFERER'];
-        iHttp::$CURLOPT_USERAGENT      = $_SERVER['HTTP_USER_AGENT'];
-
-        $queryArray  = array(
-            'iCMS_VERSION'   => iCMS_VERSION,
-            'iCMS_RELEASE'   => iCMS_RELEASE,
-            'GIT_COMMIT'     => GIT_COMMIT,
-            'GIT_TIME'       => GIT_TIME
-        );
-        $query = http_build_query($queryArray);
-        if(strpos($url, '?')===false){
-            $url.='?'.$query;
-        }else{
-            $url.='&'.$query;
-        }
-        return iHttp::remote($url);
+    public static function remote_getall($name='app'){
+        $data = array();
+        $url  = self::STORE_URL.'/'.$name.'.json';
+        isset($_GET['premium']) && $url.='?premium='.$_GET['premium'];
+        $json = self::remote($url);
+        $json && $data = json_decode($json,true);
+        return $data;
     }
     public static function pay_notify($query){
         $url = self::STORE_URL.'/store.pay.notify?'.http_build_query($query);
         return self::remote($url);
-    }
-    public static function get_data($name='app'){
-        $data = array();
-        $url  = self::STORE_URL.'/'.$name.'.json';
-        $json = self::remote($url);
-        $json && $data = json_decode($json,true);
-        return $data;
     }
     public static function premium_dialog($sid,$array,$title){
         iUI::$break                = false;
@@ -436,19 +496,21 @@ class apps_store {
       $msg = self::download($url,$name,$zip_name);
       self::$status OR iUI::dialog($msg,'js:1',1000000);
 
+      $sid = 0;
+      self::$is_update && $sid = self::$sid;
       if($type=='app'){
         $msg.= self::install_app($app);
-        self::config(array(
+        self::save(array(
             'appid' => self::$app_id,
-            'app'   => $app,
-        ));
+        ),$sid);
         if(self::$app_id){
           iUI::dialog(
             '<div style="overflow-y: auto;max-height: 360px;">'.$msg.'</div>',
-            (self::$is_update?
+            (
+                self::$is_update?
                 'js:1'://更新
-                'url:'.APP_URI."&do=add&id=".self::$app_id),
-            30
+                'url:'.__ADMINCP__."=apps&do=add&id=".self::$app_id
+            ),30
           );
         }else{
           iUI::dialog($msg,'js:1',1000000);
@@ -457,66 +519,50 @@ class apps_store {
 
       if($type=='template'){
         $msg.= self::install_template($app);
-        self::config(array(
-            'appid' => self::$app_id,
-            'app'   => $app,
-        ));
+        self::save(array(
+            'appid' => 0,
+            'type'  => 1
+        ),$sid);
         iUI::dialog(
           '<div style="overflow-y: auto;max-height: 360px;">'.$msg.'</div>',
           'js:1',1000000
         );
       }
     }
-    public static function get_config($sid=null){
-      $storeArray = configAdmincp::get('999999','store');
-      $sid===null && $sid = self::$sid;
-      return $storeArray[$sid];
+
+    public static function del($id=null,$field='appid'){
+        if(isset($_GET['sid']) && $field!='sid'){
+            $id    = (int)$_GET['sid'];
+            $field = 'sid';
+        }
+        iDB::query("DELETE FROM `#iCMS@__apps_store` WHERE `$field` = '$id'");
     }
-    public static function del_config($sid=null){
-        $sid = 'appid:'.$sid;
-        isset($_GET['sid']) && $sid = $_GET['sid'];
-        self::config('delete',$sid);
-    }
-    public static function config($data,$sid=null){
-        $config = configAdmincp::get('999999','store');
+    public static function save($data,$sid=null){
         $array = array();
-        $sid===null && $sid = self::$sid;
-        if($data==='delete'){
-            if(strpos($sid, ':') !== false){
-                list($stype,$svalue) = explode(';', $sid);
-                if($stype && $svalue){
-                    foreach ((array)$config as $key => $value) {
-                        if($stype=='appid' && $value['appid']==$svalue){
-                            $sid = $key;
-                            break;
-                        }
-                        if($stype=='app' && $value['app']==$svalue){
-                            $sid = $key;
-                            break;
-                        }
-                    }
-                }
-            }
-            unset($config[$sid]);
-        }else{
-            $cacheid = 'store/'.$sid;
+        if(self::$sid){
+            $cacheid = 'store/'.self::$sid;
             $store = iCache::get($cacheid);
             iCache::del($cacheid);
-
-            $data['addtime']  = time();
             if($store){
-                $data['git_sha']  = $store['git_sha'];
-                $data['git_time'] = $store['git_time'];
-                $data['version']  = $store['version'];
-                $store['authkey'] && $data['authkey']  = $store['authkey'];
+                if(!$sid){
+                    $array['sid']      = self::$sid;
+                    $array['app']      = $store['app'];
+                    $array['name']     = $store['name'];
+                    $array['authkey']  = $store['authkey'];
+                    $array['addtime']  = time();
+                }
+                $array['git_sha']  = $store['git_sha'];
+                $array['git_time'] = $store['git_time'];
+                $array['version']  = $store['version'];
+                $data = array_merge($data,$array);
             }
-
-            $_GET['transaction_id'] && $data['transaction_id']  = $_GET['transaction_id'];
-
-            $config[$sid] && $array = $config[$sid];
-            $config[$sid] = array_merge($array,$data);
         }
-        configAdmincp::set($config,'store','999999',false);
+        $_GET['transaction_id'] && $data['transaction_id']  = addslashes($_GET['transaction_id']);
+        if($sid){
+            iDB::update('apps_store',$data,array('sid'=>$sid));
+        }else{
+            iDB::insert('apps_store',$data);
+        }
     }
 
 }

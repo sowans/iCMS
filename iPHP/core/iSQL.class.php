@@ -54,7 +54,15 @@ class iSQL {
         }
         return implode(',', $pieces);
     }
-
+    public static function filter_data(array &$data,$fields=null) {
+        if($fields){
+            foreach ($data as $key => $value) {
+                if(array_search($key, $fields)===FALSE){
+                    unset($data[$key]);
+                }
+            }
+        }
+    }
     public static function where($where,$and=false) {
         if ( is_array( $where ) ){
             foreach ( $where as $c => $v ){

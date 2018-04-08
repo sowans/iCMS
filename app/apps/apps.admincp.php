@@ -10,7 +10,6 @@
 defined('iPHP') OR exit('What are you doing?');
 
 class appsAdmincp{
-
     public function __construct() {
       $this->appid = iCMS_APP_APPS;
     	$this->id = (int)$_GET['id'];
@@ -45,7 +44,20 @@ class appsAdmincp{
         if(empty($rs['config']['iurl'])){
           $rs['config']['iurl'] = apps_mod::iurl($rs);
         }
-
+        if($rs['menu']){
+          $rs['menu'] = str_replace(
+            array('[{"','},','}]'),
+            array("[\n{\"","},\n","}\n]"),
+            cnjson_encode($rs['menu'])
+          );
+        }
+        if($rs['router']){
+          $rs['router'] = str_replace(
+            array('{["','],',']}','\/'),
+            array("{\n[\"","],\n","]\n}",'/'),
+            stripcslashes($rs['router'])
+          );
+        }
         include admincp::view("apps.add");
     }
 
@@ -61,10 +73,14 @@ class appsAdmincp{
         $status  = (int)$_POST['status'];
         // $create  = (int)$_POST['create']?true:false;
         $create  = true;
-
-        $menu = json_decode(stripcslashes($_POST['menu']));
-        $menu = addslashes(cnjson_encode($menu));
-
+        if($_POST['menu']){
+          $menu = json_decode(stripcslashes($_POST['menu']));
+          $menu = addslashes(cnjson_encode($menu));
+        }
+        if($_POST['router']){
+          $router = json_decode(stripcslashes($_POST['router']));
+          $router = addslashes(json_encode($router));
+        }
         $name OR iUI::alert('应用名称不能为空!');
         empty($app) && $app = iPinyin::get($name);
         empty($title) && $title = $name;
@@ -83,6 +99,7 @@ class appsAdmincp{
         if($config_array['iurl']){
           $config_array['iurl'] = json_decode(stripcslashes($config_array['iurl']),true);
         }
+
         $config_array = array_filter($config_array);
         $config = addslashes(cnjson_encode($config_array));
 
@@ -113,7 +130,7 @@ class appsAdmincp{
         }
 
         $addtime = time();
-        $array   = compact(array('app','name','title','menu','table','config','fields','addtime','apptype','type','status'));
+        $array   = compact(array('app','name','title','menu','router','table','config','fields','addtime','apptype','type','status'));
         // $array['menu'] = str_replace(array("\r","\n"),'',$array['menu']);
 
         if(empty($id)) {
@@ -306,12 +323,12 @@ class appsAdmincp{
         apps::uninstall($app);
         apps::cache();
         menu::cache();
-        apps_store::del_config($id);
+        apps_store::del($id);
         $msg = '应用已经删除';
       }else{
         $msg = '应用已被禁止删除';
       }
-      empty($app) && apps_store::del_config($id);
+      empty($app) && apps_store::del($id);
 
       $dialog && iUI::alert($msg,'js:1');
     }
@@ -392,195 +409,6 @@ class appsAdmincp{
         }
         $_POST['config'] = $hooks;
         configAdmincp::save($this->appid,'hooks');
-    }
-    /**
-     * [模板市场]
-     * @return [type] [description]
-     */
-    public function do_template(){
-      $title      = '模板';
-      $storeArray = configAdmincp::get('999999','store');
-      $dataArray  = apps_store::get_data('template');
-      include admincp::view("apps.store");
-    }
-    public function do_template_update(){
-      $this->do_store_update('template','模板');
-    }
-    public function do_template_uninstall(){
-      $sid   = (int)$_GET['sid'];
-      $store = apps_store::get_config($sid);
-      $dir   = iView::check_dir($store['app']);
-      if($dir){
-        foreach (iDevice::$config as $key => $value) {
-          if($value['tpl']==$store['app']){
-            iUI::alert('当前模板【'.$key.'】设备正在使用中,如果删除将出现错误','js:1',10);
-          }
-        }
-        foreach ((array)iDevice::$config['device'] as $key => $value) {
-          if($value['tpl']==$store['app']){
-            iUI::alert('当前模板【'.$value['name'].'】设备正在使用中,如果删除将出现错误','js:1',10);
-          }
-        }
-        iFS::rmdir($dir);
-      }
-      $sid && apps_store::config('delete',$sid);
-      iUI::success('模板已删除','js:1');
-    }
-    /**
-     * [从模板市场安装模板]
-     * @return [type] [description]
-     */
-    public function do_template_install(){
-      $this->do_store_install('template','模板');
-    }
-    /**
-     * [付费安装模板]
-     * @return [type] [description]
-     */
-    public function do_template_premium_install(){
-      $this->do_store_premium_install('template');
-    }
-    /**
-     * [应用市场]
-     * @return [type] [description]
-     */
-    public function do_store($name=null){
-      $title      = '应用';
-      $storeArray = configAdmincp::get('999999','store');
-      $dataArray  = apps_store::get_data();
-      include admincp::view("apps.store");
-    }
-    public function do_store_uninstall(){
-      $this->do_uninstall();
-    }
-    public function do_store_update($type='app',$title='应用'){
-      $sid   = (int)$_GET['sid'];
-      $conf  = apps_store::get_config($sid);
-
-      $conf['authkey'] && $_GET['authkey'] = $conf['authkey'];
-      $conf['transaction_id'] && $_GET['transaction_id'] = $conf['transaction_id'];
-
-      $store = apps_store::git('app_update_zip',$sid);
-
-      if(empty($store)){
-        iUI::alert('请求出错','js:1',10);
-      }
-      if(empty($store['code'])){
-        iUI::alert($store['msg'],'js:1',10);
-      }
-
-      iCache::set('store/'.$sid,$store,3600);
-
-      apps_store::$is_update = true;
-      apps_store::$sid       = $sid;
-      apps_store::$app_id    = $this->id;
-      apps_store::$uptime    = $conf['git_time'];
-
-      apps_store::setup($store['zip_url'],$store['app'],$store['name']);
-    }
-    /**
-     * [从应用市场安装应用]
-     * @return [type] [description]
-     */
-    public function do_store_install($type='app',$title='应用',$update=false){
-      $sid   = (int)$_GET['sid'];
-      $store = apps_store::get($sid);
-      empty($store) && iUI::alert('请求出错','js:1',1000000);
-
-      if($store['iCMS_VERSION'] && $store['iCMS_RELEASE']){
-        if(version_compare($store['iCMS_VERSION'],iCMS_VERSION,'>') && $store['iCMS_RELEASE']>iCMS_RELEASE){
-          iUI::alert('该应用要求iCMS V'.$store['iCMS_VERSION'].'['.$store['iCMS_RELEASE'].']以上版本','js:1',1000000);
-        }
-      }
-
-      if($store['iCMS_GIT_TIME'] && $store['iCMS_GIT_TIME']>GIT_TIME){
-        iUI::alert('该应用要求iCMS版本更新到<br />[git:'.get_date($store['iCMS_GIT_TIME'],'Y-m-d H:i').']以上版本','js:1',1000000);
-      }
-
-      if($type=='app'){
-          $appid = iDB::value("
-            SELECT `id` FROM `#iCMS@__apps`
-            WHERE `app` ='".$store['app']."'
-          ");
-          if($appid){
-            apps_store::config(array(
-                'appid'    => $appid,
-                'app'      => $store['app'],
-                'git_sha'  => $store['git_sha'],
-                'git_time' => $store['git_time'],
-                'version'  => $store['version'],
-                'authkey'  => $store['authkey'],
-            ),$sid);
-            iUI::alert($store['name'].'['.$store['app'].'] 应用已存在','js:1',1000000);
-          }
-
-          if($store['data']['tables']){
-            foreach ($store['data']['tables'] as $table) {
-                iDB::check_table($table) && iUI::alert('['.$table.']数据表已经存在!','js:1',1000000);
-            }
-          }
-
-          $path = iPHP_APP_DIR.'/'.$store['app'];
-          if(iFS::checkDir($path)){
-            $ptext = iSecurity::filter_path($path);
-            iUI::alert(
-              $store['name'].'['.$store['app'].'] <br />应用['.$ptext.']目录已存在,<br />程序无法继续安装',
-              'js:1',1000000
-            );
-          }
-      }
-
-      if($type=='template'){
-        $path = iPHP_TPL_DIR.'/'.$store['app'];
-        if(iFS::checkDir($path)){
-          apps_store::config(array(
-              'appid'    => null,
-              'app'      => $store['app'],
-              'git_sha'  => $store['git_sha'],
-              'git_time' => $store['git_time'],
-              'version'  => $store['version'],
-              'authkey'  => $store['authkey'],
-          ),$sid);
-          $ptext = iSecurity::filter_path($path);
-          iUI::alert(
-            $store['name'].'['.$store['app'].'] <br /> 模板['.$ptext.']目录已存在,<br />程序无法继续安装',
-            'js:1',1000000
-          );
-        }
-      }
-
-      iCache::set('store/'.$sid,$store,3600);
-      apps_store::$sid = $sid;
-
-      if($store){
-        if($store['premium']){
-          apps_store::premium_dialog($sid,$store,$title);
-        }else{
-          apps_store::setup($store['url'],$store['app'],$store['name'],null,$type);
-        }
-      }
-    }
-    /**
-     * [付费安装]
-     * @return [type] [description]
-     */
-    public function do_store_premium_install($type='app'){
-      $sapp    = $_GET['sapp'];
-      $name    = $_GET['name'];
-      $version = $_GET['version'];
-
-      $url     = $_GET['url'];
-      $key     = $_GET['key'];
-      $sid     = $_GET['sid'];
-      $tid     = $_GET['transaction_id'];
-      $query   = compact(array('sid','key','tid'));
-      $zipurl  = $url.'?'.http_build_query($query);
-
-      apps_store::$sid = $sid;
-      apps_store::setup($zipurl,$sapp,$name,$key.'.zip',$type);
-    }
-    public function do_pay_notify(){
-      echo apps_store::pay_notify($_GET);
     }
     public static function _count(){
       return iDB::value("SELECT count(*) FROM `#iCMS@__apps`");

@@ -375,8 +375,9 @@ function _modal_dialog(cancel_text){
               <?php echo propAdmincp::btn_group("author");?>
               <?php echo propAdmincp::btn_add('添加作者');?>
             </div>
-            <div class="input-prepend"> <span class="add-on">编 辑</span>
+            <div class="input-prepend input-append"> <span class="add-on">编 辑</span>
               <input type="text" name="editor" class="span2" id="editor" value="<?php echo $rs['editor'] ; ?>"/>
+              <a class="btn tip-right" href="<?php echo __ADMINCP__; ?>=members&do=profile" target="_blank" title="更改名称"><i class="fa fa-pencil-square-o"></i></a>
             </div>
             <div class="clearfloat mb10"></div>
             <div class="input-prepend input-append"> <span class="add-on">缩略图</span>
@@ -401,6 +402,7 @@ function _modal_dialog(cancel_text){
             <div class="input-prepend"> <span class="add-on">标 签</span>
               <input type="text" name="tags" class="span6" id="tags" value="<?php echo $rs['tags'] ; ?>" onkeyup="javascript:this.value=this.value.replace(/，/ig,',');"/>
             </div>
+            <span class="help-inline">多个标签用,分隔</span>
             <div class="clearfloat mb10"></div>
             <div class="input-prepend" style="width:100%;"><span class="add-on">摘 要</span>
               <textarea name="description" id="description" class="span6" style="height: 150px;"><?php echo $rs['description'] ; ?></textarea>

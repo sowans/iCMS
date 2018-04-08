@@ -41,13 +41,9 @@ class membersAdmincp{
      * @return [type] [description]
      */
     public function do_profile(){
+        menu::set('add');
         $this->uid = members::$userid;
-        if($this->uid) {
-            $rs = iDB::row("SELECT * FROM `#iCMS@__members` WHERE `uid`='$this->uid' LIMIT 1;");
-            $rs->config = json_decode($rs->config,true);
-            $rs->info   = json_decode($rs->info,true);
-        }
-        include admincp::view("members.add");
+        $this->do_add();
     }
     public function do_iCMS(){
     	if($_GET['job']){

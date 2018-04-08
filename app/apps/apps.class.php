@@ -337,6 +337,26 @@ class apps {
         iCache::set('app/'.$a['id'],$a,0);
         iCache::set('app/'.$a['app'],$a,0);
     }
+    public static function router_cache(){
+        $rs = apps::get_array(array('!router'=>'','status'=>'1'),'id,app,name,title,router','app ASC');
+        $router = array(
+            'api' => array('/api','api.php')
+        );
+        foreach ($rs as $appid=> $app) {
+            $name = $app['title']?$app['title']:$app['name'];
+            $json = str_replace(
+              array('{appid}','{app}','{name}'),
+              array($app['id'],$app['app'],$name),
+              $app['router']
+            );
+            $array = json_decode($json,true);
+            if(is_array($array)){
+                // $array[0] = '/'.ltrim($array[0],'/');
+                $router   = array_merge($router,$array);
+            }
+        }
+        return $router;
+    }
     public static function get_path($app,$type='app',$arr=false){
         $path = iPHP_APP_DIR . '/' . $app . '/' . $app.'.'.$type.'.php';
         if($arr){

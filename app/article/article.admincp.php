@@ -869,18 +869,21 @@ class articleAdmincp{
         isset($_POST['iswatermark']) && files::$watermark_enable = false;
 
         if($_POST['remote']){
-            $body = filesAdmincp::remotepic($body,true,$aid);
-            $body = filesAdmincp::remotepic($body,true,$aid);
-            $body = filesAdmincp::remotepic($body,true,$aid);
+            $body = filesAdmincp::remotepic($body,true);
+            $body = filesAdmincp::remotepic($body,true);
+            $body = filesAdmincp::remotepic($body,true);
             if($body && $id){
                 article::data_update(array('body'=>$body),compact('id'));
             }
         }
-
-        if(isset($_POST['autopic']) && empty($haspic)){
-            if($picurl = filesAdmincp::remotepic($body,'autopic',$aid)){
-                $this->set_pic($picurl,$aid);
-                $haspic = true;
+        // if(isset($_POST['autopic']) && empty($haspic)){
+        if(isset($_POST['autopic'])){
+            $autopic = filesAdmincp::remotepic($body,'autopic');
+            if($autopic){
+                $sizeMap = array('b','m','s');
+                foreach ($sizeMap as $key => $size) {
+                    $autopic[$key] && $this->set_pic($autopic[$key],$aid,$size);
+                }
             }
         }
         files::set_file_iid($body,$aid,self::$appid);
@@ -922,6 +925,15 @@ class articleAdmincp{
     public function set_pic($picurl,$aid,$key='b'){
         $uri = parse_url(iCMS_FS_URL);
         if (stripos($picurl,$uri['host']) !== false){
+            $field = 'pic';
+            if($key=='b'){
+                $haspic = 1;
+            }else{
+                $field = $key.'pic';
+            }
+            $check  = article::value($field,$aid);
+            if($check) return;
+
             $pic = iFS::fp($picurl,'-http');
             list($width, $height, $type, $attr) = @getimagesize(iFS::fp($pic,'+iPATH'));
 
@@ -929,14 +941,10 @@ class articleAdmincp{
             $picArray = filesApp::get_picdata($picdata);
             $picdata  = filesAdmincp::picdata($picArray,array($key=>array('w'=>$width,'h'=>$height)));
 
-            $field = 'pic';
-            if($key=='b'){
-                $haspic = 1;
-            }else{
-                $field = $key.'pic';
-            }
 
-            article::update(compact('haspic',$field,'picdata'),array('id'=>$aid));
+            $data = compact('haspic','picdata');
+            $data[$field] = $pic;
+            article::update($data,array('id'=>$aid));
             files::set_map(self::$appid,$aid,$pic,'path');
         }
     }

@@ -411,7 +411,7 @@ class filesAdmincp{
     }
     public static function picdata($pic='',$bpic='',$mpic='',$spic=''){
         if(is_array($pic)){
-            is_array($mpic) && $pic+=$mpic;
+            is_array($bpic) && $pic+=$bpic;
             return addslashes(json_encode($pic));
         }
         $picdata = array();
@@ -441,6 +441,7 @@ class filesAdmincp{
         $array   = files::preg_img($content,$match);
         $uri     = parse_url(iCMS_FS_URL);
         $fArray  = array();
+        $autopic = array();
         foreach ($array as $key => $value) {
             $value = trim($value);
             if (stripos($value,$uri['host']) === false){
@@ -471,12 +472,10 @@ class filesAdmincp{
                     $fArray[$key] = '';
                 }
             }
-            if($remote==="autopic" && $key==0){
-                return $value;
-            }
+            $remote==="autopic" && $autopic[$key] = $value;
         }
-        if($remote==="autopic" && empty($array)){
-            return;
+        if($remote==="autopic"){
+            return $autopic;
         }
         if($array && $fArray){
             krsort($array);
