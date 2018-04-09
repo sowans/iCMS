@@ -5,6 +5,7 @@
     var paths  = [
             'icms.js',
             'plugin.js',
+            'timer.js',
             'poshytip.js',
             'config.js',
             'cookie.js',

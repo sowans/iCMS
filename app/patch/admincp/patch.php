@@ -12,9 +12,17 @@ admincp::head();
 ?>
 <style>
 #log{color: #999;font-size: 12px;line-height: 22px;}
+.alert{font-size: 18px;line-height: 30px;width: 600px;}
 </style>
 <div class="iCMS-container">
   <div class="well iCMS-well iCMS-patch">
+    <?php if($is_upgrade){ ?>
+    <div class="alert">
+      <strong>Warning!</strong>
+      本次升级将会执行相关升级程序!<hr/>
+      请勿关闭浏览器,等待程序执行完毕!
+    </div>
+    <?php } ?>
     <div id="log"></div>
     <?php if($_GET['do']=="download"){?>
         <div class="form-actions">
@@ -56,8 +64,8 @@ function log_msg(text){
 function clearIntervals(){
 	clearInterval(timer);
     <?php if($is_upgrade){ ?>
-    log_msg('<span class="label label-success">源码升级完成!</span>');
-    log_msg('<span class="label label-important">开始升级程序!</span>');
+    log_msg('<div class="alert alert-success">源码更新完成!</div>');
+    log_msg('<div class="alert">现在开始执行升级程序! >>>></div>');
     window.setTimeout(function(){
         window.location.href = '<?php echo APP_URI;?>&do=upgrade&iCMS_RELEASE=<?php echo iCMS_RELEASE;?>&GIT_TIME=<?php echo GIT_TIME;?>';
     },1000);

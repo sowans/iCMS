@@ -225,7 +225,7 @@ function clear_pay_notify_timer() {
                   <div class="column-compatibility">
                       <?php $compatible ="该{$title}<strong>兼容</strong>于您当前使用的".iPHP_APP."版本"; ?>
                       <?php if($value['iCMS_VERSION']){?>
-                        <?php if(version_compare(substr(iCMS_VERSION,1),$value['iCMS_VERSION'],'>')){?>
+                        <?php if(version_compare(substr(iCMS_VERSION,1),$value['iCMS_VERSION'],'>=')){?>
                         <i class="fa fa-check"></i>
                         <span class="compatibility-compatible"><?php echo $compatible;?></span>
                         <?php }else{ ?>

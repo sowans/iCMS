@@ -311,14 +311,11 @@ class apps_store {
         return rtrim($ROOTPATH,'/');
     }
     public static function check_must($store){
-      if($store['iCMS_VERSION'] && $store['iCMS_RELEASE']){
-        if(version_compare($store['iCMS_VERSION'],iCMS_VERSION,'>') && $store['iCMS_RELEASE']>iCMS_RELEASE){
-          iUI::alert('该应用要求iCMS V'.$store['iCMS_VERSION'].'['.$store['iCMS_RELEASE'].']以上版本','js:1',1000000);
-        }
+      if(empty($store)){
+        iUI::alert('请求出错','js:1',10);
       }
-
-      if($store['iCMS_GIT_TIME'] && $store['iCMS_GIT_TIME']>GIT_TIME){
-        iUI::alert('该应用要求iCMS版本更新到<br />[git:'.get_date($store['iCMS_GIT_TIME'],'Y-m-d H:i').']以上版本','js:1',1000000);
+      if(empty($store['code'])){
+          iUI::alert($store['msg'],'js:1',10);
       }
     }
     public static function msg($text,$s=0){

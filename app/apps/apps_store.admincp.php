@@ -78,13 +78,7 @@ class apps_storeAdmincp extends appsAdmincp {
       $data['transaction_id'] && $_GET['transaction_id'] = $data['transaction_id'];
 
       $store = apps_store::remote_git('app_update_zip',$sid);
-
-      if(empty($store)){
-        iUI::alert('请求出错','js:1',10);
-      }
-      if(empty($store['code'])){
-        iUI::alert($store['msg'],'js:1',10);
-      }
+      apps_store::check_must($store);
 
       iCache::set('store/'.$sid,$store,3600);
 
@@ -102,7 +96,6 @@ class apps_storeAdmincp extends appsAdmincp {
     public function do_store_install($type='app',$title='应用',$update=false){
       $sid   = (int)$_GET['sid'];
       $store = apps_store::remote_get($sid);
-      empty($store) && iUI::alert('请求出错','js:1',1000000);
       apps_store::check_must($store);
 
       if($type=='app'){

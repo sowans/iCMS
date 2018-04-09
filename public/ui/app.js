@@ -121,6 +121,51 @@ $(function() {
 //user模块API
 var iUSER = iCMS.run('user');
 
+function payment_notify(param,SUCCESS,WAIT,FAIL) {
+    var utils = iCMS.run('utils');
+    var me = this;
+    this.notify_timer = null;
+    this.clear_timer  = false;
+    this.notify_timer = $.timer(function() {
+        me.notify_timer.stop();
+        $.getJSON(iCMS.CONFIG.API+'?callback=?', param,
+            function(ret) {
+                if (ret.code == "1") {
+                    if (typeof(SUCCESS) === "function") {
+                        SUCCESS(ret,me);
+                    }else{
+                        iCMS.UI.success("感谢您的支持!");
+                    }
+                } else if (ret.code == "0") {
+                    if (typeof(WAIT) === "function") {
+                        WAIT(ret,me);
+                    }
+                    //等待支付
+                    if (!me.clear_timer) {
+                        me.notify_timer.play();
+                    }
+                } else {
+                    if (typeof(FAIL) === "function") {
+                        FAIL(ret,me);
+                    }else{
+                        iCMS.UI.alert(ret.msg);
+                    }
+                }
+            }
+        );
+    });
+    this.notify_timer.set({time:1000,autostart:true});
+
+    this.start = function () {
+        this.clear_timer = false;
+        this.notify_timer.play();
+    }
+    this.stop = function () {
+        this.clear_timer = true;
+        this.notify_timer.stop();
+    }
+    return this;
+}
 function imgFix (im, x, y) {
     x = x || 99999
     y = y || 99999
