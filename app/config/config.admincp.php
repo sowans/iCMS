@@ -43,11 +43,6 @@ class configAdmincp extends config {
             iPHP::callback(array("cacheAdmincp","test"),array($config['cache']));
         }
 
-        if(json_last_error()){
-            $error = json_last_error_msg();
-            $error && iUI::alert("REWRITE配置出错 > JSON -{$error}");
-        }
-
     	foreach($config AS $n=>$v){
     		$this->set($v,$n,0);
     	}
