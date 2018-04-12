@@ -26,7 +26,18 @@ hr { border-bottom:none; margin:4px 0px; }
     <div class="widget-content">
       <form action="<?php echo iPHP_SELF ; ?>" method="get" class="form-inline">
         <input type="hidden" name="app" value="<?php echo admincp::$APP_NAME;?>" />
-        <input type="hidden" name="userid" value="<?php echo $_GET['userid'] ; ?>" />
+        <input type="hidden" name="do" value="event" />
+        <div class="input-prepend">
+          <span class="add-on">公众号</span>
+          <select name="wx_appid" id="wx_appid" class="chosen-select span4" data-placeholder="== 请选择 ==">
+            <?php echo $this->option(); ?>
+          </select>
+          <script>
+          $(function(){
+           iCMS.select('wx_appid',"<?php echo $this->wx_appid ; ?>");
+          })
+          </script>
+        </div>
         <div class="input-prepend input-append"><span class="add-on"><i class="fa fa-calendar"></i></span>
           <input type="text" class="ui-datepicker" name="starttime" value="<?php echo $_GET['starttime'] ; ?>" placeholder="开始时间" />
           <span class="add-on">-</span>
@@ -54,7 +65,8 @@ hr { border-bottom:none; margin:4px 0px; }
           <thead>
             <tr>
               <th><i class="fa fa-arrows-v"></i></th>
-              <th style="width:60px;">事件ID</th>
+              <th style="width:60px;">ID</th>
+              <th style="width:180px;">公众号APPID</th>
               <th>事件名</th>
               <th>事件类型</th>
               <th>事件</th>
@@ -71,6 +83,7 @@ hr { border-bottom:none; margin:4px 0px; }
             <tr id="id<?php echo $rs[$i]['id'] ; ?>">
               <td><input type="checkbox" name="id[]" value="<?php echo $rs[$i]['id'] ; ?>" /></td>
               <td><?php echo $rs[$i]['id'] ; ?></a></td>
+              <td><a href="<?php echo admincp::uri(array("wx_appid"=>$rs[$i]['appid']),$uriArray); ?>"><?php echo $rs[$i]['appid'] ; ?></a></a></td>
               <td><?php echo $rs[$i]['name'] ; ?></a></td>
               <td><?php echo $rs[$i]['eventype'] ; ?></a></td>
               <td><?php echo $rs[$i]['eventkey'] ; ?></a></td>
@@ -84,16 +97,18 @@ hr { border-bottom:none; margin:4px 0px; }
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="9"><div class="pagination pagination-right"><?php echo iUI::$pagenav ; ?></div>
-                <div class="input-prepend input-append mt20"> <span class="add-on">全选
+              <td colspan="9">
+                <div class="input-prepend input-append mt20 pull-left"> <span class="add-on">全选
                   <input type="checkbox" class="checkAll checkbox" data-target="#<?php echo APP_BOXID;?>" />
                   </span>
                   <div class="btn-group dropup" id="iCMS-batch"> <a class="btn dropdown-toggle" data-toggle="dropdown" tabindex="-1"><i class="fa fa-wrench"></i> 批 量 操 作 </a><a class="btn dropdown-toggle" data-toggle="dropdown" tabindex="-1"> <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                      <li><a data-toggle="batch" data-action="dels"><i class="fa fa-trash-o"></i> 删除</a></li>
+                      <li><a data-toggle="batch" data-action="event_dels"><i class="fa fa-trash-o"></i> 删除</a></li>
                     </ul>
                   </div>
-                </div></td>
+                </div>
+                <div class="pagination pagination-right"><?php echo iUI::$pagenav ; ?></div>
+              </td>
             </tr>
           </tfoot>
         </table>

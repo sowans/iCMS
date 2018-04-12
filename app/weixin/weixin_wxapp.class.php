@@ -10,18 +10,11 @@
 define("WXA_PLATFORM",5);
 
 class weixin_wxapp{
-    public static $config = array();
-
-    protected static $appId     = null;
-    protected static $appSecret = null;
     protected static $API_URL   = 'https://api.weixin.qq.com/sns';
 
     public static function init($config=null){
-        $config && self::$config = $config;
-        if(self::$config){
-            self::$appId     = self::$config['appid'];
-            self::$appSecret = self::$config['appsecret'];
-        }
+        weixin::set_config($config,'wxapp');
+        iPHP_DEBUG && iPHP::$callback['error'] = array(__CLASS__,'error_handler');
     }
     public static function callback(){
         $app = $_GET['_app'];
@@ -33,7 +26,7 @@ class weixin_wxapp{
             $userid = user::openid($openid, WXA_PLATFORM);
             if($_userid==$userid){
                 $user = user::get($userid, false);
-                user::$COOKIE = array(
+                user::$callback['cookie'] = array(
                     'uid' => $userid,
                     'username' => $user->username,
                     'password' => $user->password,
@@ -49,9 +42,9 @@ class weixin_wxapp{
     public static function session(){
         $url = self::$API_URL.'/jscode2session?grant_type=authorization_code'.
         '&js_code='.$_POST['loginCode'].
-        '&appid='.self::$appId.
-        '&secret='.self::$appSecret;
-        $response = weixin::http($url);
+        '&appid='.weixin::$appid.
+        '&secret='.weixin::$appsecret;
+        $response = iHttp::send($url);
 
         if($response){
             $openid = $response->openid;
@@ -93,13 +86,9 @@ class weixin_wxapp{
         }
         iUI::json($res);
     }
-    public static function input(){
-        $input = file_get_contents("php://input");
-        if($input){
-            $data = json_decode($input,true);
-            iSecurity::_addslashes($data);
-            iWAF::check_data($data);
-            return $data;
-        }
+    public static function error_handler($html,$type=null){
+        $html = html2text($html);
+        $html = html2js($html);
+        iUI::code(0,$html);
     }
 }

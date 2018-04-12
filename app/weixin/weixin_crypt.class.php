@@ -219,7 +219,7 @@ class PKCS7Encoder{
         //计算需要填充的位数
         $amount_to_pad = PKCS7Encoder::$block_size - ($text_length % PKCS7Encoder::$block_size);
         if ($amount_to_pad == 0) {
-            $amount_to_pad = PKCS7Encoder::block_size;
+            $amount_to_pad = PKCS7Encoder::$block_size;
         }
         //获得补位所用的字符
         $pad_chr = chr($amount_to_pad);
@@ -267,17 +267,21 @@ class Prpcrypt{
             //获得16位随机字符串，填充到明文之前
             $random = self::getRandomStr();
             $text = $random . pack("N", strlen($text)) . $text . $appid;
-            // 网络字节序
-            $size = mcrypt_get_block_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
-            $module = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
-            $iv = substr(self::$key, 0, 16);
             //使用自定义的填充方式对明文进行补位填充
             $text = PKCS7Encoder::encode($text);
-            mcrypt_generic_init($module, self::$key, $iv);
-            //加密
-            $encrypted = mcrypt_generic($module, $text);
-            mcrypt_generic_deinit($module);
-            mcrypt_module_close($module);
+            $iv = substr(self::$key, 0, 16);
+            if(function_exists('openssl_encrypt')){
+                $encrypted = openssl_encrypt($text, 'AES-256-CBC', substr(self::$key, 0, 32), OPENSSL_ZERO_PADDING, $iv);
+            }else{
+                // 网络字节序
+                // $size = mcrypt_get_block_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
+                $module = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
+                mcrypt_generic_init($module, self::$key, $iv);
+                //加密
+                $encrypted = mcrypt_generic($module, $text);
+                mcrypt_generic_deinit($module);
+                mcrypt_module_close($module);
+            }
 
             //print(base64_encode($encrypted));
             //使用BASE64对加密后的字符串进行编码
@@ -296,15 +300,19 @@ class Prpcrypt{
     public static function decrypt($encrypted, $appid) {
         try {
             //使用BASE64对需要解密的字符串进行解码
-            $ciphertext_dec = base64_decode($encrypted);
-            $module = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
             $iv = substr(self::$key, 0, 16);
-            mcrypt_generic_init($module, self::$key, $iv);
+            if(function_exists('openssl_decrypt')){
+                $decrypted = openssl_decrypt($encrypted, 'AES-256-CBC', substr(self::$key, 0, 32), OPENSSL_ZERO_PADDING, $iv);
+            }else{
+                $ciphertext_dec = base64_decode($encrypted);
+                $module = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
+                mcrypt_generic_init($module, self::$key, $iv);
 
-            //解密
-            $decrypted = mdecrypt_generic($module, $ciphertext_dec);
-            mcrypt_generic_deinit($module);
-            mcrypt_module_close($module);
+                //解密
+                $decrypted = mdecrypt_generic($module, $ciphertext_dec);
+                mcrypt_generic_deinit($module);
+                mcrypt_module_close($module);
+            }
         } catch (Exception $e) {
             return array(ErrorCode::$DecryptAESError, null);
         }

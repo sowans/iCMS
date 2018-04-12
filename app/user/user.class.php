@@ -18,7 +18,7 @@ class user {
 	public static $nickname   = '';
 	public static $cookietime = 0;
 	public static $format     = false;
-	public static $COOKIE     = null;//接口类cookie设置
+	public static $callback   = array();//回调
 	private static $AUTH      = 'USER_AUTH';
 
 	public static function login_uri($uri=null){
@@ -62,21 +62,24 @@ class user {
 	}
 	public static function info($uid,$name=null,$size=0){
 		if(empty($uid)){
-			return self::empty_info($uid, $name);
+			$info = self::empty_info($uid, $name);
+		}else{
+			$url = self::router($uid,"url");
+			if($name===null){
+				$name = self::value($uid,'nickname');
+			}
+			$info = array(
+				'uid'    => $uid,
+				'name'   => $name,
+				//'inbox'  => $urls['inbox'],
+				'url'    => $url,
+				'avatar' => self::router($uid,"avatar",$size?$size:0),
+				'at'     => '<a href="'.$url.'" class="iCMS_user_link" target="_blank" i="ucard:'.$uid.'">@'.$name.'</a>',
+				'link'   => '<a href="'.$url.'" class="iCMS_user_link" target="_blank" i="ucard:'.$uid.'">'.$name.'</a>',
+			);
 		}
-		$url = self::router($uid,"url");
-		if($name===null){
-			$name = self::value($uid,'nickname');
-		}
-		return array(
-			'uid'    => $uid,
-			'name'   => $name,
-			//'inbox'  => $urls['inbox'],
-			'url'    => $url,
-			'avatar' => self::router($uid,"avatar",$size?$size:0),
-			'at'     => '<a href="'.$url.'" class="iCMS_user_link" target="_blank" i="ucard:'.$uid.'">@'.$name.'</a>',
-			'link'   => '<a href="'.$url.'" class="iCMS_user_link" target="_blank" i="ucard:'.$uid.'">'.$name.'</a>',
-		);
+		self::$callback['info'] && iPHP::callback(self::$callback['info'],array(&$info));
+		return $info;
 	}
 	public static function value($val,$field='username',$where='uid'){
 		$row = iDB::row("SELECT {$field} FROM `#iCMS@__user` where `$where`='{$val}'");
@@ -233,14 +236,14 @@ class user {
 		self::$userid   = $user->uid;
 		self::$nickname = $user->nickname;
 		self::$username = $user->username;
+		if(self::$callback['set_cookie']){
+			iPHP::callback(self::$callback['set_cookie'],array(&$user));
+		}
 		return true;
 	}
 	public static function get_cookie($unpw=false) {
-		if(self::$COOKIE){
-			if(!$unpw){
-				unset(self::$COOKIE['username'],self::$COOKIE['password']);
-			}
-			return self::$COOKIE;
+		if(self::$callback['cookie']){
+			return self::$callback['cookie'];
 		}
 		$auth     = auth_decode(iPHP::get_cookie(self::$AUTH));
 		$userid   = auth_decode(iPHP::get_cookie('userid'));

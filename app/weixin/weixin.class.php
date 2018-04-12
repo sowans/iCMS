@@ -10,50 +10,80 @@
 define('iCMS_WEIXIN_COMPONENT',"https://weixin.icmsdev.com");//iCMS微信第三方平台
 
 class weixin {
-    public static $debug       = true;
-    public static $component   = false;
-    public static $accessToken = null;
-    public static $config      = array();
-    public static $API_URL     = 'https://api.weixin.qq.com/cgi-bin';
+    public static $debug     = true;
+    public static $component = false;
+    public static $token     = null;
+    public static $config    = array();
+    public static $id        = 0;
+    public static $appid     = null;
+    public static $appsecret = null;
 
-    protected static $appId          = null;
-    protected static $appSecret      = null;
-    protected static $accessTokenKey = 'weixin/token';
+    public static $API_URL   = 'https://api.weixin.qq.com/cgi-bin';
 
-    public static function init($config=null){
-        $config && self::$config = $config;
-        if(self::$config){
-            self::$appId     = self::$config['appid'];
-            self::$appSecret = self::$config['appsecret'];
+    protected static $token_cache = 'weixin/token';
+
+    public static function init($c=null){
+        empty(self::$config) && self::set_config($c);
+
+        self::$component && self::$API_URL = iCMS_WEIXIN_COMPONENT.'/cgi-bin';
+
+        self::$token_cache = 'weixin/token_'.substr(md5(self::$appid.self::$appsecret), 8,16);
+        self::$token===null && self::$token = iCache::get(self::$token_cache);
+        self::$token OR self::get_access_token();
+    }
+    public static function set_config($config=null,$title='weixin'){
+        empty($config) && $config = self::get_data();
+        empty($config) && trigger_error("{$title} config is missing.",E_USER_ERROR);
+        empty($config['appid']) && trigger_error("{$title} appid is missing.",E_USER_ERROR);
+        empty($config['appsecret']) && trigger_error("{$title} appsecret is missing.",E_USER_ERROR);
+
+        self::$config    = $config;
+        self::$appid     = $config['appid'];
+        self::$appsecret = $config['appsecret'];
+    }
+    public static function get_data($id=null,$field='id'){
+        $id===null && $id = (int)$_GET['id'];
+        empty($id) && $id = self::$id;
+        if(empty($id) && self::$appid){
+            $id    = self::$appid;
+            $field = 'appid';
+        }
+        empty($id) && trigger_error("{$field} is missing.",E_USER_ERROR);
+
+        $data = iDB::row("SELECT * FROM `#iCMS@__weixin` WHERE `{$field}`='{$id}' LIMIT 1",ARRAY_A);
+
+        if($data){
+            $data['config'] && $data['config'] = json_decode($data['config'],true);
+            $data['payment'] && $data['payment'] = json_decode($data['payment'],true);
+
+            $apps = new appsApp('weixin');
+            $apps->custom_data($data);
+            $apps->hooked($data);
+            unset($data['sapp']);
         }
 
-        if(self::$component){
-            self::$API_URL = iCMS_WEIXIN_COMPONENT.'/cgi-bin';
-        }
-
-        self::$accessTokenKey = 'weixin/token_'.substr(md5(self::$appId.self::$appSecret), 8,16);
-        self::$accessToken===null && self::$accessToken = iCache::get(self::$accessTokenKey,null,0);
-        self::$accessToken OR self::get_access_token();
+        return $data;
     }
     public static function get_access_token(){
         $url = self::$API_URL.'/token?grant_type=client_credential'.
-        '&appid='.self::$appId.
-        '&secret='.self::$appSecret;
-        $response = self::http($url);
+        '&appid='.self::$appid.
+        '&secret='.self::$appsecret;
+
+        $response = iHttp::send($url);
         if($response->errcode){
-            self::error($response,__METHOD__);
+            self::error($response);
         }
-        self::$accessToken = $response->access_token;
-        iCache::set(self::$accessTokenKey,self::$accessToken,$response->expires_in);
+        self::$token = $response->access_token;
+        iCache::set(self::$token_cache,self::$token,$response->expires_in);
     }
-    public static function error($e,$method=''){
+    public static function error($e){
         //if(self::$debug){
-            iUI::error("<span>errcode:".$e->errcode." errmsg:".$e->errmsg.' IN '.$method."</span>");
+        trigger_error("errcode:".$e->errcode." errmsg:".$e->errmsg,E_USER_ERROR);
         //}
     }
     public static function url($uri,$query=null){
-        $url = self::$API_URL.'/'.$uri.'?access_token='.self::$accessToken;
-        self::$component && $url.= '&appid='.self::$appId;
+        $url = self::$API_URL.'/'.$uri.'?access_token='.self::$token;
+        self::$component && $url.= '&appid='.self::$appid;
         $query && $url.= '&'.http_build_query((array)$query);
         // self::$debug && var_dump($url);
         return $url;
@@ -64,9 +94,9 @@ class weixin {
         $param    = json_encode($param);
         $param    = urldecode($param);
         $url      = self::url('menu/create');
-        $response = self::http($url,$param);
+        $response = iHttp::send($url,$param);
         // if($response->errcode){
-        //     self::error($response,__METHOD__);
+        //     self::error($response);
         // }
         return $response;
     }
@@ -91,11 +121,11 @@ class weixin {
     }
     public static function getMenu(){
         $url      = self::url('menu/get');
-        $response = self::http($url);
+        $response = iHttp::send($url);
         // if($response->errcode=="46003"){
         //     return false;
         // }else if($response->errcode){
-        //     self::error($response,__METHOD__);
+        //     self::error($response);
         // }
         return $response;
     }
@@ -117,12 +147,13 @@ class weixin {
         $post_data  = json_encode($param);
         $response   = iCache::get($cache_name);
         if(empty($response)){
-            $response  = self::http($url,$post_data);
+            $response = iHttp::send($url,$post_data);
             iCache::set($cache_name,$response,300);
+        }else{
+            $response = unserialize($response);
         }
-// print_r($response);
         if($response->errcode){
-            self::error($response,__METHOD__);
+            self::error($response);
         }
         if($response->total_count){
             $media_list_array = array();
@@ -135,7 +166,9 @@ class weixin {
                 $items[$key]['url']         = $value->url;
                 $items[$key]['update_time'] = $value->update_time;
                 if(isset($value->content->news_item)){
-                    $items[$key]['content'] = self::media_item($value->content->news_item);
+                    $media_item = self::media_item($value->content->news_item);
+                    $items[$key]['content'] = $media_item;
+                    // $items[$key]['name']    = $media_item[0]['title'];
                 }
             }
             $media_list_array['items']  = $items;
@@ -164,36 +197,11 @@ class weixin {
         $param    = json_encode($param);
         $param    = urldecode($param);
         $url      = self::url('qrcode/create');
-        $response = self::http($url,$param);
+        $response = iHttp::send($url,$param);
         return $response;
     }
 
-    public static function http($url, $POSTFIELDS=null,$raw=false) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
 
-        if($POSTFIELDS){
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $POSTFIELDS);
-        }
-
-        $response = curl_exec ($ch);
-        // self::$debug && var_dump($response);
-        curl_close ($ch);
-
-        if(empty($response)){
-            return '-100000';
-        }
-        if($raw){
-            return $response;
-        }
-        return json_decode($response);
-    }
     public static function msg_xml($content,$FromUserName,$ToUserName){
         $CreateTime = time();
         echo "<xml>";
@@ -235,10 +243,7 @@ class weixin {
         exit;
     }
     public static  function checkSignature(){
-        // you must define TOKEN by yourself
-        if (!self::$config['token']) {
-            throw new Exception('TOKEN is not defined!');
-        }
+        self::$config['token'] OR trigger_error('TOKEN is not defined!',E_USER_ERROR);
 
         $signature = $_GET["signature"];
         $timestamp = $_GET["timestamp"];
@@ -252,34 +257,11 @@ class weixin {
         $tmpStr = sha1( $tmpStr );
 
         if( $tmpStr == $signature ){
-            return true;
+            $_GET["echostr"] && exit($_GET["echostr"]);
+            // return true;
         }else{
-            return false;
+            trigger_error('signature is error!',E_USER_ERROR);
+            // return false;
         }
-    }
-    public static  function input($input=null,$json=false){
-        $input===null && $input = file_get_contents("php://input");
-        if ($input){
-            if($json){
-                $data = json_decode($input,true);
-            }else{
-                libxml_disable_entity_loader(true);
-                $data = simplexml_load_string($input, 'SimpleXMLElement', LIBXML_NOCDATA);
-            }
-            iSecurity::_addslashes($data);
-            iWAF::check_data($data);
-            return $data;
-        }else{
-            return false;
-        }
-    }
-    public static function is_wxapp() {
-        return (
-            strpos($_SERVER['HTTP_REFERER'],'servicewechat.com') !== false
-            &&(
-                strpos($_SERVER['HTTP_USER_AGENT'],'MicroMessenger') !== false
-                ||strpos($_SERVER['HTTP_USER_AGENT'],'wechatdevtools') !== false
-            )
-        );
     }
 }

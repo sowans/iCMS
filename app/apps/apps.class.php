@@ -400,7 +400,11 @@ class apps {
 
     public static function get_app_lite($data=null,$throw=true) {
         is_array($data) OR $data = apps::get_app($data,$throw);
-        unset($data['table'],$data['config'],$data['fields'],$data['menu']);
+        if(is_array($data)){
+            unset($data['table'],$data['config'],$data['fields'],$data['menu']);
+        }else{
+            $data = array();
+        }
         return $data;
     }
 	public static function get_url($appid=1,$primary=''){
