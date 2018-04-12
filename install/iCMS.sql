@@ -43,11 +43,33 @@ CREATE TABLE `icms_apps` (
   `config` text NOT NULL COMMENT '应用配置',
   `fields` text NOT NULL COMMENT '应用自定义字段',
   `menu` text NOT NULL COMMENT '应用菜单',
+  `router` text NOT NULL COMMENT '应用路由',
   `addtime` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '添加时间',
   `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '应用状态',
   PRIMARY KEY (`id`),
   KEY `idx_name` (`app`)
 ) ENGINE=MyISAM AUTO_INCREMENT=100 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `icms_apps_store` */
+
+CREATE TABLE `icms_apps_store` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sid` int(10) NOT NULL DEFAULT '0',
+  `appid` int(10) NOT NULL DEFAULT '0' COMMENT 'appid',
+  `app` varchar(255) NOT NULL DEFAULT '' COMMENT 'app',
+  `name` varchar(255) NOT NULL DEFAULT '' COMMENT '名称',
+  `version` varchar(255) NOT NULL DEFAULT '' COMMENT '版本',
+  `authkey` varchar(255) NOT NULL DEFAULT '',
+  `git_sha` varchar(255) NOT NULL DEFAULT '' COMMENT 'git sha',
+  `git_time` int(10) NOT NULL DEFAULT '0' COMMENT 'git版本时间',
+  `transaction_id` varchar(255) NOT NULL DEFAULT '' COMMENT '订单号',
+  `data` text NOT NULL COMMENT '信息',
+  `addtime` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '安装时间',
+  `uptime` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `type` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'app:0 tpl:1',
+  `status` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '状态',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_article` */
 
@@ -577,15 +599,6 @@ CREATE TABLE `icms_tag` (
   KEY `pubdate` (`status`,`pubdate`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-/*Table structure for table `icms_tag_cdata` */
-
-CREATE TABLE `icms_tag_cdata` (
-  `cdata_id` int(10) NOT NULL AUTO_INCREMENT COMMENT '主键 自增ID',
-  `tag_id` int(10) NOT NULL COMMENT '内容ID 关联tag表',
-  PRIMARY KEY (`cdata_id`),
-  KEY `tag_id` (`tag_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
-
 /*Table structure for table `icms_tag_map` */
 
 CREATE TABLE `icms_tag_map` (
@@ -710,10 +723,32 @@ CREATE TABLE `icms_user_report` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+/*Table structure for table `icms_weixin` */
+
+CREATE TABLE `icms_weixin` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `cid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '分类',
+  `type` tinyint(1) unsigned NOT NULL COMMENT '类型',
+  `appid` varchar(255) NOT NULL DEFAULT '' COMMENT 'appID',
+  `appsecret` varchar(255) NOT NULL DEFAULT '' COMMENT 'appsecret',
+  `name` varchar(255) NOT NULL DEFAULT '' COMMENT '名称',
+  `token` varchar(255) DEFAULT '' COMMENT '令牌',
+  `AESKey` varchar(255) DEFAULT '' COMMENT '密钥',
+  `account` varchar(255) NOT NULL DEFAULT '' COMMENT '小程序号',
+  `description` varchar(500) NOT NULL DEFAULT '' COMMENT '小程序简介',
+  `qrcode` varchar(255) NOT NULL DEFAULT '' COMMENT '二维码',
+  `menu` text NOT NULL COMMENT '菜单',
+  `config` text NOT NULL COMMENT '其它配置',
+  `payment` text NOT NULL COMMENT '支付配置',
+  PRIMARY KEY (`id`),
+  KEY `idx_appid` (`appid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 /*Table structure for table `icms_weixin_api_log` */
 
 CREATE TABLE `icms_weixin_api_log` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `appid` varchar(255) NOT NULL DEFAULT '',
   `ToUserName` varchar(255) NOT NULL DEFAULT '',
   `FromUserName` varchar(255) NOT NULL DEFAULT '',
   `CreateTime` int(11) NOT NULL DEFAULT '0',
@@ -726,8 +761,9 @@ CREATE TABLE `icms_weixin_api_log` (
 
 CREATE TABLE `icms_weixin_event` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `pid` int(10) unsigned NOT NULL DEFAULT '0',
-  `name` varchar(255) NOT NULL DEFAULT '',
+  `pid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '属性',
+  `appid` varchar(128) NOT NULL DEFAULT '' COMMENT '公众号APPID',
+  `name` varchar(255) NOT NULL DEFAULT '' COMMENT '事件名称',
   `eventype` varchar(255) NOT NULL DEFAULT '' COMMENT '事件类型',
   `eventkey` varchar(255) NOT NULL DEFAULT '' COMMENT '事件KEY值/关键词',
   `msgtype` varchar(255) NOT NULL DEFAULT '' COMMENT '回复类型',
@@ -736,7 +772,8 @@ CREATE TABLE `icms_weixin_event` (
   `addtime` int(10) unsigned NOT NULL DEFAULT '0',
   `status` tinyint(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `eventkey` (`eventkey`)
+  KEY `eventkey` (`eventkey`),
+  KEY `idx_appid` (`appid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
