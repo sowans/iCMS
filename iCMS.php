@@ -8,14 +8,19 @@
 * @licence https://www.icmsdev.com/LICENSE.html
 */
 define('iPHP',TRUE);
-define('iPHP_APP','iCMS'); //应用名
+//应用名
+define('iPHP_APP','iCMS');
+//支持邮箱
 define('iPHP_APP_MAIL','support@iCMSdev.com');
-define('iPATH',dirname(strtr(__FILE__,'\\','/'))."/");
-//框架初始化
-require iPATH.'config.php';			//框架初始化配置
-require iPATH.'iPHP/iPHP.php';		//iPHP框架文件
-require iPHP_APP_CORE.'/iCMS.version.php';
-require iPHP_APP_CORE.'/iCMS.class.php';
-require iPHP_APP_CORE.'/iCMS.func.php';
+//配置
+require_once __DIR__.'/config.php';
+//iPHP框架文件
+require_once __DIR__.'/iPHP/iPHP.php';
+//iCMS版本
+require_once __DIR__.'/core/iCMS.version.php';
+//iCMS主类
+require_once __DIR__.'/core/iCMS.class.php';
+//iCMS常用函数
+require_once __DIR__.'/core/iCMS.func.php';
 
-iCMS::init();
+iPHP_APP_INIT && iCMS::init();

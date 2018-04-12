@@ -37,6 +37,7 @@ class userAdmincp{
             $rs && $userdata = iDB::row("SELECT * FROM `#iCMS@__user_data` WHERE `uid`='$this->uid' LIMIT 1;");
         }
         iPHP::callback(array("formerApp","add"),array($this->appid,(array)$rs,true));
+        iPHP::callback(array("apps_meta","get"),array($this->appid,$this->uid));
         include admincp::view("user.add");
     }
     /**
@@ -153,6 +154,7 @@ class userAdmincp{
             }
             $msg = "账号修改完成!";
         }
+        iPHP::callback(array("apps_meta","save"),array($this->appid,$uid));
         iPHP::callback(array("formerApp","save"),array($this->appid,$uid));
         iUI::success($msg,'url:'.APP_URI);
     }

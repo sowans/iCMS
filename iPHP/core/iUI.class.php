@@ -397,6 +397,7 @@ class iUI {
             'count'   => $count, //实际页数
             'current' => $page,
             'nav'     => $pagenav,
+            'url'     => iURL::page_num($pageurl,$_GET['p']),
             'pageurl' => $pageurl,
             'text'    => $pagetext,
             'PAGES'   => $iPages,

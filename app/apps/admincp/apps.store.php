@@ -48,7 +48,7 @@ admincp::head();
 <script type="text/javascript">
 $(function(){
   $("#<?php echo APP_FORMID;?>").batch();
-  $(".install-btn").click(function(event) {
+  $(".install-btn,.update-btn").click(function(event) {
     iCMS.success("数据下载中...请稍候!",false,10000000);
   });
 });
@@ -147,7 +147,7 @@ function clear_pay_notify_timer() {
                             <?php if($appconf){?>
                             <?php if($is_update){?>
                             <a href="<?php echo APP_FURI; ?>&do=<?php echo admincp::$APP_DO; ?>_update&sid=<?php echo $sid;?>&id=<?php echo $appconf['appid'];?>&commit_id=<?php echo $appconf['git_sha'];?>"
-                              target="iPHP_FRAME" class="btn btn-success">
+                              target="iPHP_FRAME" class="btn btn-success update-btn">
                               <i class="fa fa-repeat"></i> 现在更新
                             </a>
                             <?php }else{ ?>

@@ -108,8 +108,12 @@ class iSecurity {
 	 * @param $method
 	 */
 	public static function getGP($key, $method = null) {
-		if ($method == 'G' || $method != 'P' && isset($_GET[$key])) {return $_GET[$key];}
-		return $_POST[$key];
+		if ($method == 'G' || $method != 'P' && isset($_GET[$key])) {
+			$value = $_GET[$key];
+		}else{
+			$value = $_POST[$key];
+		}
+		return self::escapeStr($value);
 	}
 	/**
 	 * 全局变量过滤

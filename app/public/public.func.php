@@ -24,6 +24,10 @@ class publicFunc{
 		echo $html;
 	}
 	public static function public_qrcode($vars=null){
-		echo publicApp::qrcode_url($vars['data']);
+		if($vars['base64']){
+			echo publicApp::qrcode_base64($vars['data']);
+		}else{
+			echo publicApp::qrcode_url($vars['data']);
+		}
 	}
 }

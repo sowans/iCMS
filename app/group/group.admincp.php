@@ -20,10 +20,15 @@ class groupAdmincp{
     		$sql=" and `type`='$type'";
     	}
 		$rs		= iDB::all("SELECT * FROM `#iCMS@__group` where 1=1{$sql} ORDER BY `sortnum` , `gid` ASC");
-		$_count	= count($rs);
+
+        array_unshift($rs,
+            array('gid'=>'0','type'=>$this->type,'name'=>'路人甲'),
+            array('gid'=>'65535','type'=>'0','name'=>'管理员克隆')
+        );
+        $_count = count($rs);
 		for ($i=0;$i<$_count;$i++){
-			$this->array[$rs[$i]['gid']]    = $rs[$i];
-			$this->group[$rs[$i]['type']][] = $rs[$i];
+			$this->array[$rs[$i]['gid']] = $rs[$i];
+			$this->group[$rs[$i]['type']][$rs[$i]['gid']] = $rs[$i];
 		}
     }
     public function do_iCMS(){

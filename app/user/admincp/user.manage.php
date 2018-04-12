@@ -126,7 +126,7 @@ $(function(){
                 } ?>
               </td>
               <td>
-                <a href="<?php echo APP_URI; ?>&gid=<?php echo $rs[$i]['gid'] ; ?>"><?php echo $group->all[$rs[$i]['gid']]['name'] ; ?></a>
+                <a href="<?php echo APP_URI; ?>&gid=<?php echo $rs[$i]['gid'] ; ?>"><?php echo $this->groupAdmincp->array[$rs[$i]['gid']]['name'] ; ?></a>
                 <br />
                 <?php $rs[$i]['pid'] && propAdmincp::flag($rs[$i]['pid'],$propArray,APP_DOURI.'&pid={PID}&'.$uri);?>
               </td>

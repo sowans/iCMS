@@ -7,8 +7,6 @@
 * @site https://www.icmsdev.com
 * @licence https://www.icmsdev.com/LICENSE.html
 */
-defined('iPHP') OR exit('What are you doing?');
-
 class iCMS {
     public static $config    = array();
 
@@ -31,7 +29,7 @@ class iCMS {
      * @return [type] [description]
      */
 	public static function config(){
-        iPHP::$callback['config']['apps'] = array('apps','default_config');
+        iPHP::$callback['config']['apps'] = array(__CLASS__,'default_apps');
         //获取配置
         $config = iPHP::config();
         //多终端适配
@@ -171,4 +169,19 @@ class iCMS {
             'APPID'   => $APPID
         ));
     }
+    public static function default_apps() {
+        return array(
+            'admincp' => '10',
+            'config'  => '11',
+            'files'   => '12',
+            'menu'    => '13',
+            'group'   => '14',
+            'members' => '15',
+            'apps'    => '17',
+            'former'  => '18',
+            'patch'   => '19',
+            'cache'   => '23'
+        );
+    }
+
 }

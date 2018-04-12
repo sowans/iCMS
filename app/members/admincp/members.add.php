@@ -48,7 +48,6 @@ $(function(){
             <?php if(members::is_superadmin()){ ?>
             <div class="input-prepend"> <span class="add-on">角色</span>
               <select name="gid" id="gid" class="chosen-select" data-placeholder="请选择管理组">
-                <option value='0'>路人甲[GID:0] </option>
                 <?php echo $this->groupAdmincp->select(); ?>
               </select>
             </div>

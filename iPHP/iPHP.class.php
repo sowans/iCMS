@@ -8,8 +8,6 @@
  * @license http://www.iiiphp.com/license
  * @version 2.1.0
  */
-defined('iPHP') OR exit('What are you doing?');
-
 class iPHP {
 	public static $apps       = null;
 	public static $app        = null;
@@ -28,25 +26,16 @@ class iPHP {
 	public static $is_callable= false;
 
 	public static $handler    = array(
-		'autoload' => array('iPHP', 'Autoload'),
+		'autoload' => array('iPHP', 'autoload'),
 		'error'    => array('iPHP', 'error_handler'),
 	);
 	public static $reserved   = array('API','ACTION','DO','MY');
 
-	public static function Init(){
+	public static function bootstrap(){
 		self::timer_start();
-		ini_set('display_errors','ON');
-		error_reporting(E_ALL & ~E_NOTICE);
-		version_compare('5.3',PHP_VERSION,'>') && die('iPHP requires PHP version 5.3 or higher. You are running version '.PHP_VERSION.'.');
 		@ini_set('magic_quotes_sybase', 0);
 		@ini_set("magic_quotes_runtime",0);
-		header('Content-Type: text/html; charset=UTF-8');
 		header('P3P: CP="CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR"');
-
-		define('iPHP_PATH',dirname(strtr(__FILE__,'\\',DIRECTORY_SEPARATOR)));
-		require_once iPHP_PATH.'/iPHP.version.php';
-		require_once iPHP_PATH.'/iPHP.define.php';
-		require_once iPHP_PATH.'/iPHP.compat.php';
 
 		if(function_exists('ini_get')) {
 		    $memorylimit = @ini_get('memory_limit');
@@ -64,10 +53,7 @@ class iPHP {
 		iSecurity::GP('page','GP',2);
 		iDefine::request();
 	}
-    /**
-     * Autoload
-     */
-	public static function Autoload($class,$core=null){
+	public static function autoload($class,$core=null){
 		$require = self::auto_require($class);
 		if (!$require) {
 			$autoload_finish = true;
@@ -90,8 +76,12 @@ class iPHP {
 			}
 		}
 	}
+	public static function runit($it=null){
+		empty($it) && $it = array(iPHP_APP,'init');
+		iPHP_APP_INIT && self::callback($it);
+	}
 	public static function config($site=null) {
-		$config = self::app_config($site);
+		$config = self::sys_config($site);
 		//config.php 中开启后 此处设置无效
 		iDefine::debug($config['debug']);
 		iDefine::datatime($config['time']);
@@ -99,14 +89,17 @@ class iPHP {
 
 		self::define_apps($config['apps']);
 		//config.php --END--
+		defined("iPHP_INIT_CONFIG") && self::callback(iPHP_INIT_CONFIG,array(&$config));
 		return $config;
 	}
-    public static function app_config($site=null) {
+    public static function sys_config($site=null) {
+		if(defined("iPHP_INIT_SYSCONFIG")){
+			return self::callback(iPHP_INIT_SYSCONFIG);
+		}
 		if($site===null){
 			$site = iPHP_MULTI_SITE ? $_SERVER['HTTP_HOST'] : iPHP_APP;
 			if (iPHP_MULTI_DOMAIN) {
-				//只绑定主域
-				preg_match("/[^\.\/][\w\-]+\.[^\.\/]+$/", $site, $matches);
+				preg_match("/[^\.\/][\w\-]+\.[^\.\/]+$/", $site, $matches);//只绑定主域
 				$site = $matches[0];
 			}
 			strpos($site, '..') === false OR self::error_throw('What are you doing','001');
@@ -140,7 +133,7 @@ class iPHP {
         defined('iPHP_MOBILE') OR define('iPHP_MOBILE', $mobile);
     }
 	public static function run($app = NULL, $do = NULL, $args = NULL, $prefix = "do_") {
-		empty($app) && $app = iSecurity::escapeStr(iSecurity::getGP('app')); //单一入口
+		empty($app) && $app = iSecurity::getGP('app'); //单一入口
 		if (empty($app)) {
 			$fi = iFS::name(iPHP_SELF);
 			$app = $fi['name'];
@@ -178,7 +171,7 @@ class iPHP {
         self::define_device();
 		self::callback(self::$callback['run']['begin']);
 		if(self::$app===null){
-			self::app_init($app,$class_name,$prefix);
+			self::app_startup($app,$class_name,$prefix);
 			// require_once self::$app_file;
 			// self::$app = new $class_name();
 			self::callback(self::$callback['run']['init'],array(self::$app));
@@ -206,7 +199,7 @@ class iPHP {
 			iPHP::error_404('Unable to find method <b>' . $class_name . '::'.self::$app_method.'</b>', '0005');
 		}
 	}
-	public static function app_init($app,&$class_name,$prefix=null) {
+	public static function app_startup($app,&$class_name,$prefix=null) {
 		$prefix = strtoupper($prefix);
 		$path   = self::$app_path . '/'.$prefix.$app.'.app.php';
 		// a/API_a.app.php
@@ -217,13 +210,12 @@ class iPHP {
 			require_once self::$app_file;
 			self::$app = new $class_name();
 			if(!method_exists(self::$app, self::$app_method) && $prefix){
-				self::app_init($app,$class_name);
+				self::app_startup($app,$class_name);
 			}
 		}else{
-			self::app_init($app,$class_name);
+			self::app_startup($app,$class_name);
 		}
 	}
-
 	public static function auto_require($name) {
 		$o_name = $name;
 		//app_mo.class.php
@@ -313,10 +305,6 @@ class iPHP {
 		}
 	}
 
-	public static function PG($key) {
-		$value = isset($_POST[$key]) ? $_POST[$key] : $_GET[$key];
-		return iSecurity::escapeStr($value);
-	}
 	// 获取客户端IP
 	public static function get_ip($format = 0) {
 		if (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {

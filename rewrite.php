@@ -50,7 +50,7 @@ if(in_array($ext, $exts)){
         foreach ($preg as $key => $value) {
             $uri = $value[0];
             if (stripos($key, 'uid:') === 0) {
-                $url = rtrim(iURL::$CONFIG['user_url'], '/') . $value[0];
+                $url = rtrim(iURL::$config['user_url'], '/') . $value[0];
                 $uREQ = parse_url($url);
                 $uri = $uREQ['path'];
             }

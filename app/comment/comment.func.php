@@ -112,7 +112,7 @@ class commentFunc{
 				'nowindex'  => $GLOBALS['page'],
 			);
 			if($vars['display'] == 'iframe' || $vars['page_ajax']){
-				iSecurity::gp('pn','GP',2);
+				iSecurity::GP('pn','GP',2);
 				$pgconf['page_name'] = 'pn';
 				$pgconf['nowindex']  = $GLOBALS['pn'];
 			}

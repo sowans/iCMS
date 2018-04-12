@@ -33,6 +33,7 @@ $(function(){
         <li><a href="#user-data" data-toggle="tab"><i class="fa fa-users"></i> 用户资料</a></li>
         <?php };?>
         <li><a href="#user-custom" data-toggle="tab"><i class="fa fa-wrench"></i> 自定义</a></li>
+        <li><a href="#apps-metadata" data-toggle="tab"><i class="fa fa-sitemap"></i> 动态属性</a></li>
       </ul>
     </div>
     <div class="widget-content nopadding">
@@ -46,7 +47,6 @@ $(function(){
             <?php if(members::is_superadmin()){ ?>
             <div class="input-prepend"> <span class="add-on">角色</span>
               <select name="user[gid]" id="gid" class="chosen-select" data-placeholder="请选择用户组">
-                <option value='0'>路人甲[GID:0] </option>
                 <?php echo $this->groupAdmincp->select(); ?>
               </select>
             </div>
@@ -245,6 +245,9 @@ $(function(){
           </div>
           <div id="user-custom" class="tab-pane">
           <?php echo former::layout();?>
+          </div>
+          <div id="apps-metadata" class="tab-pane hide">
+              <?php include admincp::view("apps.meta","apps");?>
           </div>
         </div>
         <div class="form-actions">

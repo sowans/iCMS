@@ -67,11 +67,11 @@ class apps_common {
     }
     public static function user() {
         if (self::$vars['user']) {
+            $author = self::$data['author'];
             if (self::$data['postype']) {
-                self::$data['user'] = user::empty_info(self::$data['userid'], '#' . self::$data['editor']);
-            } else {
-                self::$data['user'] = user::info(self::$data['userid'], self::$data['author']);
+                $author = self::$data['editor'];
             }
+            self::$data['user'] = user::info(self::$data['userid'], $author);
         }
     }
     public static function hits() {

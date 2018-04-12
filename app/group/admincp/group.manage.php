@@ -59,13 +59,17 @@ $(function(){
               <td><?php echo $rs[$i]['gid'] ; ?></td>
               <td><?php echo $rs[$i]['name'] ; ?></td>
               <td><?php echo $rs[$i]['type']?"管理组":"会员组" ; ?></td>
-              <td><a href="<?php echo __ADMINCP__; ?>=members&gid=<?php echo $rs[$i]['gid'] ; ?>&job=1" class="btn btn-small"><i class="fa fa-bar-chart-o"></i> 统计</a>
-                <a href="<?php echo APP_URI; ?>&do=add&gid=<?php echo $rs[$i]['gid'] ; ?>" class="btn btn-small"><i class="fa fa-edit"></i> 编辑</a>
+              <td>
+                <?php if($rs[$i]['type']){  ?>
+                <a href="<?php echo __ADMINCP__; ?>=members&gid=<?php echo $rs[$i]['gid'] ; ?>&job=1" class="btn btn-small"><i class="fa fa-bar-chart-o"></i> 统计</a>
                 <a href="<?php echo APP_URI; ?>&do=add&tab=mpriv&gid=<?php echo $rs[$i]['gid'] ; ?>" class="btn btn-small"><i class="fa fa-tachometer"></i> 后台权限</a>
                 <a href="<?php echo APP_URI; ?>&do=add&tab=cpriv&gid=<?php echo $rs[$i]['gid'] ; ?>" class="btn btn-small"><i class="fa  fa-unlock-alt"></i> 栏目权限</a>
+                <?php } ?>
+                <a href="<?php echo APP_URI; ?>&do=add&gid=<?php echo $rs[$i]['gid'] ; ?>" class="btn btn-small"><i class="fa fa-edit"></i> 编辑</a>
                 <?php if($rs[$i]['gid']!='1'){  ?>
                 <a href="<?php echo APP_FURI; ?>&do=del&gid=<?php echo $rs[$i]['gid'] ; ?>" target="iPHP_FRAME" class="del btn btn-small" title='永久删除'  onclick="return confirm('确定要删除?');"><i class="fa fa-trash-o"></i> 删除</a>
-                <?php } ?></td>
+                <?php } ?>
+              </td>
             </tr>
             <?php } ?>
           </tbody>

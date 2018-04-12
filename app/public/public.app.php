@@ -38,6 +38,10 @@ class publicApp {
 		$url===null && $url = iSecurity::escapeStr($_GET['url']);
 		echo iPHP::callback(array("plugin_QRcode","HOOK"),$url);
 	}
+	public static function qrcode_base64($text) {
+	    $image = iPHP::callback(array("plugin_QRcode","HOOK"),array($text,true));
+	    return 'data:image/png;base64,'.base64_encode($image);
+	}
 	public static function qrcode_url($url) {
 		$query = array(
 			'app' => 'public',

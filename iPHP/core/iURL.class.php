@@ -8,26 +8,26 @@
  * @license http://www.iiiphp.com/license
  * @version 2.1.0
  */
-define('iPHP_PAGE_SIGN', '{P}');
-
 class iURL {
-    public static $CONFIG   = null;
-    public static $ARRAY    = null;
-    public static $APP_CONF = null;
+    const PAGE_SIGN = '{P}';
+
+    public static $config   = null;
+
+    protected static $ARRAY = null;
 
     public static function init($config=null,$_config=null){
-        self::$CONFIG = $config+$_config;
+        self::$config = $config+$_config;
     }
 
     public static function router($key, $var = null) {
-        $routerArray = self::$CONFIG['config'];
+        $routerArray = self::$config['config'];
         $routerKey   = $key;
         is_array($key) && $routerKey = $key[0];
         $router = $routerArray[$routerKey];
         $url = iPHP_ROUTER_REWRITE?$router[0]:$router[1];
 
         if (iPHP_ROUTER_REWRITE && stripos($routerKey, 'uid:') === 0) {
-            $url = rtrim(self::$CONFIG['user_url'], '/') . $url;
+            $url = rtrim(self::$config['user_url'], '/') . $url;
         }
 
         if (is_array($key)) {
@@ -45,11 +45,14 @@ class iURL {
             $url .= iPHP_ROUTER_REWRITE ? '?' : '&';
         }
         if(!iPHP_ROUTER_REWRITE){
-            $url = self::$CONFIG['api_url'].'/'.$url;
+            $url = self::$config['api_url'].'/'.$url;
         }else{
             if(!iFS::checkHttp($url)){
                 $url = rtrim(iPHP_URL,'/').$url;
             }
+        }
+        if(self::$config['callback']['router']){
+            call_user_func_array(self::$config['callback']['router'], array(&$url));
         }
         return $url;
     }
@@ -98,8 +101,8 @@ class iURL {
             case 'TCID':	$e = $tc['tcid'];break;
             case 'TCDIR':	$e = $tc['dir'];break;
 
-            case 'EXT':		$e = $c['htmlext']?$c['htmlext']:self::$CONFIG['ext'];break;
-            case 'P':       $e = iPHP_PAGE_SIGN;break;
+            case 'EXT':		$e = $c['htmlext']?$c['htmlext']:self::$config['ext'];break;
+            case 'P':       $e = self::PAGE_SIGN;break;
             default:
                 $key = strtolower($b);
                 $a[$key] && $e = $a[$key];
@@ -121,7 +124,7 @@ class iURL {
         $default    = array();
         $category   = array();
         $array      = (array)$a;
-        $app_conf   = self::$CONFIG['iurl'][$uri];
+        $app_conf   = self::$config['iurl'][$uri];
         $type === null && $type = $app_conf['rule'];
 
         switch($type) {
@@ -165,14 +168,14 @@ class iURL {
             break;
         }
 
-        $default  = self::$CONFIG[$uri];
+        $default  = self::$config[$uri];
         if($default){
             $router_dir = $default['dir'];
             $router_url = $default['url'];
             empty($url) && $url = $default['rule'];
         }
-        empty($router_url) && $router_url = self::$CONFIG['url'];
-        empty($router_dir) && $router_dir = self::$CONFIG['dir'];
+        empty($router_url) && $router_url = self::$config['url'];
+        empty($router_dir) && $router_dir = self::$config['dir'];
         //[xxxxx]类自定链接优先
         if($array['clink']){
             preg_match('/\[(.+)\]/', $array['clink'], $match);
@@ -187,7 +190,7 @@ class iURL {
             }
             if($app_conf['page']){
                 $i->pageurl = $href.((strpos($href,'?')===false)?'?':'&');
-                $i->pageurl.= $app_conf['page'].'='.iPHP_PAGE_SIGN;
+                $i->pageurl.= $app_conf['page'].'='.self::PAGE_SIGN;
                 iFS::checkHttp($i->pageurl) OR $i->pageurl = rtrim($router_url,'/').'/'.$i->pageurl;
             }
             iFS::checkHttp($href) OR $href = rtrim($router_url,'/').'/'.$href;
@@ -204,23 +207,23 @@ class iURL {
                 unset($ii);
             }else{
                 $pfile = $i->file;
-                if(strpos($pfile,iPHP_PAGE_SIGN)===false) {
-                    $pfile = $i->name.'_'.iPHP_PAGE_SIGN.$i->ext;
+                if(strpos($pfile,self::PAGE_SIGN)===false) {
+                    $pfile = $i->name.'_'.self::PAGE_SIGN.$i->ext;
                 }
                 $i->pageurl  = $i->hdir.'/'.$pfile ;
                 $i->pagepath = $i->dir.'/'.$pfile;
             }
             // call_user_func_array(self::$callback, array($uri,$i,self::$ARRAY,$app_conf));
         }
-        if($category['cid'] && self::$CONFIG['callback']['domain']){
-            $i = call_user_func_array(self::$CONFIG['callback']['domain'], array($i,$category['cid'],$router_url));
+        if($category['cid'] && self::$config['callback']['domain']){
+            $i = call_user_func_array(self::$config['callback']['domain'], array($i,$category['cid'],$router_url));
         }
-        if(self::$CONFIG['callback']['device']){
-            $d = call_user_func_array(self::$CONFIG['callback']['device'], array($i));
+        if(self::$config['callback']['device']){
+            $d = call_user_func_array(self::$config['callback']['device'], array($i));
             $i = (object)array_merge((array)$i,$d);
         }
-        if(self::$CONFIG['callback']['url']){
-            call_user_func_array(self::$CONFIG['callback']['url'], array(&$i));
+        if(self::$config['callback']['url']){
+            call_user_func_array(self::$config['callback']['url'], array(&$i));
         }
         $i->url = $i->href;
         return $i;
@@ -252,7 +255,7 @@ class iURL {
 
         if(empty($i->file)||substr($url,-1)=='/'||empty($pathA['extension'])) {
             $i->name = 'index';
-            $i->ext  = self::$CONFIG['ext'];
+            $i->ext  = self::$config['ext'];
             $_ext && $i->ext = $_ext;
             $i->file = $i->name.$i->ext;
             $i->path = $i->path.'/'.$i->file;
@@ -264,22 +267,22 @@ class iURL {
     }
     public static function page_sign(&$i) {
         // $i->pfile = $i->file;
-        // if(strpos($i->file,iPHP_PAGE_SIGN)===false) {
-        //     $i->pfile = $i->name.'_'.iPHP_PAGE_SIGN.$i->ext;
+        // if(strpos($i->file,self::PAGE_SIGN)===false) {
+        //     $i->pfile = $i->name.'_'.self::PAGE_SIGN.$i->ext;
         // }
         // $i->pageurl  = $i->hdir.'/'.$i->pfile ;
         // $i->pagepath = $i->dir.'/'.$i->pfile;
-        $i->href = str_replace(iPHP_PAGE_SIGN,1,$i->href);
-        $i->path = str_replace(iPHP_PAGE_SIGN,1,$i->path);
-        $i->file = str_replace(iPHP_PAGE_SIGN,1,$i->file);
-        $i->name = str_replace(iPHP_PAGE_SIGN,1,$i->name);
+        $i->href = str_replace(self::PAGE_SIGN,1,$i->href);
+        $i->path = str_replace(self::PAGE_SIGN,1,$i->path);
+        $i->file = str_replace(self::PAGE_SIGN,1,$i->file);
+        $i->name = str_replace(self::PAGE_SIGN,1,$i->name);
     }
     public static function page_num($path, $page = false) {
         $page === false && $page = $GLOBALS['page'];
         if ($page < 2) {
-            return str_replace(array('_'.iPHP_PAGE_SIGN, '&p='.iPHP_PAGE_SIGN), '', $path);
+            return str_replace(array('_'.self::PAGE_SIGN, '&p='.self::PAGE_SIGN), '', $path);
         }
-        return str_replace(iPHP_PAGE_SIGN, $page, $path);
+        return str_replace(self::PAGE_SIGN, $page, $path);
     }
     public static function page_url($iurl){
         if(isset($GLOBALS['iPage'])) return;
@@ -313,16 +316,16 @@ class iURL {
         $query = array_merge((array)$query,(array)$output);
         $parse['query'] = http_build_query($query);
 
-        $PAGE_SIGN = urlencode(iPHP_PAGE_SIGN);
+        $PAGE_SIGN = urlencode(self::PAGE_SIGN);
         if(strpos($parse['query'],$PAGE_SIGN)!==false) {
-            $parse['query'] = str_replace($PAGE_SIGN,iPHP_PAGE_SIGN, $parse['query']);
+            $parse['query'] = str_replace($PAGE_SIGN,self::PAGE_SIGN, $parse['query']);
         }
         // if(strpos($parse['path'],'.php')===false) {
         //     $path = '';
         //     foreach ($query as $key => $value) {
         //         $path.= $key.'-'.$value;
         //     }
-        //     $parse['path'].= $path.self::$CONFIG['ext'];
+        //     $parse['path'].= $path.self::$config['ext'];
         // }
         $nurl = self::glue($parse);
         return $nurl?$nurl:$url;

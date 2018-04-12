@@ -106,14 +106,15 @@ class membersAdmincp{
             $_data['lastlogintime'] = time();
             $_data['status']        = '1';
             $data = array_merge($data, $_data);
-            iDB::insert('members',$data);
-            $msg="账号添加完成!";
+            $uid  = iDB::insert('members',$data);
+            $msg  = "账号添加完成!";
         }else {
             iDB::value("SELECT `uid` FROM `#iCMS@__members` where `username` ='$username' AND `uid` !='$uid' LIMIT 1") && iUI::alert('该账号已经存在');
             iDB::update('members', $data, array('uid'=>$uid));
             $password && iDB::query("UPDATE `#iCMS@__members` SET `password`='$password' WHERE `uid` ='".$uid."'");
             $msg="账号修改完成!";
         }
+        $this->clone_touser($uid,$data);
         iUI::success($msg,'js:1');
     }
     public function do_batch(){
@@ -138,5 +139,69 @@ class membersAdmincp{
 		$uid=="1" && iUI::alert('不能删除超级管理员');
 		iDB::query("DELETE FROM `#iCMS@__members` WHERE `uid` = '$uid'");
 		$dialog && iUI::success('用户删除完成','js:parent.$("#id'.$uid.'").remove();');
+    }
+
+    public static function clone_touser($uid,$member=null){
+        empty($member) && $member = iDB::row("SELECT `username`,`nickname` FROM `#iCMS@__members` WHERE `uid`='$uid' LIMIT 1;",ARRAY_A);
+
+        $user = iDB::row("SELECT * FROM `#iCMS@__user` WHERE `uid`='$uid' LIMIT 1;",ARRAY_A);
+        if($user){
+            $array = array(
+                'gid'      =>'65535',
+                'nickname' =>$member['nickname'],
+            );
+            //管理员克隆号
+            if($user['gid']=='65535'||$member['nickname']==$user['nickname']){
+            }else{
+                //迁移用户
+                self::transfer_user($user);
+            }
+            iDB::update('user',$array,array('uid'=>$uid));
+        }else{
+            //创建克隆号
+            $array = array(
+                'uid'      =>$uid,
+                'gid'      =>'65535',
+                'username' =>substr(md5(auth_encode($member['username'])),8,16),
+                'nickname' =>$member['nickname'],
+                'password' =>md5(random(32)),
+                'type'     =>'0',
+                'status'   =>'1',
+            );
+            iDB::insert('user',$array);
+        }
+    }
+
+    public static function transfer_user($user){
+        $ouid = $user['uid'];
+        //防止username重复无法复制
+        iDB::update('user',array('username'=>md5(random(32))),array('uid'=>$ouid));
+
+        unset($user['uid']);
+        $nuid = iDB::insert('user',$user);
+
+        iDB::update('user_category',array('uid'=>$nuid),array('uid'=>$ouid));
+        if(iDB::check_table('user_cdata')){
+            iDB::update('user_cdata',array('user_id'=>$nuid),array('user_id'=>$ouid));
+        }
+        iDB::update('user_data',array('uid'=>$nuid),array('uid'=>$ouid));
+        iDB::update('user_follow',array('uid'=>$nuid),array('uid'=>$ouid));
+        iDB::update('user_follow',array('fuid'=>$nuid),array('fuid'=>$ouid));
+        iDB::update('user_openid',array('uid'=>$nuid),array('uid'=>$ouid));
+        iDB::update('user_report',array('uid'=>$nuid),array('uid'=>$ouid));
+        iDB::update('user_report',array('userid'=>$nuid),array('userid'=>$ouid));
+        iDB::update('comment',array('userid'=>$nuid),array('userid'=>$ouid));
+        iDB::update('favorite',array('uid'=>$nuid),array('uid'=>$ouid));
+        iDB::update('favorite_data',array('uid'=>$nuid),array('uid'=>$ouid));
+        iDB::update('favorite_follow',array('uid'=>$nuid),array('uid'=>$ouid));
+        iDB::update('message',array('userid'=>$nuid),array('userid'=>$ouid));
+        iDB::update('message',array('friend'=>$nuid),array('friend'=>$ouid));
+        iDB::update('message',array('send_uid'=>$nuid),array('send_uid'=>$ouid));
+        iDB::update('message',array('receiv_uid'=>$nuid),array('receiv_uid'=>$ouid));
+        iDB::update('article',array('userid'=>$nuid),array('userid'=>$ouid,'postype'=>'0'));
+        if(iDB::check_table('ask')){
+            iDB::update('ask',array('userid'=>$nuid),array('userid'=>$ouid));
+            iDB::update('ask_data',array('userid'=>$nuid),array('userid'=>$ouid));
+        }
     }
 }

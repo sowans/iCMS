@@ -13,6 +13,7 @@
  */
 class iDevice {
     public static $config   = null;
+    public static $callback   = array();
 
     public static $domain       = null;
     public static $router_url   = null;
@@ -26,10 +27,10 @@ class iDevice {
 
     public static function init($config=null,$common=array()) {
         self::$router_url = iPHP_URL;
-        self::$config       = $config;
+        self::$config = $config;
         //有设置其它设备
         if(self::$config['device']){
-            iPHP::PG('device')&& $device = self::check('device');   //判断指定设备
+            iSecurity::getGP('device')&& $device = self::check('device');   //判断指定设备
             empty($device)    && $device = self::check('domain');   //无指定设备 判断域名模板
             empty($device)    && $device = self::check('ua');       //无指定域名 判断USER_AGENT
             $device && list($device_name, $device_tpl,$device_index,self::$domain) = $device;
@@ -91,10 +92,15 @@ class iDevice {
         return $urls;
     }
     public static function router(&$router,$deep=false) {
-        $router = is_array($router) && $deep ?
-                array_map(array('iDevice','router'), $router) :
-                str_replace(self::$router_url, self::$domain, $router);
-
+        if(is_array($router) && $deep){
+            $router = array_map(array('iDevice','router'), $router);
+        }else{
+            if(self::$config['callback']['router']){
+                $router = iPHP::callback(self::$config['callback']['router'],array($router));
+            }else{
+                $router = str_replace(self::$router_url, self::$domain, $router);
+            }
+        }
         return $router;
     }
     //所有设备网址
@@ -143,7 +149,7 @@ class iDevice {
                 if ($flag == 'ua') {
                     $device['ua'] && $check = self::agent($device['ua']);
                 } elseif ($flag == 'device') {
-                    $_device = iPHP::PG('device');
+                    $_device = iSecurity::getGP('device');
                     if ($device['ua'] == $_device || $device['name'] == $_device) {
                         $check = true;
                     }

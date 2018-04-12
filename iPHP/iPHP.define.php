@@ -42,9 +42,11 @@ defined('iPHP_MULTI_DOMAIN') OR define('iPHP_MULTI_DOMAIN',false);
 //defined('iPHP_TPL_DEBUG') OR define('iPHP_TPL_DEBUG',false);
 //defined('iPHP_URL_404') OR define('iPHP_URL_404','');
 //-----------------框架相关路径-----------------------
-define('iPHP_CORE',   iPATH."iPHP/core");
-define('iPHP_LIB',    iPATH."iPHP/library");
-define('iPHP_VENDOR', iPATH."iPHP/vendor");
+define('iPHP_CORE',   __DIR__."/core");
+define('iPHP_LIB',    __DIR__."/library");
+define('iPHP_VENDOR', __DIR__."/vendor");
+//-----------------应用根目录-----------------------
+define('iPATH',realpath(__DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR);
 //-----------------应用相关路径-----------------------
 define('iPHP_APP_DIR',    iPATH."app");
 define('iPHP_APP_CORE',   iPATH."core");
@@ -57,9 +59,9 @@ define('iPHP_TPL_CACHE',  iPATH."cache/template");
 
 //---------------系统设置------------------------
 defined('iPHP_APP') OR define('iPHP_APP',"iPHP");//应用名
+defined('iPHP_APP_INIT') OR define('iPHP_APP_INIT',true);//运行初始化
 defined('iPHP_APP_MAIL') OR define('iPHP_APP_MAIL',"master@iiiphp.com");
 defined('iPHP_MEMORY_LIMIT') OR define('iPHP_MEMORY_LIMIT', '128M');
-
 //-----------------模板-----------------------
 defined('iPHP_TPL_VAR') OR define('iPHP_TPL_VAR',iPHP_APP);
 defined('iPHP_TPL_FUN') OR define('iPHP_TPL_FUN',iPHP_APP_DIR.'/func');
