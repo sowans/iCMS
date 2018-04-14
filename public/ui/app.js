@@ -128,8 +128,7 @@ function payment_notify(param,SUCCESS,WAIT,FAIL) {
     this.clear_timer  = false;
     this.notify_timer = $.timer(function() {
         me.notify_timer.stop();
-        $.getJSON(iCMS.CONFIG.API+'?callback=?', param,
-            function(ret) {
+        $.getJSON(iCMS.CONFIG.API, param,function(ret) {
                 if (ret.code == "1") {
                     if (typeof(SUCCESS) === "function") {
                         SUCCESS(ret,me);

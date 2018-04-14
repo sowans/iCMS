@@ -46,7 +46,7 @@ define('iPHP_CORE',   __DIR__."/core");
 define('iPHP_LIB',    __DIR__."/library");
 define('iPHP_VENDOR', __DIR__."/vendor");
 //-----------------应用根目录-----------------------
-define('iPATH',realpath(__DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR);
+define('iPATH',strtr(realpath(__DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR,'\\','/'));
 //-----------------应用相关路径-----------------------
 define('iPHP_APP_DIR',    iPATH."app");
 define('iPHP_APP_CORE',   iPATH."core");

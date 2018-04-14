@@ -17,9 +17,6 @@ class iUI {
 	public static $break      = true;
 	public static $dialog     = array();
 
-    public static function set_dialog($key,$value) {
-        self::$dialog[$key] = $value;
-    }
 	public static function lang($keys = '', $throw = true) {
 		if (empty($keys)) {
 			return false;
@@ -211,6 +208,13 @@ class iUI {
 		);
 		return self::dialog('success:#:check:#:' . $msg, $js, $s);
 	}
+    public static function set_dialog($key,$value) {
+        self::$dialog[$key] = $value;
+    }
+    public static function close_dialog($top=true) {
+        $obj = ($top?'top.':'').'iCMS.UI.$dialog';
+        echo '<script>if('.$obj.') '.$obj.'.close().remove();</script>';
+    }
 	public static function dialog($info = array(), $js = 'js:', $s = 3, $buttons = null, $update = false) {
 		$info = (array) $info;
 		$title = $info[1] ? $info[1] : '提示信息';

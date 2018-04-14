@@ -8,6 +8,7 @@
             DIALOG:[]
         },
         UI:{
+            $dialog:{},
             success: function(msg,callback) {
                 return iCMS.alert(msg,true,callback);
             },
@@ -174,6 +175,7 @@
                 + '</span></div>'
                 +'</td></tr></table>';
             }
+            iCMS.UI.$dialog = d;
             return d;
         },
         setcookie: function(cookieName, cookieValue, seconds, path, domain, secure) {

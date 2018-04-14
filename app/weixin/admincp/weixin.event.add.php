@@ -224,7 +224,6 @@ function modal_tplfile(e, a) {
                                 <option value='location' data-default="true">上报地理位置</option>
                             </optgroup>
                             <optgroup label="小程序客服会话" data-type="contact">
-                                <option value='user_enter_tempsession' data-default="true">进入会话事件</option>
                                 <option value='contact_text' data-operator="true" data-addon="关键词" data-help="用户输入的关键词">文本消息</option>
                                 <option value='contact_image'>图片消息</option>
                                 <option value='miniprogrampage'>小程序卡片消息</option>

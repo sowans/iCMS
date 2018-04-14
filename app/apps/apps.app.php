@@ -141,7 +141,8 @@ class appsApp {
     }
 
     public function add_method($methods){
-        $this->methods = array_merge(explode(',', $methods),$this->methods);
+        $mArray=is_array($methods)?$methods:explode(',', $methods);
+        $this->methods = array_merge($mArray,$this->methods);
     }
 //--------------------------------------------------------------------
     public static function render($data,$tpl,$name=null,$p=null) {

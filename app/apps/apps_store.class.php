@@ -8,65 +8,56 @@
 * @licence https://www.icmsdev.com/LICENSE.html
 */
 defined('iPHP') OR exit('What are you doing?');
-define('__STORE_DIR__', iPATH . 'cache/iCMS/store/');//临时文件夹
-
 class apps_store {
-    const STORE_URL = "https://store.icmsdev.com";
+    const STORE_URL = "https://store.icmsdev.com/v2";
     public static $zip_name  = null;
     public static $zip_file  = null;
     public static $is_git    = false;
     public static $is_update = false;
     public static $test      = false;
-    public static $status    = true;
+    public static $success   = false;
     public static $msg_mode  = null;
-    public static $sid       = null;
     public static $app_id    = null;
     public static $uptime    = 0;
+    public static $authcode  = null;
 
     public static function download($url=null,$name,$zip_name=null) {
+        self::$success = false;
         strpos($url, '/git/')!==false && self::$is_git = true;
-
-        iFS::mkdir(__STORE_DIR__);
-        $zip_name===null && $zip_name = basename($url);
-        self::$zip_file = __STORE_DIR__ . $zip_name; //临时文件
+        $cache_dir = iPATH . 'cache/iCMS/store/';
+        iFS::mkdir($cache_dir);
+        if(empty($zip_name)){
+            $zip_name = basename($url);
+            $zip_name = strstr($zip_name, '?', true);
+        }
+        self::$zip_file = $cache_dir . $zip_name; //临时文件
 
         $msg = self::msg('正在下载 [' . $name . '] 安装包',true);
         if (iFS::ex(self::$zip_file) && (filemtime(self::$zip_file)-time()<3600)) {
             $msg.= self::msg('安装包已存在',true);
+            self::$success = true;
             return $msg;
         }
         $data = self::remote($url);
         if($data[0] == '{'){
             $array = json_decode($data,true);
             if($array){
-                $msg.= self::msg($array['msg'].'[code:'.$array['code'].']',false);
+                $msg.= self::msg($array['msg'],false);
             }else{
                 $msg.= self::msg('下载出错误',false);
             }
-            self::$status = false;
         }else if ($data) {
-            iFS::mkdir(__STORE_DIR__);
             iFS::write(self::$zip_file, $data); //下载更新包
             $msg.= self::msg('安装包下载完成',true);
+            self::$success = true;
+        }else{
+            $msg.= self::msg('下载出错误',false);
         }
         return $msg;
     }
     public static function install_template($dir=null) {
-        $zip_file = self::$zip_file;
-        if(!file_exists($zip_file)){
-            return self::msg("安装包不存在",false);
-        }
-
-        iPHP::vendor('PclZip');
-        $zip = new PclZip($zip_file);
-        if (false == ($archive_files = $zip->extract(PCLZIP_OPT_EXTRACT_AS_STRING))) {
-          return self::msg("ZIP包错误",false);
-        }
-
-        if (0 == count($archive_files)) {
-          return self::msg("空的ZIP文件",false);
-        }
-
+        self::$success = false;
+        $archive_files = self::setup_zip();
         $msg = null;
         if ($archive_files) {
             $setup_msg = self::setup_template_file($archive_files,$dir);
@@ -78,58 +69,14 @@ class apps_store {
         }
         self::$test OR iFS::rm(self::$zip_file);
         $msg.= self::msg('模板安装完成',true);
+        self::$success = true;
         return $msg;
     }
-    public static function setup_template_file(&$archive_files,$dir){
-        $msg = self::msg('正在对安装包进行解压缩',true);
-        $msg.= self::msg('解压完成',true);
-        $msg.= self::msg('开始测试目录权限',true);
 
-        if (!iFS::checkDir(iPATH)) {
-            return self::msg(iPATH.'根目录无写权限',false);
-        }
-
-        if (!iFS::checkDir(iPHP_TPL_DIR)) {
-            return self::msg(iPHP_TPL_DIR . '目录无写权限',false);
-        }
-
-        $ROOTPATH = self::rootpath('TPL');
-        self::$is_git OR $ROOTPATH.= '/'.$dir;
-
-        $continue = self::extract_test($archive_files,$ROOTPATH,$msg);
-
-        if (!$continue) {
-            $msg.= self::msg('权限测试无法完成',false);
-            $msg.= self::msg('请设置好上面提示的文件写权限',false);
-            $msg.= self::msg('然后重新安装',false);
-            return $msg;
-        }
-        $msg.= self::msg('权限测试通过',true);
-
-        self::$test OR iFS::mkdir($ROOTPATH);
-        $bakdir = self::create_bakdir($dir,$msg);
-
-        $msg.= self::msg('开始安装模板',true);
-        $msg.= self::extract($archive_files,$ROOTPATH,$bakdir);
-
-        return array($msg,true);
-    }
     public static function install_app($app=null) {
-        $zip_file = self::$zip_file;
-        if(!file_exists($zip_file)){
-            return self::msg("安装包不存在",false);
-        }
+        self::$success = false;
 
-        iPHP::vendor('PclZip');
-        $zip = new PclZip($zip_file);
-        if (false == ($archive_files = $zip->extract(PCLZIP_OPT_EXTRACT_AS_STRING))) {
-          return self::msg("ZIP包错误",false);
-        }
-
-        if (0 == count($archive_files)) {
-          return self::msg("空的ZIP文件",false);
-        }
-
+        $archive_files = self::setup_zip();
         $msg = null;
         //安装应用数据
         $setup_msg = self::setup_app_data($archive_files,$app);
@@ -167,7 +114,42 @@ class apps_store {
         apps::cache() && $msg.= self::msg('更新应用缓存',true);
         menu::cache() && $msg.= self::msg('更新菜单缓存',true);
         $msg.= self::msg('应用安装完成',true);
+        self::$success = true;
         return $msg;
+    }
+    public static function setup_template_file(&$archive_files,$dir){
+        $msg = self::msg('正在对安装包进行解压缩',true);
+        $msg.= self::msg('解压完成',true);
+        $msg.= self::msg('开始测试目录权限',true);
+
+        if (!iFS::checkDir(iPATH)) {
+            return self::msg(iPATH.'根目录无写权限',false);
+        }
+
+        if (!iFS::checkDir(iPHP_TPL_DIR)) {
+            return self::msg(iPHP_TPL_DIR . '目录无写权限',false);
+        }
+
+        $ROOTPATH = self::rootpath('TPL');
+        self::$is_git OR $ROOTPATH.= '/'.$dir;
+
+        $continue = self::extract_test($archive_files,$ROOTPATH,$msg);
+
+        if (!$continue) {
+            $msg.= self::msg('权限测试无法完成',false);
+            $msg.= self::msg('请设置好上面提示的文件写权限',false);
+            $msg.= self::msg('然后重新安装',false);
+            return $msg;
+        }
+        $msg.= self::msg('权限测试通过',true);
+
+        self::$test OR iFS::mkdir($ROOTPATH);
+        $bakdir = self::create_bakdir($dir,$msg);
+
+        $msg.= self::msg('开始安装模板',true);
+        $msg.= self::extract($archive_files,$ROOTPATH,$bakdir);
+
+        return array($msg,true);
     }
     public static function setup_app_data(&$archive_files,$app){
         foreach ($archive_files AS $key => $file) {
@@ -276,6 +258,25 @@ class apps_store {
         }
         return $msg;
     }
+    public static function setup_zip() {
+        $zip_file = self::$zip_file;
+        if(!file_exists($zip_file)){
+            return self::msg("安装包不存在",false);
+        }
+
+        iPHP::vendor('PclZip');
+        $zip = new PclZip($zip_file);
+        if (false == ($archive_files = $zip->extract(PCLZIP_OPT_EXTRACT_AS_STRING))) {
+            iFS::rm($zip_file);
+            return self::msg("ZIP包错误",false);
+        }
+
+        if (0 == count($archive_files)) {
+            iFS::rm($zip_file);
+            return self::msg("空的ZIP文件",false);
+        }
+        return $archive_files;
+    }
     public static function setup_install($app){
         $path = iPHP_APP_DIR.'/'.$app.'/iCMS.APP.INSTALL.php';
         if(is_file($path)){
@@ -308,7 +309,7 @@ class apps_store {
         $d=='TPL' && $dir = iPHP_TPL_DIR;
 
         $ROOTPATH = self::$is_git?iPATH:$dir;
-        return rtrim($ROOTPATH,'/');
+        return rtrim($ROOTPATH,DIRECTORY_SEPARATOR);
     }
     public static function check_must($store){
       if(empty($store)){
@@ -333,7 +334,7 @@ class apps_store {
     }
     public static function extract_test($archive_files,$ROOTPATH,&$msg){
         $continue = true;
-        foreach ($archive_files as $file) {
+        if($archive_files)foreach ($archive_files as $file) {
             $folder = $file['folder'] ? $file['filename'] : dirname($file['filename']);
             $dp = $ROOTPATH .'/'.trim($folder,'/').'/';
             if (!iFS::checkdir($dp) && iFS::ex($dp)) {
@@ -348,6 +349,7 @@ class apps_store {
                 }
             }
         }
+        $msg = iSecurity::filter_path($msg);
         return array($msg,$continue);
     }
     public static function extract($archive_files,$ROOTPATH,$bakdir=null){
@@ -369,6 +371,7 @@ class apps_store {
                 $msg.= self::msg('安装文件 [' . $fp . ']',true);
             }
         }
+        $msg = iSecurity::filter_path($msg);
         return $msg;
     }
     public static function get($vars=0,$field='sid'){
@@ -409,69 +412,58 @@ class apps_store {
         iHttp::$CURLOPT_CONNECTTIMEOUT = 10;
         iHttp::$CURLOPT_REFERER        = $_SERVER['HTTP_REFERER'];
         iHttp::$CURLOPT_USERAGENT      = $_SERVER['HTTP_USER_AGENT'];
+        iHttp::$CURLOPT_HTTPHEADER     = array('AUTHORIZATION: '.self::$authcode);
 
         $queryArray  = array(
-            'iCMS_VERSION'   => iCMS_VERSION,
-            'iCMS_RELEASE'   => iCMS_RELEASE,
-            'GIT_COMMIT'     => GIT_COMMIT,
-            'GIT_TIME'       => GIT_TIME
+            'iCMS_VERSION' => iCMS_VERSION,
+            'iCMS_RELEASE' => iCMS_RELEASE,
+            'iCMS_HASH'    => iCMS_HASH,
+            'GIT_COMMIT'   => GIT_COMMIT,
+            'GIT_TIME'     => GIT_TIME,
+            'iCMS_HOST'    => $_SERVER['HTTP_HOST'],
         );
-        $url = iURL::make($queryArray,$url);
-        return iHttp::remote($url);
+        $url  = iURL::make($queryArray,$url);
+        $data = iHttp::remote($url);
+        return $data;
     }
-    public static function remote_git($do,$sid=null,$commit_id=null,$type='array') {
-        $commit_id===null && $commit_id = GIT_COMMIT;
-        $_GET['commit_id'] && $commit_id = $_GET['commit_id'];
+    public static function remote_update($store) {
+        $url = self::STORE_URL.'/git/update?sid='.$store['sid']
+            ."&version=".$store['version']
+            .'&git_sha=' .$store['git_sha']
+            .'&git_time=' .$store['git_time']
+            .'&authkey='.$store['authkey']
+            .'&transaction_id='.$store['transaction_id'];
 
-        $url = self::STORE_URL
-            .'/git?do='.$do
-            ."&sid=".$sid
-            ."&version=".$_GET['version']
-            .'&commit_id=' .$commit_id
-            .'&last_commit_id='.$_GET['last_commit_id']
-            .'&t='.time();
-
-        $_GET['authkey'] && $url.='&authkey='.$_GET['authkey'];
-        $_GET['transaction_id'] && $url.='&transaction_id='.$_GET['transaction_id'];
-
-        $data = self::remote($url);
-
-        if($type=='array'){
-          if($data){
-            return json_decode($data,true);
-          }
-          return array();
-        }else{
-          if($data){
-            return $data;
-          }
-          if($type=='json'){
-            return '[]';
-          }
-        }
+        self::$authcode = $store['data'];
+        $json  = self::remote($url);
+        $array = json_decode($json,true);
+        return $array;
     }
-    public static function remote_get($sid){
+    public static function remote_get($sid,$do='get'){
         $time  = time();
         $host  = $_SERVER['HTTP_HOST'];
         $key   = md5(iPHP_KEY.$host.$time);
         $query = compact(array('sid','key','host','time'));
-        $url   = self::STORE_URL.'/store.get?'.http_build_query($query);
+        $url   = self::STORE_URL.'/'.$do.'/'.$sid.'?'.http_build_query($query);
         $json  = self::remote($url);
         $array = json_decode($json,true);
-        $array && $array['authkey'] = $key;
         return $array;
     }
     public static function remote_getall($name='app'){
         $data = array();
-        $url  = self::STORE_URL.'/'.$name.'.json';
+        $url  = self::STORE_URL.'/all/'.$name;
         isset($_GET['premium']) && $url.='?premium='.$_GET['premium'];
         $json = self::remote($url);
         $json && $data = json_decode($json,true);
         return $data;
     }
-    public static function pay_notify($query){
-        $url = self::STORE_URL.'/store.pay.notify?'.http_build_query($query);
-        return self::remote($url);
+    public static function pay_notify(){
+        $query = array(
+            'authkey' => $_GET['authkey'],
+            'sid'     => $_GET['sid']
+        );
+        $url = self::STORE_URL.'/payment/notify?'.http_build_query($query);
+        echo self::remote($url);
     }
     public static function premium_dialog($sid,$array,$title){
         iUI::$break                = false;
@@ -482,82 +474,100 @@ class apps_store {
         iUI::$dialog['ok:js']      = 'top.clear_pay_notify_timer();';
         iUI::$dialog['cancel:js']  = 'top.clear_pay_notify_timer();';
         iUI::dialog($array['dialog_html'],'js:1',1000000);
+
         echo '<script type="text/javascript">
-        var j = '.json_encode(array($array['authkey'],$sid,$array['app'],$array['name'],$array['version'])).';
-        top.pay_notify("'.$array['pay_notify'].'",j,d);
+        var j = '.json_encode(array($array['authkey'],$sid)).';
+        top.pay_notify(j,d);
         </script>';
     }
-    public static function setup($url,$app,$name,$zip_name=null,$type='app'){
-      @set_time_limit(0);
-      // self::$test = true;
-      $msg = self::download($url,$name,$zip_name);
-      self::$status OR iUI::dialog($msg,'js:1',1000000);
-
-      $sid = 0;
-      self::$is_update && $sid = self::$sid;
-      if($type=='app'){
-        $msg.= self::install_app($app);
-        self::save(array(
-            'appid' => self::$app_id,
-        ),$sid);
-        if(self::$app_id){
-          iUI::dialog(
-            '<div style="overflow-y: auto;max-height: 360px;">'.$msg.'</div>',
-            (
-                self::$is_update?
-                'js:1'://更新
-                'url:'.__ADMINCP__."=apps&do=add&id=".self::$app_id
-            ),30
-          );
+    public static function setup($url,$store,$local=null){
+        @set_time_limit(0);
+        iUI::close_dialog();
+        $sid = 0;
+        if(self::$is_update && $local){
+            $sid = $local['sid'];
+            apps_store::$authcode = $local['data'];
+            $query = array('sid'=>$local['sid'],'authkey'=>$local['authkey']);
+            $store['premium'] && $query['transaction_id'] = $local['transaction_id'];
+            $query['store_update'] = 1;
         }else{
-          iUI::dialog($msg,'js:1',1000000);
+            apps_store::$authcode = $store['authcode'];
+            $query = array('sid'=>$store['id'],'authkey'=>$store['authkey']);
+            $store['premium'] && $query['transaction_id'] = $_GET['transaction_id'];
         }
-      }
+        $zipname = md5($store['authkey'].$local['authcode']).'.zip';
+        $zipurl  = apps_store::STORE_URL.$url.'?'.http_build_query($query);
+        $msg     = self::download($zipurl,$store['name'],$zipname);
+        self::$success OR iUI::dialog($msg,'js:1',1000000);
 
-      if($type=='template'){
-        $msg.= self::install_template($app);
-        self::save(array(
-            'appid' => 0,
-            'type'  => 1
-        ),$sid);
-        iUI::dialog(
-          '<div style="overflow-y: auto;max-height: 360px;">'.$msg.'</div>',
-          'js:1',1000000
-        );
-      }
+        $data = array_merge($query,array(
+          'app'      => $store['app'],
+          'name'     => $store['name'],
+          'git_time' => $store['git_time'],
+          'git_sha'  => $store['git_sha'],
+          'version'  => $store['version'],
+          'type'     => $store['type'],
+          'authkey'  => $store['authkey'],
+          'data'     => $store['authcode']
+        ));
+
+        switch ($store['type']) {
+            case '0':
+                $msg.= self::install_app($store['app']);
+                if(self::$success){
+                    self::$app_id && $data['appid'] = self::$app_id;
+                    self::save($data,$sid);
+                    iUI::dialog(
+                        '<div style="overflow-y: auto;max-height: 500px;">'.$msg.'</div>',
+                        (
+                            self::$is_update?
+                            'js:1'://更新
+                            'url:'.__ADMINCP__."=apps&do=add&id=".self::$app_id
+                        ),30
+                    );
+                    return true;
+                }
+            break;
+            case '1':
+                $msg.= self::install_template($store['app']);
+                if(self::$success){
+                    $data['appid'] = 0;
+                    self::save($data,$sid);
+                    iUI::dialog(
+                      '<div style="overflow-y: auto;max-height: 500px;">'.$msg.'</div>',
+                      'js:1',1000000
+                    );
+                    return true;
+                }
+            break;
+        }
+        iUI::dialog('<div style="overflow-y: auto;max-height: 500px;">'.$msg.'</div>','js:1',1000000);
     }
 
-    public static function del($id=null,$field='appid'){
+    public static function del($id=null,$field='appid',$send=true){
         if(isset($_GET['sid']) && $field!='sid'){
             $id    = (int)$_GET['sid'];
             $field = 'sid';
         }
         iDB::query("DELETE FROM `#iCMS@__apps_store` WHERE `$field` = '$id'");
+        $send && self::remote_get($id,'del');
     }
-    public static function save($data,$sid=null){
-        $array = array();
-        if(self::$sid){
-            $cacheid = 'store/'.self::$sid;
-            $store = iCache::get($cacheid);
-            iCache::del($cacheid);
-            if($store){
-                if(!$sid){
-                    $array['sid']      = self::$sid;
-                    $array['app']      = $store['app'];
-                    $array['name']     = $store['name'];
-                    $array['authkey']  = $store['authkey'];
-                    $array['addtime']  = time();
-                }
-                $array['git_sha']  = $store['git_sha'];
-                $array['git_time'] = $store['git_time'];
-                $array['version']  = $store['version'];
-                $data = array_merge($data,$array);
-            }
-        }
-        $_GET['transaction_id'] && $data['transaction_id']  = addslashes($_GET['transaction_id']);
-        if($sid){
+    public static function save($array,$sid=null){
+        $fields = array('sid', 'appid', 'app', 'name', 'version',
+            'authkey', 'git_sha', 'git_time',
+            'transaction_id', 'data',
+            'addtime', 'uptime', 'type', 'status'
+        );
+        $data = compact($fields);
+        $data = array_merge($data,$array);
+        iSQL::filter_data($data,$fields);
+
+        if(self::$is_update){
+            $data['uptime'] = time();
+            unset($data['appid'],$data['authkey'],$data['data']);//不更新
             iDB::update('apps_store',$data,array('sid'=>$sid));
         }else{
+            $data['addtime'] = time();
             iDB::insert('apps_store',$data);
         }
     }

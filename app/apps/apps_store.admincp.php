@@ -73,21 +73,10 @@ class apps_storeAdmincp extends appsAdmincp {
     public function do_store_update($type='app',$title='应用'){
       $sid   = (int)$_GET['sid'];
       $data  = apps_store::get($sid);
-
-      $data['authkey'] && $_GET['authkey'] = $data['authkey'];
-      $data['transaction_id'] && $_GET['transaction_id'] = $data['transaction_id'];
-
-      $store = apps_store::remote_git('app_update_zip',$sid);
+      $store = apps_store::remote_update($data);
       apps_store::check_must($store);
-
-      iCache::set('store/'.$sid,$store,3600);
-
       apps_store::$is_update = true;
-      apps_store::$sid       = $sid;
-      apps_store::$app_id    = $this->id;
-      apps_store::$uptime    = $data['git_time'];
-
-      apps_store::setup($store['zip_url'],$store['app'],$store['name']);
+      apps_store::setup($store['url'],$store,$data);
     }
     /**
      * [从应用市场安装应用]
@@ -97,59 +86,49 @@ class apps_storeAdmincp extends appsAdmincp {
       $sid   = (int)$_GET['sid'];
       $store = apps_store::remote_get($sid);
       apps_store::check_must($store);
+      $bak = '_bak_'.get_date(0,"YmdH");
+      $force = $store['force']?:$_GET['force'];
 
       if($type=='app'){
           $ag = apps::get($store['app'],'app');
           if($ag){
-            $asg = apps_store::get($ag['id'],'appid');
-            if(empty($asg)){
-              apps_store::save(array(
-                  'sid'      => $sid,
-                  'appid'    => $ag['id'],
-                  'app'      => $ag['app'],
-                  'name'     => $ag['name'],
-                  'git_time' => $ag['addtime'],
-                  'version'  => substr($ag['config']['version'], 1),
-                  'addtime'  => $ag['addtime'],
-                  'authkey'  => $store['authkey'],
-              ));
-            }
-            iUI::alert($store['name'].'['.$store['app'].'] 应用已存在','js:1',1000000);
-          }
-
-          if($store['data']['tables']){
-            foreach ($store['data']['tables'] as $table) {
-                iDB::check_table($table) && iUI::alert('['.$table.']数据表已经存在!','js:1',1000000);
+            if($force){
+              iDB::update("apps",array('app'=>$store['app'].$bak),array('app'=>$store['app']));
+            }else{
+              iUI::alert($store['name'].'['.$store['app'].'] 应用已存在','js:1',1000000);
             }
           }
-
+          if(is_array($store['data']) && $store['data']['tables']){
+            foreach ($store['data']['tables'] as $tkey => $table) {
+              if(iDB::check_table($table)){
+                if($force){
+                  iDB::query("RENAME TABLE `".iDB::table($table)."` TO `".iDB::table($table).$bak."`");
+                }else{
+                  iUI::alert('['.$table.']数据表已经存在!','js:1',1000000);
+                }
+              }
+            }
+          }
           $path = iPHP_APP_DIR.'/'.$store['app'];
-          if(iFS::checkDir($path) && empty($store['force'])){
-            $ptext = iSecurity::filter_path($path);
-            iUI::alert(
-              $store['name'].'['.$store['app'].'] <br />应用['.$ptext.']目录已存在,<br />程序无法继续安装',
-              'js:1',1000000
-            );
+          if(iFS::checkDir($path)){
+            if($force){
+              rename($path, $path.$bak);
+            }else{
+              $ptext = iSecurity::filter_path($path);
+              iUI::alert(
+                $store['name'].'['.$store['app'].'] <br />应用['.$ptext.']目录已存在,<br />程序无法继续安装',
+                'js:1',1000000
+              );
+            }
           }
       }
 
       if($type=='template'){
         $path = iPHP_TPL_DIR.'/'.$store['app'];
         if(iFS::checkDir($path)){
-          $asg = apps_store::get($sid,'sid');
-          if(empty($asg)){
-            apps_store::save(array(
-                'sid'      => $sid,
-                'appid'    => 0,
-                'type'     => 1,
-                'app'      => $store['app'],
-                'name'     => $store['name'],
-                'git_time' => filectime($path),
-                'addtime'  => filectime($path),
-                'authkey'  => $store['authkey'],
-            ));
-          }
-          if(empty($store['force'])){
+          if($force){
+            rename($path, $path.$bak);
+          }else{
             $ptext = iSecurity::filter_path($path);
             iUI::alert(
               $store['name'].'['.$store['app'].'] <br /> 模板['.$ptext.']目录已存在,<br />程序无法继续安装',
@@ -160,13 +139,11 @@ class apps_storeAdmincp extends appsAdmincp {
       }
 
       iCache::set('store/'.$sid,$store,3600);
-      apps_store::$sid = $sid;
-
       if($store){
         if($store['premium']){
           apps_store::premium_dialog($sid,$store,$title);
         }else{
-          apps_store::setup($store['url'],$store['app'],$store['name'],null,$type);
+          apps_store::setup($store['url'],$store);
         }
       }
     }
@@ -175,21 +152,13 @@ class apps_storeAdmincp extends appsAdmincp {
      * @return [type] [description]
      */
     public function do_store_premium_install($type='app'){
-      $sapp    = $_GET['sapp'];
-      $name    = $_GET['name'];
-      $version = $_GET['version'];
-
-      $url     = $_GET['url'];
-      $key     = $_GET['key'];
-      $sid     = $_GET['sid'];
-      $tid     = $_GET['transaction_id'];
-      $query   = compact(array('sid','key','tid'));
-      $zipurl  = $url.'?'.http_build_query($query);
-
-      apps_store::$sid = $sid;
-      apps_store::setup($zipurl,$sapp,$name,$key.'.zip',$type);
+      $sid   = (int)$_GET['sid'];
+      $key   = 'store/'.$sid;
+      $store = iCache::get($key);
+      iCache::del($key);
+      apps_store::setup($_GET['url'],$store);
     }
     public function do_pay_notify(){
-      echo apps_store::pay_notify($_GET);
+      apps_store::pay_notify();
     }
 }

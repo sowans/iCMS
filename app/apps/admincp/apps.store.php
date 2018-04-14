@@ -52,17 +52,17 @@ $(function(){
     iCMS.success("数据下载中...请稍候!",false,10000000);
   });
 });
+
 var pay_notify_timer,clear_timer;
-function pay_notify (url,j,d) {
+function pay_notify (j,d) {
   clear_timer = false;
   pay_notify_timer = $.timer(function(){
     pay_notify_timer.stop();
-    $.getJSON("<?php echo APP_URI;?>&do=pay_notify&callback=?",{key:j[0],sid:j[1],name:j[3]},
-      function(o){
+    $.getJSON("<?php echo APP_URI;?>&do=pay_notify",{authkey:j[0],sid:j[1]},function(o){
           // console.log(o);
           if(o.code=="1" && o.url && o.t){
             iCMS.success("数据下载中...请稍候!",false,10000000);
-            $("#iPHP_FRAME").attr("src","<?php echo APP_URI;?>&do=<?php echo admincp::$APP_DO; ?>_premium_install&url="+o.url+'&transaction_id='+o.transaction_id+'&sapp='+j[2]+'&name='+j[3]+'&key='+j[0]+'&sid='+j[1]+'&version='+j[4])
+            $("#iPHP_FRAME").attr("src","<?php echo APP_URI;?>&do=<?php echo admincp::$APP_DO; ?>_premium_install&url="+o.url+'&transaction_id='+o.transaction_id+'&sid='+j[1])
             d.close().remove();
             return;
           }else if(o.code=="0"){
@@ -74,8 +74,7 @@ function pay_notify (url,j,d) {
             alert(o.msg);
             window.location.reload();
           }
-      }
-    );
+    });
   });
   pay_notify_timer.set({ time : 1000, autostart : true });
   d.addEventListener('close', function(){
@@ -133,11 +132,11 @@ function clear_pay_notify_timer() {
               <div class="store-card-top">
                   <div class="name column-name">
                         <h3>
-                          <a href="<?php echo $value['store_url'];?>?modal"
+                          <a href="<?php echo $value['url'];?>?modal"
                           title="<?php echo $title;?>信息"
                           data-toggle="modal" data-target="#iCMS-MODAL" data-meta='{"width":"700px","height":"640px"}'>
                             <?php echo $value['title'];?>
-                            <img src="<?php echo $value['pic'];?>" class="store-icon" alt="">
+                            <img src="<?php echo $value['pic']['url'];?>" class="store-icon" alt="">
                           </a>
                         </h3>
                   </div>
@@ -146,7 +145,7 @@ function clear_pay_notify_timer() {
                           <li>
                             <?php if($appconf){?>
                             <?php if($is_update){?>
-                            <a href="<?php echo APP_FURI; ?>&do=<?php echo admincp::$APP_DO; ?>_update&sid=<?php echo $sid;?>&id=<?php echo $appconf['appid'];?>&commit_id=<?php echo $appconf['git_sha'];?>"
+                            <a href="<?php echo APP_FURI; ?>&do=<?php echo admincp::$APP_DO; ?>_update&sid=<?php echo $sid;?>&id=<?php echo $appconf['appid'];?>"
                               target="iPHP_FRAME" class="btn btn-success update-btn">
                               <i class="fa fa-repeat"></i> 现在更新
                             </a>
@@ -189,7 +188,7 @@ function clear_pay_notify_timer() {
                             </li>
                           <?php } ?>
                           <li>
-                          <a href="<?php echo $value['store_url'];?>?modal"
+                          <a href="<?php echo $value['url'];?>?modal"
                           title="<?php echo $title;?>信息"
                           data-toggle="modal" data-target="#iCMS-MODAL" data-meta='{"width":"700px","height":"640px"}'>
                           更多详情</a>
