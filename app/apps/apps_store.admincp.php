@@ -17,7 +17,7 @@ class apps_storeAdmincp extends appsAdmincp {
     public function do_template(){
       $title      = '模板';
       $storeArray = apps_store::get_array(array('type'=>'1'));
-      $dataArray  = apps_store::remote_getall('template');
+      $dataArray  = apps_store::remote_all('template');
       include admincp::view("apps.store");
     }
     public function do_template_update(){
@@ -64,7 +64,7 @@ class apps_storeAdmincp extends appsAdmincp {
     public function do_store($name=null){
       $title      = '应用';
       $storeArray = apps_store::get_array(array('type'=>'0'));
-      $dataArray  = apps_store::remote_getall();
+      $dataArray  = apps_store::remote_all();
       include admincp::view("apps.store");
     }
     public function do_store_uninstall(){
@@ -84,18 +84,18 @@ class apps_storeAdmincp extends appsAdmincp {
      */
     public function do_store_install($type='app',$title='应用',$update=false){
       $sid   = (int)$_GET['sid'];
-      $store = apps_store::remote_get($sid);
+      $store = apps_store::remote_send($sid);
       apps_store::check_must($store);
-      $bak = '_bak_'.get_date(0,"YmdH");
-      $force = $store['force']?:$_GET['force'];
-
+      $bak = '_bak_'.get_date(0,"YmdHi");
+      $force = $_GET['force'];
+      $store['force'] && $forceBtn = ' <a href="'.iPHP_REQUEST_URL.'&force=true" target="iPHP_FRAME" class="install-btn btn btn-inverse">备份原有,强制安装</a>';
       if($type=='app'){
           $ag = apps::get($store['app'],'app');
           if($ag){
             if($force){
               iDB::update("apps",array('app'=>$store['app'].$bak),array('app'=>$store['app']));
             }else{
-              iUI::alert($store['name'].'['.$store['app'].'] 应用已存在','js:1',1000000);
+              iUI::alert($store['name'].'['.$store['app'].'] 应用已存在'.$forceBtn,'js:1',1000000);
             }
           }
           if(is_array($store['data']) && $store['data']['tables']){
@@ -104,7 +104,7 @@ class apps_storeAdmincp extends appsAdmincp {
                 if($force){
                   iDB::query("RENAME TABLE `".iDB::table($table)."` TO `".iDB::table($table).$bak."`");
                 }else{
-                  iUI::alert('['.$table.']数据表已经存在!','js:1',1000000);
+                  iUI::alert('['.$table.']数据表已经存在!'.$forceBtn,'js:1',1000000);
                 }
               }
             }
@@ -116,7 +116,7 @@ class apps_storeAdmincp extends appsAdmincp {
             }else{
               $ptext = iSecurity::filter_path($path);
               iUI::alert(
-                $store['name'].'['.$store['app'].'] <br />应用['.$ptext.']目录已存在,<br />程序无法继续安装',
+                $store['name'].'['.$store['app'].'] <br />应用['.$ptext.']目录已存在,<br />程序无法继续安装'.$forceBtn,
                 'js:1',1000000
               );
             }
@@ -131,7 +131,7 @@ class apps_storeAdmincp extends appsAdmincp {
           }else{
             $ptext = iSecurity::filter_path($path);
             iUI::alert(
-              $store['name'].'['.$store['app'].'] <br /> 模板['.$ptext.']目录已存在,<br />程序无法继续安装',
+              $store['name'].'['.$store['app'].'] <br /> 模板['.$ptext.']目录已存在,<br />程序无法继续安装'.$forceBtn,
               'js:1',1000000
             );
           }
@@ -157,6 +157,17 @@ class apps_storeAdmincp extends appsAdmincp {
       $store = iCache::get($key);
       iCache::del($key);
       apps_store::setup($_GET['url'],$store);
+    }
+    public function do_restore(){
+      $transaction_id = $_GET['transaction_id'];
+      $sid            = $_GET['sid'];
+      $order_id       = $_GET['order_id'];
+      $authkey        = $_GET['authkey'];
+      empty($transaction_id) && iUI::alert("请输入微信支付订单号");
+      $ret = apps_store::remote_send($sid,'restore',compact(array('transaction_id','sid','order_id','authkey')));
+      if(!$ret['code']){
+        iUI::alert($ret['msg']);
+      }
     }
     public function do_pay_notify(){
       apps_store::pay_notify();

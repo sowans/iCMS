@@ -46,10 +46,11 @@ admincp::head();
 .premium .label { font-weight: normal; padding: 4px 5px; font-size: 14px; margin-bottom: 3px;}
 </style>
 <script type="text/javascript">
+var tipDialog;
 $(function(){
   $("#<?php echo APP_FORMID;?>").batch();
   $(".install-btn,.update-btn").click(function(event) {
-    iCMS.success("数据下载中...请稍候!",false,10000000);
+    tipDialog = iCMS.success("数据下载中...请稍候!",false,10000000);
   });
 });
 
@@ -82,6 +83,7 @@ function pay_notify (j,d) {
   });
 }
 function clear_pay_notify_timer() {
+  tipDialog.close().remove();
   clear_timer = true;
   pay_notify_timer.stop();
 }

@@ -439,17 +439,18 @@ class apps_store {
         $array = json_decode($json,true);
         return $array;
     }
-    public static function remote_get($sid,$do='get'){
+    public static function remote_send($sid,$do='get',$add=null){
         $time  = time();
         $host  = $_SERVER['HTTP_HOST'];
         $key   = md5(iPHP_KEY.$host.$time);
         $query = compact(array('sid','key','host','time'));
+        $add && $query = array_merge($query,$add);
         $url   = self::STORE_URL.'/'.$do.'/'.$sid.'?'.http_build_query($query);
         $json  = self::remote($url);
         $array = json_decode($json,true);
         return $array;
     }
-    public static function remote_getall($name='app'){
+    public static function remote_all($name='app'){
         $data = array();
         $url  = self::STORE_URL.'/all/'.$name;
         isset($_GET['premium']) && $url.='?premium='.$_GET['premium'];
@@ -471,13 +472,13 @@ class apps_store {
         iUI::$dialog['modal']      = true;
         iUI::$dialog['ok']         = true;
         iUI::$dialog['cancel']     = true;
-        iUI::$dialog['ok:js']      = 'top.clear_pay_notify_timer();';
-        iUI::$dialog['cancel:js']  = 'top.clear_pay_notify_timer();';
+        iUI::$dialog['ok:js']      = 'window.parent.clear_pay_notify_timer();';
+        iUI::$dialog['cancel:js']  = 'window.parent.clear_pay_notify_timer();';
         iUI::dialog($array['dialog_html'],'js:1',1000000);
 
         echo '<script type="text/javascript">
         var j = '.json_encode(array($array['authkey'],$sid)).';
-        top.pay_notify(j,d);
+        window.parent.pay_notify(j,d);
         </script>';
     }
     public static function setup($url,$store,$local=null){
@@ -550,7 +551,7 @@ class apps_store {
             $field = 'sid';
         }
         iDB::query("DELETE FROM `#iCMS@__apps_store` WHERE `$field` = '$id'");
-        $send && self::remote_get($id,'del');
+        $send && self::remote_send($id,'del');
     }
     public static function save($array,$sid=null){
         $fields = array('sid', 'appid', 'app', 'name', 'version',
