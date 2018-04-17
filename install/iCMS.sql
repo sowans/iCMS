@@ -648,8 +648,7 @@ CREATE TABLE `icms_user` (
   `type` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '用户类型',
   `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '账号状态',
   PRIMARY KEY (`uid`),
-  UNIQUE KEY `username` (`username`),
-  KEY `email` (`username`),
+  KEY `username` (`username`),
   KEY `nickname` (`nickname`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
