@@ -14,6 +14,8 @@ define('ADMINCP', true);
 define('__ADMINCP__', iPHP_SELF . '?app');
 define('ACP_PATH', iPHP_APP_DIR . '/admincp');
 define('ACP_HOST', (($_SERVER['SERVER_PORT'] == 443)?'https':'http')."://" . $_SERVER['HTTP_HOST']);
+define('ACP_TOKEN_KEY', sha1(iPHP_KEY));
+define('ACP_TOKEN', auth_encode(ACP_TOKEN_KEY.'#'.$_SERVER['REQUEST_TIME']));
 $git_ver_file = iPHP_APP_CORE.'/git.version.php';
 file_exists($git_ver_file) && require_once $git_ver_file;
 
@@ -30,6 +32,7 @@ class admincp {
 	public static $APP_FILE   = NULL;
 	public static $APP_DIR    = NULL;
 	public static $APP_ARGS   = NULL;
+	public static $URL_TOKEN  = false;
 
 	public static function init() {
 		($_GET['do'] == 'seccode') && admincpApp::get_seccode();
@@ -112,11 +115,13 @@ class admincp {
 		}
 
 		is_file(self::$APP_FILE) OR iPHP::error_throw('Unable to find admincp file <b>' .self::$APP_NAME. '.admincp.php</b>('.self::$APP_FILE.')', 1002);
+		require_once self::$APP_FILE;
+		$APP_URI = __ADMINCP__ . '=' . self::$APP_NAME;
+		defined('ACP_TOKEN_URL') && $APP_URI.='&ACP_TOKEN='.rawurlencode(ACP_TOKEN);
 
-		define('APP_URI', __ADMINCP__ . '=' . self::$APP_NAME);
-		// define('APP_FURI', APP_URI . '&frame=iPHP');
+		define('APP_URI', $APP_URI);
 		define('APP_FURI', APP_URI );
-		define('APP_DOURI', APP_URI . ($do != 'iCMS' ? '&do=' . $do : ''));
+		define('APP_DOURI', APP_URI . ($do=='iCMS'?:'&do='.$do));
 		define('APP_BOXID', self::$APP_NAME . '-box');
 		define('APP_FORMID', 'iCMS-' . APP_BOXID);
 
@@ -202,7 +207,22 @@ class admincp {
 			include self::view("footer.after",self::$view['foot:after']);
 		}
 	}
-
+	public static function token_input(){
+		echo '<input name="ACP_TOKEN" type="hidden" value="'.ACP_TOKEN.'" />';
+	}
+	public static function token_check(){
+		$tokenText = auth_decode(iSecurity::getGP('ACP_TOKEN'));
+		list($token,$time) = explode('#', $tokenText);
+		if (!defined('ACP_TOKEN_CHECK')) {
+			return true;
+		}
+		if($_SERVER['REQUEST_TIME']-$time>600){
+			trigger_error("TOKEN is timeout",E_USER_ERROR);
+		}
+		if($token!==ACP_TOKEN_KEY){
+			trigger_error("TOKEN error",E_USER_ERROR);
+		}
+	}
     public static function uri($q,$a){
     	$qs = $q;
     	is_array($q) OR parse_str($q, $qs);
