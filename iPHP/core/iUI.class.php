@@ -28,21 +28,21 @@ class iUI {
 
 		$keyArray = explode(':', $keys);
 		$count = count($keyArray);
-		list($app, $do, $key, $_msg) = $keyArray;
+		list($app, $do, $key, $flag) = $keyArray;
+
 
         if($app!=iPHP_APP){
             $path = iPHP_APP_DIR.'/'.$app.'/'.$app . '.lang.php';
             if (is_file($path)) {
                 $langArray = iPHP::import($path, true);
-                switch ($count) {
+               switch ($count) {
                     case 1:$msg = $langArray;break;
                     case 2:$msg = $langArray[$do];break;
                     case 3:$msg = $langArray[$do][$key];break;
-                    case 4:$msg = $langArray[$do][$key][$msg];break;
+                    case 4:$msg = $langArray[$do][$key][$flag];break;
                 }
             }
         }
-
         if(empty($msg)){
             $def_path = iPHP_APP_CORE.'/'.iPHP_APP.'.lang.php';
             $langArray = iPHP::import($def_path, true);
@@ -50,7 +50,7 @@ class iUI {
                 case 1:$msg = $langArray;break;
                 case 2:$msg = $langArray[$do];break;
                 case 3:$msg = $langArray[$do][$key];break;
-                case 4:$msg = $langArray[$do][$key][$msg];break;
+                case 4:$msg = $langArray[$do][$key][$flag];break;
             }
         }
 
@@ -112,6 +112,9 @@ class iUI {
             	$msg.= $content.'</span></div>';
 	        }
 		}
+        if(strtoupper(self::$dialog['msgType'])=='ARRAY'){
+            return compact('label', 'icon', 'content');
+        }
     	if($ret) return $msg;
 		echo $msg;
 	}
@@ -183,30 +186,26 @@ class iUI {
 	public static function warning($info) {
 		return self::msg('warning:#:warning:#:' . $info);
 	}
-	public static function alert($msg, $js = null, $s = 3) {
+	public static function alert($msg, $js = null, $s = 3,$flag='warning:#:warning:#:') {
 		if (iUI::$dialog['alert'] === 'window') {
 			iUI::js("js:window.alert('{$msg}')");
 		}
-		self::$dialog = array(
-			'id'         => iPHP_APP.'-DIALOG-ALERT',
-			'skin'       => iPHP_APP.'_dialog_alert',
-			'modal'      => true,
-			'quickClose' => true,
-			'width'      => 360,
-			'height'     => 120,
-		);
-		return self::dialog('warning:#:warning:#:' . $msg, $js, $s);
+
+		self::$dialog = array_merge(
+            (array)self::$dialog,
+            array(
+    			'id'         => iPHP_APP.'-DIALOG-ALERT',
+    			'skin'       => iPHP_APP.'_dialog_alert',
+    			'modal'      => true,
+    			'quickClose' => true,
+    			'width'      => 360,
+    			'height'     => 120,
+		    )
+        );
+		return self::dialog($flag.$msg, $js, $s);
 	}
 	public static function success($msg, $js = null, $s = 3) {
-		self::$dialog = array(
-			'id'         => iPHP_APP.'-DIALOG-ALERT',
-			'skin'       => iPHP_APP.'_dialog_alert',
-			'modal'      => true,
-			'quickClose' => true,
-			'width'      => 360,
-			'height'     => 120,
-		);
-		return self::dialog('success:#:check:#:' . $msg, $js, $s);
+        return self::alert($msg, $js, $s,'success:#:check:#:');
 	}
     public static function set_dialog($key,$value) {
         self::$dialog[$key] = $value;
@@ -219,6 +218,9 @@ class iUI {
 		$info = (array) $info;
 		$title = $info[1] ? $info[1] : '提示信息';
         $content = self::msg($info[0],true);
+        if(self::$dialog['callback']){
+            return iPHP::callback(self::$dialog['callback'],array($content));
+        }
         if(iPHP_SHELL){
         	echo $content;
         	return false;

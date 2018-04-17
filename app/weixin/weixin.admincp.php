@@ -51,8 +51,8 @@ class weixinAdmincp{
         $qrcode      = iSecurity::escapeStr($_POST['qrcode']);
         $description = iSecurity::escapeStr($_POST['description']);
 
-        $config    = addslashes(json_encode($_POST['config']));
-        $payment   = addslashes(json_encode($_POST['payment']));
+        $config    = $_POST['config']?addslashes(json_encode($_POST['config'])):'';
+        $payment   = $_POST['payment']?addslashes(json_encode($_POST['payment'])):'';
 
         $appid OR iUI::alert('APPID不能为空!');
         $appsecret OR iUI::alert('appsecret不能为空!');
@@ -158,7 +158,7 @@ class weixinAdmincp{
      */
     public function do_menu_save(){
         $appid = addslashes($_POST['wx_appid']);
-        $menu  = addslashes(json_encode($_POST['menuData']));
+        $menu  = $_POST['menuData']?addslashes(json_encode($_POST['menuData'])):'';
         iDB::update("weixin",array('menu'=>$menu),array('appid'=>$appid));
         iUI::success('菜单保存完成,现在可以同步菜单到微信平台');
     }
@@ -398,10 +398,9 @@ class weixinAdmincp{
     // public function cache(){
     // }
     public function weixin_init(){
-        // $this->config = configAdmincp::get($this->appid,admincp::$APP_NAME);
-        // $this->config['component']==="1" && weixin::$component = true;
         $config = $this->value($this->wx_appid,'*','appid');
         $config OR iUI::alert('获取不到公众号配置');
+        weixin::process_config($config,false);
         weixin::init($config);
     }
 }

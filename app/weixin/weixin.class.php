@@ -32,7 +32,7 @@ class weixin {
         self::$token OR self::get_access_token();
     }
     public static function set_config($config=null,$title='weixin'){
-        empty($config) && $config = self::get_data();
+        empty($config) && $config = self::get_config();
         empty($config) && trigger_error("{$title} config is missing.",E_USER_ERROR);
         empty($config['appid']) && trigger_error("{$title} appid is missing.",E_USER_ERROR);
         empty($config['appsecret']) && trigger_error("{$title} appsecret is missing.",E_USER_ERROR);
@@ -41,27 +41,31 @@ class weixin {
         self::$appid     = $config['appid'];
         self::$appsecret = $config['appsecret'];
     }
-    public static function get_data($id=null,$field='id'){
+    public static function get_config($id=null,$field='id'){
         $id===null && $id = (int)$_GET['id'];
-        empty($id) && $id = self::$id;
+        self::$id  && $id = self::$id;
         if(empty($id) && self::$appid){
             $id    = self::$appid;
             $field = 'appid';
         }
         empty($id) && trigger_error("{$field} is missing.",E_USER_ERROR);
-
         $data = iDB::row("SELECT * FROM `#iCMS@__weixin` WHERE `{$field}`='{$id}' LIMIT 1",ARRAY_A);
-
+        self::process_config($data);
+        return $data;
+    }
+    public static function process_config(&$data,$flag=true){
         if($data){
+            $data['menu']   && $data['menu'] = json_decode($data['menu'],true);
             $data['config'] && $data['config'] = json_decode($data['config'],true);
-            $data['payment'] && $data['payment'] = json_decode($data['payment'],true);
+            $data['payment']&& $data['payment'] = json_decode($data['payment'],true);
 
-            $apps = new appsApp('weixin');
-            $apps->custom_data($data);
-            $apps->hooked($data);
-            unset($data['sapp']);
+            if($flag){
+                $apps = new appsApp('weixin');
+                $apps->custom_data($data);
+                $apps->hooked($data);
+                unset($data['sapp']);
+            }
         }
-
         return $data;
     }
     public static function get_access_token(){
@@ -89,15 +93,12 @@ class weixin {
         return $url;
     }
     public static function setMenu($param=null){
-        $param===null && $param = weixin::$config['menu'];
+        $param===null && $param = self::$config['menu'];
         $param    = array('button'=>self::cn_urlencode($param));
         $param    = json_encode($param);
         $param    = urldecode($param);
         $url      = self::url('menu/create');
         $response = iHttp::send($url,$param);
-        // if($response->errcode){
-        //     self::error($response);
-        // }
         return $response;
     }
     protected static function cn_urlencode($variable){
