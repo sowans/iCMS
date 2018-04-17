@@ -121,7 +121,7 @@ class admincp {
 
 		define('APP_URI', $APP_URI);
 		define('APP_FURI', APP_URI );
-		define('APP_DOURI', APP_URI . ($do=='iCMS'?:'&do='.$do));
+		define('APP_DOURI', APP_URI . ($do=='iCMS'?null:'&do='.$do));
 		define('APP_BOXID', self::$APP_NAME . '-box');
 		define('APP_FORMID', 'iCMS-' . APP_BOXID);
 
@@ -131,6 +131,7 @@ class admincp {
 
 		//访问记录
 		iPHP::callback(self::$callback['history'],APP_DOURI);
+
 		//检查URL权限
 		iPHP::callback(self::$callback['priv'],array(APP_DOURI,'page'));
 		//默认开启

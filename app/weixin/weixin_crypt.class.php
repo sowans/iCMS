@@ -139,14 +139,11 @@ class weixin_crypt{
      * @param string $xmltext 待提取的xml字符串
      * @return string 提取出的加密消息字符串
      */
-    public static function extract($xmltext){
+    public static function extract($input){
         try {
-            $xml = new DOMDocument();
-            $xml->loadXML($xmltext);
-            $array_e = $xml->getElementsByTagName('Encrypt');
-            $array_a = $xml->getElementsByTagName('ToUserName');
-            $encrypt = $array_e->item(0)->nodeValue;
-            $tousername = $array_a->item(0)->nodeValue;
+            $array = iUtils::INPUT($input);
+            $encrypt = $array['Encrypt'];
+            $tousername = $array['ToUserName'];
             return array(0, $encrypt, $tousername);
         } catch (Exception $e) {
             //print $e . "\n";
