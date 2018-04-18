@@ -9,6 +9,7 @@
  * @licence https://www.icmsdev.com/LICENSE.html
  */
 defined('iPHP') OR exit('What are you doing?');
+define('iPHP_WAF_CSRF', true);
 
 class spiderAdmincp {
 

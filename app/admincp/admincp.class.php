@@ -14,8 +14,6 @@ define('ADMINCP', true);
 define('__ADMINCP__', iPHP_SELF . '?app');
 define('ACP_PATH', iPHP_APP_DIR . '/admincp');
 define('ACP_HOST', (($_SERVER['SERVER_PORT'] == 443)?'https':'http')."://" . $_SERVER['HTTP_HOST']);
-define('ACP_TOKEN_KEY', sha1(iPHP_KEY));
-define('ACP_TOKEN', auth_encode(ACP_TOKEN_KEY.'#'.$_SERVER['REQUEST_TIME']));
 $git_ver_file = iPHP_APP_CORE.'/git.version.php';
 file_exists($git_ver_file) && require_once $git_ver_file;
 
@@ -36,6 +34,8 @@ class admincp {
 
 	public static function init() {
 		($_GET['do'] == 'seccode') && admincpApp::get_seccode();
+
+		iWAF::CSRF_token();
 
 		iUI::$dialog['title'] = iPHP_APP;
 		iDB::$show_errors     = true;
@@ -116,10 +116,8 @@ class admincp {
 
 		is_file(self::$APP_FILE) OR iPHP::error_throw('Unable to find admincp file <b>' .self::$APP_NAME. '.admincp.php</b>('.self::$APP_FILE.')', 1002);
 		require_once self::$APP_FILE;
-		$APP_URI = __ADMINCP__ . '=' . self::$APP_NAME;
-		defined('ACP_TOKEN_URL') && $APP_URI.='&ACP_TOKEN='.rawurlencode(ACP_TOKEN);
 
-		define('APP_URI', $APP_URI);
+		define('APP_URI', __ADMINCP__ . '=' . self::$APP_NAME);
 		define('APP_FURI', APP_URI );
 		define('APP_DOURI', APP_URI . ($do=='iCMS'?null:'&do='.$do));
 		define('APP_BOXID', self::$APP_NAME . '-box');
@@ -129,9 +127,10 @@ class admincp {
 		$app_methods   = get_class_methods(self::$APP_OBJ);
 		in_array(self::$APP_METHOD, $app_methods) OR iPHP::error_throw('Call to undefined method <b>' . $obj_name . '::' . self::$APP_METHOD . '</b>', 1003);
 
+		//检验CSRF check
+		iWAF::CSRF_check();
 		//访问记录
 		iPHP::callback(self::$callback['history'],APP_DOURI);
-
 		//检查URL权限
 		iPHP::callback(self::$callback['priv'],array(APP_DOURI,'page'));
 		//默认开启
@@ -206,22 +205,6 @@ class admincp {
 
 		if(self::$view['foot:after']){
 			include self::view("footer.after",self::$view['foot:after']);
-		}
-	}
-	public static function token_input(){
-		echo '<input name="ACP_TOKEN" type="hidden" value="'.ACP_TOKEN.'" />';
-	}
-	public static function token_check(){
-		$tokenText = auth_decode(iSecurity::getGP('ACP_TOKEN'));
-		list($token,$time) = explode('#', $tokenText);
-		if (!defined('ACP_TOKEN_CHECK')) {
-			return true;
-		}
-		if($_SERVER['REQUEST_TIME']-$time>600){
-			trigger_error("TOKEN is timeout",E_USER_ERROR);
-		}
-		if($token!==ACP_TOKEN_KEY){
-			trigger_error("TOKEN error",E_USER_ERROR);
 		}
 	}
     public static function uri($q,$a){

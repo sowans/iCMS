@@ -8,11 +8,6 @@
 * @licence https://www.icmsdev.com/LICENSE.html
 */
 // class membersApp extends admincp{
-//所有链接加上token
-define('ACP_TOKEN_URL', true);
-//检查token
-define('ACP_TOKEN_CHECK', true);
-
 class membersAdmincp{
     public $groupAdmincp =null;
 
@@ -73,8 +68,6 @@ class membersAdmincp{
     	include admincp::view("members.manage");
     }
     public function do_save(){
-        admincp::token_check();
-
         $uid      = (int)$_POST['uid'];
         $gender   = (int)$_POST['gender'];
         $type     = $_POST['type'];
@@ -141,8 +134,6 @@ class membersAdmincp{
 		}
 	}
     public function do_del($uid = null,$dialog=true){
-        admincp::token_check();
-
     	$uid===null && $uid=$this->uid;
 		$uid OR iUI::alert('请选择要删除的用户');
 		$uid=="1" && iUI::alert('不能删除超级管理员');

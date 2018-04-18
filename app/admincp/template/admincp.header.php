@@ -42,6 +42,7 @@ defined('iPHP') OR exit('What are you doing?');
 <script src="./app/admincp/ui/admincp.js" type="text/javascript"></script>
 
 <script type="text/javascript">
+var CSRF_TOKEN = '<?php echo iPHP_WAF_CSRF_TOKEN;?>';
 window.iCMS.init({
   API:'<?php echo iPHP_SELF;?>',
   UI:'./app/admincp/ui',

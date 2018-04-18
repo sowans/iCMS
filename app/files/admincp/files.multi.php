@@ -23,7 +23,7 @@ var settings = {
     swf: './app/admincp/ui/webuploader/Uploader.swf',
     chunked: false,
     chunkSize: 512 * 1024,
-    server: '<?php echo APP_URI; ?>&do=upload&format=json',
+    server: '<?php echo APP_URI; ?>&do=upload&format=json&CSRF_TOKEN=<?php echo iPHP_WAF_CSRF_TOKEN;?>',
     callback:{
         "uploadSuccess":function(a,b){
             // console.log(b);

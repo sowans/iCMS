@@ -51,4 +51,24 @@ class iWAF {
 			}
 		}
 	}
+	public static function CSRF_token($key=null){
+		$key===null &&$key = iPHP_KEY;
+		define('iPHP_WAF_CSRF_TOKEN',sha1(md5(iPHP_KEY)));
+		return iPHP_WAF_CSRF_TOKEN;
+	}
+	public static function CSRF_check(){
+		$token = $_GET['CSRF_TOKEN']?$_GET['CSRF_TOKEN']:$_POST['CSRF_TOKEN'];
+
+		if(defined('iPHP_WAF_CSRF') && iPHP_CSRF_POST){
+			return true;
+		}
+		if(stripos($_SERVER['HTTP_REFERER'],iPHP_SELF)){
+			return true;
+		}
+		if($_POST){
+			if($token!==iPHP_WAF_CSRFKEY){
+				trigger_error("TOKEN error",E_USER_ERROR);
+			}
+		}
+	}
 }

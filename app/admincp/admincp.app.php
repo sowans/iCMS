@@ -30,12 +30,12 @@ class admincpApp{
             'uid'       => members::$userid,
             'username'  => members::$nickname,
             'app'       => admincp::$APP_NAME,
-            'uri'       => $_SERVER['REQUEST_URI'],
-            'useragent' => $_SERVER['HTTP_USER_AGENT'],
             'ip'        => iPHP::get_ip(),
-            'method'    => $_SERVER['REQUEST_METHOD'],
-            'referer'   => $_SERVER['HTTP_REFERER'],
-            'addtime'   => $_SERVER['REQUEST_TIME'],
+            'uri'       => iSecurity::escapeStr($_SERVER['REQUEST_URI']),
+            'useragent' => iSecurity::escapeStr($_SERVER['HTTP_USER_AGENT']),
+            'method'    => iSecurity::escapeStr($_SERVER['REQUEST_METHOD']),
+            'referer'   => iSecurity::escapeStr($_SERVER['HTTP_REFERER']),
+            'addtime'   => iSecurity::escapeStr($_SERVER['REQUEST_TIME']),
         );
         iDB::insert("access_log",$access);
     }

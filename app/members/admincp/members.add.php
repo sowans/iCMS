@@ -41,7 +41,6 @@ $(function(){
     </div>
     <div class="widget-content nopadding">
       <form action="<?php echo APP_FURI; ?>&do=save" method="post" class="form-inline" id="iCMS-members" target="iPHP_FRAME">
-        <?php echo admincp::token_input(); ?>
         <input name="uid" type="hidden" value="<?php echo $this->uid; ?>" />
         <input name="type" type="hidden" value="<?php echo $this->type; ?>" />
         <div id="members-add" class="tab-content">
