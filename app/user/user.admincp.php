@@ -115,11 +115,11 @@ class userAdmincp{
         $uid      = (int)$_POST['uid'];
         $pid      = implode(',', (array)$_POST['pid']);
         $_pid     = iSecurity::escapeStr($_POST['_pid']);
-        $user     = $_POST['user'];
-        $userdata = $_POST['userdata'];
-        $username = $user['username'];
-        $nickname = $user['nickname'];
-        $password = $user['password'];
+        $user     = iSecurity::escapeStr($_POST['user']);
+        $userdata = iSecurity::escapeStr($_POST['userdata']);
+        $username = iSecurity::escapeStr($user['username']);
+        $nickname = iSecurity::escapeStr($user['nickname']);
+        $password = iSecurity::escapeStr($user['password']);
         unset($user['password']);
 
         $username OR iUI::alert('账号不能为空');
