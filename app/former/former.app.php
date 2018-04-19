@@ -258,6 +258,12 @@ class formerApp{
                    $rs[$key.'_pics'] = filesApp::get_content_pics($value,$pic_array);
                 }
             break;
+            case 'markdown';
+                if($value){
+                    $plugin = array('markdown'=> true,'htmlspecialchars' =>true);
+                    $rs[$key] = iPHP::callback(array("plugin_markdown","HOOK"),array($value,&$plugin));
+                }
+            break;
             default:
                 // $values = $value;
             break;

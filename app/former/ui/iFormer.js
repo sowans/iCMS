@@ -161,15 +161,17 @@ var iFormer = {
                     $elem.css('height','300px');
                     elem_type = null;
                 break;
+                case 'markdown':
                 case 'editor':
                     $elem = this.widget('textarea').hide();
                     var div_after = function () {
                         var img = iFormer.widget('img');
-                        img.prop('src', './app/former/ui/img/editor.png');
+                        img.prop('src', './app/former/ui/img/'+obj_type+'.png');
                         $div.append(img);
                     }
                     elem_type = null;
                 break;
+
                 case 'PRIMARY':
                 case 'user_category':
                 case 'userid':

@@ -100,7 +100,7 @@
 .editormd-dialog-container .editormd-btn:hover,.editormd-dialog-container button:hover,.editormd-dialog-container input[type=submit]:hover,.editormd-dialog-footer .editormd-btn:hover,.editormd-dialog-footer button:hover,.editormd-dialog-footer input[type=submit]:hover,.editormd-form .editormd-btn:hover,.editormd-form button:hover,.editormd-form input[type=submit]:hover{background:#eee}
 .editormd-dialog-container .editormd-btn+.editormd-btn,.editormd-dialog-footer .editormd-btn+.editormd-btn,.editormd-form .editormd-btn+.editormd-btn{margin-left:8px}
 .editormd-file-input{width:75px;height:32px;margin-left:8px;position:relative;display:inline-block}
-.editormd-file-input input[type=file]{width:75px;height:32px;opacity:0;cursor:pointer;background:#000;display:inline-block;position:absolute;top:0;right:0}
+.editormd-file-input input[type=file]{z-index: 99999;width:75px;height:32px;opacity:0;cursor:pointer;background:#000;display:inline-block;position:absolute;top:0;right:0}
 .editormd-file-input input[type=file]::-webkit-file-upload-button{visibility:hidden}
 .editormd-file-input:hover input[type=submit]{background:#eee}
 .editormd .CodeMirror,.editormd-preview{display:inline-block;width:50%;height:100%;vertical-align:top;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;margin:0}

@@ -22,3 +22,4 @@ var <?php echo $editor_id;?> = iCMS.editor;
     <button type="button" class="btn" onclick="javascript:<?php echo $editor_id;?>.cleanup();"><i class="fa fa-magic"></i> 自动排版</button>
   </div>
 </div>
+<div class="clearfloat mt10"></div>

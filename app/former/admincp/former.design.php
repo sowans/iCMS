@@ -206,6 +206,10 @@
           <span class="fb-icon fb-icon-richtext"></span>
           <p>编辑器</p>
         </li>
+        <li i="field" tag="markdown" type="markdown" field="MEDIUMTEXT" label="md编辑器">
+          <span class="fb-icon fb-icon-richtext"></span>
+          <p>markdown</p>
+        </li>
         <span class="help-inline">* 此标签下的字段会独立创建cdata表</span>
         <div class="clearfix"></div>
       </ul>

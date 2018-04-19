@@ -268,14 +268,31 @@ $(function(){
                       <a class="btn btn-danger delprop"><i class="fa fa-trash-o"></i> 删除</a>
                     </div>
                   </td>
-                  <td class="rule_data_rule"><textarea name="rule[data][<?php echo $dkey;?>][rule]" class="span6" id="<?php echo $RDid;?>"><?php echo $data['rule'];?></textarea>
+                  <td class="rule_data_rule">
+                    <textarea name="rule[data][<?php echo $dkey;?>][rule]" class="span6" id="<?php echo $RDid;?>"><?php echo $data['rule'];?></textarea>
                     <div class="clearfloat mb10"></div>
                     <div class="input-prepend input-sp"> <span class="add-on s4">数据整理</span>
                       <textarea name="rule[data][<?php echo $dkey;?>][cleanbefor]" class="span3 tip"title="采集后整理"><?php echo $data['cleanbefor'];?></textarea>
                     </div>
                     <div class="input-append input-sp">
                       <textarea name="rule[data][<?php echo $dkey;?>][cleanafter]" class="span3 tip"title="发布前整理"><?php echo $data['cleanafter'];?></textarea>
-                      <span class="add-on s4">数据整理</span></div></td>
+                      <span class="add-on s4">数据整理</span>
+                    </div>
+                    <div class="clearfloat mb10"></div>
+                    <div class="input-prepend">
+                      <span class="add-on">数据处理</span>
+                      <select id="data-decode" class="chosen-select span6" multiple="multiple">
+                        <optgroup label="解析/解码">
+                          <option value='parse_str'>URL字符串解析</option>
+                          <option value='json_decode'>JSON => Array 解码</option>
+                        </optgroup>
+                        <optgroup label="生成/编码">
+                          <option value='http_build_query'>生成请求字符串</option>
+                          <option value='json_encode'>Array => JSON 编码</option>
+                        </optgroup>
+                      </select>
+                    </div>
+                  </td>
                   <td><label class="checkbox">
                       <input type="checkbox" class="rule_data_page" name="rule[data][<?php echo $dkey;?>][page]" value="1"<?php if($data['page']){ echo ' checked="true"';};?>>
                       有分页</label>

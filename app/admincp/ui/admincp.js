@@ -238,23 +238,26 @@ $(function() {
 function get_category_meta(cid, el) {
     $.getJSON(window.iCMS.config.API, { 'app': 'category', 'do': 'config_meta', 'cid': cid },
         function(json) {
-            if (!json) return;
+            if (!json||!json.code) return;
+
             var tb = $(el),
                 tbody = $("tbody", tb);
             $.each(json, function(n, v) {
-                var id = 'cid_meta_' + cid + '_' + v['key'];
-                if ($("#" + id).length > 0) {
-                    return
+                if(v['key']){
+                    var id = 'cid_meta_' + cid + '_' + v['key'];
+                    if ($("#" + id).length > 0) {
+                        return
+                    }
+                    var tr = $(".meta_clone", tb).clone(true).removeClass("hide meta_clone");
+                    var count = $('tr', tbody).length;
+                    tr.attr('id', id);
+                    $('[name="metadata[{key}][name]"]', tr).val(v['name']);
+                    $('[name="metadata[{key}][key]"]', tr).val(v['key']).attr('readonly', true);;
+                    $('input', tr).removeAttr("disabled").each(function() {
+                        this.name = this.name.replace("{key}", count);
+                    });
+                    tbody.append(tr);
                 }
-                var tr = $(".meta_clone", tb).clone(true).removeClass("hide meta_clone");
-                var count = $('tr', tbody).length;
-                tr.attr('id', id);
-                $('[name="metadata[{key}][name]"]', tr).val(v['name']);
-                $('[name="metadata[{key}][key]"]', tr).val(v['key']).attr('readonly', true);;
-                $('input', tr).removeAttr("disabled").each(function() {
-                    this.name = this.name.replace("{key}", count);
-                });
-                tbody.append(tr);
             });
         }
     );

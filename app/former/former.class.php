@@ -37,7 +37,7 @@ class former {
             'checkbox' => 'form-control',
         ),
         'group'=>'
-            <div class="{{class_group}} {{class}}">
+            <div id="{{id}}" class="{{class_group}} {{class}}">
                 {{label}}
                 {{input}}
                 {{label2}}
@@ -289,6 +289,17 @@ class former {
                     }
                     $input = self::widget('textarea',$attr);
                 break;
+                case 'markdown':
+                    if(self::$config['gateway']=='admincp'){
+                        $attr['class'] = 'editor-body';
+                        $attr['type']  = 'text/plain';
+                        // $attr['id']    = 'editor-body-'.$attr['id'];
+                        $form_group    = 'editor-container';
+                        $form_group_id = 'editor-body-'.$attr['id'];
+                        $script        = editorAdmincp::markdown_script($form_group_id);
+                    }
+                    $input = self::widget('textarea',$attr);
+                break;
                 case 'multitext':
                     unset($attr['type']);
                     $input = self::widget('textarea',$attr);
@@ -405,6 +416,7 @@ class former {
 
             $div = self::display(array(
                 'class'  => 'former_'.$type.' '.$form_group,
+                'id'     => $form_group_id?:'fg-'.random(5),
                 'label'  => $label,
                 'label2' => $label2,
                 'input'  => self::display($input,'input'),
@@ -488,6 +500,10 @@ class former {
                 // $script = 'var '.$id.' = iCMS.editor.get("editor-body-'.$id.'"),'.$id.'_value = '.$id.'.hasContents()';
                 $javascript = 'var '.$id.' = iCMS.editor.get("editor-body-'.$id.'"),'.$id.'_value = '.$id.'.getContent()';
             }
+            if($type=='markdown'){
+                $javascript = 'var '.$id.' = iCMS.editor.get("editor-body-'.$id.'"),'.$id.'_value = '.$id.'.getMarkdown()';
+            }
+
         }
 
         foreach ($field_array['validate'] as $key => $vd) {

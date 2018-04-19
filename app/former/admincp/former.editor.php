@@ -204,30 +204,33 @@
             <span class="add-on">数据处理</span>
             <select id="iFormer-func" class="chosen-select" style="width:360px;" data-placeholder="请选择数据处理方式..." multiple="multiple">
               <optgroup label="保存数据时">
-                <option value='repeat'>检查重复</option>
-                <option value='pinyin'>转成拼音</option>
-                <option value='cleanhtml'>清除HTML</option>
-                <option value='formathtml'>格式化HTML</option>
-                <option value='strtolower'>小写字母</option>
-                <option value='strtoupper'>大写字母</option>
-                <option value='firstword'>获取头字母大写</option>
-                <option value='implode-n'>数组转字符串(换行符)</option>
-                <option value='implode-c'>数组转字符串(,)</option>
+                <option value='input:repeat'>检查重复</option>
+                <option value='input:pinyin'>转成拼音</option>
+                <option value='input:cleanhtml'>清除HTML</option>
+                <option value='input:formathtml'>格式化HTML</option>
+                <option value='input:strtolower'>小写字母</option>
+                <option value='input:strtoupper'>大写字母</option>
+                <option value='input:firstword'>获取头字母大写</option>
+                <option value='input:md5'>md5</option>
               </optgroup>
               <optgroup label="通用">
-                <option value='explode-n'>分割(换行符)成数组</option>
-                <option value='explode-c'>分割(,)成数组</option>
                 <option value='rand'>生成随机数</option>
-                <option value='json_encode'>数组转json</option>
-                <option value='json_decode'>json转数组</option>
-                <option value='serialize'>数组序转列化</option>
-                <option value='unserialize'>序列化转数组</option>
+              </optgroup>
+              <optgroup label="互转">
+                <option value='implode' data-args="" data-title="分隔字符">数组转字符串</option>
+                <option value='explode'>数组转字符串</option>
+                <option value='json_encode'>JSON 编码</option>
+                <option value='json_decode'>JSON解码</option>
+                <option value='serialize'>序转列化编码</option>
+                <option value='unserialize'>序列化解码</option>
                 <option value='base64_encode'>base64编码</option>
                 <option value='base64_decode'>base64解码</option>
-                <option value='md5'>md5</option>
+                <option value='rawurlencode'>url编码</option>
+                <option value='rawurldecode'>url解码</option>
               </optgroup>
               <optgroup label="展示时">
-                <option value='redirect'>网址跳转</option>
+                <option value='output:md5'>md5</option>
+                <option value='output:redirect'>网址跳转</option>
               </optgroup>
             </select>
             <select multiple="multiple" class="hide" name="func[]" id="sort-func"></select>
