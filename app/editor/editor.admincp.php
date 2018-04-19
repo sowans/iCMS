@@ -7,6 +7,8 @@
 * @site https://www.icmsdev.com
 * @licence https://www.icmsdev.com/LICENSE.html
 */
+define('iPHP_WAF_CSRF', true);
+
 class editorAdmincp{
     public function __construct() {
 		iFS::$ERROR_TYPE   = 'json';
@@ -263,4 +265,12 @@ class editorAdmincp{
         ob_end_clean();
         return $output;
     }
+    public static function markdown_script($id){
+        ob_start();
+        include admincp::view("markdown.script","editor");
+        $output = ob_get_contents();
+        ob_end_clean();
+        return $output;
+    }
+
 }

@@ -145,8 +145,18 @@ class iSecurity {
 
 	}
 	public static function filter_path($text) {
-		$text = str_replace('\\', '/', $text);
-		return str_replace(iPATH,iPHP_PROTOCOL,$text);
+	    $text = str_replace('\\', '/', $text);
+	    $text = str_replace(iPATH,iPHP_PROTOCOL,$text);
+	    $pieces = explode('/', iPATH);
+	    $count = count($pieces);
+	    for ($i=0; $i < ceil($count/2); $i++) {
+			$output = array_slice($pieces, 0, $count-$i);
+			$path   = implode('/', $output);
+	        if(stripos($text, $path)!==false){
+	            $text = str_replace($path,iPHP_PROTOCOL,$text);
+	        }
+	    }
+		return $text;
 	}
 	/**
 	 * 路径转换
