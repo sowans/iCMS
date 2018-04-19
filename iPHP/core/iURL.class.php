@@ -11,12 +11,14 @@
 class iURL {
     const PAGE_SIGN = '{P}';
 
-    public static $config   = null;
+    public static $config   = array();
+    public static $callback = array();
 
     protected static $ARRAY = null;
 
-    public static function init($config=null,$_config=null){
-        self::$config = $config+$_config;
+    public static function init($config=array(),$_config=array()){
+        self::$config   = array_merge($config,$_config);
+        self::$callback = array_merge((array)$config['callback'],self::$callback);
     }
 
     public static function router($key, $var = null) {
@@ -24,9 +26,13 @@ class iURL {
         $routerKey   = $key;
         is_array($key) && $routerKey = $key[0];
         $router = $routerArray[$routerKey];
-        $url = iPHP_ROUTER_REWRITE?$router[0]:$router[1];
+        $rewrite = iPHP_ROUTER_REWRITE;
+        if(self::$callback['router']['rewrite']){
+            $rewrite = self::$callback['router']['rewrite'];
+        }
+        $url = $rewrite?$router[0]:$router[1];
 
-        if (iPHP_ROUTER_REWRITE && stripos($routerKey, 'uid:') === 0) {
+        if ($rewrite && stripos($routerKey, 'uid:') === 0) {
             $url = rtrim(self::$config['user_url'], '/') . $url;
         }
 
@@ -42,17 +48,17 @@ class iURL {
         }
 
         if ($var == '?&') {
-            $url .= iPHP_ROUTER_REWRITE ? '?' : '&';
+            $url .= $rewrite ? '?' : '&';
         }
-        if(!iPHP_ROUTER_REWRITE){
+        if(!$rewrite){
             $url = self::$config['api_url'].'/'.$url;
         }else{
             if(!iFS::checkHttp($url)){
                 $url = rtrim(iPHP_URL,'/').$url;
             }
         }
-        if(self::$config['callback']['router']){
-            call_user_func_array(self::$config['callback']['router'], array(&$url));
+        if(self::$callback['router']['data']){
+            call_user_func_array(self::$callback['router']['data'], array(&$url));
         }
         return $url;
     }
@@ -181,6 +187,9 @@ class iURL {
             preg_match('/\[(.+)\]/', $array['clink'], $match);
             isset($match[1]) && $url = $match[1];
         }
+        if(self::$callback['url']['rule']){
+            $url = self::$callback['url']['rule'];
+        }
         if($url=='{PHP}'){
             $primary = $app_conf['primary'];
             empty($href) && $href = $uri.'.php';
@@ -215,15 +224,15 @@ class iURL {
             }
             // call_user_func_array(self::$callback, array($uri,$i,self::$ARRAY,$app_conf));
         }
-        if($category['cid'] && self::$config['callback']['domain']){
-            $i = call_user_func_array(self::$config['callback']['domain'], array($i,$category['cid'],$router_url));
+        if($category['cid'] && self::$callback['domain']){
+            $i = call_user_func_array(self::$callback['domain'], array($i,$category['cid'],$router_url));
         }
-        if(self::$config['callback']['device']){
-            $d = call_user_func_array(self::$config['callback']['device'], array($i));
+        if(self::$callback['device']){
+            $d = call_user_func_array(self::$callback['device'], array($i));
             $i = (object)array_merge((array)$i,$d);
         }
-        if(self::$config['callback']['url']){
-            call_user_func_array(self::$config['callback']['url'], array(&$i));
+        if(self::$callback['url']['data']){
+            call_user_func_array(self::$callback['url']['data'], array(&$i));
         }
         $i->url = $i->href;
         return $i;
