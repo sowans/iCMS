@@ -923,6 +923,13 @@ class articleAdmincp{
         }
     }
     public function set_pic($picurl,$aid,$key='b'){
+        if(is_array($picurl)){
+            $sizeMap = array('b','m','s');
+            foreach ($sizeMap as $key => $size) {
+                $picurl[$key] && $this->set_pic($picurl[$key],$aid,$size);
+            }
+            return;
+        }
         $uri = parse_url(iCMS_FS_URL);
         if (stripos($picurl,$uri['host']) !== false){
             $field = 'pic';
