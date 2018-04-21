@@ -18,7 +18,7 @@ class iURL {
 
     public static function init($config=array(),$_config=array()){
         self::$config   = array_merge($config,$_config);
-        self::$callback = array_merge((array)$config['callback'],self::$callback);
+        self::$callback = array_merge((array)self::$config['callback'],self::$callback);
     }
 
     public static function router($key, $var = null) {
