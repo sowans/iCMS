@@ -17,3 +17,4 @@ function iCMS_config($vars){
 	}
 	return $config;
 }
+
