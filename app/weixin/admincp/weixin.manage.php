@@ -38,9 +38,6 @@ $(function(){
   <div class="widget-box">
     <div class="widget-title"> <span class="icon"> <i class="fa fa-search"></i> </span>
       <h5>搜索</h5>
-      <div class="pull-right">
-        <a style="margin: 10px;" class="btn btn-success btn-mini" href="<?php echo APP_FURI; ?>&do=cache" target="iPHP_FRAME"><i class="fa fa-refresh"></i> 更新缓存</a>
-      </div>
     </div>
     <div class="widget-content">
       <form action="<?php echo iPHP_SELF ; ?>" method="get" class="form-inline">
