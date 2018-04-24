@@ -100,7 +100,7 @@ class tagApp extends appsApp {
         }
         $tag['url'] OR $tag['url'] = $tag['iurl']['href'];
 
-        if($category['mode'] && stripos($tag['url'], '.php?')===false){
+        if(stripos($tag['url'], '.php?')===false){
             iURL::page_url($tag['iurl']);
         }
         $tag['related']  && $tag['relArray'] = explode(',', $tag['related']);

@@ -267,7 +267,7 @@ function htmlcut($content,$maxlen=300,$suffix=FALSE) {
         $outstr=str_replace("[html_&lt;]","<",$outstr);
         $outstr=str_replace("[html_&gt;]",">",$outstr);
     }
-    if($suffix&&cstrlen($outstr)>=$maxlen)$outstr.="．．．";
+    if($suffix&&cstrlen($outstr)>=$maxlen)$outstr.="......";
     return $outstr;
 }
 //去掉多余的空标签

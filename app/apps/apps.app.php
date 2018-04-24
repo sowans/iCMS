@@ -45,6 +45,9 @@ class appsApp {
     public function do_iCMS($a = null) {
         list($v,$p,$f) = $this->gets();
         $func = $this->_app;
+        if(!method_exists($this, $func)){
+            iPHP::error_404('Call to undefined method <b>' . __CLASS__ . '::'.$func.'</b>', '1004');
+        }
         return $this->$func($v,$p,$f);
     }
     public function do_clink($a = null) {
