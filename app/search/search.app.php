@@ -40,7 +40,18 @@ class searchApp {
         return $iURL;
     }
     private function search_log($search){
-        $sid = iDB::value("SELECT `id` FROM `#iCMS@__search_log` WHERE `search` = '$search' LIMIT 1");
+        $interval = 30;
+        $ip    = iPHP::get_ip();
+        $time  = time();
+        $key   = 'search/'.$ip;
+        $stime = iCache::get($key);
+
+        if($stime && $time-$stime<$interval){
+            iPHP::error_404('您搜索太快休息下,'.format_time($interval,'cn').'之后再继续', 60003);
+        }
+        iCache::set($key,$time,$interval);
+
+        $sid  = iDB::value("SELECT `id` FROM `#iCMS@__search_log` WHERE `search` = '$search' LIMIT 1");
         if($sid){
             iDB::query("
                 UPDATE `#iCMS@__search_log`
@@ -50,7 +61,7 @@ class searchApp {
         }else{
             iDB::query("
                 INSERT INTO `#iCMS@__search_log` (`search`, `times`, `addtime`)
-                VALUES ('$search', '1', '".time()."');
+                VALUES ('$search', '1', '".$time."');
             ");
         }
     }

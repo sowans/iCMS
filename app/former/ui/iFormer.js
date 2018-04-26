@@ -477,7 +477,7 @@ var iFormer = {
      */
     edit: function($container) {
         // $container.dblclick(function(event) {
-            event.preventDefault();
+            // window.event.preventDefault();
             var me = $(this),
             data   = $("[name='fields[]']",$container).val(),
             origin  = $("[name^='origin']",$container).val(),

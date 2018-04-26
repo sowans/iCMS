@@ -54,7 +54,7 @@ class iURL {
             $url = self::$config['api_url'].'/'.$url;
         }else{
             if(!iFS::checkHttp($url)){
-                $url = rtrim(iPHP_URL,'/').$url;
+                $url = rtrim(self::$config['url'],'/').$url;
             }
         }
         if(self::$callback['router']['data']){
