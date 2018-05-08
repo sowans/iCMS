@@ -185,7 +185,7 @@ td.sortnum input { width: 30px; text-align: center; padding: 2px; margin-bottom:
 #sidebar #mini { border-bottom: 1px solid #302F2F; background: #454545; color: #A8A8A8; text-align: center; padding: 0; width: 36px; height: 28px; display: block; position: absolute; right: -3px; border-radius: 5px 0 0 5px; cursor: pointer; margin-top: 5px; font-size: 18px; -webkit-transition: all .1s linear 0s; transition: all .1s linear 0s; padding-bottom: 4px; }
 #sidebar #mini:hover { background: #646464; color: #E4E4E4; right: 0 }
 #sidebartop { -webkit-border-radius: 0; -moz-border-radius: 0; border-radius: 0; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none; background-image: none; padding-right: 0; padding-left: 0px; border: 0px; border-bottom: 1px solid #262626; }
-#sidebartop .iCMS-logo { padding: 0px; margin-left: 20px; margin-right: 20px; }
+#sidebartop .iCMS-logo { padding: 0px; margin-left: 10px; margin-right: 10px; }
 
 /* Content */
 #content { z-index: 99 !important; display: block; background: #EDEDED; margin-left: 160px; margin-right: 0; min-height: 740px; width: auto; -webkit-background-clip: padding-box; border-top-left-radius: 5px; padding-bottom: 28px; }

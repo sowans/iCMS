@@ -1,7 +1,0 @@
-<template name="tag_list">
-        <block wx:for="{{tag_list}}" wx:key="*this">
-            <view class="tag" bindtap="tagTo" id="{{item.id}}">
-                <text>{{item.name}}</text>
-            </view>
-        </block>
-</template>

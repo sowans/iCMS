@@ -1,4 +1,0 @@
-@import "../common/common.wxss";
-.tags{margin-top:0px;padding:8px;border-top:none;}
-.tags-title{text-align:center;height:35px;font-size:11pt;color:#999;}
-.tag{color:#00a2ea;border:1px solid #a0d1e5;padding:4px 8px;display:inline-block;margin-right:5px;border-radius:10px;margin-bottom:5px;font-size:11pt;}
