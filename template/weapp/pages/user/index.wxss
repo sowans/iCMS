@@ -1,7 +1,0 @@
-@import "../common/common.wxss";
-.userinfo{display:flex;flex-direction:column;/*border-bottom:1px solid #D5D5D5;*/background-color:#00A2EA;text-align: center;padding-bottom: 10px;}
-.userinfo-avatar{margin: 10px auto; width: 90px;height: 90px; border-radius: 50%;}
-.userinfo-nickname{font-size: 14pt;font-weight: bold;color: #fff;}
-.weui-panel{border-top:1px solid #e5e5e5;}
-.weui-panel text{color: #333;font-size: 12pt;}
-.weui-panel .icon{width: 22px;height: 22px;margin-right: 5px;margin-top: 5px;}
