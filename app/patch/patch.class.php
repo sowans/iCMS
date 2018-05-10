@@ -37,6 +37,17 @@ class patch {
 			return array(self::$version, self::$release, $info->update, $info->changelog);
 		}
 	}
+	public static function setTime() {
+		$release = strtotime(iCMS_RELEASE);
+		$gitTime = GIT_TIME;
+		$_GET['iCMS_RELEASE']&& $release = strtotime($_GET['iCMS_RELEASE']);
+		$_GET['GIT_TIME']    && $gitTime = $_GET['GIT_TIME'];
+		iCache::set('patch.time',array($release,$gitTime),3600);
+	}
+	public static function getTime() {
+		return (array)iCache::get('patch.time');
+	}
+
 	public static function git($do,$commit_id=null,$type='array') {
         $commit_id===null && $commit_id = GIT_COMMIT;
 		$_GET['commit_id'] && $commit_id = $_GET['commit_id'];
@@ -198,16 +209,13 @@ class patch {
 	public static function get_upgrade_files() {
 		$files = array();
 		$patch_dir = iPHP_APP_DIR.'/patch/files/';
+		list($release,$gitTime) = self::getTime();
 		foreach (glob($patch_dir."*.php") as $file) {
 			$d = str_replace(array($patch_dir,'db.','fs.','.php'), '', $file);
-			$time = strtotime($d.'00');
-			$release = strtotime(iCMS_RELEASE);
-			$_GET['iCMS_RELEASE'] && $release = strtotime($_GET['iCMS_RELEASE']);
+			$time = strtotime($d.'5959');
 			if($time>$release){
-				if(defined('GIT_TIME')||isset($_GET['GIT_TIME'])){
-					$git_time = GIT_TIME;
-					$_GET['GIT_TIME'] && $git_time = $_GET['GIT_TIME'];
-					if($time>$git_time){
+				if($gitTime){
+					if($time>$gitTime){
 						$files[$d] = $file;
 					}else{
 						iFS::del($file);

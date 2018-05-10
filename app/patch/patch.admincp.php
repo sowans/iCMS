@@ -70,6 +70,7 @@ class patchAdmincp{
      * [安装升级包]
      */
     public function do_install(){
+        patch::setTime();
         $this->msg  = patch::update();//更新文件
         $is_upgrade = patch::$upgrade;
 		include admincp::view("patch");
