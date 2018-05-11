@@ -702,9 +702,9 @@ CREATE TABLE `icms_user_follow` (
 CREATE TABLE `icms_user_openid` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `uid` int(10) unsigned NOT NULL,
-  `openid` varchar(255) NOT NULL DEFAULT '',
+  `openid` varchar(128) NOT NULL DEFAULT '',
   `platform` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '1:wx,2:qq,3:wb,4:tb',
-  `appid` varchar(255) NOT NULL DEFAULT '',
+  `appid` varchar(64) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `idx_upa` (`uid`,`platform`,`appid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
