@@ -270,8 +270,12 @@ class iView {
             // return self::check_tpl($tpl, self::$config['template']['dir']);
         } elseif (strpos($tpl, '{iTPL}') !== false) {
             $flag = '{iTPL}';
-            // testApp/$tpl
+            // 模板名/$tpl
+            if ($_tpl = self::check_tpl($tpl, self::$config['template']['dir'],$flag)){
+                return $_tpl;
+            }
             if(self::$app){
+            // testApp/$tpl
                 if ($_tpl = self::check_tpl($tpl, self::$app.'App',$flag)) {
                     return $_tpl;
                 }

@@ -99,7 +99,7 @@ class userFunc{
     			$ids_array      = iCache::get($map_cache_name);
             }
             if(empty($ids_array)){
-                $ids_array = iDB::all("SELECT `id` FROM `#iCMS@__user` {$where_sql} {$order_sql} {$limit}");
+                $ids_array = iDB::all("SELECT `uid` FROM `#iCMS@__user` {$where_sql} {$order_sql} {$limit}");
                 $vars['cache'] && iCache::set($map_cache_name,$ids_array,$cache_time);
             }
             $ids       = iSQL::values($ids_array,'uid');

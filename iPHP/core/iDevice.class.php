@@ -104,10 +104,10 @@ class iDevice {
         return $router;
     }
     //所有设备网址
-    public static function urls($array) {
-        $array = (array)$array;
+    public static function urls($array=null) {
         $urls = array();
         if($array){
+            $array = (array)$array;
             $iurl = array(
                 'url' => $array['href']
             );
@@ -123,6 +123,19 @@ class iDevice {
                 if($value['domain']){
                     $name = trim($value['name']);
                     $urls[$name] = str_replace(self::$domain, $value['domain'], $iurl);
+                }
+            }
+        }else{
+            if(self::$config['desktop']['domain']){
+                $urls['desktop'] = self::$config['desktop']['domain'];
+            }
+            if(self::$config['mobile']['domain']){
+                $urls['mobile'] = self::$config['mobile']['domain'];
+            }
+            if(self::$config['device'])foreach (self::$config['device'] as $key => $value) {
+                if($value['domain']){
+                    $name = trim($value['name']);
+                    $urls[$name] = $value['domain'];
                 }
             }
         }

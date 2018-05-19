@@ -55,6 +55,10 @@ class userAdmincp{
     public function do_iCMS(){
         $sql = "WHERE 1=1";
         $pid = $_GET['pid'];
+
+        if($_GET['wxappid']) {
+            $sql.=" AND `username` like '%@{$_GET['wxappid']}'";
+        }
         if($_GET['keywords']) {
             $sql.=" AND CONCAT(username,nickname) REGEXP '{$_GET['keywords']}'";
         }
