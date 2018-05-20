@@ -137,17 +137,7 @@ class iView {
             }
         }else{
             //iPHP:func app="ooxx"
-            $func_path = iPHP_TPL_FUN."/".iPHP_APP.".".$args['app'].".php";
-            // if($args['_app']){
-            //     //判断 iPHP.app.php是否存在 不存用检测,原设置_app
-            //     if(!is_file($func_path)){
-            //         $args['app'] = $args['_app'];
-            //         $func_path = iPHP_TPL_FUN."/".iPHP_APP.".".$args['_app'].".php";
-            //     }
-            // }
-            //iPHP:func >> iPHP_func
-            $callback = iPHP_APP.'_' . $args['app'];
-            function_exists($callback) OR require_once($func_path);
+            $callback = self::app_func($args['app']);
         }
         if(isset($args['vars'])){
             $vars = $args['vars'];
@@ -162,6 +152,25 @@ class iView {
             $tpl->assign($keys,call_user_func_array($callback, array($args)));
         }else{
             $tpl->assign($keys,$callback($args));
+        }
+    }
+    public static function app_func($func,$run=false,$vars=array()){
+        //iPHP:func app="ooxx"
+        $func_path = iPHP_TPL_FUN."/".iPHP_APP."/".iPHP_APP.".".$func.".php";
+        // if($args['_app']){
+        //     //判断 iPHP.app.php是否存在 不存用检测,原设置_app
+        //     if(!is_file($func_path)){
+        //         $args['app'] = $args['_app'];
+        //         $func_path = iPHP_TPL_FUN."/".iPHP_APP.".".$args['_app'].".php";
+        //     }
+        // }
+        //iPHP:func >> iPHP_func
+        $callback = iPHP_APP.'_' . $func;
+        function_exists($callback) OR require_once($func_path);
+        if($run){
+            return call_user_func_array($callback, array($vars));
+        }else{
+            return $callback;
         }
     }
     public static function callback_func_my(&$callback=null){
@@ -193,7 +202,7 @@ class iView {
         }
     }
     public static function callback_plugin($name,$tpl) {
-        $path = iPHP_TPL_FUN."/tpl.".$name;
+        $path = iPHP_TPL_FUN."/template/tpl.".$name;
         if (is_file($path)) {
             return $path;
         }
