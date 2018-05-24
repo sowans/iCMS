@@ -48,7 +48,7 @@ if($multi){
     // var_export(self::$pic_value);
     if (is_array($picArr) && count($picArr) > 0) {
         foreach ($picArr as $row) {
-            $s .= '<li class="span2 multiupload-item"><a href="'.$row.'" target="_blank" class="thumbnail"><img src="'.iCMS_URL.'/res/'.$row.'"></a><input type="hidden" name="'.$callback.'[]" value="'.$row.'"><em class="delete" title="移除这张图片" onclick="deleteMultiImage(this)">×</em></li>';
+            $s .= '<li class="span2 multiupload-item"><a href="'.iCMS::$config['FS']['url'].$row.'" target="_blank" class="thumbnail"><img src="'.iCMS::$config['FS']['url'].$row.'"></a><input type="hidden" name="'.$callback.'[]" value="'.$row.'"><em class="delete" title="移除这张图片" onclick="deleteMultiImage(this)">×</em></li>';
         }
     }
     $s .= '</ul>';
