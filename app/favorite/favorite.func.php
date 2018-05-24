@@ -13,13 +13,10 @@ class favoriteFunc{
 	public static function favorite_list($vars=null){
 		$maxperpage = isset($vars['row'])?(int)$vars['row']:"10";
 		$where_sql  = "WHERE 1=1 ";
+		$cache_time	= isset($vars['time'])?(int)$vars['time']:-1;
 		isset($vars['userid'])&& $where_sql .= " AND `uid`='".(int)$vars['userid']."' ";
-		isset($vars['id'])   && $where_sql .= " AND `id`='".(int)$vars['id']."' ";
 		isset($vars['mode'])  && $where_sql .= " AND `mode`='".(int)$vars['mode']."'";
 		isset($vars['appid']) && $where_sql .= " AND `appid`='".(int)$vars['appid']."' ";
-
-		$cache_time	= isset($vars['time'])?(int)$vars['time']:-1;
-
 		$vars['id'] && $where_sql .= iSQL::in($vars['id'], 'id');
 		$vars['id!'] && $where_sql .= iSQL::in($vars['id!'], 'id', 'not');
 		$by=$vars['by']=="ASC"?"ASC":"DESC";
@@ -60,12 +57,13 @@ class favoriteFunc{
 	}
 	public static function favorite_data($vars=null){
 		$maxperpage = isset($vars['row'])?(int)$vars['row']:"10";
+		$cache_time	= isset($vars['time'])?(int)$vars['time']:-1;
 		$where_sql  = "WHERE 1=1 ";
-		isset($vars['userid'])&& $where_sql .= " AND `uid`='".(int)$vars['userid']."' ";
 		$vars['fid']          && $where_sql .= " AND `fid`='".(int)$vars['fid']."' ";
+		isset($vars['iid'])   && $where_sql .= " AND `iid`='".(int)$vars['userid']."' ";
+		isset($vars['userid'])&& $where_sql .= " AND `uid`='".(int)$vars['userid']."' ";
 		isset($vars['appid']) && $where_sql .= " AND `appid`='".(int)$vars['appid']."' ";
 
-		$cache_time	= isset($vars['time'])?(int)$vars['time']:-1;
 
 		$vars['id'] && $where_sql .= iSQL::in($vars['id'], 'id');
 		$vars['id!'] && $where_sql .= iSQL::in($vars['id!'], 'id', 'not');
@@ -89,6 +87,7 @@ class favoriteFunc{
 		if(empty($resource)){
 			$resource  = iDB::all("SELECT * FROM `#iCMS@__favorite_data` {$where_sql} {$order_sql} LIMIT {$offset},{$maxperpage}");
 			if($resource)foreach ($resource as $key => $value) {
+				$vars['user'] && $value['user'] = user::info($value['uid'],$value['nickname']);
 				$value['param'] = array(
 					"id"    => $value['id'],
 					"fid"   => $value['fid'],

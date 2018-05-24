@@ -224,6 +224,12 @@ class articleFunc{
 			$cids = array_map("intval", $cids);
 			$SPH->SetFilter('cid', $cids);
 		}
+		if (isset($vars['cid!'])) {
+			$cids = $vars['sub'] ? categoryApp::get_cids($vars['cid!'], true) : (array) $vars['cid!'];
+			$cids OR $cids = (array) $vars['cid!'];
+			$cids = array_map("intval", $cids);
+			$SPH->SetFilter('cid', $cids, true);
+		}
 		if (isset($vars['startdate'])) {
 			$startime = strtotime($vars['startdate']);
 			$enddate = empty($vars['enddate']) ? time() : strtotime($vars['enddate']);
