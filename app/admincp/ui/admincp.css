@@ -572,3 +572,27 @@ form { margin-bottom: 0; }
     #sidebar > ul ul:after { border-right: 6px solid #222222; }
 }
 .page_select { width: 48px; height: 20px; margin-bottom: 3px; line-height: 16px; padding: 0px }
+
+/*多图上传预览删除*/
+.multiupload-preview .multiupload-item{
+    position: relative;
+    margin-top: 10px;
+}
+.multiupload-preview .delete {
+    position:absolute;
+    top: 5px;
+    right: 5px;
+    color: #fff;
+    font-size: 16px;
+    font-style: normal;
+    width: 20px;
+    height: 20px;
+    float: right;
+    display: none;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+}
+.multiupload-preview .delete:hover {
+    display: inline-block;
+    cursor: pointer
+}
