@@ -310,7 +310,12 @@ class articleFunc{
 			$array = iCache::get($cache);
 		}
 		if (empty($array)) {
-			$rs = iDB::row("SELECT * FROM `#iCMS@__article` WHERE `status`='1' {$sql}");
+			$rs = iDB::row("
+				SELECT * FROM `#iCMS@__article`
+				WHERE `id` =(
+					SELECT `id` FROM `#iCMS@__article` WHERE `status`='1' {$sql}
+				)
+			");
 			if ($rs) {
 				$category = categoryApp::get_cahce_cid($rs->cid);
 				$array = array(

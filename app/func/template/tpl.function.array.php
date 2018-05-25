@@ -9,7 +9,26 @@
 
  */
 function tpl_function_array($params, &$tpl){
-    $assign = $params['assign']?:'array';
-    unset($params['assign']);
-    $tpl->assign($assign,$params);
+    $key = $params['assign']?:'array';
+    $params['as'] && $key = $params['as'];
+    if($params['as[]']){
+        $mkey  = $params['as[]'];
+        $array = $tpl->_vars[$mkey];
+    }
+    unset($params['assign'],$params['as'],$params['as[]']);
+
+    $value = $params;
+
+    if($array){
+        array_push($array,$value);
+        $value = $array;
+    }else{
+        $mkey && $value = array($value);
+    }
+
+    if($mkey){
+        $tpl->assign($mkey,$value);
+    }else{
+        $tpl->assign($key,$value);
+    }
 }

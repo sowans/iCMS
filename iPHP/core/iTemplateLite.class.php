@@ -125,7 +125,9 @@ class iTemplateLite {
 	function clear_all_assign(){
 		$this->_vars = array();
 	}
-
+	function get_vars($key = null){
+		return $this->get_template_vars($key);
+	}
 	function &get_template_vars($key = null){
 		if ($key == null){
 			return $this->_vars;
