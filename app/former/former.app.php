@@ -171,7 +171,7 @@ class formerApp{
         switch ($field['type']) {
             case 'multi_image':
                 $nkey     = $key.'_array';
-                $valArray = explode("\n", $value);
+                $valArray = unserialize($value);
                 foreach ($valArray as $i => $val) {
                     $val && $values[$i]= filesApp::get_pic(trim($val));
                 }
@@ -192,7 +192,7 @@ class formerApp{
             break;
             case 'multi_file':
                 $nkey = $key.'_file';
-                $valArray = explode("\n", $value);
+                $valArray = unserialize($value);
                 foreach ($valArray as $i => $val) {
                     if($val){
                         $pi   = pathinfo($val);
