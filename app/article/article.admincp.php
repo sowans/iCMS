@@ -98,8 +98,8 @@ class articleAdmincp{
     }
     public function do_batch(){
     	$_POST['id'] OR iUI::alert("请选择要操作的文章");
-    	$ids	= implode(',',(array)$_POST['id']);
-    	$batch	= $_POST['batch'];
+        $ids   = implode(',',(array)$_POST['id']);
+        $batch = $_POST['batch'];
     	switch($batch){
     		case 'order':
 		        foreach((array)$_POST['sortnum'] AS $id=>$sortnum) {
@@ -206,12 +206,13 @@ class articleAdmincp{
 		        iUI::success('成功提取缩略图!','js:1');
     		break;
     		case 'dels':
+                set_time_limit(0);
     			iUI::$break	= false;
     			iUI::flush_start();
     			$_count	= count($_POST['id']);
 				foreach((array)$_POST['id'] AS $i=>$id) {
 			     	$msg = $this->del($id);
-			        $msg.= $this->del_msg('文章删除完成!');
+			        // $msg.= $this->del_msg('文章删除完成!');
 					$updateMsg	= $i?true:false;
 					$timeout	= ($i++)==$_count?'3':false;
 					iUI::dialog($msg,'js:parent.$("#id'.$id.'").remove();',$timeout,0,$updateMsg);
@@ -220,6 +221,22 @@ class articleAdmincp{
 	   			iUI::$break	= true;
 				iUI::success('文章全部删除完成!','js:1',3,0,true);
     		break;
+            case 'quick_dels':
+                set_time_limit(0);
+                iUI::$break = false;
+                iUI::flush_start();
+                $_count = count($_POST['id']);
+                foreach((array)$_POST['id'] AS $i=>$id) {
+                    $msg = $this->del_art($id);
+                    // $msg.= $this->del_msg('文章删除完成!');
+                    $updateMsg  = $i?true:false;
+                    $timeout    = ($i++)==$_count?'3':false;
+                    iUI::dialog($msg,'js:parent.$("#id'.$id.'").remove();',$timeout,0,$updateMsg);
+                    iUI::flush();
+                }
+                iUI::$break = true;
+                iUI::success('文章全部删除完成!','js:1',3,0,true);
+            break;
     		default:
 				$data = iSQL::update_args($batch);
     	}
@@ -749,7 +766,7 @@ class articleAdmincp{
     }
 
     public static function del_msg($str){
-        return iUI::msg('success:#:check:#:'.$str.'<hr />',true);
+        return iUI::msg('success:#:check:#:'.$str.'<hr style="width:200px;"/>',true);
     }
     public function del_pic($pic){
         //$thumbfilepath    = gethumb($pic,'','',false,true,true);
@@ -762,6 +779,14 @@ class articleAdmincp{
         $filename   = iFS::info($pic)->filename;
         article::del_filedata($filename,'filename');
         $msg.= $this->del_msg($pic.'数据删除');
+        return $msg;
+    }
+    public static function del_art($id,$uid='0',$postype='1') {
+        $id = (int)$id;
+        $id OR iUI::alert("请选择要删除的文章");
+        article::del($id);
+        article::del_data($id);
+        $msg.= self::del_msg($id.' 文章删除');
         return $msg;
     }
     public static function del($id,$uid='0',$postype='1') {
@@ -790,7 +815,7 @@ class articleAdmincp{
         $msg.= self::del_msg('评论数据删除');
         article::del($id);
         article::del_data($id);
-        $msg.= self::del_msg('文章数据删除');
+        $msg.= self::del_msg($id.' 文章删除');
         categoryAdmincp::update_count($art['cid'],'-');
         $msg.= self::del_msg('栏目数据更新');
         $msg.= self::del_msg('删除完成');

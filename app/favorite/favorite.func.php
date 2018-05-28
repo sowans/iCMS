@@ -60,7 +60,7 @@ class favoriteFunc{
 		$cache_time	= isset($vars['time'])?(int)$vars['time']:-1;
 		$where_sql  = "WHERE 1=1 ";
 		$vars['fid']          && $where_sql .= " AND `fid`='".(int)$vars['fid']."' ";
-		isset($vars['iid'])   && $where_sql .= " AND `iid`='".(int)$vars['userid']."' ";
+		isset($vars['iid'])   && $where_sql .= " AND `iid`='".(int)$vars['iid']."' ";
 		isset($vars['userid'])&& $where_sql .= " AND `uid`='".(int)$vars['userid']."' ";
 		isset($vars['appid']) && $where_sql .= " AND `appid`='".(int)$vars['appid']."' ";
 
@@ -86,8 +86,15 @@ class favoriteFunc{
 		}
 		if(empty($resource)){
 			$resource  = iDB::all("SELECT * FROM `#iCMS@__favorite_data` {$where_sql} {$order_sql} LIMIT {$offset},{$maxperpage}");
+
+	        if($vars['user']){
+	            $uidArray = iSQL::values($resource,'uid','array',null);
+	            $uidArray && $userArray = (array) user::get($uidArray);
+	        }
 			if($resource)foreach ($resource as $key => $value) {
-				$vars['user'] && $value['user'] = user::info($value['uid'],$value['nickname']);
+	            if($vars['user'] && $userArray){
+	                $value['user']  = (array)$userArray[$value['uid']];
+	            }
 				$value['param'] = array(
 					"id"    => $value['id'],
 					"fid"   => $value['fid'],

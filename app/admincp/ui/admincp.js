@@ -438,6 +438,7 @@ function modal_icms(el, a) {
             var im = $(this),
                 _this = this,
                 action = $('<input type="hidden" name="batch">'),
+                bmIds = $('<input type="hidden" name="bmIds">'),
                 batch_content = $('<div class="batch_content hide"></div>').appendTo(im),
                 defaults = {
                     move: function() {
@@ -482,6 +483,16 @@ function modal_icms(el, a) {
                     options[act](checkbox);
                     return;
                 }
+                if(checkbox.length>900){
+                    var bIds=[];
+                    checkbox.each(function(index, el) {
+                        var id = $(el).val();
+                        bIds.push(id);
+                        $(el).attr('disabled', true);
+                    });
+                    bmIds.val(bIds).appendTo(im);
+                }
+
                 action.val(act).appendTo(im);
                 // console.log(box,typeof box);
                 var is_chosen = false;
@@ -520,6 +531,8 @@ function modal_icms(el, a) {
                             $("select", $(box)).chosen("destroy");
                         }
                         action.val(0);
+                        bmIds.val('');
+                        checkbox.removeAttr('disabled');
                         batch_content.empty();
                     }
                 });
