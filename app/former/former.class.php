@@ -166,9 +166,11 @@ class former {
 
             if ($type == 'multi_image' || $type == 'multi_file') {
                 unset($attr['value']);
+                $input = self::widget('input',$attr);
+            }else{
+                $input = self::widget('input',$attr);
+                $input->val($value);
             }
-            $input = self::widget('input',$attr);
-            // $input->val($value); // 貌似没用，待核查
 
             switch ($type) {
                 case 'multi_image':
@@ -780,7 +782,7 @@ class former {
 
             if(in_array($fields['type'], array('multi_image','multi_file'))){
                 if (is_array($value)) {
-                    $field_post[$key] = $value = serialize($value);
+                    $field_post[$key] = $value = json_encode($value);
                 }
             }
             if(in_array($fields['type'], array('category','multi_category'))){

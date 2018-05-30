@@ -42,14 +42,24 @@ $unid = uniqid();
 </div>
 
 <?php
+
 if($multi){
     $s = '<ul class="row multiupload-preview">';
-    $picArr = unserialize(self::$pic_value);
-    // var_export(self::$pic_value);
-    if (is_array($picArr) && count($picArr) > 0) {
-        foreach ($picArr as $row) {
-            $s .= '<li class="span2 multiupload-item"><a href="'.iCMS::$config['FS']['url'].$row.'" target="_blank" class="thumbnail"><img src="'.iCMS::$config['FS']['url'].$row.'"></a><input type="hidden" name="'.$callback.'[]" value="'.$row.'"><em class="delete" title="移除这张图片" onclick="deleteMultiImage(this)">×</em></li>';
-        }
+    if(preg_match('/^a:\d+:\{/', self::$pic_value)){
+        $picArr = unserialize(self::$pic_value);
+    }else{
+        $picArr = json_decode(self::$pic_value,true);
+    }
+    if(self::$pic_value && empty($picArr)){
+        $picArr = explode("\n", self::$pic_value);
+    }
+    if (is_array($picArr))foreach ($picArr as $row) {
+        $url = iFS::fp($row,'+http');
+        $s .= '<li class="span2 multiupload-item">';
+        $s .= '<a href="'.$url.'" target="_blank" class="thumbnail">';
+        $s .= '<img src="'.$url.'"></a>';
+        $s .= '<input type="hidden" name="'.$callback.'[]" value="'.$row.'">';
+        $s .= '<em class="delete" title="移除这张图片" onclick="deleteMultiImage(this)">×</em></li>';
     }
     $s .= '</ul>';
     echo $s;

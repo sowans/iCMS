@@ -80,17 +80,22 @@ class favoriteApp {
         $suid    = (int)$_POST['suid'];
         $id      = (int)$_POST['id'];
         $fid     = (int)$_POST['fid'];
+        $appid   = (int)$_POST['appid'];
         $title   = iSecurity::escapeStr($_POST['title']);
         $url     = iSecurity::escapeStr($_POST['url']);
         $addtime = time();
+        $sql     = '';
+
+        isset($_POST['appid'])&& $sql.=" AND `appid`='$appid'";
+        isset($_POST['iid'])  && $sql.=" AND `iid`='$iid'";
+        isset($_POST['fid'])  && $sql.=" AND `fid`='$fid'";
+        isset($_POST['url'])  && $sql.=" AND `url`='$url'";
 
         $id  = iDB::value("
             SELECT `id` FROM `#iCMS@__favorite_data`
-            WHERE `uid`='$uid'
-             AND `fid`='$fid'
-             AND `url`='$url'
-             LIMIT 1
+            WHERE `uid`='$uid' {$sql} LIMIT 1
         ");
+
         $id && iUI::code(0,'iCMS:favorite:failure',0,'json');
 
         $fields = array('uid', 'appid', 'fid', 'iid', 'url', 'title', 'addtime');

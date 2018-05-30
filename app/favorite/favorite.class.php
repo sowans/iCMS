@@ -7,9 +7,18 @@
 * @site https://www.icmsdev.com
 * @licence https://www.icmsdev.com/LICENSE.html
 */
-defined('iPHP') OR exit('What are you doing?');
 
 class favorite {
+    public static function check($iid,$uid,$appid){
+        $id  = iDB::value("
+            SELECT `id` FROM `#iCMS@__favorite_data`
+            WHERE `uid`='$uid'
+            AND `iid`='$iid'
+            AND `appid`='$appid'
+            LIMIT 1
+        ");
+        return $id?true:false;
+    }
     public static function update_count($id=0,$field='count',$math='+',$count='1'){
         $math=='-' && $sql = " AND `{$field}`>0";
         iDB::query("
