@@ -441,7 +441,7 @@ class contentAdmincp{
     //                 $json = '['.$json.']';
     //             }
 
-    //             $array  = json_decode($json,ture);
+    //             $array  = json_decode($json,true);
     //             if($array){
     //                 $array = $menu::mid($array,$sort);
     //                 $variable[] = $array;

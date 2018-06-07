@@ -143,7 +143,7 @@ class filesApp {
             $data['width']  = $size['w'];
             $data['height'] = $size['h'];
         }
-        if(is_array($size) && is_array($thumb)){
+        if($size && is_array($size) && $thumb && is_array($thumb)){
             $array = bitscale(array(
                 "tw" => (int)$thumb['width'],
                 "th" => (int)$thumb['height'],

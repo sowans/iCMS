@@ -601,7 +601,7 @@ class userApp {
 
 		$uname = iSecurity::escapeStr($_POST['uname']);
 		$pass = md5(trim($_POST['pass']));
-		$remember = (bool) $_POST['remember'] ? ture : false;
+		$remember = (bool) $_POST['remember'] ? true : false;
 
 		$openid = iSecurity::escapeStr($_POST['openid']);
 		$platform = iSecurity::escapeStr($_POST['platform']);
