@@ -59,8 +59,10 @@ class iWAF {
 	public static function CSRF_check(){
 		$token = $_GET['CSRF_TOKEN']?$_GET['CSRF_TOKEN']:$_POST['CSRF_TOKEN'];
 
-		if(defined('iPHP_WAF_CSRF') && iPHP_CSRF_POST){
-			return true;
+		if(defined('iPHP_WAF_CSRF') && defined('iPHP_WAF_POST')){
+			if(iPHP_WAF_POST){
+				return true;
+			}
 		}
 		if(stripos($_SERVER['HTTP_REFERER'],iPHP_SELF)){
 			return true;

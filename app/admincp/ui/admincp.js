@@ -238,7 +238,7 @@ $(function() {
 function get_category_meta(cid, el) {
     $.getJSON(window.iCMS.config.API, { 'app': 'category', 'do': 'config_meta', 'cid': cid },
         function(json) {
-            if (!json||!json.code) return;
+            if (!json) return;
 
             var tb = $(el),
                 tbody = $("tbody", tb);

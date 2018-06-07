@@ -39,33 +39,33 @@ class favoriteApp {
         $title   = iSecurity::escapeStr($_POST['title']);
         $url     = iSecurity::escapeStr($_POST['url']);
 
-        if(empty($fid)){
-            iUI::code(0,'iCMS:error',0,'json');
-        }
-        if(empty($url) && empty($id)){
-            iUI::code(0,'iCMS:error',0,'json');
-        }
-        if($url){
+        // if(isset($_POST['fid'])){
+        //     empty($fid) && iUI::code(0,'iCMS:error',0,'json');
+        // }
+        // if(isset($_POST['url']) || empty($id)){
+        //     iUI::code(0,'iCMS:error',0,'json');
+        // }
+
+        $WHERE = " `uid`='$uid' ";
+        isset($_POST['appid'])&& $WHERE.=" AND `appid`='$appid'";
+        isset($_POST['fid'])  && $WHERE.=" AND `fid`='$fid'";
+        isset($_POST['iid'])  && $WHERE.=" AND `iid`='$iid'";
+        isset($_POST['url'])  && $WHERE.=" AND `url`='$url'";
+
+        if($appid && ($iid || $url)){
             iDB::query("
                 DELETE
                 FROM `#iCMS@__favorite_data`
-                WHERE `uid` = '$uid'
-                AND `fid` = '$fid'
-                AND `url` = '$url';
-            ");
+                WHERE $WHERE
+            ");//iUI::code(0,'出错了',iDB::$last_query,'json');
+
+            iPHP::callback(array('apps','update_count'),array($iid,$appid,'favorite','-'));
+            iPHP::callback(array('user','update_count'),array($uid,'favorite','-'));
+            iPHP::callback(array('favorite','update_count'),array($uid,'count','-'));
+            iUI::code(1,0,0,'json');
+        }else{
+            iUI::code(0,0,0,'json');
         }
-        if($id){
-            iDB::query("
-                DELETE
-                FROM `#iCMS@__favorite_data`
-                WHERE `uid` = '$uid'
-                AND `id`='$id'
-            ");
-        }
-        iPHP::callback(array('apps','update_count'),array($iid,$appid,'favorite','-'));
-        iPHP::callback(array('user','update_count'),array($uid,'favorite','-'));
-        iPHP::callback(array('favorite','update_count'),array($uid,'count','-'));
-        iUI::code(1,0,0,'json');
     }
     /**
      * [ACTION_add 添加到收藏夹]
@@ -84,17 +84,18 @@ class favoriteApp {
         $title   = iSecurity::escapeStr($_POST['title']);
         $url     = iSecurity::escapeStr($_POST['url']);
         $addtime = time();
-        $sql     = '';
 
-        isset($_POST['appid'])&& $sql.=" AND `appid`='$appid'";
-        isset($_POST['iid'])  && $sql.=" AND `iid`='$iid'";
-        isset($_POST['fid'])  && $sql.=" AND `fid`='$fid'";
-        isset($_POST['url'])  && $sql.=" AND `url`='$url'";
+        $WHERE = " `uid`='$uid' ";
+        isset($_POST['appid'])&& $WHERE.=" AND `appid`='$appid'";
+        isset($_POST['iid'])  && $WHERE.=" AND `iid`='$iid'";
+        isset($_POST['fid'])  && $WHERE.=" AND `fid`='$fid'";
+        isset($_POST['url'])  && $WHERE.=" AND `url`='$url'";
 
         $id  = iDB::value("
             SELECT `id` FROM `#iCMS@__favorite_data`
-            WHERE `uid`='$uid' {$sql} LIMIT 1
+            WHERE {$WHERE} LIMIT 1
         ");
+// echo iDB::$last_query;
 
         $id && iUI::code(0,'iCMS:favorite:failure',0,'json');
 

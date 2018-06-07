@@ -255,7 +255,7 @@ class spider{
         }
 
         if (spider::$callback['post'] && is_callable(spider::$callback['post'])) {
-            $_POST = call_user_func_array(spider::$callback['post'],array($_POST));
+            $_POST = call_user_func_array(spider::$callback['post'],array($_POST,spider::$callback['post:data']));
             if($_POST['callback']){
                 return $_POST;
             }
