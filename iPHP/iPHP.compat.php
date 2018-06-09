@@ -372,7 +372,7 @@ function authcode($string, $operation = 'DECODE', $key = '', $expiry = 0) {
 	$cryptkey      = $keya.md5($keya.$keyc);
 	$key_length    = strlen($cryptkey);
 
-	$string        = $operation == 'DECODE' ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? $expiry + time() : 0).substr(md5($string.$keyb), 0, 16).$string;
+	$string        = $operation == 'DECODE' ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? (int)$expiry + time() : 0).substr(md5($string.$keyb), 0, 16).$string;
 	$string_length = strlen($string);
 
 	$result        = '';
