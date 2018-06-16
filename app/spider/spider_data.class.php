@@ -83,6 +83,14 @@ class spider_data {
 
             $content_html = $html;
             $dname = $data['name'];
+
+            if(isset($responses['NEW@HTML'])){
+                $content_html = $responses['NEW@HTML'];
+            }
+            if ($dname=='RE@HTML'){
+                unset($responses['NEW@HTML']);
+                $content_html = $html;
+            }
             /**
              * [UNSET:name]
              * 注销[name]
@@ -116,6 +124,7 @@ class spider_data {
                 $content_html = $responses[$pre_dname];
                 unset($responses[$pre_dname]);
             }
+
             /**
              * [EMPTY:name]
              * 如果[name]之前抓取结果数据为空使用这个数据项替换
@@ -132,9 +141,10 @@ class spider_data {
             }
             $content = spider_content::crawl($content_html,$data,$rule,$responses);
             if($content === null){
-                $responses[$key] = null;
+                $responses[$dname] = null;
                 continue;
             }
+
             unset($content_html);
 
             if (strpos($dname,'ARRAY:')!== false){
@@ -208,6 +218,8 @@ class spider_data {
                 unset($responses[$key]);
             }
         }
+        unset($responses['NEW@HTML'],$responses['RE@HTML']);
+
         if(isset($responses['title']) && empty($responses['title'])){
             $responses['title'] = $responses['__title__'];
         }

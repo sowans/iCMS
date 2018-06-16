@@ -324,6 +324,9 @@ $(function(){
                       <input type="checkbox" name="rule[data][<?php echo $dkey;?>][dom]" value="1"<?php if($data['dom']){ echo ' checked="true"';};?>>
                       phpQuery匹配</label>
                     <label class="checkbox">
+                      <input type="checkbox" name="rule[data][<?php echo $dkey;?>][xml2array]" value="1"<?php if($data['xml2array']){ echo ' checked="true"';};?>>
+                      xml转Array</label>
+                    <label class="checkbox">
                       <input type="checkbox" name="rule[data][<?php echo $dkey;?>][img_absolute]" value="1"<?php if($data['img_absolute']){ echo ' checked="true"';};?>>
                       图片地址补全</label>
                     <div class="clearfloat mb10"></div></td>
@@ -395,6 +398,9 @@ $(function(){
                     <label class="checkbox">
                       <input type="checkbox" name="rule[data][__NO__][dom]" value="1">
                       phpQuery匹配</label>
+                    <label class="checkbox">
+                      <input type="checkbox" name="rule[data][__NO__][xml2array]" value="1">
+                      xml转Array</label>
                     <label class="checkbox">
                       <input type="checkbox" name="rule[data][__NO__][img_absolute]" value="1">
                       图片地址补全</label>

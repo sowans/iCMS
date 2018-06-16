@@ -706,7 +706,11 @@ class former {
         if(!empty($fields['multiple'])){
           is_array($value) && $value = implode(',',$value);
         }
-
+        if($type=='image'){
+            if(iFS::checkHttp($value)){
+                $value  = iFS::http($value);
+            }
+        }
         //数字转换
         if(in_array($field, array('BIGINT','INT','MEDIUMINT','SMALLINT','TINYINT'))){
           $value = (int)$value;

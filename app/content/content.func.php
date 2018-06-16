@@ -270,6 +270,7 @@ class contentFunc {
                 }
                 $resource[$key] = $value;
             }
+            $vars['keys'] && iSQL::pickup_keys($resource,$vars['keys'],$vars['is_remove_keys']);
         }
         return $resource;
     }
