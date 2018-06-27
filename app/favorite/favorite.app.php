@@ -20,6 +20,19 @@ class favoriteApp {
     public function API_list(){
         user::get_cookie() OR iUI::code(0,'iCMS:!login',0,'json');
         $array = favoriteFunc::favorite_list(array('userid'=>user::$userid));
+        $appid = (int)$_POST['appid'];
+        $iid   = (int)$_POST['iid'];
+        $cid   = (int)$_POST['cid'];
+        $suid  = (int)$_POST['suid'];
+        $row   = favorite::data_all(compact("appid","iid"));
+        $fids  = array_column($row, 'fid','id');
+
+        if($array)foreach ($array as $key => &$value) {
+            $value['favorited'] = false;
+            if(array_search($value['id'], $fids)!==false){
+                $value['favorited'] = true;
+            }
+        }
         iUI::json($array);
     }
     public function API_data(){
@@ -89,11 +102,10 @@ class favoriteApp {
                 FROM `#iCMS@__favorite_data`
                 WHERE $WHERE
             ");//iUI::code(0,'出错了',iDB::$last_query,'json');
-            if($appid=="1"){
-                iPHP::callback(array('apps','update_count'),array($iid,$appid,'favorite','-'));
-                iPHP::callback(array('user','update_count'),array($uid,'favorite','-'));
-                iPHP::callback(array('favorite','update_count'),array($uid,'count','-'));
-            }
+
+            iPHP::callback(array('apps','update_count'),array($iid,$appid,'favorite','-'));
+            iPHP::callback(array('user','update_count'),array($uid,'favorite','-'));
+            iPHP::callback(array('favorite','update_count'),array($fid,$uid,'count','-'));
             iUI::code(1,0,0,'json');
         }else{
             iUI::code(0,0,0,'json');
@@ -106,7 +118,6 @@ class favoriteApp {
         $this->__login();
 
         $uid     = user::$userid;
-        $appid   = (int)$_POST['appid'];
         $iid     = (int)$_POST['iid'];
         $cid     = (int)$_POST['cid'];
         $suid    = (int)$_POST['suid'];
@@ -135,11 +146,9 @@ class favoriteApp {
         $data   = compact ($fields);
         $fdid   = iDB::insert('favorite_data',$data);
         if($fdid){
-            if($appid=="1"){
-                iPHP::callback(array('apps','update_count'),array($iid,$appid,'favorite','+'));
-                iPHP::callback(array('user','update_count'),array($fid,'favorite','+'));
-                iPHP::callback(array('favorite','update_count'),array($uid,'count','+'));
-            }
+            iPHP::callback(array('apps','update_count'),array($iid,$appid,'favorite','+'));
+            iPHP::callback(array('user','update_count'),array($uid,'favorite','+'));
+            iPHP::callback(array('favorite','update_count'),array($fid,$uid,'count','+'));
             iUI::code(1,'iCMS:favorite:success',$fdid,'json');
         }
         iUI::code(0,'iCMS:favorite:error',0,'json');

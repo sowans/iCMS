@@ -97,3 +97,15 @@
     </div>
   </div>
 </div>
+<script id="iCMS-FAVORITE-TPL" type="text/plain"
+data-title="添加到收藏夹"
+data-create-title="创建新收藏夹">
+  <a class="favo-list-item-link r5 <%if(favorited){%>active<%}%> " href="javascript:;" data-fid="<%=id%>">
+    <span class="favo-list-item-title"><%=title%></span>
+    <span class="meta gray">
+    <span class="num"><%=count%></span> 条内容
+    <span class="bull">•</span> <%=follow%> 人关注
+    </span>
+  </a>
+  <div class="clearfix mt10"></div>
+</script>

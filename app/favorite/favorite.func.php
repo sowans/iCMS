@@ -16,7 +16,7 @@ class favoriteFunc{
 		$cache_time	= isset($vars['time'])?(int)$vars['time']:-1;
 		isset($vars['userid'])&& $where_sql .= " AND `uid`='".(int)$vars['userid']."' ";
 		isset($vars['mode'])  && $where_sql .= " AND `mode`='".(int)$vars['mode']."'";
-		isset($vars['appid']) && $where_sql .= " AND `appid`='".(int)$vars['appid']."' ";
+		// isset($vars['appid']) && $where_sql .= " AND `appid`='".(int)$vars['appid']."' ";
 		$vars['id'] && $where_sql .= iSQL::in($vars['id'], 'id');
 		$vars['id!'] && $where_sql .= iSQL::in($vars['id!'], 'id', 'not');
 		$by=$vars['by']=="ASC"?"ASC":"DESC";
@@ -61,9 +61,16 @@ class favoriteFunc{
 		$where_sql  = "WHERE 1=1 ";
 		$vars['fid']          && $where_sql .= " AND `fid`='".(int)$vars['fid']."' ";
 		isset($vars['iid'])   && $where_sql .= " AND `iid`='".(int)$vars['iid']."' ";
-		isset($vars['userid'])&& $where_sql .= " AND `uid`='".(int)$vars['userid']."' ";
 		isset($vars['appid']) && $where_sql .= " AND `appid`='".(int)$vars['appid']."' ";
 
+		if(isset($vars['userid'])){
+	    	$uid = $vars['userid'];
+	    	if($uid=='me'){
+	    		$auth = user::get_cookie();
+	    		$auth && $uid = user::$userid;
+	    	}
+	    	$where_sql .= " AND `uid`='".(int)$vars['userid']."' ";
+		}
 
 		$vars['id'] && $where_sql .= iSQL::in($vars['id'], 'id');
 		$vars['id!'] && $where_sql .= iSQL::in($vars['id!'], 'id', 'not');
@@ -86,6 +93,11 @@ class favoriteFunc{
 		}
 		if(empty($resource)){
 			$resource  = iDB::all("SELECT * FROM `#iCMS@__favorite_data` {$where_sql} {$order_sql} LIMIT {$offset},{$maxperpage}");
+
+			if(!isset($vars['loop']) && isset($vars['column'])){
+				$column  = array_column($resource,$vars['column'],'id');
+				return $column;
+			}
 
 	        if($vars['user']){
 	            $uidArray = iSQL::values($resource,'uid','array',null);

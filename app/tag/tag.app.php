@@ -110,7 +110,7 @@ class tagApp extends appsApp {
         apps_common::comment();
         apps_common::pic();
         apps_common::hits();
-        apps_common::param();
+        apps_common::param($tag['name']);
 
         return $tag;
     }
