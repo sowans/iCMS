@@ -97,7 +97,7 @@ class iSeccode {
         $charset = '123456789ABCDEFGHIJKMNPQRSTUVWXYZ';
         $_len = strlen($charset)-1;
         for ($i=0;$i<self::$config['num'];$i++) {
-            $code.= $charset[rand(0,$_len)];
+            $code.= $charset[mt_rand(0,$_len)];
         }
         return $code;
     }
@@ -107,8 +107,8 @@ class iSeccode {
         //创建图片，并设置背景色
         self::$im = imagecreatetruecolor(self::$config['width'], self::$config['height']);
         for($i = 0;$i < 3;$i++) {
-            $start[$i]       = rand(200, 255);
-            $end[$i]         = rand(100, 200);
+            $start[$i]       = mt_rand(200, 255);
+            $end[$i]         = mt_rand(100, 200);
             $step[$i]        = ($end[$i] - $start[$i]) / self::$config['width'];
             self::$color[$i] = $start[$i];
         }
@@ -128,14 +128,14 @@ class iSeccode {
     private static function adulterate() {
         for($i=0; $i<self::$config['line']; $i++) {
             $color = imagecolorallocate(self::$im, self::$color[0], self::$color[1], self::$color[2]);
-            $x  = rand(0, self::$config['width']);
+            $x  = mt_rand(0, self::$config['width']);
             $y  = 0;
-            $x2 = rand(0,self::$config['width']);
+            $x2 = mt_rand(0,self::$config['width']);
             $y2 = self::$config['height'];
 
             if($i%2) {
-                imagearc(self::$im, $x, $y, $x2,$y2,rand(0, 360), rand(0, 360), $color);
-                imagearc(self::$im, $x+1, $y,$x2+1,$y2,rand(0, 360), rand(0, 360), $color);
+                imagearc(self::$im, $x, $y, $x2,$y2,mt_rand(0, 360), mt_rand(0, 360), $color);
+                imagearc(self::$im, $x+1, $y,$x2+1,$y2,mt_rand(0, 360), mt_rand(0, 360), $color);
             } else {
                 imageline(self::$im, $x, $y,$x2,$y2, $color);
                 imageline(self::$im, $x+1, $y,$x2+1,$y2, $color);
@@ -143,8 +143,8 @@ class iSeccode {
         }
         for ($i=0; $i < self::$config['pixel']; $i++) {
             $color = imagecolorallocate(self::$im, self::$color[0], self::$color[1], self::$color[2]);
-            $x = rand(0,self::$config['width']);
-            $y = rand(0,self::$config['height']);
+            $x = mt_rand(0,self::$config['width']);
+            $y = mt_rand(0,self::$config['height']);
             imagesetpixel(self::$im,$x,$y,$color);
             //imagefilledrectangle(self::$im,$x,$y, $x-1, $y-1, $color);
         }
@@ -162,7 +162,7 @@ class iSeccode {
             $x = floor(self::$config['width']/self::$config['num'])*$i+3;
             $y = $font_h+5;
             $text_color = imagecolorallocate(self::$im, self::$color[0], self::$color[1], self::$color[2]);
-            $angle = rand(-10, 20);
+            $angle = mt_rand(-10, 20);
             if(self::$config['shadow']) {
                 $text_shadowcolor = imagecolorallocate(self::$im, 255 - self::$color[0], 255 - self::$color[1], 255 - self::$color[2]);
                 imagettftext(self::$im, $font_size, $angle, $x+1, $y+1, $text_shadowcolor, $font_file, self::$code[$i]);
@@ -185,25 +185,25 @@ class iSeccode {
 
         $width_total = 0;
         for($i = 0; $i < self::$config['num']; $i++) {
-            $gif_path = $gif_dir ? $gif_root.$gif_dir[array_rand($gif_dir)].'/'.strtolower(self::$code[$i]).'.gif' : '';
+            $gif_path = $gif_dir ? $gif_root.$gif_dir[array_mt_rand($gif_dir)].'/'.strtolower(self::$code[$i]).'.gif' : '';
             if($gif_path && file_exists($gif_path)) {
                 $font[$i]['file'] = $gif_path;
                 $font[$i]['data'] = getimagesize($gif_path);
-                $font[$i]['width'] = $font[$i]['data'][0] + rand(0, 6) - 4;
-                $font[$i]['height'] = $font[$i]['data'][1] + rand(0, 6) - 4;
-                $font[$i]['width'] += rand(0, self::$config['width'] / 5 - $font[$i]['width']);
+                $font[$i]['width'] = $font[$i]['data'][0] + mt_rand(0, 6) - 4;
+                $font[$i]['height'] = $font[$i]['data'][1] + mt_rand(0, 6) - 4;
+                $font[$i]['width'] += mt_rand(0, self::$config['width'] / 5 - $font[$i]['width']);
                 $width_total += $font[$i]['width'];
             } else {
                 $font[$i]['file'] = '';
-                $font[$i]['width'] = 8 + rand(0, self::$config['width'] / 5 - 5);
+                $font[$i]['width'] = 8 + mt_rand(0, self::$config['width'] / 5 - 5);
                 $width_total += $font[$i]['width'];
             }
         }
-        $x = rand(1, self::$config['width'] - $width_total);
+        $x = mt_rand(1, self::$config['width'] - $width_total);
         for($i = 0; $i < self::$config['num']; $i++) {
             if($font[$i]['file']) {
                 $imcode = imagecreatefromgif($font[$i]['file']);
-                $y = rand(0, self::$config['height'] - $font[$i]['height']);
+                $y = mt_rand(0, self::$config['height'] - $font[$i]['height']);
                 if(self::$config['shadow']) {
                     $imcodeshadow = $imcode;
                     imagecolorset($imcodeshadow, 0 , 255 - self::$color[0], 255 - self::$color[1], 255 - self::$color[2]);
@@ -212,7 +212,7 @@ class iSeccode {
                 imagecolorset($imcode, 0 , self::$color[0], self::$color[1], self::$color[2]);
                 imagecopyresized(self::$im, $imcode, $x, $y, 0, 0, $font[$i]['width'], $font[$i]['height'], $font[$i]['data'][0], $font[$i]['data'][1]);
             } else {
-                $y = rand(0, self::$config['height'] - 20);
+                $y = mt_rand(0, self::$config['height'] - 20);
                 if(self::$config['shadow']) {
                     $text_shadowcolor = imagecolorallocate(self::$im, 255 - self::$color[0], 255 - self::$color[1], 255 - self::$color[2]);
                     imagechar(self::$im, 5, $x + 1, $y + 1, self::$code[$i], $text_shadowcolor);
@@ -255,10 +255,10 @@ class iSeccode {
         );
         foreach($numbers as $i => $number) {
             for($j = 0; $j < 6; $j++) {
-                $a1 = substr('012', rand(0, 2), 1).substr('012345', rand(0, 5), 1);
-                $a2 = substr('012345', rand(0, 5), 1).substr('0123', rand(0, 3), 1);
-                rand(0, 1) == 1 ? array_push($numbers[$i], $a1) : array_unshift($numbers[$i], $a1);
-                rand(0, 1) == 0 ? array_push($numbers[$i], $a1) : array_unshift($numbers[$i], $a2);
+                $a1 = substr('012', mt_rand(0, 2), 1).substr('012345', mt_rand(0, 5), 1);
+                $a2 = substr('012345', mt_rand(0, 5), 1).substr('0123', mt_rand(0, 3), 1);
+                mt_rand(0, 1) == 1 ? array_push($numbers[$i], $a1) : array_unshift($numbers[$i], $a1);
+                mt_rand(0, 1) == 0 ? array_push($numbers[$i], $a1) : array_unshift($numbers[$i], $a2);
             }
         }
         $bitmap = array();
@@ -266,12 +266,12 @@ class iSeccode {
             for($j = 0; $j < self::$config['num']; $j++) {
                 $n = substr(self::$code, $j, 1);
                 $bytes = $numbers[$n][$i];
-                $a = rand(0, 14);
+                $a = mt_rand(0, 14);
                 array_push($bitmap, $bytes);
             }
         }
         for($i = 0; $i < 8; $i++) {
-            $a = substr('012345', rand(0, 2), 1) . substr('012345', rand(0, 5), 1);
+            $a = substr('012345', mt_rand(0, 2), 1) . substr('012345', mt_rand(0, 5), 1);
             array_unshift($bitmap, $a);
             array_push($bitmap, $a);
         }

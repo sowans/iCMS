@@ -833,9 +833,13 @@ class articleAdmincp{
             $chaptertitle = $_POST['chaptertitle'];
             $chapter      = count($bodyArray);
             foreach ($bodyArray as $key => $body) {
-                $adid     = (int)$adidArray[$key];
-                $subtitle = iSecurity::escapeStr($chaptertitle[$key]);
-                $this->body($body,$subtitle,$aid,$adid,$haspic);
+                if(is_array($body)){
+                    $body['body'] && $this->body($body['body'],$body['subtitle'],$aid,null,$haspic);
+                }else{
+                    $adid     = (int)$adidArray[$key];
+                    $subtitle = iSecurity::escapeStr($chaptertitle[$key]);
+                    $this->body($body,$subtitle,$aid,$adid,$haspic);
+                }
             }
             if(is_array($_data_id)){
                 $diff = array_diff_values($adidArray,$_data_id);

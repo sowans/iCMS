@@ -42,6 +42,28 @@ if (!function_exists('json_last_error_msg')){
         return $msg;
     }
 }
+# for PHP < 5.5
+# AND it works with arrayObject AND array of objects
+# miguelfzarth at gmail dot com 18-Aug-2016 11:02
+if (!function_exists('array_column')) {
+    function array_column($array, $columnKey, $indexKey = null){
+        $result = array();
+        foreach ($array as $subArray) {
+            if (is_null($indexKey) && array_key_exists($columnKey, $subArray)) {
+                $result[] = is_object($subArray)?$subArray->$columnKey: $subArray[$columnKey];
+            } elseif (array_key_exists($indexKey, $subArray)) {
+                if (is_null($columnKey)) {
+                    $index = is_object($subArray)?$subArray->$indexKey: $subArray[$indexKey];
+                    $result[$index] = $subArray;
+                } elseif (array_key_exists($columnKey, $subArray)) {
+                    $index = is_object($subArray)?$subArray->$indexKey: $subArray[$indexKey];
+                    $result[$index] = is_object($subArray)?$subArray->$columnKey: $subArray[$columnKey];
+                }
+            }
+        }
+        return $result;
+    }
+}
 
 function days_in_month($year,$month) {
     if (!function_exists('cal_days_in_month')) {
@@ -329,13 +351,13 @@ function stripslashes_deep($value) {
 
 function random($length, $numeric = 0) {
     if($numeric) {
-        $hash = sprintf('%0'.$length.'d', rand(0, pow(10, $length) - 1));
+        $hash = sprintf('%0'.$length.'d', mt_rand(0, pow(10, $length) - 1));
     } else {
 		$hash  = '';
 		$chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789abcdefghjkmnpqrstuvwxyz';
 		$max   = strlen($chars) - 1;
         for($i = 0; $i < $length; $i++) {
-            $hash .= $chars[rand(0, $max)];
+            $hash .= $chars[mt_rand(0, $max)];
         }
     }
     return $hash;

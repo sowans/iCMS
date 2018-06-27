@@ -83,16 +83,10 @@ $(function() {
     doc.on("click", '.checkAll', function() {
         var target = $(this).attr('data-target'),
             checkedStatus = $(this).prop("checked");
-        //$('input:checkbox',$(target)).prop("checked",checkedStatus);
         $(".checkAll").prop("checked", checkedStatus);
         $('input:checkbox', $(target)).each(function() {
             this.checked = checkedStatus;
-            if (checkedStatus == this.checked) {
-                $(this).closest('.checker > span').removeClass('checked');
-            }
-            if (this.checked) {
-                $(this).closest('.checker > span').addClass('checked');
-            }
+            $.uniform.update($(this));
         });
     });
     doc.on("change", '[data-toggle="select_insert"]', function() {
