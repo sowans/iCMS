@@ -11,6 +11,12 @@ defined('iPHP') OR exit('What are you doing?');
 
 class spider_content {
     public static $hash = null;
+    //兼容旧版
+    public static $helperMap = array(
+        'format','cleanhtml','mergepage','autobreakpage',
+        'trim','filter','json_decode','array',
+        'capture','download','img_absolute'
+    );
     /**
      * 抓取资源
      * @param  [string] $html      [抓取结果]
@@ -41,16 +47,17 @@ class spider_content {
             }
         }
         /**
-         * 在数据项里调用之前采集的数据RULE@规则id@url
+         * 在数据项里调用采集规则RULE@规则id@url@checker
          */
         if(strpos($data['rule'], 'RULE@')!==false){
-            list($_rid,$_urls) = explode('@', str_replace('RULE@', '',$data['rule']));
+            list($_rid,$_urls,$_checker) = explode('@', str_replace('RULE@', '',$data['rule']));
             empty($_urls) && $_urls = trim($html);
+            $_nocheck = ($_checker ==='false'?true:false);//是否检测采集过
             if (spider::$dataTest) {
                 print_r('<b>使用[rid:'.$_rid.']规则抓取</b>:'.$_urls);
                 echo "<hr />";
             }
-            return spider_urls::crawl('DATA@RULE',false,$_rid,$_urls);
+            return spider_urls::crawl('DATA@RULE',false,$_rid,$_urls,null,$_nocheck);
         }
         /**
          * RAND@10,0
@@ -103,9 +110,53 @@ class spider_content {
             print_r('<b>['.$name.']匹配结果:</b><div style="max-height:300px;overflow-y: scroll;">'.htmlspecialchars($content).'</div>');
             echo "<hr />";
         }
-
         if ($data['cleanbefor']) {
             $content = spider_tools::dataClean($data['cleanbefor'], $content);
+        }
+
+        if(isset($data['helper'])){
+        }else{
+            $data['helper'] = array();
+            //兼容旧版
+            foreach ($data as $kh => $vh) {
+                if(array_search($kh, self::$helperMap)!==false){
+                    $data['helper'][] = $kh;
+                }
+            }
+        }
+        foreach ((array)$data['helper'] as $key => $value) {
+            $content = self::helper($content,array($value=>true),$rule);
+            if($content===null){
+                return null;
+            }
+        }
+        if ($data['cleanafter']) {
+            $content = spider_tools::dataClean($data['cleanafter'], $content);
+        }
+        if (spider::$callback['content'] && is_callable(spider::$callback['content'])) {
+            $content = call_user_func_array(spider::$callback['content'],array($content,$data));
+        }
+        return $content;
+    }
+    public static function helper($content,$data,$rule){
+        if ($data['stripslashes']) {
+            $content = stripslashes($content);
+        }
+        if ($data['addslashes']) {
+            $content = addslashes($content);
+        }
+        if ($data['base64_encode']) {
+            $content = base64_encode($content);
+        }
+        if ($data['base64_decode']) {
+            $content = base64_decode($content);
+        }
+        if ($data['parse_str']) {
+            parse_str($content, $output);
+            $content = $output;
+        }
+        if ($data['http_build_query'] && is_array($content)) {
+            $content = http_build_query($content);
         }
         if ($data['trim']) {
             if(is_array($content)){
@@ -113,6 +164,9 @@ class spider_content {
             }else{
                 $content = str_replace('&nbsp;','',trim($content));
             }
+        }
+        if($data['json_encode'] && is_array($content)){
+            $content = json_encode($content);
         }
         if ($data['json_decode']) {
             $content = json_decode($content,true);
@@ -127,17 +181,18 @@ class spider_content {
         if ($data['htmlspecialchars_decode']) {
             $content = htmlspecialchars_decode($content);
         }
-        if(!is_array($content)){
-            $content = stripslashes($content);
+        if ($data['htmlspecialchars']) {
+            $content = htmlspecialchars($content);
         }
-
         if ($data['cleanhtml']) {
             $content = preg_replace('/<[\/\!]*?[^<>]*?>/is', '', $content);
         }
         if ($data['format'] && $content) {
             $content = autoformat($content);
         }
-
+        if ($data['url_absolute'] && $content) {
+            $content = spider_tools::url_complement($rule['__url__'],$content);
+        }
         if ($data['img_absolute'] && $content) {
             preg_match_all("/<img.*?src\s*=[\"|'](.*?)[\"|']/is", $content, $img_match);
             if($img_match[1]){
@@ -158,16 +213,12 @@ class spider_content {
             $content && $content = iFS::http($content);
         }
 
-        if ($data['autobreakpage']) {
+        if ($data['autobreakpage'] && $content) {
             $content = spider_tools::autoBreakPage($content);
         }
-        if ($data['mergepage']) {
+        if ($data['mergepage'] && $content) {
             $content = spider_tools::mergePage($content);
         }
-        if ($data['cleanafter']) {
-            $content = spider_tools::dataClean($data['cleanafter'], $content);
-        }
-
         if ($data['filter']) {
             $fwd = iPHP::callback(array("filterApp","run"),array(&$content),false);
             if($fwd){
@@ -194,11 +245,6 @@ class spider_content {
         if ($data['xml2array']) {
             $content = iUtils::xmlToArray($content);
         }
-
-        if (spider::$callback['content'] && is_callable(spider::$callback['content'])) {
-            $content = call_user_func_array(spider::$callback['content'],array($content,$data));
-        }
-
         if($data['array']){
             if(strpos($content, '#--iCMS.PageBreak--#')!==false){
                 $content = explode('#--iCMS.PageBreak--#', $content);
@@ -207,6 +253,9 @@ class spider_content {
         }
         if($data['implode'] && is_array($content)){
             $content = implode('', $content);
+        }
+        if($data['explode'] && is_string($content)){
+            $content = explode(',', $content);
         }
         return $content;
     }

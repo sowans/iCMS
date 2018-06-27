@@ -446,10 +446,24 @@ class spiderAdmincp {
 		$rs['rule'] && $rule = $rs['rule'];
 		if (empty($rule['data'])) {
 			$rule['data'] = array(
-				array('name' => 'title', 'trim' => true, 'empty' => true),
-				array('name' => 'body', 'trim' => true, 'empty' => true, 'format' => true, 'page' => true, 'multi' => true),
+				array('name' => 'title','helper' => array('trim'),'empty' => true),
+				array('name' => 'body', 'helper' => array('trim','format'),'empty' => true,'page' => true, 'multi' => true),
 			);
+		}else{
+			//兼容旧版
+			$helper = spider_content::$helperMap;
+			if(is_array($rule['data']))foreach ($rule['data'] as $key => $value) {
+				if(is_array($value))foreach ($value as $k => $v) {
+					$fk = array_search($k, $helper);
+					if($fk!==false){
+						$rule['data'][$key]['helper'][]=$helper[$fk];
+					}
+				}
+			}
+			$rule['fs']['encoding']&& $rule['http']['ENCODING'] = $rule['fs']['encoding'];
+			$rule['fs']['referer'] && $rule['http']['REFERER'] = $rule['fs']['referer'];
 		}
+
 		$rule['sort'] OR $rule['sort'] = 1;
 		$rule['mode'] OR $rule['mode'] = 1;
 		$rule['page_no_start'] OR $rule['page_no_start'] = 1;
