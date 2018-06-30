@@ -117,21 +117,7 @@ class iCMS {
     }
     //分页数缓存
     public static function page_total_cache($sql, $type = null,$cachetime=3600) {
-        $total = (int) $_GET['total_num'];
-        if($type=="G"){
-            empty($total) && $total = iDB::value($sql);
-        }else{
-            $cache_key = 'page_total/'.substr(md5($sql), 8, 16);
-            if(empty($total)){
-                if (!isset($_GET['page_total_cache'])|| $type === 'nocache'||!$cachetime) {
-                    $total = iDB::value($sql);
-                    $type === null && iCache::set($cache_key,$total,$cachetime);
-                }else{
-                    $total = iCache::get($cache_key);
-                }
-            }
-        }
-        return (int)$total;
+        return iPagination::totalCache($sql, $type,$cachetime);
     }
 
     public static function set_tpl_const() {

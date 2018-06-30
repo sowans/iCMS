@@ -157,7 +157,7 @@ class contentFunc {
                 $map_order_sql = " ORDER BY `".self::$table['table']."`.`id` $by";
             }
         }
-        $hash = md5($where_sql . $order_sql . $limit);
+        $hash = md5(json_encode($vars) . $order_sql . $limit);
         if ($offset) {
             if ($vars['cache']) {
                 $map_cache_name = iPHP_DEVICE . '/'.self::$app['app'].'_page/' . $hash;

@@ -94,7 +94,7 @@ class categoryFunc{
 			$cache_name = iPHP_DEVICE.'/category/'.$hash;
 	        $vars['page'] && $cache_name.= "/".(int)$GLOBALS['page'];
 			$resource = iCache::get($cache_name);
-	        if($resource){
+	        if(is_array($resource)){
 	            return $resource;
 	        }
 		}
