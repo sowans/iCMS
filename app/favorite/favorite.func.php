@@ -38,6 +38,7 @@ class favoriteFunc{
 		if($vars['cache']){
 			$cache_name = iPHP_DEVICE.'/favorite/'.$md5."/".(int)$GLOBALS['page'];
 			$resource   = iCache::get($cache_name);
+			if(is_array($resource)) return $resource;
 		}
 		if(empty($resource)){
 			$rs  = iDB::all("SELECT * FROM `#iCMS@__favorite` {$where_sql} {$order_sql} LIMIT {$offset},{$maxperpage}");

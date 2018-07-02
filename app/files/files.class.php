@@ -291,6 +291,10 @@ class files {
         }
         $size = $w.'x'.$h;
 
+        if(iCMS::$config['thumb']['size']==='ALL'){
+            return $sfp.'_'.$size.'.jpg';
+        }
+
         if(empty(iCMS::$config['thumb']['size'])){
             return $sfp;
         }

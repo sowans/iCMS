@@ -56,14 +56,14 @@ class favoriteApp {
             SELECT `id` FROM `#iCMS@__favorite_data`
             WHERE {$WHERE} LIMIT 1
         ");
-        $array['sql1'] = iDB::$last_query;
+        // $array['sql1'] = iDB::$last_query;
 
         $WHERE = " 1=1 ".$sql;
         $array['count'] = iDB::value("
             SELECT count(id) FROM `#iCMS@__favorite_data`
             WHERE {$WHERE} LIMIT 1
         ");
-        $array['sql2'] = iDB::$last_query;
+        // $array['sql2'] = iDB::$last_query;
         iUI::json($array);
 
     }

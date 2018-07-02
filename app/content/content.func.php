@@ -182,6 +182,7 @@ class contentFunc {
         if ($vars['cache']) {
             $cache_name = iPHP_DEVICE . '/'.self::$app['app'].'/' . $hash;
             $resource = iCache::get($cache_name);
+            if(is_array($resource)) return $resource;
         }
 
         if (empty($resource)) {

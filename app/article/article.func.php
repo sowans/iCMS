@@ -170,6 +170,7 @@ class articleFunc{
 		if ($vars['cache']) {
 			$cache_name = iPHP_DEVICE . '/article/' . $hash;
 			$resource = iCache::get($cache_name);
+			if(is_array($resource)) return $resource;
 		}
 		// $func = 'article_array';
 		// if($vars['func']=="user_home"){ //暂时只有一个选项

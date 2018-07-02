@@ -182,16 +182,24 @@ class articleAdmincp{
 		     	foreach($_POST['id'] AS $id){
                     $art  = article::row($id,'tags,cid');
                     $mtag = iSecurity::escapeStr($_POST['mtag']);
-                    $tagArray  = explode(',', $art['tags']);
+                    $tagArray  = $art['tags']?explode(',', $art['tags']):array();
                     $mtagArray = explode(',', $mtag);
 			        if($_POST['pattern']=='replace') {
-			        }elseif($_POST['pattern']=='addto') {
+                    }elseif($_POST['pattern']=='delete') {
+                        foreach ($mtagArray as $key => $value) {
+                            $tk = array_search($value, $tagArray);
+                            if($tk!==false){
+                                unset($tagArray[$tk]);
+                            }
+                        }
+                        $mtag   = implode(',', $tagArray);
+                    }elseif($_POST['pattern']=='addto') {
                         $pieces = array_merge($tagArray,$mtagArray);
                         $pieces = array_unique($pieces);
                         $mtag   = implode(',', $pieces);
 			        }
-
-			        $tags = tag::diff($mtag,$art['tags'],members::$userid,$id,$art['cid']);
+                    $mtag = ltrim($mtag,',');
+                    $tags = tag::diff($mtag,$art['tags'],members::$userid,$id,$art['cid']);
                     $tags = addslashes($tags);
                     article::update(compact('tags'),compact('id'));
 		    	}

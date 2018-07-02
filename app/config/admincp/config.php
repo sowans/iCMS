@@ -17,17 +17,17 @@ $(function(){
       $(this).parent().parent().remove();
   });
   $(".add_template_device").click(function(){
-    var TD  = $("#template_device"),count = $('.device',TD).length;
+    var TD  = $("#template_device"),lastid = parseInt($('.device:last td',TD).attr("id").replace("device_",''))+1;
     var tdc = $(".template_device_clone").clone(true).removeClass("hide template_device_clone").addClass('device');
     $('input',tdc).removeAttr("disabled").each(function(){
-      this.id   = this.id.replace("{key}",count);
-      this.name = this.name.replace("{key}",count);
+      this.id   = this.id.replace("{key}",lastid);
+      this.name = this.name.replace("{key}",lastid);
     });
-    var tdid = $('td',tdc).attr("id").replace("{key}",count);
+    var tdid = $('td',tdc).attr("id").replace("{key}",lastid);
     $('td',tdc).attr("id",tdid);
 
     $('.files_modal',tdc).each(function(index, el) {
-      var href = $(this).attr("href").replace("{key}",count);
+      var href = $(this).attr("href").replace("{key}",lastid);
       $(this).attr("href",href);
     });
 

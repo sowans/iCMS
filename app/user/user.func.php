@@ -109,6 +109,7 @@ class userFunc{
         if($vars['cache']){
     		$cache_name = iPHP_DEVICE.'/user_list/'.$hash;
     		$resource   = iCache::get($cache_name);
+            if(is_array($resource)) return $resource;
         }
     	if(empty($resource)){
             $resource = iDB::all("SELECT * FROM `#iCMS@__user` {$where_sql} {$order_sql} {$limit}");

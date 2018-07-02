@@ -16,22 +16,21 @@ class iSeccode {
     public static $_fontNum    = 4;     //字符数
     public static $_fontSize   = 24;    //字体大小
     public static $_fontShadow = 0;     //字体阴影色差 0 无阴影
-    public static $_fontRand   = false;     //随机字体
+    public static $_fontAngle  = 45;    //旋转角度 0 无旋转
+    public static $_fontRand   = 0;     //随机字体
     public static $_lineNum    = 0;     //干扰线数量
-    public static $_pixelNum   = 10;     //干扰点数量
+    public static $_pixelNum   = 10;    //干扰点数量
     public static $_curveNum   = 1;     //正弦曲线数量
     public static $_bgcharNum  = 4;     //背景字符数量组,每组5个
     public static $_contrast   = 120;   //颜色反差值,越大越好识别 最大200
     public static $_spacing    = 0;     //字符间距
+    public static $_randcolor  = 0;     //随机颜色
     public static $_charset    = '2345789ABCDEFHJKLMNPQRTUVWXYZ';
 
-    public static $setcookie   = array();
-
+    protected static $bgcolor    = array();
+    protected static $color      = array();
     protected static $code       = null;
-    protected static $bgcolor    = null;
-    protected static $randcolor  = false;
     protected static $curveColor = null;
-    protected static $color      = null;
     protected static $_image     = null;
     protected static $_color     = null;
 
@@ -184,7 +183,7 @@ class iSeccode {
         }
     }
     private static function randColor($flag=false,$rand=false,$fix=0){
-        if(self::$randcolor||$rand){
+        if(self::$_randcolor||$rand){
             $R = mt_rand(self::$color[0],self::$bgcolor[0]+$fix);
             $G = mt_rand(self::$color[1],self::$bgcolor[1]+$fix);
             $B = mt_rand(self::$color[2],self::$bgcolor[2]+$fix);
@@ -202,21 +201,21 @@ class iSeccode {
     }
     private static function ttf() {
         $x     = 3;
-        $y     = self::$_height-3;
+        $y     = self::$_height*0.8;
         $size  = self::$_fontSize;
         $color = self::$_color;
         $ttf   = self::getTtf();
         for ($i = 0; $i<self::$_fontNum; $i++) {
             self::$_fontRand && $ttf = self::getTtf();
-            $angle = mt_rand(0, 45);
+            $angle = self::$_fontAngle?mt_rand(0, self::$_fontAngle):0;
             $code  = self::$code[$i];
             list($color,$R,$G,$B) = self::randColor(true);
             if(self::$_fontShadow) {
-                $sr = min($R+self::$_fontShadow,255);
-                $sg = min($G+self::$_fontShadow,255);
-                $sb = min($B+self::$_fontShadow,255);
+                $sr = min(abs($R+self::$_fontShadow),255);
+                $sg = min(abs($G+self::$_fontShadow),255);
+                $sb = min(abs($B+self::$_fontShadow),255);
                 $shadow = imagecolorallocate(self::$_image,$sr,$sg,$sb);
-                imagettftext(self::$_image, $size, $angle, $x+2, $y+2, $shadow, $ttf, $code);
+                imagettftext(self::$_image, $size, $angle, $x+1, $y+1, $shadow, $ttf, $code);
             }
             imagettftext(self::$_image,$size,$angle,$x,$y,$color,$ttf, $code);
             self::$curveColor = $color;
@@ -225,7 +224,7 @@ class iSeccode {
                 $bw = abs($b[4] - $b[0]);
                 $x += $bw+self::$_spacing;
             }else{
-                $x += mt_rand($size, $size*1.3);
+                $x += mt_rand($size, $size*1.5);
             }
         }
 

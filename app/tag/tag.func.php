@@ -118,9 +118,7 @@ class tagFunc{
     		$cache_name = iPHP_DEVICE.'/tag/'.$hash;
             $vars['page'] && $cache_name.= "/".(int)$GLOBALS['page'];
     		$resource = iCache::get($cache_name);
-            if($resource){
-                return $resource;
-            }
+            if(is_array($resource)) return $resource;
     	}
         if($map_sql || $offset){
             if($vars['cache']){
