@@ -11,14 +11,14 @@ defined('iPHP') OR exit('What are you doing?');
 admincp::head();
 ?>
 <style>
-.rule_data_name { width:80px; }
-.rule_data_rule { width:600px; }
+.rule_data_name { width:90px; }
 .delprop { width:45px; }
 .chosen-container-multi .chosen-choices li.search-choice span{font-size: 14px;}
 </style>
 <script type="text/javascript">
 $(function(){
   iCMS.select('watermark_pos',"<?php echo (int)$rule['watermark']['pos'] ; ?>");
+  select_sort_change('.helper-wrap');
 
 	<?php if($_GET['tab']){?>
 		var $itab	= $("#<?php echo $_GET['app']; ?>-tab");
@@ -27,6 +27,7 @@ $(function(){
 		$("a[href='#<?php echo $_GET['app']; ?>-<?php echo $_GET['tab']; ?>']",$itab).parent().addClass("active");
 		$("#<?php echo $_GET['app']; ?>-<?php echo $_GET['tab']; ?>").addClass("active").removeClass("hide");
 	<?php }?>
+
 	$('#spider-data').on("click",".delprop",function(){
       if(confirm('确定要删除?')){
         $(this).parent().parent().parent().remove();
@@ -100,6 +101,29 @@ $(".preg_checkbox,.dom_checkbox").on("click",function(){
   });
 });
 
+function select_sort_option(e, v) {
+    var option = e.find('option[value="' + v + '"]').clone();
+    option.attr('selected', 'selected');
+    return option;
+}
+function select_sort_change($e) {
+    $('select[multiple="multiple"]',$e).each(function(index, select) {
+        var s_id = this.id;
+        $("#sort_"+s_id, $e).html('');
+        $(this).on('change', function(e, p) {
+            select_sort_value(this,e,p);
+        });
+    });
+}
+function select_sort_value(a,e,p) {
+    var s_id = a.id,select = $("#sort_"+s_id);
+    if(p['selected']){
+      select.append(select_sort_option($(a),p['selected']));
+    }
+    if(p['deselected']){
+      select.find('option[value="' + p['deselected'] + '"]').remove();
+    }
+}
 </script>
 
 <div class="iCMS-container">
@@ -327,9 +351,9 @@ function rule_data_rule_td($dkey,$data = array()){
       <textarea name="<?php echo $DR_name;?>[cleanbefor]" class="span6 <?php echo $tip_class;?>"title="规则采集后数据整理"><?php echo $data['cleanbefor'];?></textarea>
     </div>
     <div class="clearfloat mb10"></div>
-    <div class="input-prepend">
+    <div class="input-prepend helper-wrap">
       <span class="add-on" style="width:55px;text-align: left;">2.处理</span>
-      <select name="<?php echo $DR_name;?>[helper][]" data-placeholder="选择数据处理方法..." id="<?php echo $DR_id;?>_helper" class="rule_data_helper <?php echo $chosen_class;?> span6" multiple="multiple">
+      <select id="<?php echo $DR_id;?>_helper" data-placeholder="选择数据处理方法..." class="rule_data_helper <?php echo $chosen_class;?> span6" multiple="multiple">
         <optgroup label="常用处理">
           <option value='trim'>去首尾空白</option>
           <option value='format'>HTML格式化</option>
@@ -367,6 +391,7 @@ function rule_data_rule_td($dkey,$data = array()){
           <option value='implode'>将数组的值转化为字符串</option>
         </optgroup>
       </select>
+      <select multiple="multiple" class="hide" name="<?php echo $DR_name;?>[helper][]" id="sort_<?php echo $DR_id;?>_helper"></select>
     </div>
     <span class="help-inline">可多选，按顺序处理</span>
     <?php if($dkey!=='__KEY__'){?>
@@ -380,7 +405,14 @@ function rule_data_rule_td($dkey,$data = array()){
           }
           $helper_json = json_encode($_helper);
       ?>
-      $("#<?php echo $DR_id;?>_helper").setSelectionOrder(<?php echo $helper_json;?>, true);
+      // $("#<?php echo $DR_id;?>_helper").setSelectionOrder(<?php echo $helper_json;?>, true);
+      var helper_json = <?php echo $helper_json;?>;
+      var helper_id   = $("#<?php echo $DR_id;?>_helper");
+      var helper_sort = $("#sort_<?php echo $DR_id;?>_helper");
+      helper_id.setSelectionOrder(helper_json, true);
+      $.each(helper_json, function(ii, v) {
+          helper_sort.append(select_sort_option(helper_id,v));
+      });
       <?php }?>
     })
     </script>
