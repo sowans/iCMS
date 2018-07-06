@@ -626,7 +626,7 @@ CREATE TABLE `icms_user` (
   `gid` smallint(6) unsigned NOT NULL DEFAULT '0' COMMENT '用户组ID',
   `pid` varchar(255) NOT NULL DEFAULT '' COMMENT '属性ID',
   `username` varchar(255) NOT NULL DEFAULT '' COMMENT '用户名/email',
-  `nickname` varchar(50) NOT NULL DEFAULT '' COMMENT '昵称',
+  `nickname` varchar(128) NOT NULL DEFAULT '' COMMENT '昵称',
   `password` char(32) NOT NULL DEFAULT '' COMMENT '密码',
   `gender` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '性别',
   `fans` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '粉丝数',
@@ -723,59 +723,6 @@ CREATE TABLE `icms_user_report` (
   `addtime` int(10) unsigned NOT NULL DEFAULT '0',
   `status` tinyint(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
-/*Table structure for table `icms_weixin` */
-
-CREATE TABLE `icms_weixin` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `cid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '分类',
-  `type` tinyint(1) unsigned NOT NULL COMMENT '类型',
-  `appid` varchar(255) NOT NULL DEFAULT '' COMMENT 'appID',
-  `appsecret` varchar(255) NOT NULL DEFAULT '' COMMENT 'appsecret',
-  `name` varchar(255) NOT NULL DEFAULT '' COMMENT '名称',
-  `token` varchar(255) DEFAULT '' COMMENT '令牌',
-  `AESKey` varchar(255) DEFAULT '' COMMENT '密钥',
-  `account` varchar(255) NOT NULL DEFAULT '' COMMENT '小程序号',
-  `description` varchar(500) NOT NULL DEFAULT '' COMMENT '小程序简介',
-  `qrcode` varchar(255) NOT NULL DEFAULT '' COMMENT '二维码',
-  `menu` text NOT NULL COMMENT '菜单',
-  `config` text NOT NULL COMMENT '其它配置',
-  `payment` text NOT NULL COMMENT '支付配置',
-  PRIMARY KEY (`id`),
-  KEY `idx_appid` (`appid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
-/*Table structure for table `icms_weixin_api_log` */
-
-CREATE TABLE `icms_weixin_api_log` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `appid` varchar(255) NOT NULL DEFAULT '',
-  `ToUserName` varchar(255) NOT NULL DEFAULT '',
-  `FromUserName` varchar(255) NOT NULL DEFAULT '',
-  `CreateTime` int(11) NOT NULL DEFAULT '0',
-  `content` text NOT NULL,
-  `dayline` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
-/*Table structure for table `icms_weixin_event` */
-
-CREATE TABLE `icms_weixin_event` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `pid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '属性',
-  `appid` varchar(128) NOT NULL DEFAULT '' COMMENT '公众号APPID',
-  `name` varchar(255) NOT NULL DEFAULT '' COMMENT '事件名称',
-  `eventype` varchar(255) NOT NULL DEFAULT '' COMMENT '事件类型',
-  `eventkey` varchar(255) NOT NULL DEFAULT '' COMMENT '事件KEY值/关键词',
-  `msgtype` varchar(255) NOT NULL DEFAULT '' COMMENT '回复类型',
-  `operator` varchar(10) NOT NULL DEFAULT '' COMMENT '匹配模式',
-  `msg` mediumtext NOT NULL COMMENT '消息内容包含格式',
-  `addtime` int(10) unsigned NOT NULL DEFAULT '0',
-  `status` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `eventkey` (`eventkey`),
-  KEY `idx_appid` (`appid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
