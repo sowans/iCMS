@@ -77,6 +77,13 @@ class iDevice {
 
         $common['redirect'] && self::redirect();
     }
+    public static function output(&$content){
+        if(!self::$IS_IDENTITY_URL){
+            // var_dump(self::$domain,self::$router_url);
+            // var_dump($content);
+            $content = str_replace(self::$router_url, self::$domain, $content);
+        }
+    }
     public static function identity(&$array) {
         self::$IS_IDENTITY_URL OR self::router($array);
     }

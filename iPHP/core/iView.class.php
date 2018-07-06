@@ -50,7 +50,7 @@ class iView {
             "plugin"   => array(__CLASS__,"callback_plugin"),
             "block"    => array(__CLASS__,"callback_block"),
             "register" => array(__CLASS__,"callback_register"),
-            // "output"   => array(__CLASS__,"callback_output"),
+            "output"   => array(__CLASS__,"callback_output"),
         );
         return $tpl;
     }
@@ -70,11 +70,11 @@ class iView {
         $path = iPHP_APP_DIR . '/' . $app . '/' . $app . '.func.php';
         return is_file($path);
     }
-    // public static function callback_output(&$content,$obj) {
-    //     if(!self::$config['callback']['output']){
-    //         $content.= publicFunc::public_crontab(true);
-    //     }
-    // }
+    public static function callback_output(&$content) {
+        if(self::$config['callback']['output']){
+            iPHP::callback(self::$config['callback']['output'],array(&$content));
+        }
+    }
     /**
      * iPHP:app:method
      * iPHP:func
