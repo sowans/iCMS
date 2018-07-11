@@ -16,8 +16,8 @@ class iWAF {
 		'xss'   =>
 			"['\";\*<>].*\bon[a-zA-Z]{3,15}[\s\r\n\v\f]*=|".
 			"\b(?:expression)\(|".
-			"<script.*?|".
-			"<\!\[cdata\[|".
+			"<script+|".
+			"<!\[cdata\[|".
 			"\b(?:eval|alert|prompt|msgbox)\s*\(|".
 			"url\((?:\#|data|javascript)",
 		'sql'   =>

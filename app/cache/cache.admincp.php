@@ -103,6 +103,9 @@ class cacheAdmincp{
             $dialog && iUI::success('过期文件类缓存清理完成');
         }
     }
+    public function do_cleanall($dialog=true){
+        $this->do_filecache();
+    }
     public static function test($config){
         set_error_handler(function($errno, $errstr, $errfile, $errline){
             $errno = $errno & error_reporting();
@@ -123,5 +126,8 @@ class cacheAdmincp{
         $cache = iCache::init($config,true);
         $cache->set('cache_test',1);
         $cache->delete('cache_test');
+    }
+    public static function clean_cache() {
+        include admincp::view("cache.clean","cache");
     }
 }
