@@ -14,15 +14,15 @@ class iSeccode {
     public static $_width      = 0;     //图片宽度
     public static $_height     = 0;     //图片高度
     public static $_fontNum    = 4;     //字符数
-    public static $_fontSize   = 24;    //字体大小
+    public static $_fontSize   = 22;    //字体大小
     public static $_fontShadow = 0;     //字体阴影色差 0 无阴影
-    public static $_fontAngle  = 45;    //旋转角度 0 无旋转
+    public static $_fontAngle  = 0;     //旋转角度 0 无旋转
     public static $_fontRand   = 0;     //随机字体
     public static $_lineNum    = 0;     //干扰线数量
-    public static $_pixelNum   = 10;    //干扰点数量
-    public static $_curveNum   = 1;     //正弦曲线数量
+    public static $_pixelNum   = 0;     //干扰点数量
+    public static $_curveNum   = 0;     //正弦曲线数量
     public static $_bgcharNum  = 4;     //背景字符数量组,每组5个
-    public static $_contrast   = 120;   //颜色反差值,越大越好识别 最大200
+    public static $_contrast   = 125;   //颜色反差值,越大越好识别 最大200
     public static $_spacing    = 0;     //字符间距
     public static $_randcolor  = 0;     //随机颜色
     public static $_charset    = '2345789ABCDEFHJKLMNPQRTUVWXYZ';
@@ -118,8 +118,8 @@ class iSeccode {
 
     //背景
     private static function init() {
-        self::$_width   OR self::$_width   = self::$_fontNum * (self::$_fontSize * 1.2);
-        self::$_height  OR self::$_height  = self::$_fontSize * 1.6;
+        self::$_width   OR self::$_width   = self::$_fontNum * (self::$_fontSize * 1.25);
+        self::$_height  OR self::$_height  = self::$_fontSize * 1.85;
         // self::$_lineNum OR self::$_lineNum = round(self::$_fontNum*1.2);
         self::$_image = imagecreate(self::$_width, self::$_height);
 
@@ -196,15 +196,18 @@ class iSeccode {
         }
         return $flag?array($color,$R,$G,$B):$color;
     }
-    private static function getTtf() {
-        return iPHP_CORE. '/seccode/ttf/t' . mt_rand(1, 10) . '.ttf';;
+    private static function getTtf(&$n=0) {
+        $n = mt_rand(1, 10);
+        return iPHP_CORE. '/seccode/ttf/t' .$n. '.ttf';;
     }
     private static function ttf() {
         $x     = 3;
         $y     = self::$_height*0.8;
+        $ttf   = self::getTtf($ttf_num);
         $size  = self::$_fontSize;
-        $color = self::$_color;
-        $ttf   = self::getTtf();
+        $ttf_num == "9" && $size = self::$_fontSize *0.8;
+        $color   = self::$_color;
+        $spacing = self::$_width/self::$_fontNum;
         for ($i = 0; $i<self::$_fontNum; $i++) {
             self::$_fontRand && $ttf = self::getTtf();
             $angle = self::$_fontAngle?mt_rand(0, self::$_fontAngle):0;
@@ -224,7 +227,7 @@ class iSeccode {
                 $bw = abs($b[4] - $b[0]);
                 $x += $bw+self::$_spacing;
             }else{
-                $x += mt_rand($size, $size*1.5);
+                $x += mt_rand($spacing*0.85,$spacing);
             }
         }
 
