@@ -64,7 +64,7 @@ class iUI extends iPagination{
 	}
 	public static function json($a, $break = true, $ret = false) {
 		$json = json_encode($a);
-		$_GET['callback'] && $json = $_GET['callback'] . '(' . $json . ')';
+		$_GET['callback'] && $json = htmlspecialchars($_GET['callback']).'(' . $json . ')';
 		$_GET['script'] && exit("<script>{$json};</script>");
 		if ($ret) {
 			return $json;
@@ -73,7 +73,7 @@ class iUI extends iPagination{
 		$break && exit();
 	}
 	public static function js_callback($a, $callback = null, $node = 'parent') {
-		$callback === null && $callback = $_GET['callback'];
+		$callback === null && $callback = htmlspecialchars($_GET['callback']);
 		empty($callback) && $callback = 'callback';
 		$json = json_encode($a);
 		echo "<script>window.{$node}.{$callback}($json);</script>";

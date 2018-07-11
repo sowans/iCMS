@@ -38,21 +38,22 @@ class spiderAdmincp {
 	public function do_batch() {
 		$idArray = (array) $_POST['id'];
 		$idArray OR iUI::alert("请选择要删除的项目");
-		$ids = implode(',', $idArray);
-		$batch = $_POST['batch'];
+		$idArray = array_map('intval', $idArray);
+		$ids     = implode(',', $idArray);
+		$batch   = $_POST['batch'];
 		switch ($batch) {
             case 'poid':
-                $poid = $_POST['poid'];
+                $poid = (int)$_POST['poid'];
                 iDB::query("update `#iCMS@__spider_project` set `poid`='$poid' where `id` IN($ids);");
                 iUI::success('操作成功!','js:1');
             break;
             case 'rid':
-                $rid = $_POST['rid'];
+                $rid = (int)$_POST['rid'];
                 iDB::query("update `#iCMS@__spider_project` set `rid`='$rid' where `id` IN($ids);");
                 iUI::success('操作成功!','js:1');
             break;
             case 'move':
-                $cid = $_POST['cid'];
+                $cid = (int)$_POST['cid'];
                 iDB::query("update `#iCMS@__spider_project` set `cid`='$cid' where `id` IN($ids);");
                 iUI::success('操作成功!','js:1');
             break;
