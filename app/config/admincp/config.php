@@ -14,20 +14,22 @@ admincp::head();
 
 $(function(){
   $(document).on("click",".del_device",function(){
-      $(this).parent().parent().remove();
+      $(this).parent().parent().parent().remove();
   });
   $(".add_template_device").click(function(){
-    var TD  = $("#template_device"),lastid = parseInt($('.device:last td',TD).attr("id").replace("device_",''))+1;
-    var tdc = $(".template_device_clone").clone(true).removeClass("hide template_device_clone").addClass('device');
-    $('input',tdc).removeAttr("disabled").each(function(){
-      this.id   = this.id.replace("{key}",lastid);
-      this.name = this.name.replace("{key}",lastid);
+    var TD  = $("#template_device");
+    var length = parseInt($("tr:last",TD).attr('data-key'))+1;
+    var tdc = $(".template_device_clone tr").clone(true);
+    if(!length) length = 0;
+    tdc.attr('data-key', length);
+
+    $('input',tdc).each(function(){
+      this.id   = this.id.replace("{key}",length);
+      if(this.name) this.name = this.name.replace("{key}",length);
     });
-    var tdid = $('td',tdc).attr("id").replace("{key}",lastid);
-    $('td',tdc).attr("id",tdid);
 
     $('.files_modal',tdc).each(function(index, el) {
-      var href = $(this).attr("href").replace("{key}",lastid);
+      var href = $(this).attr("href").replace("{key}",length);
       $(this).attr("href",href);
     });
 
@@ -255,72 +257,47 @@ function modal_tpl_index(el,a){
                 </tr>
               </thead>
               <tbody id="template_device">
+<?php
+function template_device_td($key,$device=array()){
+  $td_key = "device_{$key}";
+?>
+  <td>
+    <div class="input-prepend input-append"> <span class="add-on">设备名称</span>
+      <input type="text" name="config[template][device][<?php echo $key;?>][name]" class="span3" id="<?php echo $td_key;?>_name" value="<?php echo $device['name'];?>"/>
+      <a class="btn del_device"><i class="fa fa-trash-o"></i> 删除</a>
+    </div>
+    <span class="help-inline"></span>
+    <div class="clearfloat mb10"></div>
+    <div class="input-prepend"> <span class="add-on">设备识别符</span>
+      <input type="text" name="config[template][device][<?php echo $key;?>][ua]" class="span3" id="<?php echo $td_key;?>_ua" value="<?php echo $device['ua'];?>"/>
+    </div>
+    <span class="help-inline">设备唯一识别符,识别设备的User agent,如果多个请用<span class="label label-info">,</span>分隔.</span>
+    <div class="clearfloat mb10"></div>
+    <div class="input-prepend"> <span class="add-on">访问域名</span>
+      <input type="text" name="config[template][device][<?php echo $key;?>][domain]" class="span3" id="<?php echo $td_key;?>_domain" value="<?php echo $device['domain'];?>"/>
+    </div>
+    <span class="help-inline"></span>
+    <div class="clearfloat mb10"></div>
+    <div class="input-prepend input-append"> <span class="add-on">设备模板</span>
+      <input type="text" name="config[template][device][<?php echo $key;?>][tpl]" class="span3" id="<?php echo $td_key;?>_tpl" value="<?php echo $device['tpl'];?>"/>
+      <?php echo filesAdmincp::modal_btn('模板',"<?php echo $td_key;?>_tpl",'dir');?>
+    </div>
+    <span class="help-inline">识别到的设备会使用这个模板设置</span>
+    <div class="clearfloat mb10"></div>
+    <div class="input-prepend input-append"> <span class="add-on">首页模板</span>
+      <input type="text" name="config[template][device][<?php echo $key;?>][index]" class="span3" id="<?php echo $td_key;?>_index" value="<?php echo $device['index']?:'{iTPL}/index.htm';?>"/>
+      <?php echo filesAdmincp::modal_btn('模板',"<?php echo $td_key;?>_index",'file','tpl_index');?>
+    </div>
+    <span class="help-inline">设备的首页模板</span>
+  </td>
+<?php }?>
                 <?php foreach ((array)$config['template']['device'] as $key => $device) {?>
-                <tr class="device">
-                  <td id="device_<?php echo $key;?>">
-                    <div class="input-prepend input-append"> <span class="add-on">设备名称</span>
-                      <input type="text" name="config[template][device][<?php echo $key;?>][name]" class="span3" id="device_<?php echo $key;?>_name" value="<?php echo $device['name'];?>"/>
-                      <a class="btn del_device"><i class="fa fa-trash-o"></i> 删除</a>
-                    </div>
-                    <span class="help-inline"></span>
-                    <div class="clearfloat mb10"></div>
-                    <div class="input-prepend"> <span class="add-on">设备识别符</span>
-                      <input type="text" name="config[template][device][<?php echo $key;?>][ua]" class="span3" id="device_<?php echo $key;?>_ua" value="<?php echo $device['ua'];?>"/>
-                    </div>
-                    <span class="help-inline">设备唯一识别符,识别设备的User agent,如果多个请用<span class="label label-info">,</span>分隔.</span>
-                    <div class="clearfloat mb10"></div>
-                    <div class="input-prepend"> <span class="add-on">访问域名</span>
-                      <input type="text" name="config[template][device][<?php echo $key;?>][domain]" class="span3" id="device_<?php echo $key;?>_domain" value="<?php echo $device['domain'];?>"/>
-                    </div>
-                    <span class="help-inline"></span>
-                    <div class="clearfloat mb10"></div>
-                    <div class="input-prepend input-append"> <span class="add-on">设备模板</span>
-                      <input type="text" name="config[template][device][<?php echo $key;?>][tpl]" class="span3" id="device_<?php echo $key;?>_tpl" value="<?php echo $device['tpl'];?>"/>
-                      <?php echo filesAdmincp::modal_btn('模板',"device_{$key}_tpl",'dir');?>
-                    </div>
-                    <span class="help-inline">识别到的设备会使用这个模板设置</span>
-                    <div class="clearfloat mb10"></div>
-                    <div class="input-prepend input-append"> <span class="add-on">首页模板</span>
-                      <input type="text" name="config[template][device][<?php echo $key;?>][index]" class="span3" id="device_<?php echo $key;?>_index" value="<?php echo $device['index']?:'{iTPL}/index.htm';?>"/>
-                      <?php echo filesAdmincp::modal_btn('模板',"device_{$key}_index",'file','tpl_index');?>
-                    </div>
-                    <span class="help-inline">设备的首页模板</span>
-                  </td>
-                </tr>
+                <?php echo '<tr data-key="'.$key.'">';?>
+                <?php echo template_device_td($key,$device);?>
+                <?php echo '</tr>';?>
                 <?php }?>
               </tbody>
               <tfoot>
-              <tr class="hide template_device_clone">
-                <td id="device_{key}">
-                  <div class="input-prepend input-append"> <span class="add-on">设备名称</span>
-                    <input type="text" name="config[template][device][{key}][name]" class="span3" id="device_{key}_name" value="" disabled="disabled"/>
-                    <a class="btn del_device"><i class="fa fa-trash-o"></i> 删除</a>
-                  </div>
-                  <span class="help-inline"><span class="label label-info">例:iPad</span></span>
-                  <div class="clearfloat mb10"></div>
-                  <div class="input-prepend"> <span class="add-on">设备识别符</span>
-                    <input type="text" name="config[template][device][{key}][ua]" class="span3" id="device_{key}_ua" value="" disabled="disabled"/>
-                  </div>
-                  <span class="help-inline">设备唯一识别符,识别设备的User agent<span class="label label-info">例:iPad</span>,如果多个请用<span class="label label-info">,</span>分隔.</span>
-                  <div class="clearfloat mb10"></div>
-                  <div class="input-prepend"> <span class="add-on">访问域名</span>
-                    <input type="text" name="config[template][device][{key}][domain]" class="span3" id="device_{key}_domain" value="" disabled="disabled"/>
-                  </div>
-                  <span class="help-inline"><span class="label label-info">例:http://ipad.icmsdev.com</span></span>
-                  <div class="clearfloat mb10"></div>
-                  <div class="input-prepend input-append"> <span class="add-on">设备模板</span>
-                    <input type="text" name="config[template][device][{key}][tpl]" class="span3" id="device_{key}_tpl" value="" disabled="disabled"/>
-                    <?php echo filesAdmincp::modal_btn('模板','device_{key}_tpl','dir');?>
-                  </div>
-                  <span class="help-inline">识别到的设备会使用这个模板设置</span>
-                  <div class="clearfloat mb10"></div>
-                  <div class="input-prepend input-append"> <span class="add-on">首页模板</span>
-                    <input type="text" name="config[template][device][{key}][index]" class="span3" id="device_{key}_index" value="" disabled="disabled"/>
-                    <?php echo filesAdmincp::modal_btn('模板','device_{key}_index','file','tpl_index');?>
-                  </div>
-                  <span class="help-inline">设备的首页模板</span>
-                </td>
-              </tr>
               <tr>
                 <td colspan="2"><a href="#template_device" class="btn add_template_device btn-success"/><i class="fa fa-tablet"></i> 增加设备模板</a></td>
               </tr>
@@ -494,4 +471,9 @@ function modal_tpl_index(el,a){
     </div>
   </div>
 </div>
+<table class="hide template_device_clone">
+  <tr>
+    <?php echo template_device_td('{key}');?>
+  </tr>
+</table>
 <?php admincp::foot();?>
