@@ -59,14 +59,14 @@ class iView {
     }
     public static function callback_register($func,$type) {
         list($app,$method) = explode(':', $func);
-        if(self::check_func($app)){
-            $callable = array($app.'Func',$type.($method?'_'.$method:''));
-            if(is_callable($callable)){
-                return implode('::', $callable);
+        if(self::check_func_file($app)){
+            $callback = array($app.'Func',$type.($method?'_'.$method:''));
+            if(class_exists($callback[0]) && method_exists($callback[0], $callback[1])){
+                return implode('::', $callback);
             }
         }
     }
-    public static function check_func($app) {
+    public static function check_func_file($app) {
         $path = iPHP_APP_DIR . '/' . $app . '/' . $app . '.func.php';
         return is_file($path);
     }
@@ -113,7 +113,7 @@ class iView {
             if(self::$config['define']){
                 $apps = self::$config['define']['apps'];
                 $func = self::$config['define']['func'];
-                if(!self::check_func($args['app']) && $apps[$args['app']]){
+                if(!self::check_func_file($args['app']) && $apps[$args['app']]){
                     // 判断自定义APP app/test/test.func.php 程序是否存在
                     // 程序不存在调用 contentFunc::content_list
                     $callback = array(

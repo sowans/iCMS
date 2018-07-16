@@ -423,10 +423,7 @@ function rule_data_rule_td($dkey,$data = array()){
       <textarea name="<?php echo $DR_name;?>[cleanafter]" class="span6 <?php echo $tip_class;?>" title="发布前数据整理"><?php echo $data['cleanafter'];?></textarea>
     </div>
   </td>
-<?php
-EOF;
-};
-?>
+<?php }?>
               <?php
                 if($rule['data'])foreach((array)$rule['data'] AS $dkey=>$data){
                 echo '<tr data-key="'.$dkey.'">';
