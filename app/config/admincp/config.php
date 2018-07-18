@@ -77,6 +77,7 @@ function modal_tpl_index(el,a){
         <li><a href="#config-patch" data-toggle="tab">更新</a></li>
         <li><a href="#config-grade" data-toggle="tab">高级</a></li>
         <li><a href="#config-mail" data-toggle="tab">邮件</a></li>
+        <li><a href="#apps-metadata" data-toggle="tab">动态属性</a></li>
         <?php //apps::config('tabs');?>
       </ul>
     </div>
@@ -462,6 +463,9 @@ function template_device_td($key,$device=array()){
           </div>
           <div id="config-mail" class="tab-pane hide">
             <?php include admincp::view("config.email","config");?>
+          </div>
+          <div id="apps-metadata" class="tab-pane hide">
+            <?php include admincp::view("apps.meta","apps");?>
           </div>
         </div>
         <div class="form-actions">
