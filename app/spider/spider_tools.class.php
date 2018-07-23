@@ -602,6 +602,12 @@ class spider_tools {
     }
 
     public static function remote($url, $_count = 0) {
+        if(!iHttp::is_url($url,true)){
+            if (spider::$dataTest || spider::$ruleTest) {
+                echo "<b>{$url} 请求错误:非正常URL格式,因安全问题只允许抓取 http:// 或 https:// 开头的链接</b>";
+            }
+            return false;
+        }
         $url = str_replace('&amp;', '&', $url);
         if(empty(spider::$referer)){
             $uri = parse_url($url);
