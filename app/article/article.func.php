@@ -133,7 +133,7 @@ class articleFunc{
 				$total = (int)$vars['pageNum']*$maxperpage;
 			}
 			if(!isset($vars['total']) && !isset($vars['pageNum'])){
-				$total = iCMS::page_total_cache(
+				$total = iPagination::totalCache(
 					"SELECT count(*) FROM `#iCMS@__article` {$where_sql}",
 					$total_type,
 					iCMS::$config['cache']['page_total']
@@ -142,13 +142,13 @@ class articleFunc{
 
 			$pagenav    = isset($vars['pagenav']) ? $vars['pagenav'] : "pagenav";
 			$pnstyle    = isset($vars['pnstyle']) ? $vars['pnstyle'] : 0;
-			$multi      = iUI::page(array(
+			$multi      = iPagination::make(array(
 				'total_type' => $total_type,
 				'total'      => $total,
 				'perpage'    => $maxperpage,
 				'unit'       => iUI::lang('iCMS:page:list'),
-				'nowindex'   => $GLOBALS['page'])
-			);
+				'nowindex'   => $GLOBALS['page']
+			));
 			$offset     = $multi->offset;
 			iView::assign("article_list_total", $total);
 		}
@@ -291,7 +291,7 @@ class articleFunc{
 			iView::assign("article_search_total", $total);
 			$pagenav = isset($vars['pagenav']) ? $vars['pagenav'] : "pagenav";
 			$pnstyle = isset($vars['pnstyle']) ? $vars['pnstyle'] : 0;
-			$multi = iUI::page(array('total' => $total, 'perpage' => $maxperpage, 'unit' => iUI::lang('iCMS:page:list'), 'nowindex' => $GLOBALS['page']));
+			$multi = iPagination::make(array('total' => $total, 'perpage' => $maxperpage, 'unit' => iUI::lang('iCMS:page:list'), 'nowindex' => $GLOBALS['page']));
 			$offset = $multi->offset;
 		}
 		$resource = iDB::all("SELECT * FROM `#iCMS@__article` WHERE {$where_sql} {$order_sql} LIMIT {$maxperpage}");

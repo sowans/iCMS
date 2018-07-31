@@ -70,6 +70,9 @@ class iCMS {
             'define' => array(
                 'apps' => $config['apps'],
                 'func' => 'content',
+            ),
+            'callback' => array(
+                'output' => array('iDevice','output'),
             )
         ));
         //UI

@@ -97,9 +97,7 @@ class articleAdmincp{
         }
     }
     public function do_batch(){
-    	$_POST['id'] OR iUI::alert("请选择要操作的文章");
-        $ids   = implode(',',(array)$_POST['id']);
-        $batch = $_POST['batch'];
+        list($idArray,$ids,$batch) = iUI::get_batch_args("请选择要操作的文章");
     	switch($batch){
     		case 'order':
 		        foreach((array)$_POST['sortnum'] AS $id=>$sortnum) {
@@ -512,14 +510,14 @@ class articleAdmincp{
             $sql     = ",({$map_sql}) map {$sql} AND `id` = map.`iid`";
         }
 
-        $total = iCMS::page_total_cache(article::count_sql($sql),"G");
+        $total = iPagination::totalCache(article::count_sql($sql),"G");
         iUI::pagenav($total,$maxperpage,"篇文章");
 
-        $limit = 'LIMIT '.iUI::$offset.','.$maxperpage;
+        $limit = 'LIMIT '.iPagination::$offset.','.$maxperpage;
 
-        if($map_sql||iUI::$offset){
-            if(iUI::$offset > 1000 && $total > 2000 && iUI::$offset >= $total/2) {
-                $_offset = $total-iUI::$offset-$maxperpage;
+        if($map_sql||iPagination::$offset){
+            if(iPagination::$offset > 1000 && $total > 2000 && iPagination::$offset >= $total/2) {
+                $_offset = $total-iPagination::$offset-$maxperpage;
                 if($_offset < 0) {
                     $_offset = 0;
                 }

@@ -110,7 +110,6 @@ class categoryApp{
         foreach ($keyArray as $i => $key) {
              unset($category[$key]);
         }
-        // $vars['meta'] && $category+=(array)apps_meta::data('category',$category['cid']);
         self::router($category);
         return $category;
     }

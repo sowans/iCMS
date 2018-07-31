@@ -41,9 +41,7 @@ class iFS {
 	public static function ex($f) {
 		return @stat($f) === false ? false : true;
 	}
-	public static function is_url($url) {
-		return self::checkHttp($url);
-	}
+
 	public static function is_file($file) {
 		return @is_file($file);
 	}

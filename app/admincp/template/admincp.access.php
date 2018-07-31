@@ -78,7 +78,7 @@ $(function(){
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="9"><div class="pagination pagination-right" style="float:right;"><?php echo iUI::$pagenav ; ?></div></td>
+              <td colspan="9"><div class="pagination pagination-right" style="float:right;"><?php echo iPagination::$pagenav ; ?></div></td>
             </tr>
           </tfoot>
         </table>

@@ -561,8 +561,8 @@ function _modal_dialog(cancel_text){
             <div class="clearfloat mb10"></div>
             <div class="input-prepend"> <span class="add-on">自定链接</span>
               <input type="text" name="clink" class="span6" id="clink" value="<?php echo $rs['clink'] ; ?>"/>
-              <span class="help-inline">只能由英文字母、数字或_-组成(不支持中文),留空则自动以标题拼音填充</span>
             </div>
+            <span class="help-inline">以[]方式填写优先级最高,如:[about.html],否则将以文章规则是否设置{LINK}为准</span>
             <div class="clearfloat mb10"></div>
             <div class="input-prepend"> <span class="add-on">外部链接</span>
               <input type="text" name="url" class="span6 tip" title="注意:文章设置外部链接后编辑器里的内容是不会被保存的哦!" id="url" value="<?php echo $rs['url'] ; ?>"/>
