@@ -41,7 +41,9 @@ class iFS {
 	public static function ex($f) {
 		return @stat($f) === false ? false : true;
 	}
-
+	public static function is_url($url) {
+		return self::checkHttp($url);
+	}
 	public static function is_file($file) {
 		return @is_file($file);
 	}
@@ -365,7 +367,7 @@ class iFS {
 			@chmod($fp, 0644);
 		} elseif (@copy($tn, $fp)) {
 			@chmod($fp, 0644);
-		} elseif (is_readable($tn)) {
+		} elseif (is_readable($tn) && is_writable($fp)) {
 			if ($fp = @fopen($tn, 'rb')) {
 				@flock($fp, 2);
 				$filedata = @fread($fp, @filesize($tn));
@@ -376,12 +378,11 @@ class iFS {
 				@fwrite($fp, $filedata);
 				@fclose($fp);
 				@chmod($fp, 0644);
-			} else {
-				return self::_error(array('code' => 0, 'state' => 'Error'));
 			}
 		} else {
-			return self::_error(array('code' => 0, 'state' => 'UNKNOWN'));
+			return self::_error(array('code' => 0, 'state' => 'Error'));
 		}
+		return true;
 	}
 	public static function _data($value) {
 		$keys = array(
@@ -487,6 +488,11 @@ class iFS {
 			$FileRootPath = self::fp($FilePath, "+iPATH");
 			$ret = self::save_ufile($tmp_file, $FileRootPath);
 			@unlink($tmp_file);
+
+			if($ret!==true){
+				return self::_error(array('code' => 0, 'state' => 'Error'));
+			}
+
 			if ($fid) {
 				self::update_filedata(array(
 					'ofilename' => $oFileName,
@@ -732,7 +738,7 @@ class iFS {
 			"DIR" => "目录创建失败",
 			"IO" => "输入输出错误",
 			"UNKNOWN" => "未知错误",
-			"Error" => "Upload Unknown Error (fopen)",
+			"Error" => "Upload Unknown Error",
 			"MOVE" => "文件保存时出错",
 			"DIR_Error" => "您访问的目录有问题",
 		);
