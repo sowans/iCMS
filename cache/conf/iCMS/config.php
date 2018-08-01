@@ -12,15 +12,66 @@ return array (
   'router' => 
   array (
     'url' => 'http://icms7.idreamsoft.com',
+    'redirect' => '0',
     404 => 'http://icms7.idreamsoft.com/public/404.htm',
     'public' => 'http://icms7.idreamsoft.com/public',
     'user' => 'http://icms7.idreamsoft.com/user',
     'dir' => '/',
     'ext' => '.html',
-    'speed' => '5',
+    'speed' => '50',
     'rewrite' => '0',
     'config' => 
     array (
+      'api' => 
+      array (
+        0 => '/api',
+        1 => 'api.php',
+      ),
+      'comment' => 
+      array (
+        0 => '/comment',
+        1 => 'api.php?app=comment',
+      ),
+      'favorite' => 
+      array (
+        0 => '/favorite',
+        1 => 'api.php?app=favorite',
+      ),
+      'favorite:id' => 
+      array (
+        0 => '/favorite/{id}/',
+        1 => 'api.php?app=favorite&id={id}',
+      ),
+      'forms' => 
+      array (
+        0 => '/forms',
+        1 => 'api.php?app=forms',
+      ),
+      'forms:save' => 
+      array (
+        0 => '/forms/save',
+        1 => 'api.php?app=forms&do=save',
+      ),
+      'forms:id' => 
+      array (
+        0 => '/forms/{id}/',
+        1 => 'api.php?app=forms&id={id}',
+      ),
+      'public:seccode' => 
+      array (
+        0 => '/public/seccode',
+        1 => 'api.php?app=public&do=seccode',
+      ),
+      'public:agreement' => 
+      array (
+        0 => '/public/agreement',
+        1 => 'api.php?app=public&do=agreement',
+      ),
+      'search' => 
+      array (
+        0 => '/search',
+        1 => 'api.php?app=search',
+      ),
       'user' => 
       array (
         0 => '/user',
@@ -186,56 +237,6 @@ return array (
         0 => '/{uid}/favorite/{id}/',
         1 => 'api.php?app=user&do=favorite&uid={uid}&id={id}',
       ),
-      'api' => 
-      array (
-        0 => '/api',
-        1 => 'api.php',
-      ),
-      'comment' => 
-      array (
-        0 => '/comment',
-        1 => 'api.php?app=comment',
-      ),
-      'search' => 
-      array (
-        0 => '/search',
-        1 => 'api.php?app=search',
-      ),
-      'public:seccode' => 
-      array (
-        0 => '/public/seccode',
-        1 => 'api.php?app=public&do=seccode',
-      ),
-      'public:agreement' => 
-      array (
-        0 => '/public/agreement',
-        1 => 'api.php?app=public&do=agreement',
-      ),
-      'favorite' => 
-      array (
-        0 => '/favorite',
-        1 => 'api.php?app=favorite',
-      ),
-      'favorite:id' => 
-      array (
-        0 => '/favorite/{id}/',
-        1 => 'api.php?app=favorite&id={id}',
-      ),
-      'forms' => 
-      array (
-        0 => '/forms',
-        1 => 'api.php?app=forms',
-      ),
-      'forms:save' => 
-      array (
-        0 => '/forms/save',
-        1 => 'api.php?app=forms&do=save',
-      ),
-      'forms:id' => 
-      array (
-        0 => '/forms/{id}/',
-        1 => 'api.php?app=forms&id={id}',
-      ),
     ),
   ),
   'cache' => 
@@ -245,6 +246,7 @@ return array (
     'time' => '300',
     'compress' => '1',
     'page_total' => '300',
+    'prefix' => 'iCMS',
   ),
   'FS' => 
   array (
@@ -252,29 +254,7 @@ return array (
     'dir' => 'res',
     'dir_format' => 'Y/m-d/H',
     'allow_ext' => 'gif,jpg,rar,swf,jpeg,png,zip',
-    'cloud' => 
-    array (
-      'enable' => '0',
-      'local' => '0',
-      'sdk' => 
-      array (
-        'QiNiuYun' => 
-        array (
-          'domain' => '',
-          'Bucket' => '',
-          'AccessKey' => '',
-          'SecretKey' => '',
-        ),
-        'TencentYun' => 
-        array (
-          'domain' => '',
-          'AppId' => '',
-          'Bucket' => '',
-          'AccessKey' => '',
-          'SecretKey' => '',
-        ),
-      ),
-    ),
+    'check_md5' => '0',
   ),
   'thumb' => 
   array (
@@ -352,7 +332,6 @@ return array (
   ),
   'other' => 
   array (
-    'py_split' => '',
     'sidebar_enable' => '1',
     'sidebar' => '1',
   ),
@@ -380,12 +359,15 @@ return array (
     'desktop' => 
     array (
       'tpl' => 'www/desktop',
+      'index' => '{iTPL}/index.htm',
+      'domain' => 'https://www.icmsdev.com',
     ),
     'mobile' => 
     array (
       'agent' => 'WAP,Smartphone,Mobile,UCWEB,Opera Mini,Windows CE,Symbian,SAMSUNG,iPhone,Android,BlackBerry,HTC,Mini,LG,SonyEricsson,J2ME,MOT',
-      'domain' => 'http://icms7.idreamsoft.com',
+      'domain' => 'https://m.icmsdev.com',
       'tpl' => 'www/mobile',
+      'index' => '{iTPL}/index.htm',
     ),
   ),
   'api' => 
@@ -434,25 +416,15 @@ return array (
   ),
   'tag' => 
   array (
-    'url' => 'http://icms7.idreamsoft.com',
-    'rule' => '{TKEY}',
-    'dir' => '/tag/',
+    'rule' => 'tag-{ID}.html',
     'tpl' => '{iTPL}/tag.htm',
+    'tkey' => '-',
   ),
   'comment' => 
   array (
     'enable' => '1',
     'examine' => '0',
     'seccode' => '1',
-    'plugin' => 
-    array (
-      'changyan' => 
-      array (
-        'enable' => '0',
-        'appid' => '',
-        'appkey' => '',
-      ),
-    ),
   ),
   'user' => 
   array (

@@ -10,7 +10,7 @@
  */
 defined('iPHP') OR exit('What are you doing?');
 
-class iUI {
+class iUI extends iPagination{
 
 	public static $break      = true;
 	public static $dialog     = array();

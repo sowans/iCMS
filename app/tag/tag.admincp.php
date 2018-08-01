@@ -451,6 +451,17 @@ class tagAdmincp{
         $sql && iDB::query("UPDATE `#iCMS@__tag` SET {$sql} WHERE `id` IN ($ids)");
 		iUI::success('操作成功!','js:1');
 	}
+    public function do_api_extract(){
+        $title   = html2text($_POST['title']);
+        $content = html2text($_POST['content']);
+        $words   = self::api_extract($title,$content);
+        echo $words;
+    }
+    public static function api_extract($title=null,$content=null){
+        $array    = compact('title','content');
+        $response = apps_store::api_post('tag.extract',$array);
+        return $response;
+    }
     public static function _count(){
         return iDB::value("SELECT count(*) FROM `#iCMS@__tag`");
     }

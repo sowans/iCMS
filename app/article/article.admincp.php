@@ -330,8 +330,15 @@ class articleAdmincp{
      * [查找正文图片]
      * @return [type] [description]
      */
-    public function do_findpic(){
-        $content = article::body($this->id);
+    public function do_findpic($id=null){
+        $id===null && $id=$this->id;
+        $rs = $this->getContentPics($id);
+        $_count = count($rs);
+        include admincp::view("files.manage","files");
+    }
+    public static function getContentPics($id=null){
+        $content  = article::body($id);
+        $picArray = array();
         if($content){
             $content = stripslashes($content);
             $array   = files::preg_img($content);
@@ -345,8 +352,9 @@ class articleAdmincp{
                     $rpath    = iFS::fp($value,'http2iPATH');
                    if($filepath){
                         $pf   = pathinfo($filepath);
-                        $rs[] = array(
+                        $picArray[] = array(
                             'id'       => 'path@'.$filepath,
+                            'rootpath' => $rpath,
                             'path'     => rtrim($pf['dirname'],'/').'/',
                             'filename' => $pf['filename'],
                             'size'     => @filesize($rpath),
@@ -355,12 +363,11 @@ class articleAdmincp{
                         );
                     }
                 }
-                // echo "<hr />";
             }
-            $_count = count($rs);
         }
-        include admincp::view("files.manage","files");
+        return $picArray;
     }
+
     /**
      * [正文预览]
      * @return [type] [description]
@@ -820,6 +827,7 @@ class articleAdmincp{
         commentAdmincp::delete($id,self::$appid);
         $msg.= self::del_msg('评论数据删除');
         article::del($id);
+
         article::del_data($id);
         $msg.= self::del_msg($id.' 文章删除');
         categoryAdmincp::update_count($art['cid'],'-');

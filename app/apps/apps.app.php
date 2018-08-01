@@ -54,7 +54,7 @@ class appsApp {
         return $this->do_iCMS($a);
     }
     public function do_search($a = null) {
-        $app = iPHP::app("search");
+        $app = new searchApp();
         return $app->search('{iTPL}/'.$this->_app.'.search.htm');
     }
     public function API_iCMS() {
