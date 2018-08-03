@@ -604,8 +604,8 @@ class spider_tools {
     public static function remote($url, $_count = 0) {
         $parsed = parse_url($url);
         $validate_ip = true;
-        preg_match('/\d+/', $parsed['host']) && $parsed['host'] = long2ip($parsed['host']);
-        if(preg_match('/\d+\.\d+\.\d+\.\d+/', $parsed['host'])){
+        preg_match('/^\d+$/', $parsed['host']) && $parsed['host'] = long2ip($parsed['host']);
+        if(preg_match('/^\d+\.\d+\.\d+\.\d+$/', $parsed['host'])){
             $validate_ip = filter_var($parsed['host'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
         }
         if(!in_array($parsed['scheme'],array('http','https')) || !$validate_ip|| strtolower($parsed['host'])=='localhost'){
