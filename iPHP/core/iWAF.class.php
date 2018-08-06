@@ -57,8 +57,9 @@ class iWAF {
 	}
 	public static function CSRF_token($key=null){
 		$key===null &&$key = iPHP_KEY;
-		define('iPHP_WAF_CSRF_TOKEN',sha1(md5(iPHP_KEY)));
-		return iPHP_WAF_CSRF_TOKEN;
+		$token = sha1(md5(iPHP_KEY));
+		define('iPHP_WAF_CSRF_TOKEN',$token);
+		return $token;
 	}
 	public static function CSRF_check(){
 		$token = $_POST['CSRF_TOKEN']?$_POST['CSRF_TOKEN']:$_GET['CSRF_TOKEN'];
@@ -68,13 +69,11 @@ class iWAF {
 				return true;
 			}
 		}
-		if(stripos($_SERVER['HTTP_REFERER'],iPHP_SELF)){
+		if(stripos($_SERVER['HTTP_REFERER'],iPHP_SELF) && empty($_POST)){
 			return true;
 		}
-		if($_POST){
-			if($token!==iPHP_WAF_CSRF_TOKEN){
-				trigger_error("TOKEN error",E_USER_ERROR);
-			}
+		if($_POST && $token!==iPHP_WAF_CSRF_TOKEN){
+			trigger_error("TOKEN error",E_USER_ERROR);
 		}
 	}
 }
