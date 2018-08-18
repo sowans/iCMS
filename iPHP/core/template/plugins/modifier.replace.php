@@ -11,14 +11,12 @@
  */
 function tpl_modifier_replace($string, $search, $replace)
 {
-	if(strpos($search,',')){
-		$s=explode(',',$search);
-		$r=explode(',',$replace);
-		foreach($s AS $k=>$v){
-			$string=str_replace($v,$r[$k], $string);
-		}
+
+	if(!is_array($search) && strpos($search,',')){
+		$s = explode(',',$search);
+		$r = explode(',',$replace);
+		return str_replace($s,$r, $string);
 	}else{
-		$string=str_replace($search, $replace, $string);
+		return str_replace($search, $replace, $string);
 	}
-		return $string;
 }
