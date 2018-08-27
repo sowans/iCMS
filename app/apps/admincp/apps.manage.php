@@ -196,8 +196,11 @@ $(function(){
     <div class="input-prepend">
       <span class="add-on">可用安装包</span>
       <select name="zipfile" class="chosen-select span4" data-placeholder="请选择iCMS应用安装包文件(.zip)...">
-        <?php foreach(glob(iPATH."iCMS.APP.*-v*.*.*.zip") as $value){ ?>
-        <option value="<?php echo $value;?>"><?php echo str_replace(iPATH, '', $value);?></option>
+        <?php
+          foreach(glob(iPATH."iCMS.APP.*-v*.*.*.zip") as $value){
+            $name = str_replace(iPATH, '', $value);
+        ?>
+        <option value="<?php echo $name;?>"><?php echo $name;?></option>
         <?php } ?>
       </select>
     </div>
