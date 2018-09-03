@@ -405,7 +405,7 @@ function _modal_dialog(cancel_text){
             </div>
             <script>
             $(function(){
-                var api_url = "<?php echo __ADMINCP__; ?>=tag&do=api_extract";
+                var api_url = "<?php echo __ADMINCP__; ?>=tag&do=api_extract&CSRF_TOKEN=<?php echo iPHP_WAF_CSRF_TOKEN;?>";
                 $("#tag_extrac").click(function(event) {
                   var that = this;
                   var title = $("#title").val();

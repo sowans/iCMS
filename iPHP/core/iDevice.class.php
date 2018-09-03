@@ -18,6 +18,7 @@ class iDevice {
     public static $domain       = null;
     public static $router_url   = null;
 
+    public static $device       = array();
     public static $device_name  = null;
     public static $device_tpl   = null;
     public static $device_index = null;
@@ -28,36 +29,44 @@ class iDevice {
     public static function init($config=null,$common=array()) {
         self::$router_url = iPHP_URL;
         self::$config = $config;
-        //有设置其它设备
-        if(self::$config['device']){
-            iSecurity::getGP('device')&& $device = self::check('device');   //判断指定设备
-            empty($device)    && $device = self::check('domain');   //无指定设备 判断域名模板
-            empty($device)    && $device = self::check('ua');       //无指定域名 判断USER_AGENT
-            $device && list($device_name, $device_tpl,$device_index,self::$domain) = $device;
-        }
 
-        self::$IS_MOBILE = false;
-        if (empty($device_tpl)) {
-            //检查是否移动设备 USER_AGENT 或者 域名
-            $is_m_domain = (
-                self::$config['mobile']['domain']==iPHP_REQUEST_HOST
-                &&
-                self::$config['mobile']['domain']!=self::$router_url
-            );
-            if (self::agent(self::$config['mobile']['agent'])||$is_m_domain) {
-                self::$IS_MOBILE = true;
-                $device_name  = 'mobile';
-                $device_tpl   = self::$config['mobile']['tpl'];
-                $device_index = self::$config['mobile']['index'];
-                self::$domain = self::$config['mobile']['domain'];
+        if(self::$config['callback']['init']){
+            iPHP::callback(self::$config['callback']['init'],array(self::$config));
+        }
+        if(empty(self::$device)){
+            //有设置其它设备
+            if(self::$config['device']){
+                iSecurity::getGP('device')&& $device = self::check('device');   //判断指定设备
+                empty($device)    && $device = self::check('domain');   //无指定设备 判断域名模板
+                empty($device)    && $device = self::check('ua');       //无指定域名 判断USER_AGENT
+                $device && list($device_name, $device_tpl,$device_index,self::$domain) = $device;
             }
-        }
 
-        if (empty($device_tpl)) {
-            $device_name  = 'desktop';
-            $device_tpl   = self::$config['desktop']['tpl'];
-            $device_index = self::$config['desktop']['index'];
-            self::$domain = self::$router_url;
+            self::$IS_MOBILE = false;
+            if (empty($device_tpl)) {
+                //检查是否移动设备 USER_AGENT 或者 域名
+                $is_m_domain = (
+                    self::$config['mobile']['domain']==iPHP_REQUEST_HOST
+                    &&
+                    self::$config['mobile']['domain']!=self::$router_url
+                );
+                if (self::agent(self::$config['mobile']['agent'])||$is_m_domain) {
+                    self::$IS_MOBILE = true;
+                    $device_name  = 'mobile';
+                    $device_tpl   = self::$config['mobile']['tpl'];
+                    $device_index = self::$config['mobile']['index'];
+                    self::$domain = self::$config['mobile']['domain'];
+                }
+            }
+
+            if (empty($device_tpl)) {
+                $device_name  = 'desktop';
+                $device_tpl   = self::$config['desktop']['tpl'];
+                $device_index = self::$config['desktop']['index'];
+                self::$domain = self::$router_url;
+            }
+        }else{
+            list($device_name, $device_tpl,$device_index,self::$domain,self::$IS_MOBILE) = self::$device;
         }
 
         self::$device_name  = $device_name;
@@ -76,6 +85,17 @@ class iDevice {
         // self::$IS_IDENTITY_URL OR self::router($config['FS']);
 
         $common['redirect'] && self::redirect();
+    }
+    /**
+     * [set_device description]
+     * @param [type]  $domain       [访问域名]
+     * @param [type]  $device_tpl   [设备模板]
+     * @param [type]  $device_name  [设备名称]
+     * @param [type]  $device_index [首页模板]
+     * @param boolean $IS_MOBILE    [是否标识移动端]
+     */
+    public static function set_device($domain,$device_tpl,$device_name,$device_index='{iTPL}/index.htm',$IS_MOBILE=false){
+        self::$device = array($device_name, $device_tpl,$device_index,$domain,$IS_MOBILE);
     }
     public static function output(&$content){
         if(!self::$IS_IDENTITY_URL){

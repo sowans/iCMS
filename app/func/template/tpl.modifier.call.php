@@ -21,7 +21,7 @@ function tpl_modifier_call($object,$method){
         $array = array_merge(array($object),array_slice($arg_list, 2));
         $call  = $method;
     }else if(!is_object($object) && strpos($object,'::')!==false){
-        //{'class::method'|call:'method':'参数1':'参数2':'参数3'}
+        //{'class::method'|call:'参数1':'参数2':'参数3'}
         $array = array_slice($arg_list, 1);
         $call  = $object;
     }else {

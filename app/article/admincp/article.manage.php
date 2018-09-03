@@ -77,7 +77,7 @@ $(function(){
 							return false;
 						}
 						$(box).trigger("chosen:updated");
-						$.post("<?php echo APP_URI; ?>&do=edit",{
+						$.post("<?php echo APP_URI; ?>&do=edit&CSRF_TOKEN=<?php echo iPHP_WAF_CSRF_TOKEN;?>",{
                 id:aid,cid:cid,pid:edpid.val(),
                 title:title,
                 source:edsource.val(),

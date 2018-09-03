@@ -98,6 +98,7 @@ class apps_meta {
         if(empty($table)) return false;
 
         $json = iDB::value("SELECT `data` FROM `#iCMS@__{$table}` where `id` = '$id'");
+
         if($json){
             $data = json_decode($json,true);
             if($index){
@@ -125,9 +126,21 @@ class apps_meta {
     }
 
     public static function config($table){
-        $config  = configAdmincp::get(iCMS_APP_APPS,'apps:meta');
+        $config  = config::get(iCMS_APP_APPS,'apps:meta');
         $config[$table] = 1;
         $_POST['config'] = $config;
-        configAdmincp::save(iCMS_APP_APPS,'apps:meta',null,false);
+        config::save(iCMS_APP_APPS,'apps:meta',null,false);
+    }
+    public static function cache(){
+        $rs = iDB::all("SHOW TABLE STATUS FROM `" . iPHP_DB_NAME . "` WHERE ENGINE IS NOT NULL;");
+        $config = array();
+        foreach ($rs as $key => $value) {
+            if(stristr($value['Name'], '_meta') !== FALSE) {
+                $name = str_replace(iPHP_DB_PREFIX, '', $value['Name']);
+                $config[$name] = 1;
+            }
+        }
+        $_POST['config'] = $config;
+        config::save(iCMS_APP_APPS,'apps:meta',null,false);
     }
 }

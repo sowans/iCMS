@@ -149,7 +149,7 @@ class formerApp{
                 if($fields['field']=='MEDIUMTEXT'){
                     $dataFields[$fkey] = $fields;
                 }else{
-                   self::vars($fields,$fkey,$resource,$vars,$category,$app);
+                   self::vars($fields,$fkey,$resource,$vars,$category,$name);
                 }
             }
 
@@ -158,7 +158,7 @@ class formerApp{
                 $iDATA = apps_mod::get_data($app,$id,array($dtn));
                 foreach ((array)$dataFields as $fkey => $fields) {
                     $resource[$fkey] = $iDATA[$fkey];
-                    self::vars($fields,$fkey,$resource,$vars,$category,$app);
+                    self::vars($fields,$fkey,$resource,$vars,$category,$name);
                 }
             }
         }
@@ -247,15 +247,17 @@ class formerApp{
                     }
                 }
             break;
+            case 'radio_prop':
+            case 'checkbox_prop':
             case 'multi_prop':
             case 'prop':
                 if($key=='pid'){
                     continue;
                 }
                 $nkey   = $key.'_prop';
-                $propArray = propApp::value($key,$_app);
+                $propArray = propApp::field($key,$app);
                 // empty($values['prop']) && $propArray = propApp::value($key);
-                if($field['type']=='multi_prop'){
+                if($field['type']=='multi_prop'||$field['type']=='checkbox_prop'){
                     $valArray = explode(",", $value);
                     if($propArray)foreach ($propArray as $i => $val) {
                         if(in_array($val['val'], $valArray)){
@@ -265,6 +267,8 @@ class formerApp{
                 }else{
                     $values = $propArray[$value];
                 }
+                empty($values) && $values = array();
+                $field['option'] = null;
             break;
             case 'tag':
                 $vars['tag'] && tagApp::get_array($rs,$category['name'],$key,$value);

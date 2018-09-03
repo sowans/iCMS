@@ -31,7 +31,10 @@ class contentFunc {
         self::$table   = apps::get_table(self::$app);
         self::$primary = self::$table['primary'];
     }
-
+    public static function book_category($vars) {
+        $vars['apps'] = self::$apps['app'];
+        return categoryFunc::category_list($vars);
+    }
     public static function content_list($vars) {
         self::data($vars,'list');
 

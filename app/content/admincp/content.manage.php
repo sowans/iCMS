@@ -20,11 +20,19 @@ $(function(){
   <?php } ?>
 
   iCMS.select('status',"<?php echo isset($_GET['status'])?$_GET['status']:$this->_status ; ?>");
-  <?php if($_GET['orderby']){ ?>
-  iCMS.select('orderby',"<?php echo $_GET['orderby'] ; ?>");
+  iCMS.select('postype',"<?php echo isset($_GET['postype'])?$_GET['postype']:$this->_postype ; ?>");
+
+	<?php if($_GET['orderby']){ ?>
+	iCMS.select('orderby',"<?php echo $_GET['orderby'] ; ?>");
+	<?php } ?>
+  <?php if($_GET['st']){ ?>
+  iCMS.select('st',"<?php echo $_GET['st'] ; ?>");
   <?php } ?>
   <?php if($_GET['sub']=="on"){ ?>
   iCMS.checked('#sub');
+  <?php } ?>
+  <?php if($_GET['hidden']=="on"){ ?>
+  iCMS.checked('#hidden');
   <?php } ?>
   <?php if($_GET['scid']=="on"){ ?>
     iCMS.checked('#search_scid');
@@ -67,18 +75,11 @@ $(function(){
           <input type="checkbox" name="scid" id="search_scid"/>
           副栏目 </span>
           <span class="add-on tip" title="选中查询此栏目下面所有的子栏目,包含本栏目">
-          <input type="checkbox" name="sub" id="sub"/>
-          子栏目 </span>
-        </div>
-        <div class="input-prepend"> <span class="add-on">状 态</span>
-          <select name="status" id="status" class="chosen-select span3">
-            <option value="0"> 草稿 [status='0']</option>
-            <option value="1"selected='selected'> 正常 [status='1']</option>
-            <option value="2"> 回收站 [status='2']</option>
-            <option value="3"> 待审核 [status='3']</option>
-            <option value="4"> 未通过 [status='4']</option>
-            <?php echo propAdmincp::get("status") ; ?>
-          </select>
+            <input type="checkbox" name="sub" id="sub"/>子栏目
+          </span>
+          <span class="add-on tip" title="不显示隐藏栏目">
+            <input type="checkbox" name="hidden" id="hidden"/>隐藏栏目
+          </span>
         </div>
         <div class="input-prepend">
           <span class="add-on">排序</span>
@@ -108,12 +109,45 @@ $(function(){
           <span class="add-on"><i class="fa fa-calendar"></i></span>
         </div>
         <div class="clearfloat mb10"></div>
+        <div class="input-prepend">
+          <span class="add-on">发布类型</span>
+          <select name="postype" id="postype" class="chosen-select span3">
+            <option value=""></option>
+            <option value="all">所有类型</option>
+            <option value="0"> 用户 [postype='0']</option>
+            <option value="1"selected='selected'> 管理 [postype='1']</option>
+            <?php echo propAdmincp::get("postype") ; ?>
+          </select>
+        </div>
+        <div class="input-prepend">
+          <span class="add-on">状 态</span>
+          <select name="status" id="status" class="chosen-select span3">
+            <option value=""></option>
+            <option value="all">所有状态</option>
+            <option value="0"> 草稿 [status='0']</option>
+            <option value="1"selected='selected'> 正常 [status='1']</option>
+            <option value="2"> 回收站 [status='2']</option>
+            <option value="3"> 待审核 [status='3']</option>
+            <option value="4"> 未通过 [status='4']</option>
+            <?php echo propAdmincp::get("status") ; ?>
+          </select>
+        </div>
+        <div class="clearfloat mb10"></div>
         <div class="input-prepend input-append">
           <span class="add-on">每页</span>
           <input type="text" name="perpage" id="perpage" value="<?php echo $maxperpage ; ?>" style="width:36px;"/>
           <span class="add-on">条记录</span>
         </div>
-        <div class="input-prepend"> <span class="add-on">查找方式</span>
+        <div class="input-prepend">
+          <span class="add-on">排序</span>
+          <select name="orderby" id="orderby" class="span2 chosen-select">
+            <option value=""></option>
+            <optgroup label="降序"><?php echo $orderby_option['DESC'];?></optgroup>
+            <optgroup label="升序"><?php echo $orderby_option['ASC'];?></optgroup>
+          </select>
+        </div>
+        <div class="input-prepend input-append">
+          <span class="add-on">查找方式</span>
           <select name="st" id="st" class="chosen-select" style="width:120px;">
             <option value="title">标题</option>
             <option value="id">ID</option>

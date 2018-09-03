@@ -192,14 +192,21 @@ var iFormer = {
                 case 'switch':
                 case 'radio':
                 case 'checkbox':
+                case 'radio_prop':
+                case 'checkbox_prop':
                     obj['class'] = obj['class']||obj_type;
                     elem_type = obj_type;
-                    if(obj_type=='switch'){
+                    if(obj_type=='switch'||obj_type=='radio_prop'){
                         obj['class'] = 'radio';
                         elem_type = 'radio';
                     }
-                    if(obj_type=='checkbox'){
+                    if(obj_type=='checkbox'||obj_type=='checkbox_prop'){
                         obj['multiple'] = true;
+                        obj['class']    = 'checkbox';
+                        elem_type       = 'checkbox';
+                    }
+                    if(obj_type=='radio_prop'||obj_type=='checkbox_prop'){
+                        obj['option']= '默认属性=0;'
                     }
                     //改变$div内容
                     var _div = function () {

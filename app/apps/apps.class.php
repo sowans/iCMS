@@ -327,7 +327,8 @@ class apps {
         }
         iCache::set('app/idarray',  $appid_array,0);
         iCache::set('app/array',$app_array,0);
-        configAdmincp::cache();
+        apps_meta::cache();
+        config::cache();
         return true;
 	}
     public static function set_app_cache($a){

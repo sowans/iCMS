@@ -26,10 +26,13 @@ class categoryFunc{
 			$apps['id'] && $where_sql.= iSQL::in($apps['id'],'appid');
 		}
 
-		isset($vars['appid']) && $where_sql.= iSQL::in($vars['appid'],'appid');
-		isset($vars['mode']) && $where_sql.= iSQL::in($vars['mode'],'mode');
-		isset($vars['cid']) && !isset($vars['stype']) && $where_sql.= iSQL::in($vars['cid'],'cid');
-		isset($vars['cid!']) && $where_sql.= iSQL::in($vars['cid!'],'cid','not');
+		isset($vars['appid'])  && $where_sql.= iSQL::in($vars['appid'],'appid');
+		isset($vars['mode'])   && $where_sql.= iSQL::in($vars['mode'],'mode');
+		isset($vars['cid'])    && !isset($vars['stype']) && $where_sql.= iSQL::in($vars['cid'],'cid');
+		isset($vars['cid!'])   && $where_sql.= iSQL::in($vars['cid!'],'cid','not');
+		isset($vars['rootid']) && $where_sql.=" AND `rootid`='".(int)$vars['rootid']."'";
+		isset($vars['rootid!'])&& $where_sql.=" AND `rootid`!='".(int)$vars['rootid!']."'";
+
 		if($vars['stype']=='sub' && isset($vars['sub'])){
 			$vars['stype']='suball';
 		}
@@ -102,6 +105,7 @@ class categoryFunc{
 		}
 
 		$resource = iDB::all("SELECT `cid` FROM `#iCMS@__category` {$where_sql} {$order_sql} {$limit}");
+
 		if($resource){
 	        if($vars['meta']){
 	            $cidArray = iSQL::values($resource,'cid','array',null);

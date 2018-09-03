@@ -10,6 +10,7 @@
 class propAdmincp{
     public static $app   = null;
     public static $field = null;
+    public static $default = array();
     public function __construct() {
         $this->pid = (int)$_GET['pid'];
     }
@@ -176,8 +177,8 @@ class propAdmincp{
                 $app_field_id[$row['app'].'/'.$row['field']][$row['pid']] =
                 $app_field_val[$row['app']][$row['field']][$row['val']]   = $row;
             }else{
-                $app_field_id[$row['field'].'/pid'][$row['pid']]  =
-                $app_field_val[$row['field']][$row['val']] = $row;
+                $app_field_id[$row['field'].'/pid'][$row['pid']] =
+                $app_field_val[$row['field']][$row['val']]       = $row;
             }
     	}
         // prop/article/author=>pid
@@ -255,7 +256,7 @@ class propAdmincp{
             if ($out == 'option') {
                 $optText = "<option value='{$P['val']}'";
                 array_search($P['val'], $valArray)!==FALSE && $optText.= " selected='selected'";
-                $optText.= "title='{$field}={$P['val']}'";
+                $optText.= " title='{$field}={$P['val']}'";
                 $optText.= ">{$P['name']}";
                 $isopt && $optText.= "[{$field}='{$P['val']}']";
                 $optText.= "</option>";

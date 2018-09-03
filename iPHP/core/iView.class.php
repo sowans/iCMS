@@ -84,6 +84,7 @@ class iView {
         is_array($args['app']) && $args['app'] = $args['app']['app'];
         $keys = $args['app'].($args['method']?'_'.$args['method']:'');
         isset($args['as']) && $keys = $args['as'];
+        $isMultiArgs = false;
         //模板标签 对应>> 类::静态方法
         //iPHP:app:method >> appFunc::app_method
         if($args['method']){
@@ -98,6 +99,7 @@ class iView {
                     $args['app'],
                     $args['method']
                 );
+                $isMultiArgs = true;
             }
             if(strpos($args['app'], 'Class')!==false){
                 //iPHP:aaaClass:method >> aaa::method
@@ -106,6 +108,7 @@ class iView {
                     substr($args['app'], 0,-5),
                     $args['method']
                 );
+                $isMultiArgs = true;
             }
             //自定义APP模板调用
             //iPHP:content:list app="test" >> contentFunc::content_list
@@ -149,7 +152,7 @@ class iView {
             // iPHP:app:_method >> app_method::func
             // iPHP:app:_method func='aaa' >> app_method::aaa
             strpos($callback[1], '__')!==false && $callback = array('iView','callback_func_proxy');
-            $tpl->assign($keys,call_user_func_array($callback, array($args)));
+            $tpl->assign($keys,call_user_func_array($callback, $isMultiArgs?(array)$args:array($args)));
         }else{
             $tpl->assign($keys,$callback($args));
         }

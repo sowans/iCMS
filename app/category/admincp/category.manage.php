@@ -296,11 +296,11 @@ iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
             <input type="checkbox" data-type="switch" name="status" id="status"/>
           </div>
         </div>
-        <div id="ruleBatch" style="width: 560px;height:260px;text-align: left;">
+        <div id="ruleBatch" style="width: 560px;min-height:260px;text-align: left;"  class="form-inline">
           <?php include admincp::view('category.rule',$this->_view_tpl_dir);?>
           <div class="clearfloat mb10"></div>
         </div>
-        <div id="templateBatch" style="height:180px;">
+        <div id="templateBatch" style="min-height:180px;" class="form-inline">
           <?php include admincp::view('category.template',$this->_view_tpl_dir);?>
           <div class="clearfloat mb10"></div>
         </div>

@@ -109,9 +109,7 @@ class former {
     }
 
     public static function widget($name,$attr=null) {
-        $widget = new iQuery($name);
-        $attr && $widget->attr($attr);
-        return $widget;
+        return former_helper::widget($name,$attr);
     }
 
     public static function render($app,$rs=null) {
@@ -230,6 +228,9 @@ class former {
                     }else{
                         $option='<option value="0">默认'.$field['label'].'</option>';
                     }
+                    if(propAdmincp::$default['option'][$name]){
+                        $option.= propAdmincp::$default['option'][$name];
+                    }
                     $option.= propAdmincp::get($name,null,'option',null,self::$config['app']['app'],self::$config['option']);
                     $value===null OR $script = self::script('iCMS.FORMER.select("'.$attr['id'].'","'.$value.'");',true);
                     $input = $select->html($option).$orig.$btn;
@@ -318,41 +319,33 @@ class former {
                 case 'switch':
                 case 'radio':
                 case 'checkbox':
-                    if($type=='checkbox'){
+                case 'radio_prop':
+                case 'checkbox_prop':
+                    if($type=='checkbox'||$type=='checkbox_prop'){
                         $attr['name'] = $attr['name'].'[]';
                     }
-                    if($field['option']){
-                        $optionArray = explode(";", $field['option']);
-                        $option = '';
-                        foreach ($optionArray as $optk => $val) {
-                            $val = trim($val,"\r\n");
-                            if($val){
-                                list($opt_text,$opt_value) = explode("=", $val);
-                                $opt_value===null && $opt_value = $opt_text;
-                                $attr2 = $attr;
-                                $attr2['value'] = $opt_value;
-                                $attr2['class'].= ' '.$attr2['id'];
-                                $attr2['id'].='_'.$optk;
-                                $option.= self::widget('label',array('for'=>$attr2['id'],'class'=>$type.'-inline'))->html($opt_text);
-                                $_input = self::widget('input',$attr2);
-                                if(self::$template['class']['input']){
-                                    $_input->removeClass(self::$template['class']['input']);
-                                }
-                                $option.= $_input;
-                            }
+                    $btn = '';
+                    if($type=='radio_prop'||$type=='checkbox_prop'){
+                        $attr['type']    = str_replace('_prop', '', $type);
+                        $propArray       = propAdmincp::get($name,null,'array',null,self::$config['app']['app'],self::$config['option']);
+                        if($propArray){
+                            //交换键值
+                            $field['option'] = array_flip($propArray);
+                        }else{
+                            $field['option'] = '默认'.$field['label'].'=0;';
                         }
-                        $input = self::display($option,$type);
-                    }else{
-                        $input = self::display($input,$type);
+                        $btn = propAdmincp::btn_add('添加'.$field['label'],$name,self::$config['app']['app']);
                     }
 
+                    $field['option'] && $input  = former_helper::option($field['option'],$attr);
+                    $input = self::display($input,$attr['type']);
                     $value===null OR $script= self::script('iCMS.FORMER.checked(".'.$attr['id'].'","'.$value.'");',true);
-
                     if($type=='switch'){
                         $attr['type'] = 'checkbox';
                         $input = self::widget('input',$attr);
                         $input ='<div class="switch">'.$input.'</div>';
                     }
+                    $input.= $btn;
                 break;
                 case 'multi_category':
                 case 'category':
@@ -365,7 +358,7 @@ class former {
                         $orig = self::widget('input',array('type'=>'hidden','name'=>$orig_name,'value'=>$value));
                     }
                     $select = self::widget('select',$attr)->addClass('chosen-select');
-                    $option = category::appid(self::$config['app']['id'],'cs')->select();
+                    $option = category::appid(category::$appid,'cs')->select();
                     $value===null OR $script = self::script('iCMS.FORMER.select("'.$attr['id'].'","'.$value.'");',true);
                     $input = $select->html($option).$orig;
                 break;
@@ -386,17 +379,7 @@ class former {
                         $option.='<option value=""></option>';
                     }
                     if($field['option']){
-                        $optionArray = explode(";", $field['option']);
-                        foreach ($optionArray as $ok => $val) {
-                            $val = trim($val,"\r\n");
-                            if($val){
-                                list($opt_text,$opt_value) = explode("=", $val);
-                                $opt_value===null && $opt_value = $opt_text;
-                                $option.='<option value="'.$opt_value.'">'.$opt_text;
-                                self::$config['option'] && $option.=' ['.$name.'="'.$opt_value.'"]';
-                                $option.='</option>';
-                            }
-                        }
+                        $option = former_helper::s_option($field['option'],$name);
                         $input->html($option);
                         $value===null OR $script = self::script('iCMS.FORMER.select("'.$attr['id'].'","'.$value.'");',true);
                     }

@@ -13,7 +13,14 @@ class contentApp extends appsApp {
     public $tables  = null;
     public $table   = null;
 
-    public function __construct($data) {
+    public function __construct($data=null) {
+        if($data===null){
+            $id = iSecurity::getGP('appid');
+            $data = apps::get_app($id);
+        }else if(!is_array($data)){
+            $data = apps::get_app($data);
+        }
+
         $this->data    = $data;
         $this->appid   = $data['id'];
         $this->app     = $data['app'];
@@ -34,13 +41,15 @@ class contentApp extends appsApp {
             'tag'  => true,
             'user' => true,
         );
-        $rs+= $this->data($id);
+        $rs = array_merge($rs,$this->data($id));
         $rs = $this->value($rs,$vars,$page,$tpl);
         if ($rs === false) {
             return false;
         }
-        $rs+=(array)apps_meta::data($this->app,$id);
-        $this->hooked($rs);
+        // $rs+=(array)apps_meta::data($this->app,$id);
+        // $this->hooked($rs);
+        self::custom_data($rs,$vars);
+        self::hooked($rs);
 
         if ($tpl) {
             $app = apps::get_app_lite($this->data);

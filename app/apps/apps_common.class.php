@@ -96,7 +96,7 @@ class apps_common {
         );
     }
 
-    public static function data($ids=0,$table,$primary='id',$fields="*"){
+    public static function data($ids=0,$table,$primary='id',$fields="*",$Dtable='data'){
         if(empty($ids)) return array();
         list($ids,$is_multi)  = iSQL::multi_var($ids);
         $fields OR $fields = "*";
@@ -114,7 +114,7 @@ class apps_common {
         }
         $sql  = iSQL::in($ids,$primary,false,true);
         $data = array();
-        $rs   = iDB::all("SELECT {$fields} FROM `#iCMS@__{$table}_data` where {$sql}");
+        $rs   = iDB::all("SELECT {$fields} FROM `#iCMS@__{$table}_{$Dtable}` where {$sql}");
         if($rs){
             $_count = count($rs);
             for ($i=0; $i < $_count; $i++) {

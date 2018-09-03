@@ -43,6 +43,7 @@ class contentAdmincp{
         $this->_status   = '1';
         $this->config    = iCMS::$config[$this->app['app']];
         category::$appid = $this->appid;
+        tag::$appid      = $this->appid;
         $this->_view_tpl_dir = $dir;
     }
     public function do_config(){
@@ -141,10 +142,23 @@ class contentAdmincp{
                 foreach($_POST['id'] AS $id){
                     $art  = content::row($id,'tags,cid');
                     $mtag = iSecurity::escapeStr($_POST['mtag']);
+                    $tagArray  = $art['tags']?explode(',', $art['tags']):array();
+                    $mtagArray = explode(',', $mtag);
                     if($_POST['pattern']=='replace') {
+                    }elseif($_POST['pattern']=='delete') {
+                        foreach ($mtagArray as $key => $value) {
+                            $tk = array_search($value, $tagArray);
+                            if($tk!==false){
+                                unset($tagArray[$tk]);
+                            }
+                        }
+                        $mtag   = implode(',', $tagArray);
                     }elseif($_POST['pattern']=='addto') {
-                        $art['tags'] && $mtag = $art['tags'].','.$mtag;
-                    }
+                        $pieces = array_merge($tagArray,$mtagArray);
+                        $pieces = array_unique($pieces);
+                        $mtag   = implode(',', $pieces);
+			        }
+                    $mtag = ltrim($mtag,',');
                     $tags = tag::diff($mtag,$art['tags'],members::$userid,$id,$art['cid']);
                     $tags = addslashes($tags);
                     content::update(compact('tags'),compact('id'));
@@ -239,14 +253,16 @@ class contentAdmincp{
         //status:[0:草稿][1:正常][2:回收][3:待审核][4:不合格]
         //postype: [0:用户][1:管理员]
         $stype && $this->_status = $stype_map[$stype];
-        if(isset($_GET['pt']) && $_GET['pt']!=''){
-            $this->_postype = (int)$_GET['pt'];
+
+        $sql = 'WHERE 1=1';
+        if(is_numeric($_GET['postype'])){
+            $this->_postype = (int)$_GET['postype'];
         }
-        if(isset($_GET['status'])){
+        if(is_numeric($_GET['status'])){
             $this->_status = (int)$_GET['status'];
         }
-        $sql = "WHERE `status`='{$this->_status}'";
-        $this->_postype==='all' OR $sql.= " AND `postype`='{$this->_postype}'";
+        is_numeric($this->_postype) && $sql.=" AND `postype` ='".$this->_postype."'";
+        is_numeric($this->_status) && $sql.=" AND `status` ='".$this->_status."'";
 
         if(members::check_priv($this->app['app'].".VIEW")){
             $_GET['userid'] && $sql.= iSQL::in($_GET['userid'],'userid');
@@ -289,11 +305,17 @@ class contentAdmincp{
         }else{
             $sql.= iSQL::in('-1','cid');
         }
-
+        if($_GET['hidden']) {
+            $hidden = categoryApp::get_cahce('hidden');
+            $hidden && $sql.= iSQL::in($hidden, 'cid', 'not');
+        }
         if($_GET['keywords']) {
             $kws = $_GET['keywords'];
             switch ($_GET['st']) {
                 case "title": $sql.=" AND `title` REGEXP '{$kws}'";break;
+                //case "tag":   $sql.=" AND `tags` REGEXP '{$kws}'";break;
+                //case "source":$sql.=" AND `source` REGEXP '{$kws}'";break;
+                case "weight":$sql.=" AND `weight`='{$kws}'";break;
                 case "id":
                 $kws = str_replace(',', "','", $kws);
                 $sql.=" AND `id` IN ('{$kws}')";
@@ -312,13 +334,11 @@ class contentAdmincp{
         $_GET['post_endtime']   && $sql.=" AND `postime`<='".str2time($_GET['post_endtime'].(strpos($_GET['post_endtime'],' ')!==false?'':" 23:59:59"))."'";
 
 
-
-        isset($_GET['userid']) && $uri_array['userid']  = (int)$_GET['userid'];
-        isset($_GET['keyword'])&& $uri_array['keyword'] = $_GET['keyword'];
-        isset($_GET['tag'])    && $uri_array['tag']     = $_GET['tag'];
-        isset($_GET['pt'])     && $uri_array['pt']      = $_GET['pt'];
-        isset($_GET['cid'])    && $uri_array['cid']     = $_GET['cid'];
-        $uri_array  && $uri = http_build_query($uri_array);
+        isset($_GET['userid']) && $uriArray['userid']  = (int)$_GET['userid'];
+        isset($_GET['keyword'])&& $uriArray['keyword'] = $_GET['keyword'];
+        isset($_GET['tag'])    && $uriArray['tag']     = $_GET['tag'];
+        isset($_GET['postype'])&& $uriArray['postype'] = $_GET['postype'];
+        isset($_GET['cid'])    && $uriArray['cid']     = $_GET['cid'];
 
         list($orderby,$orderby_option) = get_orderby(array(
             content::$primary =>"ID",
@@ -379,16 +399,16 @@ class contentAdmincp{
         include admincp::view($this->_view_manage,$this->_view_tpl_dir);
     }
     public function do_save(){
+        iPHP::callback($this->callback['save:begin'],array($this));
         $update = iPHP::callback(array("formerApp","save"),array($this->app));
+        iPHP::callback($this->callback['save:end'],array($this,formerApp::$primary_id,$update));
         iPHP::callback(array("apps_meta","save"),array($this->appid,formerApp::$primary_id));
         iPHP::callback(array("spider","callback"),array($this,formerApp::$primary_id));
 
-        if($this->callback['return']){
-            return $this->callback['return'];
+        if($this->callback['save:return']){
+            return $this->callback['save:return'];
         }
-        // $REFERER_URL = $_POST['REFERER'];
-        // if(empty($REFERER_URL)||strstr($REFERER_URL, '=save')){
-        // }
+
         $REFERER_URL= APP_URI.'&do=manage';
         if($update){
             iUI::success($this->app['title'].'编辑完成!<br />3秒后返回'.$this->app['title'].'列表','url:'.$REFERER_URL);
@@ -402,7 +422,6 @@ class contentAdmincp{
             );
             iUI::$dialog['modal'] = true;
             iUI::dialog('success:#:check:#:'.$this->app['title'].'添加完成!<br />10秒后返回'.$this->app['title'].'列表'.$msg,'url:'.$REFERER_URL,10,$moreBtn);
-            // iUI::success($this->app['title'].'添加完成!<br />3秒后返回'.$this->app['title'].'列表','url:'.$REFERER_URL);
         }
     }
 

@@ -13,9 +13,9 @@ class category {
     private static $instance = null;
 
     // static public function getInstance() {
-    //     if (is_null ( self::$instance ) || isset ( self::$instance )) {
-    //         self::$instance = new self();
-    //     }
+    //
+    //
+          //     }
     //     return self::$instance;
     // }
     public static function appid($appid,$priv=null){

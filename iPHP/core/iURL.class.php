@@ -13,6 +13,7 @@ class iURL {
 
     public static $config   = array();
     public static $callback = array();
+    public static $data     = array();
 
     protected static $ARRAY = null;
 
@@ -64,29 +65,62 @@ class iURL {
     }
 
     public static function rule($matches) {
-    	$b	= $matches[1];
-        if(strpos($b,'RAND')!==false){
-            list($_b,$len,$is_num) = explode(':', $b);
-            empty($len) && $len = 8;
-            return random($len,$is_num);
-        }
+    	$rule = $matches[1];
         $_time = 0;
-        if(strpos($b,'AUTHID:')!==false||strpos($b,'AUTHCID:')!==false){
-            list($b,$_time) = explode(':', $b);
+        if(strpos($rule,'AUTHID:')!==false||strpos($rule,'AUTHCID:')!==false){
+            list($rule,$_time) = explode(':', $rule);
         }
-    	list($a,$c,$tc) = self::$ARRAY;
-        switch($b) {
-            case 'ID':		$e = $a['id'];break;
+
+        list($a,$c,$tc) = self::$ARRAY;
+
+        //{BOOK:ID}
+        if(strpos($rule,':')!==false){
+            list($app,$rule) = explode(':', $rule);
+            $app = strtolower($app);
+            self::$data[$app] && $a = self::$data[$app];
+        }
+        //兼容
+        $rule =='0x3ID'   && $rule = '0xID,0,4';
+        $rule =='0x3,2ID' && $rule = '0xID,4,2';
+        $is_substr = false;
+        if(strpos($rule,',')!==false){
+            //{@random,8}
+            if($rule[0]=='@'){
+                $_rule = substr($rule, 1);
+                $rule  = '@';
+            }else{
+                //{0xID,3,2}
+                list($rule,$start,$len) = explode(',', $rule);
+                $substr_func = function($e,$start=0,$len=0){
+                    if($len===null){
+                        $len   = $start;
+                        $start = 0;
+                    }
+                    return substr($e, $start, $len);
+                };
+            }
+        }
+
+
+        switch($rule) {
+            case 'ID':      $e = $a['id'];break;
+            case 'Hash@ID':
+                $vendor = iPHP::vendor('Hashids');
+                $e = $vendor->encode([$a['id']]);
+            break;
             case '0xID':	$e = sprintf("%08s",$a['id']);break;
-            case '0x3ID':	$e = substr(sprintf("%08s",$a['id']), 0, 4);break;
-            case '0x3,2ID': $e = substr(sprintf("%08s",$a['id']), 4, 2);break;
-            case 'AUTHID':  $e = urlencode(auth_encode($a['id'],$_time));break;
-            case 'MD5':     $e = substr(md5($c['id']),8,16);break;
+            case 'AUTHID':  $e = rawurlencode(auth_encode($a['id'],$_time));break;
+            case 'MD5':     $e = substr(md5($a['id']),8,16);break;
             case 'TMD5':    $e = substr(md5(time().uniqid()),8,16);break;
 
             case 'CID':     $e = $c['cid'];break;
+            case 'Hash@CID':
+                $vendor = iPHP::vendor('Hashids');
+                $e = $vendor->encode([$a['cid']]);
+            break;
+            case 'CMD5':    $e = substr(md5($c['cid']),8,16);break;
             case '0xCID':   $e = sprintf("%08s",$c['cid']);break;
-            case 'AUTHCID': $e = urlencode(auth_encode($a['cid'],$_time));break;
+            case 'AUTHCID': $e = rawurlencode(auth_encode($a['cid'],$_time));break;
             case 'CDIR':    $e = $c['dir'];break;
             case 'CDIRS':   $e = $c['dirs'];break;
 
@@ -98,8 +132,8 @@ class iURL {
             case 'D':		$e = get_date($a['pubdate'],'j');break;
             case 'DD':		$e = get_date($a['pubdate'],'d');break;
 
-            case 'NAME':    $e = urlencode(iSecurity::escapeStr($a['name']));break;
-            case 'TITLE':   $e = urlencode(iSecurity::escapeStr($a['title']));break;
+            case 'NAME':    $e = rawurlencode($a['name']);break;
+            case 'TITLE':   $e = rawurlencode($a['title']);break;
             case 'ZH_CN':	$e = ($a['name']?$a['name']:$a['title']);break;
             case 'TKEY':    $e = $a['tkey'];break;
             case 'LINK':    $e = $a['clink'];break;
@@ -107,12 +141,21 @@ class iURL {
             case 'TCID':	$e = $tc['tcid'];break;
             case 'TCDIR':	$e = $tc['dir'];break;
 
-            case 'EXT':		$e = $c['htmlext']?$c['htmlext']:self::$config['ext'];break;
+            case 'EXT':		$e = self::$config['ext'];break;
             case 'P':       $e = self::PAGE_SIGN;break;
+            case '@':
+                $args = explode(',', $_rule);
+                if (in_array($args[0],array('random'))) {
+                    return call_user_func_array($args[0], array_slice($args,1));
+                }
+            break;
             default:
-                $key = strtolower($b);
+                $key = strtolower($rule);
                 $a[$key] && $e = $a[$key];
         }
+
+        is_callable($substr_func) && $e = $substr_func($e, $start, $len);
+
         return $e;
     }
     public static function rule_data($C,$key) {
@@ -121,16 +164,21 @@ class iURL {
         }else{
             is_object($C['rule']) && $C['rule'] = (array)$C['rule'];
             is_array($C['rule'])  OR $C['rule'] = json_decode($C['rule'],true);
-
-            return $C['rule'][$key];
+            $rule = $C['rule'][$key];
+            $rule OR $rule = $key;
+            return $rule;
         }
     }
-    public static function get($uri,$a=array(),$type=null) {
-        $i          = new stdClass();
-        $default    = array();
-        $category   = array();
-        $array      = (array)$a;
-        $app_conf   = self::$config['iurl'][$uri];
+    public static function get($route,$a=array(),$type=null) {
+        $i        = new stdClass();
+        $default  = array();
+        $category = array();
+        $array    = (array)$a;
+
+        $app = $route;
+        if(strpos($route,':')!==false) list($app,$do) = explode(':', $route);
+
+        $app_conf = self::$config['iurl'][$app];
         $type === null && $type = $app_conf['rule'];
 
         switch($type) {
@@ -148,33 +196,34 @@ class iURL {
                 $array    = (array)$a[0];
                 $category = (array)$a[1];
                 $i->href  = $array['url'];
-                $url      = self::rule_data($category,$uri);
+                $url      = self::rule_data($category,$app);
             break;
             case '3'://标签
                 $array     = (array)$a[0];
                 $category  = (array)$a[1];
                 $_category = (array)$a[2];
                 $i->href   = $array['url'];
-                $category && $url = self::rule_data($category,$uri);
+                $category && $url = self::rule_data($category,$app);
 
-                if($_category['rule'][$uri]){
-                    $url = self::rule_data($_category,$uri);
+                if($_category['rule'][$app]){
+                    $url = self::rule_data($_category,$app);
                 }
             break;
             case '4'://自定义
                 $array    = (array)$a[0];
                 $category = (array)$a[1];
                 $i->href  = $array['url'];
-                $url      = self::rule_data($category,$uri);
-                $href     = 'index.php?app='.$uri;
+                $url      = self::rule_data($category,$route);
+                $href     = 'index.php?app='.$app;
             break;
             default:
                 $url  = '{PHP}';
-                $href = 'index.php?app='.$uri;
+                $href = 'index.php?app='.$app;
             break;
         }
+        $do && $href.='&do='.$do;
 
-        $default  = self::$config[$uri];
+        $default  = self::$config[$app];
         if($default){
             $router_dir = $default['dir'];
             $router_url = $default['url'];
@@ -192,7 +241,7 @@ class iURL {
         }
         if($url=='{PHP}'){
             $primary = $app_conf['primary'];
-            empty($href) && $href = $uri.'.php';
+            empty($href) && $href = $app.'.php';
             if($primary){
                 $href.= (strpos($href,'?')===false)?'?':'&';
                 $href.= $primary.'='.$array[$primary];
@@ -206,11 +255,14 @@ class iURL {
             $i->href = $href;
         }else if(strpos($url,'{PHP}')===false) {
         	self::$ARRAY = array($array,$category,$_category);
-            $i = self::build($url,$router_dir,$router_url,$category['htmlext']);
+
+            $category['htmlext'] && self::$config['ext'] = $category['htmlext'];
+
+            $i = self::build($url,$router_dir,$router_url);
             self::page_sign($i);
 
             if($purl){
-                $ii = self::build($purl,$router_dir,$router_url,$category['htmlext']);
+                $ii = self::build($purl,$router_dir,$router_url);
                 $i->pageurl  = $ii->href;
                 $i->pagepath = $ii->path;
                 unset($ii);
@@ -222,7 +274,7 @@ class iURL {
                 $i->pageurl  = $i->hdir.'/'.$pfile ;
                 $i->pagepath = $i->dir.'/'.$pfile;
             }
-            // call_user_func_array(self::$callback, array($uri,$i,self::$ARRAY,$app_conf));
+            // call_user_func_array(self::$callback, array($app,$i,self::$ARRAY,$app_conf));
         }
         if($category['cid'] && self::$callback['domain']){
             $i = call_user_func_array(self::$callback['domain'], array($i,$category['cid'],$router_url));
@@ -238,8 +290,8 @@ class iURL {
         return $i;
     }
 
-    public static function build($url,$_dir,$_url,$_ext) {
-        if(strpos($url,'{')!==false){
+    public static function build($url,$_dir,$_host=null,$_ext=null) {
+        if(strpos($url,'{')!==false && strpos($url,'}')!==false){
             $url = preg_replace_callback("/\{(.*?)\}/",array(__CLASS__,'rule'),$url);
         }
 
@@ -251,8 +303,8 @@ class iURL {
         $i->href = ltrim(iFS::path($i->href),'/');
         $i->path = rtrim(iFS::path(iPATH.$_dir.$url),'/') ;
 
-        if(iFS::checkHttp($i->href)===false){
-            $i->href = rtrim($_url,'/').'/'.$i->href;
+        if(iHttp::is_url($i->href)===false){
+            $i->href = rtrim($_host,'/').'/'.$i->href;
         }
         $pathA = pathinfo($i->path);
         $i->hdir = pathinfo($i->href,PATHINFO_DIRNAME);

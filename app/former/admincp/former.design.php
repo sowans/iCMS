@@ -122,6 +122,10 @@
     </div>
     <div id="fields-tab-func" class="tab-pane">
       <ul>
+        <li i="layout" tag="br" type="br" class="br">
+          <span class="fa fa-arrows-h"></span>
+          <p style="vertical-align: text-top;">换行符</p>
+        </li>
         <li i="field" tag="tpldir" type="tpldir" field="VARCHAR" len="255" label="模板目录">
           <span class="fb-icon fb-icon-template"></span>
           <p>选择框-模板目录</p>
@@ -156,11 +160,19 @@
         </li>
         <li i="field" tag="prop" type="prop" field="VARCHAR" len="255" label="属性">
           <span class="fb-icon fb-icon-prop"></span>
-          <p>属性(单选)</p>
+          <p>属性(下拉列表)</p>
         </li>
         <li i="field" tag="multi_prop" type="multi_prop" field="VARCHAR" len="255" label="多选属性">
           <span class="fb-icon fb-icon-prop"></span>
-          <p>属性(多选)</p>
+          <p>属性(多选列表)</p>
+        </li>
+        <li i="field" tag="multi_prop" type="radio_prop" field="VARCHAR" len="200" label="单选属性">
+          <span class="fb-icon fb-icon-prop"></span>
+          <p>属性(单选框)</p>
+        </li>
+        <li i="field" tag="multi_prop" type="checkbox_prop" field="VARCHAR" len="255" label="复选属性">
+          <span class="fb-icon fb-icon-prop"></span>
+          <p>属性(复选框)</p>
         </li>
         <li i="field" tag="tag" type="tag" field="VARCHAR" len="255" label="标签" ui-class="span6">
           <span class="fb-icon fb-icon-tag"></span>

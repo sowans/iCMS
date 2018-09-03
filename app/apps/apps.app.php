@@ -117,7 +117,7 @@ class appsApp {
         iUI::code(1, $name.':'. $type, 0, 'json');
     }
 
-    public function get_data($fvar,$field=null) {
+    public function get_data($fvar,$field=null,$flag=true) {
         list($name,$primary,$table) = array($this->_app,$this->_primary,$this->_table);
 
         $table===null && $table = '`#iCMS@__'.$name.'`';
@@ -128,6 +128,10 @@ class appsApp {
             WHERE `".$field."`='".$fvar. "'
             AND `status` ='1' LIMIT 1;",
         ARRAY_A);
+
+        if($flag===false && empty($data)){
+            return $data;
+        }
 
         $data OR iPHP::error_404(array("{$name}:not_found",$field,$fvar), 10001);
 
@@ -149,10 +153,11 @@ class appsApp {
     }
 //--------------------------------------------------------------------
     public static function render($data,$tpl,$name=null,$p=null) {
-        if (!$tpl) return $data;
+        if ($tpl===false) return $data;
 
-        $name===null && $name = self::$s_app;
-        $p===null && $p = $name;
+        $tpl  ===null && $_data = $data;//不解析模板返回原数据
+        $name ===null && $name = self::$s_app;
+        $p    ===null && $p = $name;
         $view_tpl = $data['tpl'];
         $view_tpl OR $view_tpl = $data['category']['template'][$name];
         strstr($tpl, '.htm') && $view_tpl = $tpl;
@@ -161,23 +166,31 @@ class appsApp {
             if(!isset(iView::$handle->_vars['APP'])){
                 iView::assign('APP', $data['category']['app']); //绑定的应用信息
             }
+            //不解析模板时不清空
             unset($data['category']['app']);
             iView::assign('category', $data['category']);
             unset($data['category']);
         }
         $data['sapp'] && iView::assign('SAPP', apps::get_app_lite($data['sapp']));//自身应用信息
         iView::assign($name, $data);
+
+        if($tpl===null) return $_data;//不解析模板返回原数据
+
         $view = iView::render($view_tpl,$p);
         if($view) return array($view,$data);
     }
 
     public static function custom_data(&$data,$vars=null){
         if(is_array($data)){
-            $meta = (array)apps_meta::data(self::$s_app,$data['id']);
+            $app_name = self::$s_app;
+            if(empty($app_name) && $data['category']){
+                $app_name =$data['category']['app']['app'];
+            }
+            $meta = (array)apps_meta::data($app_name,$data['id']);
             $data = array_merge($data,$meta);
-            $app  = apps::get_app(self::$s_app);
+            $app  = apps::get_app($app_name);
             $data['sapp'] = apps::get_app_lite($app);
-            $app['fields'] && formerApp::data($data['id'],$app,self::$s_app,$data,$vars,$data['category']);
+            $app['fields'] && formerApp::data($data['id'],$app,$app_name,$data,$vars,$data['category']);
         }
     }
 
@@ -212,7 +225,7 @@ class appsApp {
         }
         return str_replace($img_array, $img_replace, $data['body']);
     }
-    public static function process($expr,&$category,&$data){
+    public static function process($expr,&$category,&$data, $tpl = false){
         $category = categoryApp::category($data['cid'], false);
         isset($data['appid']) OR $data['appid'] = $category['app']['id'];
 
@@ -224,18 +237,19 @@ class appsApp {
 
         if ($category['status'] == 0) return false;
 
-        $_app = $category['app']['app'];
+        $app_name = $category['app']['app'];
 
-        if(self::is_html($expr,$category,$_app)){
+        if(self::is_html($expr,$category,$app_name)){
             return false;
         }
 
-        $data['iurl'] = (array)iURL::get($_app,array($data,$category));
+        $data['iurl'] = (array)iURL::get($app_name,array($data,$category));
         $data['url']  = $data['iurl']['href'];
 
         self::__redirect($tpl,$category['mode'],$data['iurl']);
 
         $data['category'] = categoryApp::get_lite($category);
+        $tpl===null && $data['category'] = $category;
 
         return true;
     }

@@ -1,5 +1,3 @@
-@import "bootstrap.min.css";
-
 /* common */
 html, body { word-wrap: break-word; word-break: break-all; }
 body {padding: 0px; margin: 0px;font-family: -apple-system, BlinkMacSystemFont, PingFang SC, "Hiragino Sans GB", Tahoma, Helvetica, Arial, SimSun, Heiti, sans-serif; font-size: 14px; line-height: 1.75; word-wrap: break-word; color: #262626; }

@@ -7,11 +7,9 @@
 * @site https://www.icmsdev.com
 * @licence https://www.icmsdev.com/LICENSE.html
 */
-function iCMS_config($vars){
-	if(empty($vars['name'])){
-		return;
-	}
-	$config = iCMS::$config[$vars['name']];
+function iCMS_config($vars=null){
+	$config = iCMS::$config;
+	$vars['name'] && $config = $config[$vars['name']];
 	if(isset($vars['key']) && is_array($config)){
 		$config = $config[$vars['key']];
 	}

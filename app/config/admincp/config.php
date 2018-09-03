@@ -196,6 +196,8 @@ function modal_tpl_index(el,a){
             <input type="hidden" name="config[template][index][tpl]" value="<?php echo $config['template']['index']['tpl']?:$config['template']['desktop']['index']; ?>"/>
             <input type="hidden" name="config[template][index][name]" value="<?php echo $config['template']['index']['name']?:'index' ; ?>"/>
             <div id="template_desktop">
+              <input type="hidden" name="config[template][desktop][name]" value="desktop"/>
+              <input type="hidden" name="config[template][desktop][domain]" value="<?php echo $config['router']['url'] ; ?>"/>
               <div class="input-prepend"> <span class="add-on">桌面端域名</span>
                 <input type="text" name="config[router][url]" class="span3" value="<?php echo $config['router']['url'] ; ?>"/>
               </div>
@@ -215,7 +217,9 @@ function modal_tpl_index(el,a){
             </div>
             <div class="clearfloat mb10 solid"></div>
             <div id="template_mobile">
-              <div class="input-prepend"> <span class="add-on">移动端识别</span>
+              <input type="hidden" name="config[template][desktop][name]" value="mobile"/>
+              <div class="input-prepend">
+                <span class="add-on">移动端识别</span>
                 <input type="text" name="config[template][mobile][agent]" class="span3" id="template_mobile_agent" value="<?php echo $config['template']['mobile']['agent'] ; ?>"/>
               </div>
               <span class="help-inline">请用<span class="label label-info">,</span>分隔 如不启用自动识别请留空</span>

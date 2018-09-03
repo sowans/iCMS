@@ -59,7 +59,7 @@ $(function(){
                 a.focus();
                 return false;
               }else{
-                $.post('<?php echo __ADMINCP__;?>=files&do=mkdir',{name: n,'pwd':'<?php echo $pwd;?>'},
+                $.post('<?php echo __ADMINCP__;?>=files&do=mkdir&CSRF_TOKEN=<?php echo iPHP_WAF_CSRF_TOKEN;?>',{name: n,'pwd':'<?php echo $pwd;?>'},
                 function(j){
                   if(j.code){
                       d.content(j.msg).button([{value: '完成',

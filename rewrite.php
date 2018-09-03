@@ -108,8 +108,6 @@ if(in_array($ext, $exts)){
         usort($result ,"cmpl");
         krsort($result);
 
-        // var_dump($result);
-
         foreach ($result as $key => $value) {
             preg_match_all('@'.$value[0].'@i', $path, $matches);
             if($matches[1]){
@@ -166,17 +164,22 @@ function builder($key,$value){
     preg_match_all("/\{(.*?)\}/", $value, $matches);
     $rule   = $value;
     $pieces = array();
-    $i=1;
+    $app    = $key;
+    if(strpos($key,':')!==false) {
+        list($app,$do) = explode(':', $key);
+        $do && $pieces[] = 'do='.$do;
+    }
+    $i = 1;
     foreach ($matches[1] as $k => $v) {
-        $ru   = preg($v,$key);
+        $ru   = preg($v,$app);
         $rule = str_replace($matches[0][$k], $ru, $rule);
-        $rw   = rewrite($v,$i,$key);
+        $rw   = rewrite($v,$i,$app);
         if($rw){
             $pieces[] = $rw;
             ++$i;
         }
     }
-    $rewrite = $key.'.php?'.implode('&', $pieces);
+    $rewrite = $app.'.php?'.implode('&', $pieces);
     return array($rule,$rewrite);
 }
 function rewrite($b,$k,$t){
@@ -241,9 +244,9 @@ function preg($b,$t){
         break;
         case 'CDIR':
             if($t=='category'){
-                $e = '(\w+)';
+                $e = '(.+)';
             }else{
-                $e = '\w+';
+                $e = '.+';
             }
             break;
         case 'TIME':    $e = '\d+';break;
