@@ -232,6 +232,9 @@ class iPages {
 	* @return string
 	*/
 	public function show($mode=0){
+		if(empty($this->totalpage)){
+			return '';
+		}
 		switch ($mode){
 			case '1':
 				return $this->prev_page().$this->nowbar().$this->next_page().$this->select_wrap();

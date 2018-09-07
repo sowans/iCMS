@@ -116,12 +116,16 @@ class formerApp{
                     self::$primary_id = $id;
                 }
             }
+
             if($imap)foreach ($imap as $key => $value) {
                 iMap::init($value[0],$app['id'],$key);
                 if($update){
                     $orig = $orig_post[$key];
                     iMap::diff($value[1],$orig,$id);
                 }else{
+                    if($value[0]=="category"){
+                        category::update_count($value[1]);
+                    }
                     iMap::add($value[1],$id);
                 }
             }

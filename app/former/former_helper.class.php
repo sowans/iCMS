@@ -16,17 +16,22 @@ class former_helper {
         return $widget;
     }
 	public static function option($data,$attr){
-		is_array($data) OR $data = explode(";", $data);
+        if(is_array($data)){
+            $flag = true;
+        }else{
+            $flag = false;
+            $data = explode(";", $data);
+        }
 
 	    foreach ($data as $optk => $val) {
 	        $val = trim($val,"\r\n");
 	        if($val==='') continue;
 
-            if(strpos($val,'=')!==false){
-	            list($opt_text,$opt_value) = explode("=", $val);
-            }else{
+            if($flag){
                 $opt_text  = $optk;
                 $opt_value = $val;
+            }else{
+                list($opt_text,$opt_value) = explode("=", $val);
             }
 
 	        $opt_value===null && $opt_value = $opt_text;

@@ -439,4 +439,8 @@ class category {
             iUI::permission($title, $ret);
         }
     }
+    public static function update_count($cid,$math='+'){
+        $math=='-' && $sql = " AND `count`>0";
+        iDB::query("UPDATE `#iCMS@__category` SET `count` = count".$math."1 WHERE `cid` ='$cid' {$sql}");
+    }
 }

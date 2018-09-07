@@ -53,11 +53,14 @@ class contentAdmincp{
         configAdmincp::save($this->appid);
     }
     public function do_add(){
-      $rs = apps_mod::get_data($this->app,$this->id);
-      isset($rs['status']) OR $rs['status'] = '1';
-      iPHP::callback(array("apps_meta","get"),array($this->appid,$this->id));
-      iPHP::callback(array("formerApp","add"),array($this->app,$rs));
-      include admincp::view($this->_view_add,$this->_view_tpl_dir);
+        $rs = apps_mod::get_data($this->app,$this->id);
+        isset($rs['status']) OR $rs['status'] = '1';
+        if(empty($rs['cid']) && isset($_GET['cid'])){
+            $rs['cid'] = (int)$_GET['cid'];
+        }
+        iPHP::callback(array("apps_meta","get"),array($this->appid,$this->id));
+        iPHP::callback(array("formerApp","add"),array($this->app,$rs));
+        include admincp::view($this->_view_add,$this->_view_tpl_dir);
     }
     public function do_update(){
         $data = iSQL::update_args($_GET['_args']);
@@ -313,13 +316,14 @@ class contentAdmincp{
             $kws = $_GET['keywords'];
             switch ($_GET['st']) {
                 case "title": $sql.=" AND `title` REGEXP '{$kws}'";break;
-                //case "tag":   $sql.=" AND `tags` REGEXP '{$kws}'";break;
+                case "tag":   $sql.=" AND `tags` REGEXP '{$kws}'";break;
                 //case "source":$sql.=" AND `source` REGEXP '{$kws}'";break;
                 case "weight":$sql.=" AND `weight`='{$kws}'";break;
                 case "id":
                 $kws = str_replace(',', "','", $kws);
                 $sql.=" AND `id` IN ('{$kws}')";
                 break;
+                case "tkd":   $sql.=" AND CONCAT(title,keywords,description) REGEXP '{$kws}'";break;
             }
         }
 
@@ -327,7 +331,7 @@ class contentAdmincp{
 
         isset($_GET['nopic'])&& $sql.=" AND `haspic` ='0'";
         isset($_GET['pic'])&& $sql.=" AND `haspic` ='".($_GET['pic']?1:0)."'";
-
+        $_GET['tag']       && $sql.=" AND `tags` REGEXP '[[:<:]]".preg_quote(rawurldecode($_GET['tag']),'/')."[[:>:]]'";
         $_GET['starttime'] && $sql.=" AND `pubdate`>='".str2time($_GET['starttime'].(strpos($_GET['starttime'],' ')!==false?'':" 00:00:00"))."'";
         $_GET['endtime']   && $sql.=" AND `pubdate`<='".str2time($_GET['endtime'].(strpos($_GET['endtime'],' ')!==false?'':" 23:59:59"))."'";
         $_GET['post_starttime'] && $sql.=" AND `postime`>='".str2time($_GET['post_starttime'].(strpos($_GET['post_starttime'],' ')!==false?'':" 00:00:00"))."'";

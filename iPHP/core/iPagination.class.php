@@ -88,8 +88,8 @@ class iPagination {
                     'TOTAL'   => $iPages->totalpage,
                     'CURRENT' => $iPages->nowindex,
                     'PN'      => $iPages->nowindex,
-                    'PREV'    => $iPages->prev_page(),
-                    'NEXT'    => $iPages->next_page(),
+                    'PREV'    => $iPages->prev_page('array'),
+                    'NEXT'    => $iPages->next_page('array'),
                     'LAST'    => ($iPages->nowindex>=$iPages->totalpage),
                 )
             ));

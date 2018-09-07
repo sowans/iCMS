@@ -648,8 +648,7 @@ class categoryAdmincp {
     }
 
     public static function update_count($cid,$math='+'){
-        $math=='-' && $sql = " AND `count`>0";
-        iDB::query("UPDATE `#iCMS@__category` SET `count` = count".$math."1 WHERE `cid` ='$cid' {$sql}");
+        category::update_count($cid,$math);
     }
     public static function _count($where=null){
         $sql = iSQL::where($where,true);

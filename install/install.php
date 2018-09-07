@@ -42,18 +42,12 @@ if($_POST['action']=='install'){
     iDB::$show_trace      = false;
     iDB::$show_explain    = false;
 
-    iPHP::$apps = array(
-            'admincp' => '10',
-            'config'  => '11',
-            'files'   => '12',
-            'menu'    => '13',
-            'group'   => '14',
-            'members' => '15',
-            'apps'    => '17',
-            'former'  => '18',
-            'patch'   => '19',
-            'cache'   => '23'
-    );
+    iPHP::define_apps(array(
+        'admincp' => '10','config'  => '11','files'   => '12',
+        'menu'    => '13','group'   => '14','members' => '15',
+        'apps'    => '17','former'  => '18','patch'   => '19',
+        'cache'   => '23'
+    ));
 
     $router_url     = iSecurity::escapeStr(trim($_POST['ROUTER_URL'],'/'));
     $admin_name     = iSecurity::escapeStr(trim($_POST['ADMIN_NAME']));
