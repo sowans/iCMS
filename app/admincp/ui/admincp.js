@@ -41,10 +41,12 @@ $(function() {
     iCMS = $.extend(iCMS, _iCMS); //扩展 or 替换 iCMS属性
     var doc = $(document);
     //iCMS.modal();
-    doc.on("click",'[data-toggle=dropdown]',function (e) {
-        var t=$(this),o=t.offset();
-        var p= t.parent(),m=p.find('.dropdown-menu');
-        if(m.height()>o.top){
+    doc.on("click", '[data-toggle=dropdown]', function(e) {
+        var t = $(this),
+            o = t.offset();
+        var p = t.parent(),
+            m = p.find('.dropdown-menu');
+        if (m.height() > o.top) {
             p.addClass('dropdown')
             p.removeClass('dropup')
         }
@@ -57,7 +59,7 @@ $(function() {
             } else {
                 this.href += '&frame=iPHP';
             }
-            this.href+='&CSRF_TOKEN='+CSRF_TOKEN;
+            this.href += '&CSRF_TOKEN=' + CSRF_TOKEN;
         }
         if (this.action && this.action.indexOf('.php') != "-1" && this.action.indexOf('&frame=iPHP') == "-1") {
             if (this.action.indexOf('?') == "-1") {
@@ -65,7 +67,7 @@ $(function() {
             } else {
                 this.action += '&frame=iPHP';
             }
-            this.action+='&CSRF_TOKEN='+CSRF_TOKEN;
+            this.action += '&CSRF_TOKEN=' + CSRF_TOKEN;
         }
     });
 
@@ -237,7 +239,7 @@ function get_category_meta(cid, el) {
             var tb = $(el),
                 tbody = $("tbody", tb);
             $.each(json, function(n, v) {
-                if(v['key']){
+                if (v['key']) {
                     var id = 'cid_meta_' + cid + '_' + v['key'];
                     if ($("#" + id).length > 0) {
                         return
@@ -392,8 +394,8 @@ function modal_icms(el, a) {
                 mBody.height(opts.height);
                 $("#modal-iframe").height(opts.height);
 
-                var zIndex = (parseInt(m.css('z-index'))-1)||9998;
-                moverlay.css('z-index',zIndex);
+                var zIndex = (parseInt(m.css('z-index')) - 1) || 9998;
+                moverlay.css('z-index', zIndex);
             };
             im.close = function() {
                 m.hide().removeClass('in');
@@ -477,8 +479,8 @@ function modal_icms(el, a) {
                     options[act](checkbox);
                     return;
                 }
-                if(checkbox.length>900){
-                    var bIds=[];
+                if (checkbox.length > 900) {
+                    var bIds = [];
                     checkbox.each(function(index, el) {
                         var id = $(el).val();
                         bIds.push(id);

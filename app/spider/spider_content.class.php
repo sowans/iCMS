@@ -168,6 +168,18 @@ class spider_content {
         if ($data['base64_decode']) {
             $content = base64_decode($content);
         }
+        if ($data['urlencode']) {
+            $content = urlencode($content);
+        }
+        if ($data['urldecode']) {
+            $content = urldecode($content);
+        }
+        if ($data['rawurlencode']) {
+            $content = rawurlencode($content);
+        }
+        if ($data['rawurldecode']) {
+            $content = rawurldecode($content);
+        }
         if ($data['parse_str']) {
             parse_str($content, $output);
             $content = $output;

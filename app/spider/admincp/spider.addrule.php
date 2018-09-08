@@ -16,112 +16,127 @@ admincp::head();
 .chosen-container-multi .chosen-choices li.search-choice span{font-size: 14px;}
 </style>
 <script type="text/javascript">
-$(function(){
-  iCMS.select('watermark_pos',"<?php echo (int)$rule['watermark']['pos'] ; ?>");
-  select_sort_change('.helper-wrap');
+$(function() {
+    iCMS.select('watermark_pos', "<?php echo (int)$rule['watermark']['pos'] ; ?>");
+    select_sort_change('.helper-wrap');
 
-	<?php if($_GET['tab']){?>
-		var $itab	= $("#<?php echo $_GET['app']; ?>-tab");
-		$("li",$itab).removeClass("active");
-		$(".tab-pane").removeClass("active").addClass("hide");
-		$("a[href='#<?php echo $_GET['app']; ?>-<?php echo $_GET['tab']; ?>']",$itab).parent().addClass("active");
-		$("#<?php echo $_GET['app']; ?>-<?php echo $_GET['tab']; ?>").addClass("active").removeClass("hide");
-	<?php }?>
+    <?php if($_GET['tab']) {?>
+        var $itab=$("#<?php echo $_GET['app']; ?>-tab");
+        $("li", $itab).removeClass("active");
+        $(".tab-pane").removeClass("active").addClass("hide");
+        $("a[href='#<?php echo $_GET['app']; ?>-<?php echo $_GET['tab']; ?>']", $itab).parent().addClass("active");
+        $("#<?php echo $_GET['app']; ?>-<?php echo $_GET['tab']; ?>").addClass("active").removeClass("hide");
+    <?php } ?>
 
-	$('#spider-data').on("click",".delprop",function(){
-      if(confirm('确定要删除?')){
-        $(this).parent().parent().parent().remove();
-      }
-	});
-  $('#spider').on("click",'a[data-toggle="insertContent"]',function(){
-    var href = $(this).attr("href");
-    // console.log(href.indexOf('<%'),href.indexOf('aaaaaaaaaa'));
-    if(href.indexOf('<%')!="-1"){
-      var target= $(this).attr('data-target')
-      var text = $(target).val();
-      if(text.indexOf(href)!="-1"){
-        alert(href+"只能有一个!其它请用 变量标识!");
-        return false;
-      }
-    }
-  });
-
-	$(".addprop").click(function(){
-    // var length=$("#spider-data tbody tr").length+1;
-    var length = parseInt($("#spider-data tbody tr:last").attr('data-key'))+1;
-    var href   = $(this).attr("href");
-    var tb     = $(href);
-    var tbody  = $("tbody",tb);
-    var ntr    = $(".rule_data_clone tr").clone(true);
-
-    if(!length) length = 0;
-    ntr.attr('data-key', length);
-
-		$('input,textarea,td,select',ntr).each(function(i){
-      this.id = this.id.replace('__KEY__',length);
-      if(this.name) this.name = this.name.replace('[__KEY__]','['+length+']');
-		});
-    $('a[data-target]',ntr).each(function(i){
-      var target= $(this).attr('data-target')
-      target = target.replace('__KEY__',length);
-      $(this).attr('data-target',target);
+    $('#spider-data').on("click", ".delprop", function() {
+        if(confirm('确定要删除?')) {
+            $(this).parent().parent().parent().remove();
+        }
     });
-    chosen_config.width = $(".rule_data_helper").width()+'px';
-    $(".dr_chosen",ntr).chosen(chosen_config);
-    $('.dr_tip',ntr).tooltip();
-    $(':checkbox,:radio',ntr).uniform();
-    ntr.appendTo(tbody);
-		return false;
-	});
-$(".preg_checkbox,.dom_checkbox").on("click",function(){
-  var pp = $(this).parents('td');
-  var checkedStatus = $(this).prop("checked");
-  if(this.className=='dom_checkbox'){
-    var cb = $(".preg_checkbox",pp).prop("checked", !checkedStatus);
-  }else{
-    var cb = $(".dom_checkbox",pp).prop("checked", !checkedStatus);
-  }
-  $.uniform.update(cb);
-});
 
-	$(".rule_data_page").on("click",function(){
-		var checkedStatus = $(this).prop("checked");
-    if (checkedStatus) {
-	   alert("此数据项您选择有分页,\n\n请记得设置[分页设置]选项卡的内容!");
-    }
-	});
-  $(".rule_data_datasource").on("click",function(){
-    var pp = $(this).parents('td');
-    var checkedStatus = $(this).prop("checked");
-    if (checkedStatus) {
-      $(".data_datasource",pp).removeClass('hide');
-    }else{
-      $(".data_datasource",pp).addClass('hide');
-    }
-  });
+    $('#spider').on("click", 'a[data-toggle="insertContent"]', function() {
+        var href=$(this).attr("href"); // console.log(href.indexOf('<%'),href.indexOf('aaaaaaaaaa'));
+        if(href.indexOf('<%')!="-1") {
+            var target=$(this).attr('data-target');
+            var text=$(target).val();
+            if(text.indexOf(href)!="-1") {
+                alert(href+"只能有一个!其它请用 变量标识!");
+                return false;
+            }
+        }
+    });
+
+    $(".addprop").click(function() {
+        // var length=$("#spider-data tbody tr").length+1;
+        var length =parseInt($("#spider-data tbody tr:last").attr('data-key'))+1;
+        var href   =$(this).attr("href");
+        var tb     =$(href);
+        var tbody  =$("tbody", tb);
+        var ntr    =$(".rule_data_clone tr").clone(true);
+
+        if(!length) length=0;
+        ntr.attr('data-key', length);
+
+        $('input,textarea,td,select', ntr).each(function(i) {
+            if(this.id)   this.id   = this.id.replace('__KEY__', length);
+            if(this.name) this.name = this.name.replace('[__KEY__]', '['+length+']');
+            // if(this.type) this.type = this.type.replace('dr_checkbox', 'checkbox');
+            var type = $(this).attr('type');
+            if(type=="dr_checkbox"){
+                $(this).attr('type','checkbox');
+            }
+        });
+
+        $('a[data-target]', ntr).each(function(i) {
+            var target = $(this).attr('data-target');
+            target = target.replace('__KEY__', length);
+            $(this).attr('data-target', target);
+        });
+
+        chosen_config.width=$(".rule_data_helper").width()+'px';
+        $(".dr_chosen", ntr).chosen(chosen_config);
+        $('.dr_tip', ntr).tooltip();
+        $(':checkbox',ntr).uniform();
+
+        ntr.appendTo(tbody);
+
+        return false;
+    });
+
+
+
+    $(".preg_checkbox,.dom_checkbox").on("click", function() {
+        var pp=$(this).parents('td');
+        var checkedStatus=$(this).prop("checked");
+        if(this.className=='dom_checkbox') {
+            var cb=$(".preg_checkbox", pp).prop("checked", !checkedStatus);
+        } else {
+            var cb=$(".dom_checkbox", pp).prop("checked", !checkedStatus);
+        }
+        $.uniform.update(cb);
+    });
+
+    $(".rule_data_page").on("click", function() {
+        var checkedStatus=$(this).prop("checked");
+        if (checkedStatus) {
+            alert("此数据项您选择有分页,\n\n请记得设置[分页设置]选项卡的内容!");
+        }
+    });
+    $(".rule_data_datasource").on("click", function() {
+        var pp=$(this).parents('td');
+        var checkedStatus=$(this).prop("checked");
+        if (checkedStatus) {
+            $(".data_datasource", pp).removeClass('hide');
+        }else {
+            $(".data_datasource", pp).addClass('hide');
+        }
+    });
 });
 
 function select_sort_option(e, v) {
-    var option = e.find('option[value="' + v + '"]').clone();
+    var option=e.find('option[value="' + v + '"]').clone();
     option.attr('selected', 'selected');
     return option;
 }
+
 function select_sort_change($e) {
-    $('select[multiple="multiple"]',$e).each(function(index, select) {
-        var s_id = this.id;
+    $('select[multiple="multiple"]', $e).each(function(index, select) {
+        var s_id=this.id;
         $("#sort_"+s_id, $e).html('');
         $(this).on('change', function(e, p) {
-            select_sort_value(this,e,p);
+            select_sort_value(this, e, p);
         });
     });
 }
-function select_sort_value(a,e,p) {
-    var s_id = a.id,select = $("#sort_"+s_id);
-    if(p['selected']){
-      select.append(select_sort_option($(a),p['selected']));
+
+function select_sort_value(a, e, p) {
+    var s_id=a.id,
+    select=$("#sort_"+s_id);
+    if(p['selected']) {
+        select.append(select_sort_option($(a), p['selected']));
     }
-    if(p['deselected']){
-      select.find('option[value="' + p['deselected'] + '"]').remove();
+    if(p['deselected']) {
+        select.find('option[value="' + p['deselected'] + '"]').remove();
     }
 }
 </script>
@@ -292,11 +307,12 @@ function select_sort_value(a,e,p) {
               <tbody>
 <?php
 function rule_data_rule_td($dkey,$data = array()){
-  $DR_target    = 'rule_data_'.$dkey.'_rule';
-  $DR_id        = 'data_rule_'.$dkey;
-  $DR_name      = 'rule[data]['.$dkey.']';
-  $tip_class    = ($dkey==='__KEY__')?'dr_tip':'tip';
-  $chosen_class = ($dkey==='__KEY__')?'dr_chosen':'chosen-select';
+  $DR_target     = 'rule_data_'.$dkey.'_rule';
+  $DR_id         = 'data_rule_'.$dkey;
+  $DR_name       = 'rule[data]['.$dkey.']';
+  $tip_class     = ($dkey==='__KEY__')?'dr_tip':'tip';
+  $chosen_class  = ($dkey==='__KEY__')?'dr_chosen':'chosen-select';
+  $checkbox_type = ($dkey==='__KEY__')?'dr_checkbox':'checkbox';
 ?>
 
   <td>
@@ -320,28 +336,28 @@ function rule_data_rule_td($dkey,$data = array()){
     </div>
     <div class="clearfloat mb10"></div>
     <label class="checkbox">
-      <input type="checkbox" class="preg_checkbox" name="<?php echo $DR_name;?>[preg]" value="1"<?php if(!$data['dom']||$data['preg']){ echo ' checked="true"';};?>>
+      <input type="<?php echo $checkbox_type;?>" class="preg_checkbox" name="<?php echo $DR_name;?>[preg]" value="1"<?php if(!$data['dom']||$data['preg']){ echo ' checked="true"';};?>>
       正则匹配
     </label>
     <label class="checkbox">
-      <input type="checkbox" class="dom_checkbox" name="<?php echo $DR_name;?>[dom]" value="1"<?php if($data['dom']){ echo ' checked="true"';};?>>
+      <input type="<?php echo $checkbox_type;?>" class="dom_checkbox" name="<?php echo $DR_name;?>[dom]" value="1"<?php if($data['dom']){ echo ' checked="true"';};?>>
       phpQuery匹配
     </label>
     <label class="checkbox">
-      <input class="rule_data_datasource" type="checkbox" <?php if($data['data@source']){ echo ' checked="true"';};?>>
+      <input type="<?php echo $checkbox_type;?>" class="rule_data_datasource" <?php if($data['data@source']){ echo ' checked="true"';};?>>
       设置数据源
     </label>
     <div class="clearfloat mb10"></div>
     <label class="checkbox">
-      <input type="checkbox" name="<?php echo $DR_name;?>[empty]" value="1"<?php if($data['empty']){ echo ' checked="true"';};?>>
+      <input type="<?php echo $checkbox_type;?>" name="<?php echo $DR_name;?>[empty]" value="1"<?php if($data['empty']){ echo ' checked="true"';};?>>
       不允许为空
     </label>
     <label class="checkbox">
-      <input type="checkbox" class="rule_data_page" name="<?php echo $DR_name;?>[page]" value="1"<?php if($data['page']){ echo ' checked="true"';};?>>
+      <input type="<?php echo $checkbox_type;?>" class="rule_data_page" name="<?php echo $DR_name;?>[page]" value="1"<?php if($data['page']){ echo ' checked="true"';};?>>
       有分页
     </label>
     <label class="checkbox">
-      <input type="checkbox" name="<?php echo $DR_name;?>[multi]" value="1"<?php if($data['multi']){ echo ' checked="true"';};?>>
+      <input type="<?php echo $checkbox_type;?>" name="<?php echo $DR_name;?>[multi]" value="1"<?php if($data['multi']){ echo ' checked="true"';};?>>
       匹配多条
     </label>
   </td>
@@ -377,14 +393,18 @@ function rule_data_rule_td($dkey,$data = array()){
           <option value='autobreakpage'>自动分页</option>
         </optgroup>
         <optgroup label="解析/解码">
-          <option value='parse_str'>URL字符串解析</option>
-          <option value='json_decode'>JSON解码(JSON => Array) </option>
-          <option value='base64_decode'>base64 解码 </option>
+          <option value='urldecode'>解码 URL 字符串(urldecode)</option>
+          <option value='rawurldecode'>解码 URL 字符串(rawurldecode)</option>
+          <option value='parse_str'>URL字符串解析(parse_str)</option>
+          <option value='json_decode'>JSON解码(json_decode) </option>
+          <option value='base64_decode'>base64 解码(base64_decode) </option>
         </optgroup>
         <optgroup label="生成/编码">
-          <option value='http_build_query'>Array转URL字符串</option>
-          <option value='json_encode'>JSON编码(Array => JSON) </option>
-          <option value='base64_encode'>base64 编码 </option>
+          <option value='urlencode'>编码 URL 字符串(urlencode)</option>
+          <option value='rawurlencode'>编码 URL 字符串(rawurlencode)</option>
+          <option value='http_build_query'>Array转URL字符串(http_build_query)</option>
+          <option value='json_encode'>JSON编码(json_encode) </option>
+          <option value='base64_encode'>base64编码(base64_encode) </option>
         </optgroup>
         <optgroup label="字符串">
           <option value='explode'>使用,将字符串组成的数组</option>
