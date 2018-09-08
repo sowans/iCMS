@@ -25,31 +25,23 @@ class apps {
     public static function uninstall($app){
         is_array($app) OR $app = self::get($app);
         if($app){
+            //test::__uninstall($data)
+            iPHP::callfunc(array($data['app'],'__uninstall'),$data);
+            //testAdmincp::__uninstall($data)
+            iPHP::callfunc(array($data['app'].'Admincp','__uninstall'),$data);
             self::__uninstall($app);
-            // $obj_name = $data['app'].'Admincp';
-            // var_dump(@class_exists($obj_name));
-            // $obj_name = $data['app'].'App';
-            // var_dump(@class_exists($obj_name));
-            // $obj_name = $data['app'];
-            // var_dump(@class_exists($obj_name));
-            // $app = iPHP::app($data['app'].'.app');
-            // if(is_object($app)){
-            //     $app_methods = get_class_methods($app);
-            //     in_array('__uninstall', $app_methods) OR iUI::alert('卸载出错！ ['.$data['name'].']应用没有设置反安装程序[uninstall],请直接手动删除！');
-            //     return $app->__uninstall($data,self);
-            // }
         }
-        // return false;
+        return false;
     }
     private  static function __uninstall($app){
         //删除分类
-        categoryAdmincp::del_app_data($app['id']);
+        category::del_app_data($app['id']);
         //删除属性
         propAdmincp::del_app_data($app['id']);
         //删除文件
         files::del_app_data($app['id']);
         //删除配置
-        configAdmincp::del($app['id'],$app['app']);
+        config::del($app['id'],$app['app']);
         //删除表
         self::drop_table($app['table']);
         //删除数据

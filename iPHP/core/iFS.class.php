@@ -352,10 +352,37 @@ class iFS {
 		return rtrim($dir, '/') . '/';
 	}
 
-	public static function mk_udir($_dir = '') {
-		$FileDir = $_dir ? $_dir : get_date(0, self::$config['dir_format']);
-		$FileDir = rtrim($FileDir, '/') . '/';
-		$FileDir = ltrim($FileDir, './');
+	public static function mk_udir($udir = null,$md5=null,$ext=null) {
+		$format  = self::$config['dir_format'];
+        if(strpos($format,'md5:')!==false){
+			$FileDir = $format;
+			preg_match_all("@md5:([0-9,]+)@",$FileDir,$match);
+			if($match[1]){
+				foreach ($match[1] as $key => $value) {
+				    list($start,$len) = explode(',', $value);
+				    if($len===null){
+				        $len   = $start;
+				        $start = 0;
+				    }
+				    $dir = substr($md5, $start, $len);
+				    $FileDir = str_replace($match[0][$key], $dir, $FileDir);
+				}
+			}
+			preg_match_all("@date:(\w+\-)@",$FileDir,$match);
+			if($match[1]){
+				foreach ($match[1] as $key => $value) {
+				    $dir = get_date(0, $value);
+				    $FileDir = str_replace($match[0][$key], $dir, $FileDir);
+				}
+			}
+        }else{
+			$FileDir = get_date(0, $format);
+        }
+
+        $udir && $FileDir = $udir;
+
+		$FileDir  = rtrim($FileDir, '/') . '/';
+		$FileDir  = ltrim($FileDir, './');
 		$RootPath = self::get_dir() . $FileDir;
 		$RootPath = rtrim($RootPath, '/') . '/';
 		self::mkdir($RootPath);
@@ -410,22 +437,22 @@ class iFS {
 			return false;
 		}
 
-		list($RootPath, $FileDir) = self::mk_udir($udir); // 文件保存目录方式
-		$file_md5 = md5($filedata);
-		$FileName OR $FileName = $file_md5;
+		$fileMd5 = md5($filedata);
+		$FileName OR $FileName = $fileMd5;
 		$FileSize = strlen($filedata);
 		$FileExt = self::valid_ext($FileName . "." . $FileExt); //判断文件类型
 		if ($FileExt === false) {
 			return false;
 		}
 
+		list($RootPath, $FileDir) = self::mk_udir($udir,$fileMd5,$FileExt); // 文件保存目录方式
 		$FilePath = $FileDir . $FileName . "." . $FileExt;
 		$FileRootPath = $RootPath . $FileName . "." . $FileExt;
 		self::write($FileRootPath, $filedata);
 		$fid = self::insert_filedata(array($FileName,'',$FileDir,'',$FileExt,$FileSize), $type);
 		self::hook('upload',array($FileRootPath,$FileExt));
 		$value = array(
-			1,$fid,$file_md5,$FileSize,
+			1,$fid,$fileMd5,$FileSize,
 			'',$FileName,$FileName.".".$FileExt,
 			$FileDir,$FileExt,
 			$FileRootPath,$FilePath,$RootPath
@@ -465,25 +492,26 @@ class iFS {
 				return false;
 			}
 
-			list($RootPath, $FileDir) = self::mk_udir($udir); // 文件保存目录方式
 
 			if (self::$data) {
 				$fid       = self::$data->id;
-				$file_md5  = self::$data->filename;
-				$oFileName = self::$data->ofilename;
-				$FileDir   = self::$data->path;
+				$fileMd5   = self::$data->filename;
 				$FileExt   = self::$data->ext;
+				$oFileName = self::$data->ofilename;
 				$FileSize  = self::$data->size;
+				$FileDir   = self::$data->path;
+				list($RootPath, $_FileDir) = self::mk_udir($udir,$fileMd5,$FileExt); // 文件保存目录方式
 			} else {
-				$file_md5 = md5_file($tmp_file);
-				$frs = self::get_filedata('filename', $file_md5);
+				$fileMd5 = md5_file($tmp_file);
+				$ext && $FileExt = $ext;
+				list($RootPath, $FileDir) = self::mk_udir($udir,$fileMd5,$FileExt); // 文件保存目录方式
+				$frs = self::get_filedata('filename', $fileMd5);
 				if ($frs) {
 					return self::_array(1, $frs, $RootPath);
 				}
-				$ext && $FileExt = $ext;
 				$FileSize = @filesize($tmp_file);
 			}
-			$FileName OR $FileName = $file_md5;
+			$FileName OR $FileName = $fileMd5;
 			$FilePath = $FileDir . $FileName . "." . $FileExt;
 			$FileRootPath = self::fp($FilePath, "+iPATH");
 			$ret = self::save_ufile($tmp_file, $FileRootPath);
@@ -500,11 +528,11 @@ class iFS {
 					'size'      => $FileSize,
 				), $fid);
 			} else {
-				$fid = self::insert_filedata(array($file_md5,$oFileName,$FileDir,'',$FileExt,$FileSize), 0);
+				$fid = self::insert_filedata(array($fileMd5,$oFileName,$FileDir,'',$FileExt,$FileSize), 0);
 			}
 			self::hook('upload',array($FileRootPath,$FileExt));
 			$value =array(
-				1,$fid,$file_md5,$FileSize,
+				1,$fid,$fileMd5,$FileSize,
 				$oFileName,$FileName,$FileName.".".$FileExt,
 				$FileDir,$FileExt,
 				$FileRootPath,$FilePath,$RootPath
@@ -650,10 +678,9 @@ class iFS {
 
 		$fdata = iHttp::remote($http);
 		if ($fdata) {
-			list($RootPath, $FileDir) = self::mk_udir($udir); // 文件保存目录方式
-
-			$file_md5 = md5($fdata);
-			$frs = self::get_filedata('filename', $file_md5);
+			$fileMd5 = md5($fdata);
+			list($RootPath, $FileDir) = self::mk_udir($udir,$fileMd5,$FileExt); // 文件保存目录方式
+			$frs = self::get_filedata('filename', $fileMd5);
 			if ($frs) {
 				$FilePath = $frs->filepath;
 				$FileRootPath = iFS::fp($FilePath, "+iPATH");
@@ -668,17 +695,17 @@ class iFS {
 					return self::_array(1, $frs, $RootPath);
 				}
 			} else {
-				$FileName = $file_md5 . "." . $FileExt;
+				$FileName = $fileMd5 . "." . $FileExt;
 				$FilePath = $FileDir . $FileName;
 				$FileRootPath = $RootPath . $FileName;
 				self::write($FileRootPath, $fdata);
 				$FileSize = @filesize($FileRootPath);
 				empty($FileSize) && $FileSize = 0;
-				$fid = self::insert_filedata(array($file_md5,$http,$FileDir,$intro,$FileExt,$FileSize),1);
+				$fid = self::insert_filedata(array($fileMd5,$http,$FileDir,$intro,$FileExt,$FileSize),1);
 				self::hook('upload',array($FileRootPath,$FileExt));
 				if ($ret == 'array') {
 					$value =array(
-						1,$fid,$file_md5,$FileSize,
+						1,$fid,$fileMd5,$FileSize,
 						$http,$FileName,$FileName.".".$FileExt,
 						$FileDir,$FileExt,
 						$FileRootPath,$FilePath,$RootPath

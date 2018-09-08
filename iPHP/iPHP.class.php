@@ -434,6 +434,14 @@ class iPHP {
 	        }
         }
     }
+    public static function callfunc($callback,$value) {
+	    $callable = self::$is_callable;
+	    self::$is_callable = true;
+	    if(is_callable($callback)){
+	    	return call_user_func_array($callback,(array)$value);
+	    }
+	    self::$is_callable = $callable;
+    }
     public static function is_callable($callback) {
     	self::$is_callable = true;
     	return is_callable($callback);

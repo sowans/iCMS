@@ -443,4 +443,8 @@ class category {
         $math=='-' && $sql = " AND `count`>0";
         iDB::query("UPDATE `#iCMS@__category` SET `count` = count".$math."1 WHERE `cid` ='$cid' {$sql}");
     }
+    public static function del_app_data($appid=null){
+        iDB::query("DELETE FROM `#iCMS@__category` WHERE `appid` = '".$appid."'");
+        iDB::query("DELETE FROM `#iCMS@__category_map` WHERE `appid` = '".$appid."';");
+    }
 }

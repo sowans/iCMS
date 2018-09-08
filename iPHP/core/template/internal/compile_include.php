@@ -27,7 +27,13 @@ function compile_include($arguments, &$object){
 		if(isset($assign_var)){
 			$arg_list[] = "'$arg_name' => $arg_value";
 		}else{
-			$object->_vars[$arg_name] = $object->_dequote($arg_value);
+			$value = $object->_dequote($arg_value);
+
+			if(strpos($value,'$this->_vars')!==false){
+				$vars_output.='<?php $this->_vars[\''.$arg_name.'\'] = '.$value.'; ?>';
+			}else{
+				$object->_vars[$arg_name] = $value;
+			}
 		}
 	}
 
@@ -52,5 +58,5 @@ function compile_include($arguments, &$object){
 		}
 	}
 	$object->_include_file = false;
-	return $output;
+	return $vars_output.$output;
 }

@@ -219,7 +219,7 @@
               <optgroup label="互转">
                 <option value='implode' data-args="" data-title="分隔字符">数组转字符串</option>
                 <option value='explode'>数组转字符串</option>
-                <option value='json_encode'>JSON 编码</option>
+                <option value='json_encode'>JSON编码</option>
                 <option value='json_decode'>JSON解码</option>
                 <option value='serialize'>序转列化编码</option>
                 <option value='unserialize'>序列化解码</option>
@@ -257,7 +257,6 @@
           <div class="input-prepend">
             <span class="add-on">数据优化</span>
             <select id="iFormer-db" class="chosen-select" style="width:360px;" data-placeholder="请选择..." multiple="multiple">
-              <option value='index'>索引项</option>
             </select>
             <select multiple="multiple" class="hide" name="db[]" id="sort-db"></select>
           </div>

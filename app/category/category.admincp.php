@@ -623,8 +623,7 @@ class categoryAdmincp {
     }
 
     public static function del_app_data($appid=null){
-        iDB::query("DELETE FROM `#iCMS@__category` WHERE `appid` = '".$appid."'");
-        iDB::query("DELETE FROM `#iCMS@__category_map` WHERE `appid` = '".$appid."';");
+        category::del_app_data($appid);
     }
     //接口
     public function del_content($cid){
