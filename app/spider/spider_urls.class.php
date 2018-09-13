@@ -37,7 +37,12 @@ class spider_urls {
                     return;
                 }
             }
-            echo "\033[32m开始采集方案[".$pid."] 采集规则[".$rid."]\033[0m\n";
+            if($pid){
+                echo "\033[32m开始采集方案[".$pid."] \033[0m\n";
+            }
+            if($rid){
+                echo "\033[32m使用采集规则[".$rid."] \033[0m\n";
+            }
         }
         $ruleA = spider::rule($rid);
         $rule = $ruleA['rule'];
@@ -68,28 +73,38 @@ class spider_urls {
              * url使用[rid]规则采集并返回列表结果
              */
             if(strpos($_url, 'RULE@')!==false){
+                if($work=='shell'){
+                    echo str_repeat("-=", 30).PHP_EOL;
+                }
                 list($___s,$_rid,$_urls) = explode('@', $_url);
                 if (spider::$ruleTest) {
                     print_r('<b>使用[rid:'.$_rid.']规则抓取列表</b>:'.$_urls);
                     echo "<hr />";
                 }
                 $_urlsList = spider_urls::crawl($work,false,$_rid,$_urls,'CALLBACK@URL');
-                $urlsList  = array_merge($urlsList,$_urlsList);
-                unset($urlsArray[$_key]);
-            }else{
-                preg_match('|.*<(.*)>.*|is',$_url, $_matches);
 
-                if($_matches){
-                    if(strpos($_matches[1], 'DATE:')!==false){
-                        list($type,$format) = explode(':',$_matches[1]);
-                        $urlsArray[$_key] = str_replace('<'.$_matches[1].'>', date($format),trim($_matches[0]));
-                    }else{
-                        list($format,$begin,$num,$step,$zeroize,$reverse) = explode(',',$_matches[1]);
-                        $url = str_replace($_matches[1], '*',trim($_matches[0]));
-                        $_urlsList = spider_tools::mkurls($url,$format,$begin,$num,$step,$zeroize,$reverse);
-                        unset($urlsArray[$_key]);
-                        $urlsList = array_merge($urlsList,$_urlsList);
+                if($work=='shell'){
+                    echo '使用[rid:'.$_rid.']规则抓取列表'.PHP_EOL;
+                    echo "获取链接:".count($_urlsList).'条记录'.PHP_EOL;
+                }
+
+                foreach ($_urlsList as $uk => $vurl) {
+                    $urls_match = self::urls_match($vurl);
+                    if($urls_match){
+                        $urlsList  = array_merge($urlsList,$urls_match);
+                        unset($_urlsList[$uk]);
                     }
+                }
+                $_urlsList && $urlsList  = array_merge($urlsList,$_urlsList);
+                unset($urlsArray[$_key]);
+                if($work=='shell'){
+                    echo str_repeat("-=", 30).PHP_EOL;
+                }
+            }else{
+                $urls_match = self::urls_match($_url);
+                if($urls_match){
+                    $urlsList  = array_merge($urlsList,$urls_match);
+                    unset($urlsArray[$_key]);
                 }
             }
         }
@@ -136,11 +151,15 @@ class spider_urls {
             $urlsArray = array(reset($urlsArray));
             echo '<b>测试第一条</b><br />';
         }
+        if($work=='shell'){
+            echo '最终需抓取列表总:'.count($urlsArray)."条\n";
+        }
+
         foreach ($urlsArray AS $key => $url) {
             $url = trim($url);
             spider::$urlslast = $url;
             if($work=='shell'){
-                echo '开始采集列表:'.$url."\n";
+                echo '开始抓取第'.$key.'条,链接:'.$url."\n";
             }
             if (spider::$ruleTest) {
                 echo '<b>抓取列表:</b>'.$url . "<br />";
@@ -445,6 +464,23 @@ class spider_urls {
             $data && $array[$lkey] = $data;
         }
         return $array;
+    }
+
+    public static function urls_match($_url){
+        preg_match('|.*<(.*)>.*|is',$_url, $_matches);
+        $urlsList = array();
+        if($_matches){
+            if(strpos($_matches[1], 'DATE:')!==false){
+                list($type,$format) = explode(':',$_matches[1]);
+                $urlsList[]= str_replace('<'.$_matches[1].'>', date($format),trim($_matches[0]));
+            }else{
+                list($format,$begin,$num,$step,$zeroize,$reverse) = explode(',',$_matches[1]);
+                $url = str_replace($_matches[1], '*',trim($_matches[0]));
+                $_urlsList = spider_tools::mkurls($url,$format,$begin,$num,$step,$zeroize,$reverse);
+                $urlsList = array_merge($urlsList,$_urlsList);
+            }
+        }
+        return $urlsList;
     }
 
 }

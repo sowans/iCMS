@@ -106,7 +106,7 @@ class iURL {
             case 'ID':      $e = $a['id'];break;
             case 'Hash@ID':
                 $vendor = iPHP::vendor('Hashids');
-                $e = $vendor->encode([$a['id']]);
+                $e = $vendor->encode(array($a['id']));
             break;
             case '0xID':	$e = sprintf("%08s",$a['id']);break;
             case 'AUTHID':  $e = rawurlencode(auth_encode($a['id'],$_time));break;
@@ -116,7 +116,7 @@ class iURL {
             case 'CID':     $e = $c['cid'];break;
             case 'Hash@CID':
                 $vendor = iPHP::vendor('Hashids');
-                $e = $vendor->encode([$a['cid']]);
+                $e = $vendor->encode(array($a['id']));
             break;
             case 'CMD5':    $e = substr(md5($c['cid']),8,16);break;
             case '0xCID':   $e = sprintf("%08s",$c['cid']);break;

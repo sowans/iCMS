@@ -334,10 +334,10 @@ class appsAdmincp{
      */
     public function do_local_app(){
       $zipfile = trim($_POST['zipfile']);
-      if(preg_match("/^iCMS\.APP\.\w+\-v\d+\.\d+\.\d+\.zip$/", $zipfile)){
+      if(preg_match("/^iCMS\.APP\.(\w+)\-v\d+\.\d+\.\d+\.zip$/", $zipfile,$match)){
         apps_store::$zip_file = iPATH.$zipfile;
         apps_store::$msg_mode = 'alert';
-        apps_store::install_app();
+        apps_store::install_app($match[1]);
         iUI::success('应用安装完成','js:1');
       }else{
         iUI::alert('What the fuck!!');

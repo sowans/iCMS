@@ -187,7 +187,7 @@ class former {
                     // $form_group.=' input-append';
                     $input->attr('type','text');
                     if(self::$config['gateway']=='admincp'){
-                        $picbtn = filesAdmincp::set_opt($value, false)->pic_btn($attr['id'],null,($type=='file'?'文件':'图片'),true);
+                        $picbtn = filesAdmincp::set_opt($value)->pic_btn($attr['id'],null,($type=='file'?'文件':'图片'),true);
                     }
                     $input.= $picbtn;
                 break;
@@ -695,7 +695,8 @@ class former {
           is_array($value) && $value = implode(',',$value);
         }
         if($type=='image'){
-            if(iFS::checkHttp($value)){
+            $name = $fields['name'];
+            if(iFS::checkHttp($value) && !isset($_POST[$name.'_http'])){
                 $value  = iFS::http($value);
             }
         }

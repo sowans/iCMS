@@ -26,9 +26,9 @@ class apps {
         is_array($app) OR $app = self::get($app);
         if($app){
             //test::__uninstall($data)
-            iPHP::callfunc(array($data['app'],'__uninstall'),$data);
-            //testAdmincp::__uninstall($data)
-            iPHP::callfunc(array($data['app'].'Admincp','__uninstall'),$data);
+            iPHP::callfunc(array($app['app'],'__uninstall'),$app);
+            //testAdmincp::__uninstall($app)
+            iPHP::callfunc(array($app['app'].'Admincp','__uninstall'),$app);
             self::__uninstall($app);
         }
         return false;
@@ -37,7 +37,7 @@ class apps {
         //删除分类
         category::del_app_data($app['id']);
         //删除属性
-        propAdmincp::del_app_data($app['id']);
+        propAdmincp::del_app_data($app['id'],$app['app']);
         //删除文件
         files::del_app_data($app['id']);
         //删除配置
@@ -436,10 +436,17 @@ class apps {
         iPHP::vendor('PclZip');
         $zipFile = iPHP_APP_CACHE.'/'.$name.'.zip';
         $zip = new PclZip($zipFile);
+        $fileList = iFS::fileList($dir);
+        foreach ($fileList as $key => $value) {
+            if(strpos($value, '/.git/') === false){
+                $lists[] = $value;
+            }
+        }
+
         if($REMOVE_PATH){
-            $v_list = $zip->create($dir,PCLZIP_OPT_REMOVE_PATH, $REMOVE_PATH); //将文件进行压缩
+            $v_list = $zip->create($lists,PCLZIP_OPT_REMOVE_PATH, $REMOVE_PATH); //将文件进行压缩
         }else{
-            $v_list = $zip->create($dir); //将文件进行压缩
+            $v_list = $zip->create($lists); //将文件进行压缩
         }
         $v_list == 0 && iPHP::error_throw($zip->errorInfo(true)); //如果有误，提示错误信息。
         return $zipFile;

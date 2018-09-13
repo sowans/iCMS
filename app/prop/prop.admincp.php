@@ -30,6 +30,7 @@ class propAdmincp{
         $pid     = (int)$_POST['pid'];
         $cid     = (int)$_POST['cid'];
         $field   = iSecurity::escapeStr($_POST['field']);
+        $appid   = iSecurity::escapeStr($_POST['appid']);
         $app     = iSecurity::escapeStr($_POST['app']);
         $val     = iSecurity::escapeStr($_POST['val']);
         $sortnum = (int)$_POST['sortnum'];
@@ -39,7 +40,7 @@ class propAdmincp{
         $name OR iUI::alert('属性名称不能为空!');
         // $app OR iUI::alert('所属应用不能为空!');
 
-        $fields = array('rootid','cid','field','app','sortnum', 'name', 'val');
+        $fields = array('rootid','cid','field','app','appid','sortnum', 'name', 'val');
         $data   = compact ($fields);
 
 		if($pid){
@@ -287,10 +288,16 @@ class propAdmincp{
             }
         }
     }
-    public static function del_app_data($appid=null){
+    public static function del_app_data($appid=null,$appname=null){
         if($appid){
             iDB::query("DELETE FROM `#iCMS@__prop` WHERE `appid` = '".$appid."'");
             iDB::query("DELETE FROM `#iCMS@__prop_map` WHERE `appid` = '".$appid."';");
+            if($appname){
+                iDB::query("DELETE FROM `#iCMS@__prop_map` WHERE `node` IN
+                    (SELECT `pid` FROM `#iCMS@__prop` WHERE `app` = '".$appname."')
+                ");
+                iDB::query("DELETE FROM `#iCMS@__prop` WHERE `app` = '".$appname."'");
+            }
         }
     }
     public static function del($pid=null,$appid=null,$iid=null){

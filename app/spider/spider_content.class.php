@@ -130,13 +130,17 @@ class spider_content {
             }
         }
         if (spider::$dataTest && $data['helper']) {
-            echo "<b>2.方法处理:</b>";
+            echo "<b>2.方法处理:</b>".implode(',', $data['helper']);
         }
         foreach ((array)$data['helper'] as $key => $value) {
-            if (spider::$dataTest) {
-                echo $value,',';
+            $func = array($value=>true);
+            if(is_array($content)){
+                foreach ($content as $ckey => $cvalue) {
+                    $content[$ckey] = self::helper($cvalue,$func,$rule);
+                }
+            }else{
+                $content = self::helper($content,$func,$rule);
             }
-            $content = self::helper($content,array($value=>true),$rule);
             if($content===null){
                 return null;
             }

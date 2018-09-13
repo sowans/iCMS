@@ -11,7 +11,7 @@ defined('iPHP') OR exit('What are you doing?');
 
 class spider_data {
 
-    public static function crawl($_pid = NULL,$_rid = NULL,$_url = NULL,$_title = NULL) {
+    public static function crawl($_pid = NULL,$_rid = NULL,$_url = NULL,$_title = NULL,$_cid = NULL) {
         @set_time_limit(0);
         $sid = spider::$sid;
         if ($sid) {
@@ -22,15 +22,17 @@ class spider_data {
             $url   = $sRs->url;
             $rid   = $sRs->rid;
        } else {
-            $rid   = spider::$rid;
-            $pid   = spider::$pid;
             $title = spider::$title;
+            $cid   = spider::$cid;
+            $pid   = spider::$pid;
             $url   = spider::$url;
+            $rid   = spider::$rid;
 
-            $_rid   === NULL OR $rid = $_rid;
-            $_pid   === NULL OR $pid = $_pid;
             $_title === NULL OR $title = $_title;
+            $_cid   === NULL OR $cid = $_cid;
+            $_pid   === NULL OR $pid = $_pid;
             $_url   === NULL OR $url = $_url;
+            $_rid   === NULL OR $rid = $_rid;
         }
 
         if($pid){

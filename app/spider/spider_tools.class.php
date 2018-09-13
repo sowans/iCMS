@@ -17,6 +17,7 @@ class spider_tools {
 
     /**
      * 在数据项里调用之前采集的数据[DATA@name][DATA@name.key]
+     * [DATA@list:name]调用列表其它数据
      */
     public static function getDATA($responses,$content){
         preg_match_all('#\[DATA@(.*?)\]#is', $content,$data_match);
