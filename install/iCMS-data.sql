@@ -54,7 +54,7 @@ insert  into `icms_config`(`appid`,`name`,`value`) values
     (0,'site','{\"name\":\"iCMS\",\"seotitle\":\"给我一套程序，我能搅动互联网\",\"keywords\":\"iCMS,iCMS内容管理系统,文章管理系统,PHP文章管理系统\",\"description\":\"iCMS 是一套采用 PHP 和 MySQL 构建的高效简洁的内容管理系统,为您的网站提供一个完美的开源解决方案\",\"icp\":\"\"}'),
     (0,'router','{\"url\":\"https:\\/\\/www.icmsdev.com\",\"404\":\"https:\\/\\/www.icmsdev.com\\/public\\/404.htm\",\"public\":\"https:\\/\\/www.icmsdev.com\\/public\",\"user\":\"https:\\/\\/www.icmsdev.com\\/user\",\"dir\":\"\\/\",\"ext\":\".html\",\"speed\":\"5\",\"rewrite\":\"0\"}'),
     (0,'cache','{\"engine\":\"file\",\"host\":\"\",\"time\":\"300\",\"compress\":\"1\",\"page_total\":\"300\",\"prefix\":\"iCMS\"}'),
-    (0,'FS','{\"url\":\"https:\\/\\/www.icmsdev.com\\/res\\/\",\"dir\":\"res\",\"dir_format\":\"Y\\/m-d\\/H\",\"allow_ext\":\"gif,jpg,rar,swf,jpeg,png,zip\"}'),
+    (0,'FS','{\"url\":\"https:\\/\\/www.icmsdev.com\\/res\\/\",\"dir\":\"res\",\"dir_format\":\"Y\\/m-d\\/H\",\"allow_ext\":\"gif,jpg,rar,swf,jpeg,png,zip\",\"check_md5\":\"0\"}'),
     (0,'thumb','{\"size\":\"\"}'),
     (0,'watermark','{\"enable\":\"1\",\"width\":\"140\",\"height\":\"140\",\"allow_ext\":\"jpg,jpeg,png\",\"pos\":\"9\",\"x\":\"10\",\"y\":\"10\",\"img\":\"watermark.png\",\"text\":\"iCMS\",\"font\":\"\",\"fontsize\":\"24\",\"color\":\"#000000\",\"transparent\":\"80\"}'),
     (0,'publish','[]'),

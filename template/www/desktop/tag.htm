@@ -49,6 +49,13 @@
                             </blockquote>
                             <!--{/if}-->
                         </div>
+                        <div class="APP-like" data-param='<!--{$tag.param|json_encode}-->'>
+                            <div i="favorite:tag" class="btn btn-primary btn-sm" title="关注">
+                                <i class="fa fa-heart"></i>
+                                <span i="favorite_num" class="favorite-num"><!--{$tag.favorite}--></span>
+                            </div>
+                        </div>
+
                     </div>
                     <div class="clearfix"></div>
                     <div class="tabs-content">

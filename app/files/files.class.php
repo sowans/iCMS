@@ -41,7 +41,7 @@ class files {
     public static $TABLE_DATA       = null;
     public static $TABLE_MAP        = null;
     public static $check_data       = true;
-    public static $check_md5        = true;
+    public static $check_md5        = false;
     public static $userid           = false;
     public static $watermark_enable = true;
     public static $watermark_config = null;
@@ -59,10 +59,7 @@ class files {
         list(self::$TABLE_DATA,self::$TABLE_MAP) = $table;
         self::$_DATA_TABLE = '`'.iPHP_DB_PREFIX . self::$TABLE_DATA.'`';
         self::$_MAP_TABLE  = '`'.iPHP_DB_PREFIX . self::$TABLE_MAP.'`';
-
-        if(isset(iCMS::$config['FS']['check_md5'])){
-            self::$check_md5  = iCMS::$config['FS']['check_md5'];
-        }
+        self::$check_md5   = iCMS::$config['FS']['check_md5'];
     }
 
     public static function init($vars=null){

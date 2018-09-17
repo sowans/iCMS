@@ -66,6 +66,7 @@ function modal_tpl_index(el,a){
     <div class="widget-title"> <span class="icon"> <i class="fa fa-cog"></i> </span>
       <ul class="nav nav-tabs" id="config-tab">
         <li class="active"><a href="#config-base" data-toggle="tab">基本信息</a></li>
+        <li><a href="#config-debug" data-toggle="tab">调试</a></li>
         <li><a href="#config-tpl" data-toggle="tab">模板</a></li>
         <li><a href="#config-url" data-toggle="tab">URL</a></li>
         <li><a href="#config-cache" data-toggle="tab">缓存</a></li>
@@ -84,7 +85,6 @@ function modal_tpl_index(el,a){
     <div class="widget-content nopadding iCMS-config">
       <form action="<?php echo APP_FURI; ?>&do=save" method="post" class="form-inline" id="iCMS-config" target="iPHP_FRAME">
         <div id="config" class="tab-content">
-
           <div id="config-base" class="tab-pane active">
             <div class="input-prepend"> <span class="add-on">网站名称</span>
               <input type="text" name="config[site][name]" class="span6" id="name" value="<?php echo $config['site']['name'] ; ?>"/>
@@ -106,11 +106,62 @@ function modal_tpl_index(el,a){
             </div>
             <span class="help-inline">将被搜索引擎用来说明您网站的主要内容</span>
             <div class="clearfloat mb10"></div>
+            <div class="input-prepend"><span class="add-on">统计代码</span>
+              <textarea name="config[site][code]" id="site_code" class="span6" style="height: 90px;"><?php echo $config['site']['code'] ; ?></textarea>
+            </div>
+            <span class="help-inline">统计代码</span>
+            <div class="clearfloat mb10"></div>
             <div class="input-prepend"> <span class="add-on">备 案 号</span>
               <input type="text" name="config[site][icp]" class="span3" id="title" value="<?php echo $config['site']['icp'] ; ?>"/>
             </div>
             <span class="help-inline">页面底部可以显示 ICP 备案信息，如果网站已备案，在此输入您的备案号，如果没有请留空</span>
-            <div class="clearfloat mb10"></div>
+            <hr>
+            <div class="metadata">
+
+<button class="btn btn-inverse add_meta" type="button"><i class="fa fa-plus-circle"></i> 增加自定义网站配置</button>
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>名称</th>
+      <th>字段<span class="label label-important">只能由英文字母、数字或_-组成,不支持中文</span></th>
+      <th>值</th>
+    </tr>
+  </thead>
+  <tbody>
+    <?php
+      $site_md_index  = 0;
+      $site_meta = $config['site']['meta'];
+    ?>
+    <?php if($site_meta)foreach((array)$site_meta AS $mdkey=>$mdata){?>
+    <tr>
+      <td>
+        <input name="config[site][meta][<?php echo $site_md_index;?>][name]" type="text" value="<?php echo $mdata['name'];?>" class="span3" />
+        <span class="help-block">模板标签:&lt;!--{$site.meta[<?php echo $site_md_index;?>].name}--&gt;</span>
+      </td>
+      <td>
+        <input name="config[site][meta][<?php echo $site_md_index;?>][key]" type="text" value="<?php echo $mdata['key'];?>" class="span3" />
+        <span class="help-block">&lt;!--{$site.meta[<?php echo $site_md_index;?>].key}--&gt;</span>
+      </td>
+      <td><input name="config[site][meta][<?php echo $site_md_index;?>][value]" type="text" value="<?php echo $mdata['value'];?>" class="span6" />
+        <button class="btn btn-small btn-danger del_meta" type="button"><i class="fa fa-trash-o"></i> 删除</button>
+        <span class="help-block">&lt;!--{$site.meta[<?php echo $site_md_index;?>].value}--&gt;</span>
+      </td>
+    </tr>
+    <?php ++$site_md_index;}?>
+  </tbody>
+  <tfoot>
+    <tr class="hide meta_clone">
+      <td><input name="config[site][meta][{key}][name]" type="text" disabled="disabled" class="span3" /></td>
+      <td><input name="config[site][meta][{key}][key]" type="text" disabled="disabled" class="span3" /></td>
+      <td><input name="config[site][meta][{key}][value]" type="text" disabled="disabled" class="span6"  />
+        <button class="btn btn-small btn-danger del_meta" type="button"><i class="fa fa-trash-o"></i> 删除</button>
+      </td>
+    </tr>
+  </tfoot>
+</table>
+            </div>
+          </div>
+          <div id="config-debug" class="tab-pane">
             <div class="input-prepend"> <span class="add-on">程序提示</span>
               <div class="switch">
                 <input type="checkbox" data-type="switch" name="config[debug][php]" id="debug_php" <?php echo $config['debug']['php']?'checked':''; ?>/>

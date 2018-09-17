@@ -93,24 +93,23 @@ class apps_meta {
         }
         return $table;
     }
+    public static function toArray($data,$index=true){
+        is_array($data) OR $data = json_decode($data,true);
+
+        if(!$index) return $data;
+
+        $array = array();
+        foreach ($data as $key => $value) {
+            $array[$value['key']] = $value;
+        }
+        return $array;
+    }
     public static function get($app,$id,$index=true){
         $table = self::table($app);
         if(empty($table)) return false;
 
         $json = iDB::value("SELECT `data` FROM `#iCMS@__{$table}` where `id` = '$id'");
-
-        if($json){
-            $data = json_decode($json,true);
-            if($index){
-                foreach ($data as $key => $value) {
-                    $_data[$value['key']] = $value;
-                }
-                $data = $_data;
-                unset($_data);
-            }
-            self::$data = $data;
-            unset($data);
-        }
+        $json && self::$data = self::toArray($json,$index);
     }
     public static function save($app,$id,$data=null){
         $data===null && $data = self::post();

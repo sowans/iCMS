@@ -3,6 +3,10 @@
     <p>如存在版权或非法内容，欢迎举报，我们将尽快予以删除。</p>
     <p>Copyright &copy; 2008-2016 <a href="<!--{$site.url}-->" target="_blank"><!--{$site.name}--></a>. All rights reserved.</p>
     <p>Powered by <a href="https://www.icmsdev.com/" target="_blank">iCMS <!--{$iCMS.CONST.iCMS_VERSION}--></a></p>
+    <!--{if $site.icp}--><p>ICP备案号 <!--{$site.icp}--></p><!--{/if}-->
+</div>
+<div class="hide">
+<!--{$site.code|htmlspecialchars_decode}-->
 </div>
 <!--{include file="iCMS://public.dialog.htm"}-->
 <!--{iCMS:public:crontab}-->

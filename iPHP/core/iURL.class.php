@@ -165,7 +165,7 @@ class iURL {
             is_object($C['rule']) && $C['rule'] = (array)$C['rule'];
             is_array($C['rule'])  OR $C['rule'] = json_decode($C['rule'],true);
             $rule = $C['rule'][$key];
-            $rule OR $rule = $key;
+            // $rule OR $rule = $key;
             return $rule;
         }
     }
@@ -191,6 +191,7 @@ class iURL {
                 $i->href  = $category['url'];
                 $url      = self::rule_data($category,'index');
                 $purl     = self::rule_data($category,'list');
+                empty($purl) && $purl = rtrim($url,'/').'/index_{P}{EXT}';
             break;
             case '2'://内容
                 $array    = (array)$a[0];
@@ -221,6 +222,10 @@ class iURL {
                 $href = 'index.php?app='.$app;
             break;
         }
+        if(empty($url) && $array['rule']){
+            $url = $array['rule'];
+        }
+
         $do && $href.='&do='.$do;
 
         $default  = self::$config[$app];

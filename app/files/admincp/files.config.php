@@ -22,30 +22,36 @@ defined('iPHP') OR exit('What are you doing?');
     <div class="clearfloat mb10"></div>
     <div class="input-prepend input-append"> <span class="add-on">目录结构</span>
         <input type="text" name="config[FS][dir_format]" class="span4" id="FS_dir_format" value="<?php echo $config['FS']['dir_format'] ; ?>" />
-        <div class="btn-group" to="#FS_dir_format">
+        <div class="btn-group">
             <a class="btn dropdown-toggle" data-toggle="dropdown" tabindex="-1"><i class="fa fa-question-circle"></i> 帮助</a>
             <ul class="dropdown-menu">
                 <li>
-                    <a href="#Y"><span class="label label-inverse">Y</span> 4位数年份</a>
+                    <a href="Y" data-toggle="insertContent" data-target="#FS_dir_format"><span class="label label-inverse">Y</span> 4位数年份</a>
                 </li>
                 <li>
-                    <a href="#y"><span class="label label-inverse">y</span> 2位数年份</a>
+                    <a href="y" data-toggle="insertContent" data-target="#FS_dir_format"><span class="label label-inverse">y</span> 2位数年份</a>
                 </li>
                 <li>
-                    <a href="#m"><span class="label label-inverse">m</span> 月份01-12</a>
+                    <a href="m" data-toggle="insertContent" data-target="#FS_dir_format"><span class="label label-inverse">m</span> 月份01-12</a>
                 </li>
                 <li>
-                    <a href="#n"><span class="label label-inverse">n</span> 月份1-12</a>
+                    <a href="n" data-toggle="insertContent" data-target="#FS_dir_format"><span class="label label-inverse">n</span> 月份1-12</a>
                 </li>
                 <li>
-                    <a href="#d"><span class="label label-inverse">n</span> 日期01-31</a>
+                    <a href="d" data-toggle="insertContent" data-target="#FS_dir_format"><span class="label label-inverse">n</span> 日期01-31</a>
                 </li>
                 <li>
-                    <a href="#j"><span class="label label-inverse">j</span> 日期1-31</a>
+                    <a href="j" data-toggle="insertContent" data-target="#FS_dir_format"><span class="label label-inverse">j</span> 日期1-31</a>
                 </li>
                 <li class="divider"></li>
                 <li>
-                    <a href="#EXT"><span class="label label-inverse">EXT</span> 文件类型</a>
+                    <a href="md5:0,2/" data-toggle="insertContent" data-target="#FS_dir_format"><span class="label label-inverse">md5:0,2</span> 文件MD5</a>
+                    <a href="md5:2,3/" data-toggle="insertContent" data-target="#FS_dir_format"><span class="label label-inverse">md5:2,3</span> 文件MD5</a>
+                    <a href="date:Ymd/" data-toggle="insertContent" data-target="#FS_dir_format"><span class="label label-inverse">date:Ymd</span> 日期</a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="EXT" data-toggle="insertContent" data-target="#FS_dir_format"><span class="label label-inverse">EXT</span> 文件类型</a>
                 </li>
             </ul>
         </div>
@@ -58,11 +64,6 @@ defined('iPHP') OR exit('What are you doing?');
     <div class="clearfloat mb10"></div>
     <div class="input-prepend"> <span class="add-on">检测文件</span>
       <div class="switch">
-        <?php
-            if(!isset($config['FS']['check_md5'])){
-                $config['FS']['check_md5'] = true;
-            }
-        ?>
         <input type="checkbox" data-type="switch" name="config[FS][check_md5]" id="FS_check_md5" <?php echo $config['FS']['check_md5']?'checked':''; ?>/>
       </div>
     </div>
