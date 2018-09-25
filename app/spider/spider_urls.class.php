@@ -172,7 +172,11 @@ class spider_urls {
                 continue;
             }
             $rule['list_urls_format'] && $html = spider_tools::dataClean($rule['list_urls_format'], $html);
-
+            if ($rule['list_urls_format'] && spider::$ruleTest) {
+                echo '<b>列表采集结果整理结果:</b><div style="max-height:300px;overflow-y: scroll;">';
+                echo iSecurity::escapeStr($html);
+                echo "</div><hr />";
+            }
             if($rule['mode']=="2"){
                 $doc       = phpQuery::newDocumentHTML($html,'UTF-8');
                 $list_area = $doc[trim($rule['list_area_rule'])];
@@ -211,6 +215,9 @@ class spider_urls {
                 }else{
                     $lists = $list_area;
                 }
+                if ($rule['list_area_format']) {
+                    $lists = spider_tools::dataClean($rule['list_area_format'], $lists);
+                }
             }else{
                 $list_area_rule = spider_tools::pregTag($rule['list_area_rule']);
                 if ($list_area_rule && $rule['list_area_rule']!='<%content%>') {
@@ -220,8 +227,6 @@ class spider_urls {
                     $list_area = $html;
                 }
 
-                $html = null;
-                unset($html);
 
                 if (spider::$ruleTest) {
                     echo iSecurity::escapeStr($rule['list_area_rule']);
@@ -242,14 +247,15 @@ class spider_urls {
                 }
             }
 
+            $html = null;
+            unset($html);
+
             if (spider::$ruleTest) {
                 echo '<b>列表区域规则:</b>'.iSecurity::escapeStr($rule['list_area_rule']);
                 echo "<hr />";
                 echo '<b>列表区域抓取结果:</b><div style="max-height:300px;overflow-y: scroll;">';
-                if(is_array($list_area)){
-                    echo "<pre>";
-                    var_export($list_area);
-                    echo "</pre>";
+                if(is_array($lists)){
+                    echo "<pre>";var_dump($list_area);echo "</pre>";
                 }else{
                     echo iSecurity::escapeStr($list_area);
                 }
@@ -448,6 +454,9 @@ class spider_urls {
         }
     }
     public static function lists_item_data($lists,$rule,$url){
+        if (spider::$callback['lists_item_data'] && is_callable(spider::$callback['lists_item_data'])) {
+            return call_user_func_array(spider::$callback['lists_item_data'],array($lists,$rule,$url));
+        }
         $array = array();
         if($lists)foreach ($lists AS $lkey => $row) {
             $cache = array();

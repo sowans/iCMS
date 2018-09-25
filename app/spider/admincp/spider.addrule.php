@@ -249,7 +249,6 @@ function select_sort_value(a, e, p) {
               <textarea name="rule[list_area_rule]" id="list_area_rule" class="span6"><?php echo $rule['list_area_rule'] ; ?></textarea>
               <div class="btn-group btn-group-vertical"> <a class="btn" href="<%content%>" data-toggle="insertContent" data-target="#list_area_rule">内容标识</a> <a class="btn" href="<%var%>" data-toggle="insertContent" data-target="#list_area_rule">变量标识</a> </div>
             </div>
-            <div class="clearfloat mb10"></div>
             <div class="input-prepend input-sp"><span class="add-on">列表区域整理</span>
               <textarea name="rule[list_area_format]" id="list_area_format" class="span6"><?php echo $rule['list_area_format'] ; ?></textarea>
             </div>

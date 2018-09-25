@@ -114,7 +114,6 @@ class spider_tools {
                 }
                 if(strpos($dom_rule, 'DOM::')!==false){
                     $content = self::domAttr($DOM,$dom_rule);
-                    empty($dom_key) && $dom_key  = $dom_key_map[$key];
                 }else{
                     if($dom_rule=='url'||$dom_rule=='href'){
                         $dom_key  = 'url';
@@ -134,7 +133,7 @@ class spider_tools {
                         $content = $DOM->attr($dom_rule);
                     }
                 }
-
+                empty($dom_key) && $dom_key  = $dom_key_map[$key];
                 $responses[$dom_key] = str_replace('&nbsp;','',trim($content));
             }
             unset($DOM);
@@ -280,6 +279,16 @@ class spider_tools {
                 $replacement[$key] = $_replacement;
                 $pattern[$key] = '|' . self::pregTag($_pattern) . '|is';
                 $content = preg_replace($pattern, $replacement, $content);
+            }else if(strpos($rule, 'FUNC::')!==false){
+              $funcText = str_replace('FUNC::','', $rule);
+              $param    = explode(',', $funcText);
+              $func     = $param[0];unset($param[0]);
+              foreach ($param as $key => $value) {
+                  if($value=='@me'){
+                    $param[$key] = $content;
+                  }
+              }
+              $content = call_user_func_array($func, $param);
             }else if(strpos($rule, 'NEED::')!==false){
                 $NEED[$key]= self::data_check('NEED::',$rule,$content);
             }else if(strpos($rule, 'NOT::')!==false){
