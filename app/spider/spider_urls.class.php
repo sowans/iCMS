@@ -254,7 +254,7 @@ class spider_urls {
                 echo '<b>列表区域规则:</b>'.iSecurity::escapeStr($rule['list_area_rule']);
                 echo "<hr />";
                 echo '<b>列表区域抓取结果:</b><div style="max-height:300px;overflow-y: scroll;">';
-                if(is_array($lists)){
+                if(is_array($list_area)){
                     echo "<pre>";var_dump($list_area);echo "</pre>";
                 }else{
                     echo iSecurity::escapeStr($list_area);

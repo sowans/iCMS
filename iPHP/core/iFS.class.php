@@ -331,8 +331,11 @@ class iFS {
 
 	// 获得文件扩展名
 	public static function get_ext($fn) {
-		return pathinfo($fn, PATHINFO_EXTENSION);
-		//return substr(strrchr($fn, "."), 1);
+		if(self::is_url($fn)){
+			$parse = parse_url($fn);
+			$fn = $parse['path'];
+		}
+		return substr(strrchr($fn, "."), 1);
 	}
 
 	// 获取文件大小

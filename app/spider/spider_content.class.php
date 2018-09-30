@@ -115,7 +115,7 @@ class spider_content {
         if ($data['cleanbefor']) {
             $content = spider_tools::dataClean($data['cleanbefor'], $content);
             if (spider::$dataTest) {
-                echo "<b>1.规则后处理</b>";
+                echo "<b>1.规则后处理</b>".htmlspecialchars($data['cleanbefor']);
             }
         }
 
@@ -130,7 +130,7 @@ class spider_content {
             }
         }
         if (spider::$dataTest && $data['helper']) {
-            echo "<b>2.方法处理:</b>".implode(',', $data['helper']);
+            echo "<b>2.方法处理:</b>".htmlspecialchars(implode(',', $data['helper']));
         }
         foreach ((array)$data['helper'] as $key => $value) {
             $func = array($value=>true);
@@ -148,7 +148,7 @@ class spider_content {
         if ($data['cleanafter']) {
             $content = spider_tools::dataClean($data['cleanafter'], $content);
             if (spider::$dataTest) {
-                echo "<b>3.发布前处理</b>";
+                echo "<b>3.发布前处理</b>".htmlspecialchars($data['cleanafter']);
             }
         }
         if (spider::$callback['content'] && is_callable(spider::$callback['content'])) {
@@ -157,6 +157,8 @@ class spider_content {
         if (spider::$dataTest) {
             echo "<hr/>";
         }
+        // is_array($content) OR $content = preg_replace('/&(\w{2,6});/is', '&amp;$1;', $content);
+        // $content = str_replace('&nbsp;','&amp;nbsp;',$content);
         return $content;
     }
     public static function helper($content,$data,$rule){
@@ -492,8 +494,10 @@ class spider_content {
             $html = preg_replace(array('/<script.+?<\/script>/is','/<style.+?<\/style>/is'),'',$html);
             $doc  = phpQuery::newDocumentHTML($html,'UTF-8');
             if(strpos($data['rule'], '@')!==false){
-                list($content_dom,$content_attr) = explode("@", $data['rule']);
-                $content_fun = 'attr';
+                //div.class@data-attr@fun
+                //a.link@href
+                list($content_dom,$content_attr,$content_fun) = explode("@", $data['rule']);
+                empty($content_fun) && $content_fun = 'attr';
             }else{
                 list($content_dom,$content_fun,$content_attr) = explode("\n", $data['rule']);
             }

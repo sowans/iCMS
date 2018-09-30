@@ -10,11 +10,12 @@
 defined('iPHP') OR exit('What are you doing?');
 
 class spider_tools {
-    public static $listArray = array();
-    public static $curl_info = array();
-    public static $safe_port = array('80','443');//检测采集url端口
-    public static $safe_url  = false; //是否检测采集url安全性
-
+    public static $listArray   = array();
+    public static $curl_info   = array();
+    public static $safe_port   = array('80','443');//检测采集url端口
+    public static $safe_url    = false; //是否检测采集url安全性
+    public static $curl_proxy  = false;
+    public static $proxy_array = array();
     /**
      * 在数据项里调用之前采集的数据[DATA@name][DATA@name.key]
      * [DATA@list:name]调用列表其它数据
@@ -237,10 +238,14 @@ class spider_tools {
                     return null;
                 }
             }else if(strpos($rule, 'DOM::')!==false){
-                iPHP::vendor('phpQuery');
-                $doc      = phpQuery::newDocumentHTML($content,'UTF-8');
-                //echo 'dataClean:getDocumentID:'.$doc->getDocumentID()."\n";
                 $rule = str_replace('DOM::','', $rule);
+                $dflag = false;
+                if($rule[0]==':'){
+                    $dflag = true;
+                    $rule = substr($rule, 1);
+                }
+                $doc = phpQuery::newDocumentHTML($content,'UTF-8');
+                //DOM::div.class::attr::ooxx
                 list($pq_dom, $pq_fun,$pq_attr) = explode("::", $rule);
                 $pq_array = phpQuery::pq($pq_dom);
                 foreach ($pq_array as $pq_key => $pq_val) {
@@ -253,11 +258,14 @@ class spider_tools {
                     }else{
                         $pq_content = (string)phpQuery::pq($pq_val);
                     }
-                    $pq_pattern[$pq_key]     = $pq_content;
-                    // $pq_replacement[$pq_key] = $_replacement;
+                    $pq_pattern[$pq_key] = $pq_content;
                 }
                 phpQuery::unloadDocuments($doc->getDocumentID());
-                $content = str_replace($pq_pattern,'', $content);
+                if($dflag){
+                    $_content[$key] = implode('', (array)$pq_pattern);
+                }else{
+                    $content = str_replace($pq_pattern,'', $content);
+                }
                 unset($doc,$pq_array);
             }else if(strpos($rule, '==')!==false){
                 list($_pattern, $_replacement) = explode("==", $rule);
@@ -296,6 +304,9 @@ class spider_tools {
             }else{
                 $content = preg_replace('|' . self::pregTag($rule) . '|is','', $content);
             }
+        }
+        if(is_array($_content)){
+            $content = implode('', $_content);
         }
         if($NOT){
             $content = self::data_check_result($NOT,'NOT::');
@@ -677,9 +688,13 @@ class spider_tools {
             // CURLOPT_MAXREDIRS => 7,//查找次数，防止查找太深
         );
         spider::$cookie && $options[CURLOPT_COOKIE] = spider::$cookie;
-        if(spider::$curl_proxy){
-            $proxy   = self::proxy_test();
-            $proxy && $options = iHttp::proxy($options,$proxy);
+        if(spider::$curl_proxy||spider_tools::$curl_proxy){
+            $proxy = self::proxy_test();
+            if (spider::$dataTest || spider::$ruleTest) {
+                echo "<b>代理测试:</b>";
+                var_dump($proxy);
+            }
+            $proxy && iHttp::proxy_set($options,$proxy);
         }
         if(spider::$PROXY_URL){
             $options[CURLOPT_URL] = spider::$PROXY_URL.urlencode($url);
@@ -748,8 +763,8 @@ class spider_tools {
         return $responses;
     }
     public static function proxy_test(){
-        iHttp::$CURL_PROXY_ARRAY = spider::$proxy_array;
-        iHttp::$CURL_PROXY = spider::$curl_proxy;
+        iHttp::$CURL_PROXY       = self::$curl_proxy?:spider::$curl_proxy;
+        iHttp::$CURL_PROXY_ARRAY = self::$proxy_array?:spider::$proxy_array;
         return iHttp::proxy_test();
     }
 	public static function str_cut($str, $start, $end) {

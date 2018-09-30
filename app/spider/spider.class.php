@@ -25,15 +25,15 @@ class spider{
 	public static $content_right_code = false;
 	public static $content_error_code = false;
 
-	public static $referer     = null;
-	public static $encoding    = null;
-	public static $useragent   = null;
-	public static $cookie      = null;
-	public static $charset     = null;
-	public static $curl_proxy  = false;
+    public static $referer     = null;
+    public static $encoding    = null;
+    public static $useragent   = null;
+    public static $cookie      = null;
+    public static $charset     = null;
+    public static $curl_proxy  = false;
     public static $proxy_array = array();
-    public static $PROXY_URL = false;
-    public static $callback = array();
+    public static $PROXY_URL   = false;
+    public static $callback    = array();
 
     public static $spider_url_ids   = array();
     public static $spider_url_appid = 0;

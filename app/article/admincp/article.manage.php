@@ -199,6 +199,7 @@ $(function(){
             <option value="title">标题</option>
             <option value="tag">标签</option>
             <option value="source">出处</option>
+            <option value="clink">自定义链接</option>
             <option value="id">ID</option>
             <option value="weight">置顶权重</option>
             <option value="tkd">标题/关键字/简介</option>

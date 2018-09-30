@@ -9,6 +9,7 @@
  * @version 2.1.0
  */
 class iHttp{
+    public static $callback  = array();
     public static $PROXY_URL = null;
 
     public static $CURL_COUNT             = 3;
@@ -72,13 +73,20 @@ class iHttp{
             }
             self::$CURL_PROXY_ARRAY = explode("\n", self::$CURL_PROXY); // socks5://127.0.0.1:1080@username:password
         }
+
+        self::$CURL_PROXY_ARRAY = array_unique(self::$CURL_PROXY_ARRAY);
+        self::$CURL_PROXY_ARRAY = array_filter(self::$CURL_PROXY_ARRAY);
+
+        if (self::$callback['PROXY_ARRAY'] && is_callable(self::$callback['PROXY_ARRAY'])) {
+            call_user_func_array(self::$callback['PROXY_ARRAY'],array(&self::$CURL_PROXY_ARRAY));
+        }
         if (empty(self::$CURL_PROXY_ARRAY)) {
             return false;
         }
         $rand_keys = array_rand(self::$CURL_PROXY_ARRAY, 1);
         $proxy = self::$CURL_PROXY_ARRAY[$rand_keys];
         $proxy = trim($proxy);
-        $options = self::proxy($options, $proxy);
+        self::proxy_set($options, $proxy);
 
         $ch = curl_init();
         curl_setopt_array($ch, $options);
@@ -92,7 +100,7 @@ class iHttp{
             return self::proxy_test();
         }
     }
-    public static function proxy($options = array(), $proxy) {
+    public static function proxy_set(&$options = array(), $proxy) {
         if ($proxy) {
             $proxy = trim($proxy);
             $matches = strpos($proxy, 'socks5://');
@@ -201,7 +209,7 @@ class iHttp{
 
             if (self::$CURL_PROXY) {
                 $proxy = self::proxy_test();
-                $proxy && $options = self::proxy($options, $proxy);
+                $proxy && self::proxy_set($options, $proxy);
             }
             if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')){
                 $options[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;

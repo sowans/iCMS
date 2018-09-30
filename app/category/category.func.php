@@ -28,6 +28,7 @@ class categoryFunc{
 
 		isset($vars['appid'])  && $where_sql.= iSQL::in($vars['appid'],'appid');
 		isset($vars['mode'])   && $where_sql.= iSQL::in($vars['mode'],'mode');
+		isset($vars['dir'])    && $where_sql.= iSQL::in($vars['dir'],'dir');
 		isset($vars['cid'])    && !isset($vars['stype']) && $where_sql.= iSQL::in($vars['cid'],'cid');
 		isset($vars['cid!'])   && $where_sql.= iSQL::in($vars['cid!'],'cid','not');
 		isset($vars['rootid']) && $where_sql.=" AND `rootid`='".(int)$vars['rootid']."'";
@@ -67,8 +68,9 @@ class categoryFunc{
 			$where_sql.= iMap::exists($vars['pids'],'`#iCMS@__category`.cid'); //主表小 map表大
 			// $map_where=iMap::where($vars['pids']); //主表大 map表大
 		}
+		isset($vars['where']) && $where_sql .= $vars['where'];
 
-		$by = $vars['by']=='DESC'?"DESC":"ASC";
+		$by = strtoupper($vars['by'])=='DESC'?"DESC":"ASC";
 
 		switch ($vars['orderby']) {
 			case "hot":		$order_sql=" ORDER BY `count` $by";		break;

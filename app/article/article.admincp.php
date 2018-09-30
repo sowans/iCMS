@@ -476,12 +476,13 @@ class articleAdmincp{
                 case "title": $sql.=" AND `title` REGEXP '{$kws}'";break;
                 case "tag":   $sql.=" AND `tags` REGEXP '{$kws}'";break;
                 case "source":$sql.=" AND `source` REGEXP '{$kws}'";break;
+                case "clink":$sql.=" AND `clink` REGEXP '{$kws}'";break;
                 case "weight":$sql.=" AND `weight`='{$kws}'";break;
                 case "id":
                 $kws = str_replace(',', "','", $kws);
                 $sql.=" AND `id` IN ('{$kws}')";
                 break;
-                case "tkd":   $sql.=" AND CONCAT(title,keywords,description) REGEXP '{$kws}'";break;
+                case "tkd":   $sql.=" AND CONCAT(title,stitle,keywords,description) REGEXP '{$kws}'";break;
             }
         }
 

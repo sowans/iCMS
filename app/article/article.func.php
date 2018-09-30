@@ -90,7 +90,7 @@ class articleFunc{
 
 		$vars['id'] && $where_sql .= iSQL::in($vars['id'], 'id');
 		$vars['id!'] && $where_sql .= iSQL::in($vars['id!'], 'id', 'not');
-		$by = $vars['by'] == "ASC" ? "ASC" : "DESC";
+		$by = strtoupper($vars['by']) == "ASC" ? "ASC" : "DESC";
 		isset($vars['pic']) && $where_sql .= " AND `haspic`='1'";
 		isset($vars['nopic']) && $where_sql .= " AND `haspic`='0'";
 
