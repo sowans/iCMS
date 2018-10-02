@@ -61,10 +61,12 @@ class spider_data {
         $responses = array();
         $html      = spider_tools::remote($url);
         if(empty($html)){
-            $msg = '错误:001..采集 ' . $url . '文件内容为空!请检查采集规则';
+            $msg = "采集错误 " . $url . ' 内容为空'.PHP_EOL;
+            $msg.= '请检查请求是否正常'.PHP_EOL;
             $msg.= var_export(spider_tools::$curl_info,true);
             if(spider::$work=='shell'){
-                echo spider::errorlog("{$msg}\n",$url,'data.empty',array('pid'=>$pid,'sid'=>$sid,'rid'=>$rid));
+                echo PHP_EOL;
+                spider::errorlog($msg,$url,'data.empty',array('pid'=>$pid,'sid'=>$sid,'rid'=>$rid));
                 return false;
             }else{
                 iUI::alert($msg);

@@ -335,7 +335,7 @@ class iFS {
 			$parse = parse_url($fn);
 			$fn = $parse['path'];
 		}
-		return substr(strrchr($fn, "."), 1);
+		return pathinfo($fn, PATHINFO_EXTENSION);
 	}
 
 	// 获取文件大小

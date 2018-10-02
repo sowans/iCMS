@@ -301,54 +301,117 @@ class spiderAdmincp {
 		$a = spider_urls::crawl('WEB@AUTO');
 		$this->do_mpublish($a);
 	}
+	public function do_crawl($a=null,$dialog=true){
+		// sleep(1);
+		// echo json_encode($_POST);
+		$_POST && $a = $_POST;
+
+		spider::$sid = $a['sid'];
+		spider::$cid = $a['cid'];
+		spider::$pid = $a['pid'];
+		spider::$rid = $a['rid'];
+		spider::$url = $a['url'];
+		spider::$title = $a['title'];
+
+		isset($a['dialog']) && $dialog = $a['dialog'];
+
+		$code = spider::publish('WEB@AUTO');
+
+		if (is_array($code)) {
+			$label = '内容ID['.$code['indexid'].'] <span class="label label-success">发布成功!</span>';
+		} else {
+			$code == "-1" && $label = '<span class="label label-warning">该URL的文章已经发布过!请检查是否重复</span>';
+		}
+		$msg = '标题:' . spider::$title . '<br />网址:' . spider::$url . '<br />信息:' . $label . '<hr />';
+		$dialog && iUI::success($msg, 'js:1');
+		echo $msg;
+	}
 	/**
 	 * [批量发布]
 	 * @return [type] [description]
 	 */
 	public function do_mpublish($pubArray = array()) {
-		@set_time_limit(0);
-		iUI::$break = false;
 		if ($_POST['pub']) {
 			foreach ((array) $_POST['pub'] as $i => $a) {
 				list($cid, $pid, $rid, $url, $title) = explode('|', $a);
 				$pubArray[] = array('sid' => 0, 'url' => $url, 'title' => $title, 'cid' => $cid, 'rid' => $rid, 'pid' => $pid);
 			}
 		}
-		if (empty($pubArray)) {
-			iUI::$break = true;
-			iUI::alert('暂无最新内容', 0, 30);
-		}
-		$_count = count($pubArray);
-		@header('Cache-Control: no-cache');
+
+		empty($pubArray) && iUI::alert('暂无最新内容', 0, 30);
+
+		$_count    = count($pubArray);
+		$jsonArray = array();
+		// foreach ((array) $pubArray as $i => $a) {
+		// 	$a['index']    = $i;
+		// 	$a['dialog']   = 0;
+		// 	$a['md5']      = md5($a['url']);
+		// 	$jsonArray[$i] = $a;
+		// }
+
+		iUI::$break = false;
 		iUI::flush_start();
+		iUI::dialog('开始采集', '', false, 0, false);
+echo '
+<script type="text/javascript">
+// var crawl_data = \'.json_encode($jsonArray).\';
+// var crawl_count = crawl_data.length,crawl_complete = 0;
+
+// if(crawl_count>0){
+// 	crawl_data.forEach(function(v,i){
+// 		crawl(v);
+// 	});
+// }
+
+// top.$.ajaxSetup({
+// 	cache : false,
+// 	compelete:function(jqXHR){
+// 	    delete jqXHR;
+// 	    jqXHR = null;
+// 	}
+// });
+
+var crawl_count = '.$_count.',crawl_complete = 0;
+
+function is_complete(){
+	if(crawl_complete==crawl_count){
+	    d.content(\'<table class=\"ui-dialog-table\" align=\"center\"><tr><td valign=\"middle\">全部采集完成!</td></tr></table>\');
+	    top.$.get("'.APP_URI.'&do=update_project_lastupdate",{"id":"'. $this->pid.'"});
+
+	    window.setTimeout(function(){
+	        d.destroy();
+	    },1000);
+	}
+}
+function crawl(a){
+	top.$.ajax(
+	type: "POST",
+	url:"'.APP_URI.'&do=crawl&CSRF_TOKEN='.iPHP_WAF_CSRF_TOKEN.'",
+	data:a,
+	success:function(msg){
+	    ++crawl_complete;
+	    d.content(\'<table class=\"ui-dialog-table\" align=\"center\"><tr><td valign=\"middle\">\'+msg+\'[\'+a.index+\']采集完成 (\'+crawl_complete+\':\'+crawl_count+\')</td></tr></table>\');
+		parent.$("#"+a.md5).remove();
+		is_complete();
+	});
+}
+</script>';
+
+echo '<script type="text/javascript">';
 		foreach ((array) $pubArray as $i => $a) {
-			spider::$sid = $a['sid'];
-			spider::$cid = $a['cid'];
-			spider::$pid = $a['pid'];
-			spider::$rid = $a['rid'];
-			spider::$url = $a['url'];
-			spider::$title = $a['title'];
-			$rs = $this->multipublish($_count,$i+1);
-			$updateMsg = $i ? true : false;
-			$timeout = ($i++) == $_count ? '3' : false;
-			iUI::dialog($rs['msg'], 'js:' . $rs['js'], $timeout, 0, $updateMsg);
+			$a['index']    = $i;
+			$a['dialog']   = 0;
+			$a['md5']      = md5($a['url']);
+			// $jsonArray[$i] = $a;
+			echo 'var a = '.json_encode($a).';crawl(a);'.PHP_EOL;
 			iUI::flush();
 		}
-		iDB::update('spider_project', array('lastupdate' => time()), array('id' => $this->pid));
-		iUI::dialog('success:#:check:#:采集完成!', 0, 3, 0, true);
+echo '</script>';
+		iUI::flush();
+
 	}
-	public function multipublish($count,$i) {
-		$a = array();
-		$code = spider::publish('WEB@AUTO');
-		if (is_array($code)) {
-			$label = '内容ID:'.$code['indexid'].' <span class="label label-success">发布成功!</span>';
-		} else {
-			$code == "-1" && $label = '<span class="label label-warning">该URL的文章已经发布过!请检查是否重复</span>';
-		}
-		$a['msg'].= "总共{$count}条,当前第{$i}条,剩余".($count-$i)."条<hr />";
-		$a['msg'].= '标题:' . spider::$title . '<br />URL:' . spider::$url . '<br />' . $label . '<hr />';
-		$a['js'] = 'parent.$("#' . md5(spider::$url) . '").remove();';
-		return $a;
+	public function do_update_project_lastupdate(){
+		iDB::update('spider_project', array('lastupdate' => time()), array('id' => (int)$_GET['id']));
 	}
 	/**
 	 * [发布]

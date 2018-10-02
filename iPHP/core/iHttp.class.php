@@ -10,8 +10,10 @@
  */
 class iHttp{
     public static $callback  = array();
+    public static $handle    = null;
     public static $PROXY_URL = null;
 
+    public static $CURL_MULTI             = false;
     public static $CURL_COUNT             = 3;
     public static $CURL_HTTP_CODE         = null;
     public static $CURL_CONTENT_TYPE      = null;
@@ -21,7 +23,7 @@ class iHttp{
     public static $CURLOPT_ENCODING       = '';
     public static $CURLOPT_REFERER        = null;
     public static $CURLOPT_TIMEOUT        = 10; //数据传输的最大允许时间
-    public static $CURLOPT_CONNECTTIMEOUT = 3; //连接超时时间
+    public static $CURLOPT_CONNECTTIMEOUT = 5; //连接超时时间
     public static $CURLOPT_USERAGENT      = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36';
     public static $CURLOPT_COOKIEFILE     = null;
     public static $CURLOPT_COOKIEJAR      = null;
@@ -50,61 +52,79 @@ class iHttp{
             $_GET['format']=='json'||$_POST['format']=='json'
         );
     }
-    public static function proxy_test() {
-        $options = array(
-            CURLOPT_URL => 'http://www.baidu.com',
-            CURLOPT_REFERER => 'http://www.baidu.com',
-            CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)',
-            CURLOPT_TIMEOUT => 10,
-            CURLOPT_CONNECTTIMEOUT => 8,
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_HEADER => 0,
-            CURLOPT_NOSIGNAL => true,
-            // CURLOPT_DNS_USE_GLOBAL_CACHE => true,
-            // CURLOPT_DNS_CACHE_TIMEOUT => 86400,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_SSL_VERIFYHOST => false,
-            // CURLOPT_FOLLOWLOCATION => 1,// 使用自动跳转
-            // CURLOPT_MAXREDIRS => 7,//查找次数，防止查找太深
-        );
+
+    public static function proxy_test($options=null,$_count=0) {
+        if (self::$callback['proxy_test'] && is_callable(self::$callback['proxy_test'])) {
+            $test = call_user_func_array(self::$callback['proxy_test'],array($options));
+            if($test===false) return false;
+        }
+
         if (empty(self::$CURL_PROXY_ARRAY)) {
-            if (empty(self::$CURL_PROXY)) {
-                return false;
+            if (self::$CURL_PROXY && is_string(self::$CURL_PROXY)) {
+                self::$CURL_PROXY_ARRAY = explode("\n", self::$CURL_PROXY); // socks5://127.0.0.1:1080@username:password
+                self::$CURL_PROXY = null;
             }
-            self::$CURL_PROXY_ARRAY = explode("\n", self::$CURL_PROXY); // socks5://127.0.0.1:1080@username:password
+        }
+
+        if (self::$callback['proxy_array'] && is_callable(self::$callback['proxy_array'])) {
+            call_user_func_array(self::$callback['proxy_array'],array(&self::$CURL_PROXY_ARRAY));
         }
 
         self::$CURL_PROXY_ARRAY = array_unique(self::$CURL_PROXY_ARRAY);
         self::$CURL_PROXY_ARRAY = array_filter(self::$CURL_PROXY_ARRAY);
 
-        if (self::$callback['PROXY_ARRAY'] && is_callable(self::$callback['PROXY_ARRAY'])) {
-            call_user_func_array(self::$callback['PROXY_ARRAY'],array(&self::$CURL_PROXY_ARRAY));
-        }
         if (empty(self::$CURL_PROXY_ARRAY)) {
             return false;
         }
-        $rand_keys = array_rand(self::$CURL_PROXY_ARRAY, 1);
-        $proxy = self::$CURL_PROXY_ARRAY[$rand_keys];
+
+        $index = array_rand(self::$CURL_PROXY_ARRAY, 1);
+        $proxy = self::$CURL_PROXY_ARRAY[$index];
         $proxy = trim($proxy);
+
+        // if($count[$proxy]>10){
+        //     return false;
+        // }
+
+        $options = array(
+            CURLOPT_URL            => 'http://www.baidu.com',
+            CURLOPT_REFERER        => 'http://www.baidu.com',
+            CURLOPT_USERAGENT      => 'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)',
+            CURLOPT_TIMEOUT        => 8,//self::$CURLOPT_TIMEOUT,
+            CURLOPT_CONNECTTIMEOUT => 3,//self::$CURLOPT_CONNECTTIMEOUT,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_HEADER         => 1,
+            CURLOPT_NOSIGNAL       => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+        );
+
         self::proxy_set($options, $proxy);
 
         $ch = curl_init();
         curl_setopt_array($ch, $options);
-        curl_exec($ch);
+        $ret  = curl_exec($ch);
         $info = curl_getinfo($ch);
+        $errno = curl_errno($ch);
+        $curl_error = curl_error($ch);
         curl_close($ch);
+
+        iPHP_SHELL && print date("Y-m-d H:i:s ").'iHttp::proxy_test [proxy:'.$index.'] => '.$proxy;
         if ($info['http_code'] == 200) {
+            iPHP_SHELL && print ' SUCCESS...'.PHP_EOL;
             return $proxy;
         } else {
-            unset(self::$CURL_PROXY_ARRAY[$rand_keys]);
-            return self::proxy_test();
+            iPHP_SHELL && print ' FAIL...'.PHP_EOL;
+            iPHP_SHELL && print date("Y-m-d H:i:s ")."iHttp::proxy_test [error:$errno] => $curl_error".PHP_EOL;
+            iPHP_SHELL && print date("Y-m-d H:i:s ");
+            iPHP_SHELL && print PHP_EOL;
+            unset(self::$CURL_PROXY_ARRAY[$index]);
+            return self::proxy_test($options,$_count);
         }
     }
     public static function proxy_set(&$options = array(), $proxy) {
         if ($proxy) {
             $proxy = trim($proxy);
-            $matches = strpos($proxy, 'socks5://');
-            if ($matches === false) {
+            if (strpos($proxy, 'socks5://') === false) {
                 // $options[CURLOPT_HTTPPROXYTUNNEL] = true;//HTTP代理开关
                 $options[CURLOPT_PROXYTYPE] = CURLPROXY_HTTP; //使用http代理模式
             } else {
@@ -115,6 +135,10 @@ class iHttp{
             $options[CURLOPT_PROXY] = $url;
             $auth && $options[CURLOPT_PROXYUSERPWD] = $auth; //代理验证格式  username:password
             $options[CURLOPT_PROXYAUTH] = CURLAUTH_BASIC; //代理认证模式
+
+        }
+        if (self::$callback['proxy_set'] && is_callable(self::$callback['proxy_set'])) {
+            $options = call_user_func_array(self::$callback['proxy_set'],array($options,$proxy));
         }
         return $options;
     }
@@ -138,12 +162,15 @@ class iHttp{
     public static function remote($url, $postdata = null,$files = array()) {
         $url = str_replace(array(' ','&amp;'), array('%20','&'), $url);
 
+        iPHP_SHELL && print 'iHttp::remote [count:' . self::$_count . '] => ' . $url . "\n";
+
+        if (empty($url)) {
+            echo "url:empty\n";
+            return false;
+        }
+
         if (function_exists('curl_init')) {
-            if (empty($url)) {
-                echo 'remote:(' . self::$_count . ')' . $url . "\n";
-                echo "url:empty\n";
-                return false;
-            }
+
             if (self::$CURLOPT_REFERER === null) {
                 $uri = parse_url($url);
                 self::$CURLOPT_REFERER = $uri['scheme'] . '://' . $uri['host'];
@@ -207,18 +234,33 @@ class iHttp{
                 $options[CURLOPT_HTTPHEADER] = self::$CURLOPT_HTTPHEADER;
             }
 
-            if (self::$CURL_PROXY) {
-                $proxy = self::proxy_test();
+            if (self::$CURL_PROXY || self::$CURL_PROXY_ARRAY) {
+                $proxy = self::proxy_test($options);
                 $proxy && self::proxy_set($options, $proxy);
             }
             if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')){
                 $options[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
             }
-            $ch = curl_init();
-            curl_setopt_array($ch, $options);
-            $responses = curl_exec($ch);
-            $info  = curl_getinfo($ch);
-            $errno = curl_errno($ch);
+            if (self::$callback['progress'] && is_callable(self::$callback['progress'])) {
+                $options[CURLOPT_NOPROGRESS] = FALSE;
+                $options[CURLOPT_PROGRESSFUNCTION] = array(__CLASS__,'progressCallback');
+            }
+            if (self::$callback['header'] && is_callable(self::$callback['header'])) {
+                $options[CURLOPT_HEADERFUNCTION] = self::$callback['header'];
+            }
+            if (self::$callback['options'] && is_callable(self::$callback['options'])) {
+                call_user_func_array(self::$callback['options'],array(&$options));
+            }
+
+            self::$handle = curl_init();
+            curl_setopt_array(self::$handle, $options);
+
+            if(self::$CURL_MULTI){
+                return self::$handle;
+            }
+            $responses = curl_exec(self::$handle);
+            $info  = curl_getinfo(self::$handle);
+            $errno = curl_errno(self::$handle);
             if (self::$CURL_HTTP_CODE !== null) {
                 if (self::$CURL_HTTP_CODE == $info['http_code']) {
                     return $responses;
@@ -226,7 +268,7 @@ class iHttp{
             }
 
             if ($info['http_code'] == 404 || $info['http_code'] == 500) {
-                curl_close($ch);
+                curl_close(self::$handle);
                 echo $url . "\n";
                 echo "http_code:" . $info['http_code'] . "\n";
                 unset($responses, $info);
@@ -235,8 +277,8 @@ class iHttp{
             if (($info['http_code'] == 301 || $info['http_code'] == 302) && self::$_count < self::$CURL_COUNT) {
                 $newurl = $info['redirect_url'];
                 if (empty($newurl)) {
-                    curl_setopt($ch, CURLOPT_HEADER, 1);
-                    $header = curl_exec($ch);
+                    curl_setopt(self::$handle, CURLOPT_HEADER, 1);
+                    $header = curl_exec(self::$handle);
                     preg_match('|Location: (.*)|i', $header, $matches);
                     $newurl = ltrim($matches[1], '/');
                     if (empty($newurl)) {
@@ -249,7 +291,7 @@ class iHttp{
                     }
                 }
                 $newurl = trim($newurl);
-                curl_close($ch);
+                curl_close(self::$handle);
                 unset($responses, $info);
                 self::$_count++;
                 return self::remote($newurl, $postdata,$filepath);
@@ -257,7 +299,7 @@ class iHttp{
 
             if (self::$CURL_CONTENT_TYPE !== null && $info['content_type']) {
                 if (stripos($info['content_type'], self::$CURL_CONTENT_TYPE) === false) {
-                    curl_close($ch);
+                    curl_close(self::$handle);
                     echo $url . "\n";
                     echo "content_type:" . $info['content_type'] . "\n";
                     unset($responses, $info);
@@ -268,19 +310,19 @@ class iHttp{
             if ($errno > 0 || empty($responses) || empty($info['http_code'])) {
                 if (self::$_count < self::$CURL_COUNT) {
                     self::$_count++;
-                    curl_close($ch);
+                    curl_close(self::$handle);
                     unset($responses, $info);
                     return self::remote($url, $postdata,$filepath);
                 } else {
-                    $curl_error = curl_error($ch);
-                    curl_close($ch);
+                    $curl_error = curl_error(self::$handle);
+                    curl_close(self::$handle);
                     unset($responses, $info);
                     echo $url . " remote:".self::$_count."\n";
                     echo "cURL Error ($errno): $curl_error\n";
                     return false;
                 }
             }
-            curl_close($ch);
+            curl_close(self::$handle);
         } elseif (ini_get('allow_url_fopen') && ($handle = fopen($url, 'rb'))) {
             if (function_exists('stream_get_contents')) {
                 $responses = stream_get_contents($handle);
@@ -298,11 +340,10 @@ class iHttp{
     public static function send($url, $POSTFIELDS=null,$ret=false) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, self::$CURLOPT_TIMEOUT);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, self::$CURLOPT_CONNECTTIMEOUT);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
 
         if($POSTFIELDS){
             curl_setopt($ch, CURLOPT_POST, 1);
@@ -320,5 +361,16 @@ class iHttp{
             return '0000000';
         }
         return json_decode($response);
+    }
+    public static function progressCallback($resource, $download_total = 0, $downloaded_size = 0, $upload_total = 0, $uploaded_size = 0){
+        if (version_compare(PHP_VERSION, '5.5.0') < 0) {
+            $download_total  = $resource;
+            $downloaded_size = $download_total;
+            $upload_total    = $downloaded_size;
+            $uploaded_size   = $upload_total;
+            $resource        = null;
+        }
+        $args = array($resource, $download_total, $downloaded_size, $upload_total, $uploaded_size);
+        call_user_func_array(self::$callback['progress'],array($args));
     }
 }

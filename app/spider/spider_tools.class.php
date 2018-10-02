@@ -16,6 +16,7 @@ class spider_tools {
     public static $safe_url    = false; //是否检测采集url安全性
     public static $curl_proxy  = false;
     public static $proxy_array = array();
+    public static $callback    = array();
     /**
      * 在数据项里调用之前采集的数据[DATA@name][DATA@name.key]
      * [DATA@list:name]调用列表其它数据
@@ -660,8 +661,9 @@ class spider_tools {
         }
     }
     public static function remote($url, $_count = 0) {
-
         if(self::safe_url($url)===false) return false;
+
+        iPHP_SHELL && print date("Y-m-d H:i:s ")."\033[36mspider_tools::remote\033[0m [count:".($_count+1)."] => ".$url.PHP_EOL;
 
         $parsed = parse_url($url);
         $url = str_replace('&amp;', '&', $url);
@@ -689,16 +691,31 @@ class spider_tools {
         );
         spider::$cookie && $options[CURLOPT_COOKIE] = spider::$cookie;
         if(spider::$curl_proxy||spider_tools::$curl_proxy){
-            $proxy = self::proxy_test();
+            $proxy = self::proxy_test($options);
             if (spider::$dataTest || spider::$ruleTest) {
-                echo "<b>代理测试:</b>";
-                var_dump($proxy);
+                echo "<b>使用代理:</b>";
+                echo $proxy;
+                echo '<hr />';
             }
             $proxy && iHttp::proxy_set($options,$proxy);
         }
-        if(spider::$PROXY_URL){
-            $options[CURLOPT_URL] = spider::$PROXY_URL.urlencode($url);
+
+        spider::$PROXY_URL && $options[CURLOPT_URL] = spider::$PROXY_URL.urlencode($url);
+
+        if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')){
+            $options[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
         }
+        if (self::$callback['progress'] && is_callable(self::$callback['progress'])) {
+            $options[CURLOPT_NOPROGRESS] = FALSE;
+            $options[CURLOPT_PROGRESSFUNCTION] = array(__CLASS__,'curl_progressfunction');
+        }
+        if (self::$callback['header'] && is_callable(self::$callback['header'])) {
+            $options[CURLOPT_HEADERFUNCTION] = self::$callback['header'];
+        }
+        if (self::$callback['options'] && is_callable(self::$callback['options'])) {
+            call_user_func_array(self::$callback['options'],array(&$options));
+        }
+
         $ch = curl_init();
         curl_setopt_array($ch,$options);
         $responses = curl_exec($ch);
@@ -762,11 +779,39 @@ class spider_tools {
         spider::$url = $url;
         return $responses;
     }
-    public static function proxy_test(){
-        iHttp::$CURL_PROXY       = self::$curl_proxy?:spider::$curl_proxy;
-        iHttp::$CURL_PROXY_ARRAY = self::$proxy_array?:spider::$proxy_array;
-        return iHttp::proxy_test();
+    public static function proxy_test($options=null){
+        iHttp::$CURL_PROXY = self::$curl_proxy?:spider::$curl_proxy;
+        // iHttp::$CURL_PROXY_ARRAY = self::$proxy_array?:spider::$proxy_array;
+        return iHttp::proxy_test($options);
     }
+    public static function curl_progressCallback($a){
+        static $previousProgress = 0;
+        $download_size = $a[1];
+        $downloaded_size = $a[2];
+        if ($download_size == 0 ){
+            $progress = 0;
+        }else{
+            $progress = round($downloaded_size/$download_size,2)*100;
+        }
+        if ( $progress > $previousProgress){
+            $previousProgress = $progress;
+            if($progress%2){
+                echo '.';
+            }
+        }
+    }
+    public static function curl_progressfunction($resource, $download_total = 0, $downloaded_size = 0, $upload_total = 0, $uploaded_size = 0){
+        if (version_compare(PHP_VERSION, '5.5.0') < 0) {
+            $download_total  = $resource;
+            $downloaded_size = $download_total;
+            $upload_total    = $downloaded_size;
+            $uploaded_size   = $upload_total;
+            $resource        = null;
+        }
+        $args = array($resource, $download_total, $downloaded_size, $upload_total, $uploaded_size);
+        call_user_func_array(self::$callback['progress'],array($args));
+    }
+
 	public static function str_cut($str, $start, $end) {
 	    $content = strstr($str, $start);
 	    $content = substr($content, strlen($start), strpos($content, $end) - strlen($start));

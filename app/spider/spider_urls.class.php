@@ -11,11 +11,13 @@ defined('iPHP') OR exit('What are you doing?');
 
 class spider_urls {
     public static $urls = null;
+    public static $work = null;
+    public static $ids = array();
 
     public static function crawl($work = NULL,$pid = NULL,$_rid = NULL,$_urls=null,$callback=null,$_nocheck=false) {
         @set_time_limit(0);
         $pid === NULL && $pid = spider::$pid;
-
+        self::$work = $work;
         if ($pid) {
             $project = spider::project($pid);
             $cid = $project['cid'];
@@ -33,94 +35,31 @@ class spider_urls {
             $lastupdate = $project['lastupdate'];
             if($project['psleep']){
                 if(time()-$lastupdate<$project['psleep']){
-                    echo '采集方案['.$pid."]:".format_date($lastupdate)."刚采集过了,请".($project['psleep']/3600)."小时后在继续采集\n";
+                    echo date("Y-m-d H:i:s ").'采集方案['.$pid."]:".format_date($lastupdate)."刚采集过了,请".($project['psleep']/3600)."小时后在继续采集\n";
                     return;
                 }
             }
             if($pid){
-                echo "\033[32m开始采集方案[".$pid."] \033[0m\n";
+                echo date("Y-m-d H:i:s ")."\033[32m开始采集方案[".$pid."] \033[0m\n";
             }
             if($rid){
-                echo "\033[32m使用采集规则[".$rid."] \033[0m\n";
+                echo date("Y-m-d H:i:s ")."\033[32m使用采集规则[".$rid."] \033[0m\n";
             }
         }
+
         $ruleA = spider::rule($rid);
         $rule = $ruleA['rule'];
         $urls = $rule['list_urls'];
         $project['urls'] && $urls = $project['urls'];
-        spider_urls::$urls && $urls = spider_urls::$urls;
+        self::$urls && $urls = spider_urls::$urls;
         $_urls && $urls = $_urls;
+        self::$ids = array('pid'=>$pid,'sid'=>$sid,'rid'=>$rid);
 
-        $urlsArray  = explode("\n", $urls);
-        $urlsArray  = array_filter($urlsArray);
-        $_urlsArray = $urlsArray;
-        $urlsList   = array();
-        if($work=='shell'){
-            // echo "$urls\n";
-            print_r($urlsArray);
-        }
-
-        foreach ($_urlsArray AS $_key => $_url) {
-            $_url = trim($_url);
-            if(empty($_url)){
-                continue;
-            }
-
-            $_url      = htmlspecialchars_decode($_url);
-            $_urlsList = array();
-            /**
-             * RULE@rid@url
-             * url使用[rid]规则采集并返回列表结果
-             */
-            if(strpos($_url, 'RULE@')!==false){
-                if($work=='shell'){
-                    echo str_repeat("-=", 30).PHP_EOL;
-                }
-                list($___s,$_rid,$_urls) = explode('@', $_url);
-                if (spider::$ruleTest) {
-                    print_r('<b>使用[rid:'.$_rid.']规则抓取列表</b>:'.$_urls);
-                    echo "<hr />";
-                }
-                $_urlsList = spider_urls::crawl($work,false,$_rid,$_urls,'CALLBACK@URL');
-
-                if($work=='shell'){
-                    echo '使用[rid:'.$_rid.']规则抓取列表'.PHP_EOL;
-                    echo "获取链接:".count($_urlsList).'条记录'.PHP_EOL;
-                }
-
-                foreach ($_urlsList as $uk => $vurl) {
-                    $urls_match = self::urls_match($vurl);
-                    if($urls_match){
-                        $urlsList  = array_merge($urlsList,$urls_match);
-                        unset($_urlsList[$uk]);
-                    }
-                }
-                $_urlsList && $urlsList  = array_merge($urlsList,$_urlsList);
-                unset($urlsArray[$_key]);
-                if($work=='shell'){
-                    echo str_repeat("-=", 30).PHP_EOL;
-                }
-            }else{
-                $urls_match = self::urls_match($_url);
-                if($urls_match){
-                    $urlsList  = array_merge($urlsList,$urls_match);
-                    unset($urlsArray[$_key]);
-                }
-            }
-        }
-        $urlsList && $urlsArray = array_merge($urlsArray,$urlsList);
-        unset($_urlsArray,$_key,$_url,$_matches,$_urlsList,$urlsList);
-        $urlsArray = array_filter($urlsArray);
-        $urlsArray = array_unique($urlsArray);
-
-        // spider::$useragent = $rule['user_agent'];
-        // spider::$encoding  = $rule['curl']['encoding'];
-        // spider::$referer   = $rule['curl']['referer'];
-        // spider::$charset   = $rule['charset'];
-
+        $urlsArray = self::make_list_urls($urls);
         if(empty($urlsArray)){
             if($work=='shell'){
-                echo spider::errorlog("采集列表为空!请填写!\n",$url,'urls.empty',array('pid'=>$pid,'sid'=>$sid,'rid'=>$rid));
+                spider::errorlog("采集列表为空!请填写!",$url,'urls.empty',self::$ids);
+                echo PHP_EOL;
                 return false;
             }
             iUI::alert('采集列表为空!请填写!', 'js:parent.window.iCMS_MODAL.destroy();');
@@ -138,13 +77,16 @@ class spider_urls {
             spider::$ruleTest && $_GET['pq_debug'] && phpQuery::$debug =1;
         }
 
-        $pubArray         = array();
-        $pubCount         = array();
-        $pubAllCount      = array();
+        $pubArray           = array();
+        $pubCount           = array();
+        $pubAllCount        = array();
+        $urlsAllCount       = count($urlsArray);
+
         spider::$curl_proxy = $rule['proxy'];
         spider::$urlslast   = null;
+
         if (spider::$ruleTest) {
-            echo '<b>列表总:</b>'.count($urlsArray) . "条<br />";
+            echo '<b>最终需抓取列表总共:</b>'.$urlsAllCount. "条<br />";
             echo '<pre>';
             print_r($urlsArray);
             echo '</pre>';
@@ -152,23 +94,41 @@ class spider_urls {
             echo '<b>测试第一条</b><br />';
         }
         if($work=='shell'){
-            echo '最终需抓取列表总:'.count($urlsArray)."条\n";
+            echo date("Y-m-d H:i:s ")."\033[36m最终需抓取列表总共(".$urlsAllCount.")条\033[0m\n";
         }
+
+        $lastkey_file = iPHP_APP_CACHE."/spider.{$pid}.lastkey.pid";
 
         foreach ($urlsArray AS $key => $url) {
             $url = trim($url);
             spider::$urlslast = $url;
-            if($work=='shell'){
-                echo '开始抓取第'.$key.'条,链接:'.$url."\n";
+
+            if($pid){
+                if(file_exists($lastkey_file)){
+                    $lastkey     = file_get_contents($lastkey_file);
+                    $lastkeytime = filemtime($lastkey_file);
+                    if(trim($lastkey)>$key && time()-$lastkeytime < $project['psleep']){
+                        iPHP_SHELL && print date("Y-m-d H:i:s ")."\033[32m[".$key.'] '.$url." 该列表已经抓取过...\033[0m\n";
+                        continue;
+                    }
+                }
+                file_put_contents($lastkey_file, $key);
             }
+
+
+            if($work=='shell'){
+                echo date("Y-m-d H:i:s ")."\033[32m开始抓取 ".$key.'/'.$urlsAllCount.' 条列表链接:'.$url."\033[0m\n";
+            }
+
             if (spider::$ruleTest) {
                 echo '<b>抓取列表:</b>'.$url . "<br />";
             }
             $html = spider_tools::remote($url);
             if(empty($html)){
-                $msg = "采集列表内容为空!\n";
+                $msg = "采集列表内容为空!";
                 $msg.= var_export(spider_tools::$curl_info,true);
-                echo spider::errorlog($msg,$url,'url.empty',array('pid'=>$pid,'sid'=>$sid,'rid'=>$rid));
+                spider::errorlog($msg,$url,'url.empty',self::$ids);
+                echo PHP_EOL;
                 continue;
             }
             $rule['list_urls_format'] && $html = spider_tools::dataClean($rule['list_urls_format'], $html);
@@ -186,6 +146,7 @@ class spider_urls {
 
                 if($rule['list_area_format']){
                     $list_area_format = trim($rule['list_area_format']);
+                    //ARRAY::div.class
                     if(strpos($list_area_format, 'ARRAY::')!==false){
                         $list_area_format = str_replace('ARRAY::', '', $list_area_format);
                         $lists = array();
@@ -276,9 +237,17 @@ class spider_urls {
             $urlsData = self::lists_item_data($lists,$rule,$url);
 
             if (spider::$callback['urls'] && is_callable(spider::$callback['urls'])) {
-                $urlsData = call_user_func_array(spider::$callback['urls'],array($urlsData,$url));
-                $urlsData['work'] && $work = $urlsData['work'];
+                $_work = call_user_func_array(spider::$callback['urls'],array(&$urlsData,$url));
+                $_work && $work = $_work;
             }
+
+            $urlsDataCount = count($urlsData);
+
+            if(empty($urlsDataCount)){
+                spider::errorlog("采集列表记录为0!",$url,'url.zero',self::$ids);
+                continue;
+            }
+
             //PID@xx 返回URL列表
             if($callback=='CALLBACK@URL'){
                 $cbListUrl = array();
@@ -297,34 +266,33 @@ class spider_urls {
                 $listsArray[$url] = $urlsData;
             }
             if($work=="shell"){
-                $pubCount[$url]['count'] = count($lists);
-                $pubAllCount['count']+=$pubCount[$url]['count'];
-                echo "开始采集:".$url." 列表 ".$pubCount[$url]['count']."条记录\n";
-                if(empty($pubCount[$url]['count'])){
-                    echo spider::errorlog("采集列表记录为0!\n",$url,'url.zero',array('pid'=>$pid,'sid'=>$sid,'rid'=>$rid));
-                }
+                $pubCount[$key]['url']   = $url;
+                $pubCount[$key]['count'] = $urlsDataCount;
+                $pubAllCount['count']+=$pubCount[$key]['count'];
+                echo date("Y-m-d H:i:s ")."\033[32m开始采集 列表 ".$url." (".$pubCount[$key]['count'].")条记录\033[0m\n\n";
+
                 foreach ($urlsData AS $lkey => $value) {
+                    if($value['url']===false) continue;
+
                     spider::$title = $value['title'];
                     spider::$url   = $value['url'];
 
-                    if(spider::$url===false){
-                        continue;
-                    }
-                    $hash  = md5(spider::$url);
-                    echo "\033[32m开始采集...\033[0m\n";
-                    echo "\033[36mtitle:\033[0m".spider::$title."\n";
-                    echo "\033[36murl:\033[0m".spider::$url."\n";
+                    echo date("Y-m-d H:i:s ")."\033[32m开始采集...(".$lkey."/".$urlsDataCount.")\033[0m\n";
+                    echo date("Y-m-d H:i:s ")."\033[36mtitle:\033[0m".spider::$title."\n";
+                    echo date("Y-m-d H:i:s ")."\033[36murl:\033[0m".spider::$url."\n";
+
                     spider::$rid = $rid;
-                    $checker = spider::checker($work,$pid,spider::$url,spider::$title);
+                    $hash        = md5(spider::$url);
+                    $checker     = spider::checker($work,$pid,spider::$url,spider::$title);
                     if($checker===true){
                         $wait = 3;
                         $wait_start = time();
                         $callback  = spider::publish("shell");
                         if ($callback['code'] == "1001") {
-                            $pubCount[$url]['success']++;
+                            $pubCount[$key]['success']++;
                             $pubAllCount['success']++;
                             $wait+= time()-$wait_start;
-                            echo "\033[32m采集完成并发布成功".str_repeat('.',$wait)."√\033[0m\n";
+                            echo date("Y-m-d H:i:s ")."\033[32m采集完成并发布成功".str_repeat('.',$wait)."√\033[0m\n\n";
                             if($project['sleep']){
                                 if($rule['mode']!="2"){
                                     unset($lists[$lkey]);
@@ -332,20 +300,21 @@ class spider_urls {
                                 gc_collect_cycles();
 
                                 $usleep = $project['sleep']*1000;
-                                echo "\033[31m暂停".($project['sleep']/1000)."秒后继续\033[0m\n\n";
+                                echo date("Y-m-d H:i:s ")."\033[31m暂停".($project['sleep']/1000)."秒后继续\033[0m\n\n";
                                 usleep($usleep); //1000000 = 1s
                             }else{
                                 //sleep(1);
                             }
                         }else{
-                            $pubCount[$url]['error']++;
+                            $pubCount[$key]['error']++;
                             $pubAllCount['error']++;
-                            echo "error\n\n";
+                            echo date("Y-m-d H:i:s ")."\033[31m error \033[0m\n\n";
                             continue;
                         }
+                    }else{
+                        $pubCount[$key]['published']++;
+                        $pubAllCount['published']++;
                     }
-                    $pubCount[$url]['published']++;
-                    $pubAllCount['published']++;
                 }
                 if($rule['mode']=="2"){
                     phpQuery::unloadDocuments($doc->getDocumentID());
@@ -356,12 +325,12 @@ class spider_urls {
             if($work=="WEB@AUTO"||$work=='DATA@RULE'){
                 spider::$spider_url_ids = array();
                 foreach ($urlsData AS $lkey => $value) {
+                    if($value['url']===false) continue;
+
                     spider::$title = $value['title'];
                     spider::$url   = $value['url'];
+                    unset($value['title'],$value['url']);
 
-                    if(spider::$url===false){
-                        continue;
-                    }
                     $hash  = md5(spider::$url);
                     if (spider::$ruleTest) {
                         echo '<b>列表抓取结果:</b>'.$lkey.'<br />';
@@ -373,7 +342,6 @@ class spider_urls {
                             '" target="_blank">测试内容规则</a>) <br />';
                         echo spider::$url . "<br />";
                         echo $hash . "<br />";
-                        unset($value['title'],$value['url']);
                         if($value){
                             echo '<b>其它采集结果:</b>';
                             echo '<pre>';
@@ -401,15 +369,16 @@ class spider_urls {
                                     // $contentArray[$lkey] = spider_urls::crawl($work,$_pid);
                                     unset($suData['sid']);
                                     $suData['title'] = addslashes($suData['title']);
-                                    $suData+= array(
+                                    $suData = array_merge($suData,array(
                                         'addtime' => time(),
                                         'status'  => '2','publish' => '2',
                                         'indexid' => '0','pubdate' => '0'
-                                    );
+                                    ));
                                     if($_nocheck||spider::$dataTest){
 
                                     }else{
                                         $suid = iDB::insert('spider_url',$suData);
+                                        iDB::insert('spider_url_data',array('id'=>$suid,'data'=>addslashes(json_encode($value))));
                                     }
                                     spider::$spider_url_ids[$lkey] = $suid;
                                 break;
@@ -445,14 +414,98 @@ class spider_urls {
                 );
             break;
             case "shell":
-                echo "采集数据统结果:\n";
-                print_r($pubCount);
-                print_r($pubAllCount);
-                echo "全部采集完成....\n";
                 iDB::update('spider_project',array('lastupdate'=>time()),array('id'=>$pid));
+
+                echo str_repeat("=", 30).PHP_EOL;
+                $logfile = iPHP_APP_CACHE."/spider.{$pid}.log";
+                echo date("Y-m-d H:i:s ")."\033[33m采集数据统结果\033[0m\n";
+                print_r($pubAllCount);
+                echo date("Y-m-d H:i:s ")."\033[33m全部采集完成\033[0m\n";
+                echo date("Y-m-d H:i:s ")."\033[33m详细采集结果请查看:".iSecurity::filter_path($logfile)."\033[0m\n";
+                echo str_repeat("=", 30).PHP_EOL;
+
+                file_exists($lastkey_file) && @unlink($lastkey_file);
+                file_put_contents($logfile, var_export($pubCount,true));
+                file_put_contents($logfile, var_export($pubAllCount,true),FILE_APPEND);
             break;
         }
     }
+    /**
+     * 列表生成
+     * @param  [type] $urls [description]
+     * @return [type]       [description]
+     */
+    public static function make_list_urls($urls){
+        $urlsArray  = explode("\n", $urls);
+        $urlsArray  = array_filter($urlsArray);
+        $_urlsArray = $urlsArray;
+        $urlsList   = array();
+        if(self::$work=='shell'){
+            // echo "$urls\n";
+            print_r($urlsArray);
+        }
+
+        foreach ($_urlsArray AS $_key => $_url) {
+            $_url = trim($_url);
+            if(empty($_url)){
+                continue;
+            }
+
+            $_url      = htmlspecialchars_decode($_url);
+            $_urlsList = array();
+            /**
+             * RULE@rid@url
+             * url使用[rid]规则采集并返回列表结果
+             */
+            if(strpos($_url, 'RULE@')!==false){
+                if(self::$work=='shell'){
+                    echo str_repeat("-=", 30).PHP_EOL;
+                }
+                list($___s,$_rid,$_urls) = explode('@', $_url);
+                if (spider::$ruleTest) {
+                    print_r('<b>使用[rid:'.$_rid.']规则抓取列表</b>:'.$_urls);
+                    echo "<hr />";
+                }
+                $_urlsList = spider_urls::crawl(self::$work,false,$_rid,$_urls,'CALLBACK@URL');
+
+                if(self::$work=='shell'){
+                    echo date("Y-m-d H:i:s ").'使用[rid:'.$_rid.']规则抓取列表'.PHP_EOL;
+                    echo date("Y-m-d H:i:s ")."获取链接:".count($_urlsList).'条记录'.PHP_EOL;
+                }
+
+                foreach ($_urlsList as $uk => $vurl) {
+                    $urls_match = self::urls_match($vurl);
+                    if($urls_match){
+                        $urlsList  = array_merge($urlsList,$urls_match);
+                        unset($_urlsList[$uk]);
+                    }
+                }
+                $_urlsList && $urlsList  = array_merge($urlsList,$_urlsList);
+                unset($urlsArray[$_key]);
+                if(self::$work=='shell'){
+                    echo str_repeat("-=", 30).PHP_EOL;
+                }
+            }else{
+                $urls_match = self::urls_match($_url);
+                if($urls_match){
+                    $urlsList  = array_merge($urlsList,$urls_match);
+                    unset($urlsArray[$_key]);
+                }
+            }
+        }
+        $urlsList && $urlsArray = array_merge($urlsArray,$urlsList);
+        unset($_urlsArray,$_key,$_url,$_matches,$_urlsList,$urlsList,$urls_match);
+        $urlsArray = array_filter($urlsArray);
+        $urlsArray = array_unique($urlsArray);
+        return $urlsArray;
+    }
+    /**
+     * 列表链接规则
+     * @param  [type] $lists [description]
+     * @param  [type] $rule  [description]
+     * @param  [type] $url   [description]
+     * @return [type]        [description]
+     */
     public static function lists_item_data($lists,$rule,$url){
         if (spider::$callback['lists_item_data'] && is_callable(spider::$callback['lists_item_data'])) {
             return call_user_func_array(spider::$callback['lists_item_data'],array($lists,$rule,$url));
@@ -474,7 +527,11 @@ class spider_urls {
         }
         return $array;
     }
-
+    /**
+     * 列表网址生成
+     * @param  [type] $_url [description]
+     * @return [type]       [description]
+     */
     public static function urls_match($_url){
         preg_match('|.*<(.*)>.*|is',$_url, $_matches);
         $urlsList = array();

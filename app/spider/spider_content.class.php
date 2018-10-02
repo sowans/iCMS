@@ -641,8 +641,7 @@ class spider_content {
             exit('<h1>'.$msg.'</h1>');
         }
         if(spider::$work){
-            echo spider::errorlog($msg,$rule['__url__'],$type);
-            echo "\n{$msg}\n";
+            spider::errorlog($msg,$rule['__url__'],$type);
             return null;
         }else{
             iUI::alert($msg);

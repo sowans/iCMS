@@ -112,7 +112,7 @@ class spider{
             if($checker){
                 $work===NULL && iUI::alert($msg, 'js:parent.$("#' . $hash . '").remove();');
                 if($work=='shell'){
-                    echo "\n\033[35m".$msg."\033[0m\n\n";
+                    echo date("Y-m-d H:i:s ")."\n\033[35m".$msg."\033[0m\n\n";
                     return false;
                 }
                 if($work=="WEB@AUTO"){
@@ -169,13 +169,17 @@ class spider{
             'pid'     => (int)spider::$pid,
             'url'     => ($url?$url:spider::$url),
             'msg'     => addslashes($msg),
-            'date'    => date("Y-m-d"),
+            'date'    => date("Y-m-d H:i:s"),
             'addtime' => time(),
             'type'    => $type
         );
         $a && $data = array_merge($data,(array)$a);
         iDB::insert('spider_error',$data);
-        return $msg;
+        if(iPHP_SHELL){
+            echo $data['date']." \033[31m".$msg."\033[0m".PHP_EOL;
+        }else{
+            echo '<b>'.$msg.'</b><hr />';
+        }
     }
     public static function publish($work = null) {
         @set_time_limit(0);
@@ -185,7 +189,7 @@ class spider{
 
         foreach ((array)$_POST as $key => $value) {
             if($value===null && $key!='__title__'){
-                echo spider::errorlog("publish:$key:null\n",$_POST['reurl'],"publish:$key:null");
+                spider::errorlog("publish:$key:null",$_POST['reurl'],"publish:$key:null");
                 return null;
             }
         }
@@ -196,11 +200,11 @@ class spider{
 
         // if($work=='shell'){
         //    if(empty($_POST['title'])){
-        //         echo spider::errorlog("标题不能为空\n",$_POST['reurl'],'publish.title');
+        //         spider::errorlog("标题不能为空",$_POST['reurl'],'publish.title');
         //         return false;
         //    }
         //    if(empty($_POST['body'])){
-        //         echo spider::errorlog("内容不能为空\n",$_POST['reurl'],'publish.body');
+        //         spider::errorlog("内容不能为空",$_POST['reurl'],'publish.body');
         //         return false;
         //    }
         // }
@@ -292,7 +296,7 @@ class spider{
 
             $callback = $acp->$fun();
             if(!$callback){
-                echo spider::errorlog("发布失败\n",$_POST['reurl'],'publish.fail');
+                spider::errorlog("发布失败",$_POST['reurl'],'publish.fail');
                 return false;
             }
         }
