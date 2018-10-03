@@ -378,7 +378,7 @@ class spider_urls {
 
                                     }else{
                                         $suid = iDB::insert('spider_url',$suData);
-                                        iDB::insert('spider_url_data',array('id'=>$suid,'data'=>addslashes(json_encode($value))));
+                                        // iDB::insert('spider_url_data',array('id'=>$suid,'data'=>addslashes(json_encode($value))));
                                     }
                                     spider::$spider_url_ids[$lkey] = $suid;
                                 break;
