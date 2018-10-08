@@ -177,7 +177,7 @@ $(function(){
             <a class="btn" id="makeurls">添加采集地址</a>
           </div>
           <div class="clearfloat mb10"></div>
-          <div class="input-prepend input-append"><span class="add-on">网址合成</span>
+          <div class="input-prepend input-append"><span class="add-on">内容网址合成</span>
             <input type="text" name="list_url" class="span6" id="list_url" value="<?php echo $rs['list_url'] ; ?>"/>
             <a class="btn" href="<%url%>" data-toggle="insertContent" data-target="#list_url">网址</a>
           </div>

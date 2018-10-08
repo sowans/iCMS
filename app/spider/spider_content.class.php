@@ -115,7 +115,7 @@ class spider_content {
         if ($data['cleanbefor']) {
             $content = spider_tools::dataClean($data['cleanbefor'], $content);
             if (spider::$dataTest) {
-                echo "<b>1.规则后处理</b>".htmlspecialchars($data['cleanbefor']);
+                echo "<b>1.规则后处理</b>".htmlspecialchars($data['cleanbefor']).'<br />';
             }
         }
 
@@ -130,7 +130,7 @@ class spider_content {
             }
         }
         if (spider::$dataTest && $data['helper']) {
-            echo "<b>2.方法处理:</b>".htmlspecialchars(implode(',', $data['helper']));
+            echo "<b>2.方法处理:</b>".htmlspecialchars(implode(',', $data['helper'])).'<br />';
         }
         foreach ((array)$data['helper'] as $key => $value) {
             $func = array($value=>true);
@@ -148,7 +148,7 @@ class spider_content {
         if ($data['cleanafter']) {
             $content = spider_tools::dataClean($data['cleanafter'], $content);
             if (spider::$dataTest) {
-                echo "<b>3.发布前处理</b>".htmlspecialchars($data['cleanafter']);
+                echo "<b>3.发布前处理</b>".htmlspecialchars($data['cleanafter']).'<br />';
             }
         }
         if (spider::$callback['content'] && is_callable(spider::$callback['content'])) {

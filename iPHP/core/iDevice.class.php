@@ -31,7 +31,7 @@ class iDevice {
         self::$config = $config;
 
         if(self::$config['callback']['init']){
-            iPHP::callback(self::$config['callback']['init'],array(self::$config));
+            iPHP::callback(self::$config['callback']['init'],array(&self::$config));
         }
         if(empty(self::$device)){
             //有设置其它设备

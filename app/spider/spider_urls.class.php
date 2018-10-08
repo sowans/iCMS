@@ -9,15 +9,18 @@
 */
 defined('iPHP') OR exit('What are you doing?');
 
+spider_urls::$timer[0] = time();
+
 class spider_urls {
-    public static $urls = null;
-    public static $work = null;
-    public static $ids = array();
+    public static $urls  = null;
+    public static $work  = null;
+    public static $ids   = array();
+    public static $timer = array();
 
     public static function crawl($work = NULL,$pid = NULL,$_rid = NULL,$_urls=null,$callback=null,$_nocheck=false) {
         @set_time_limit(0);
         $pid === NULL && $pid = spider::$pid;
-        self::$work = $work;
+
         if ($pid) {
             $project = spider::project($pid);
             $cid = $project['cid'];
@@ -55,7 +58,7 @@ class spider_urls {
         $_urls && $urls = $_urls;
         self::$ids = array('pid'=>$pid,'sid'=>$sid,'rid'=>$rid);
 
-        $urlsArray = self::make_list_urls($urls);
+        $urlsArray = self::make_list_urls($urls,$work);
         if(empty($urlsArray)){
             if($work=='shell'){
                 spider::errorlog("采集列表为空!请填写!",$url,'urls.empty',self::$ids);
@@ -415,12 +418,14 @@ class spider_urls {
             break;
             case "shell":
                 iDB::update('spider_project',array('lastupdate'=>time()),array('id'=>$pid));
+                self::$timer[1] = time();
 
                 echo str_repeat("=", 30).PHP_EOL;
                 $logfile = iPHP_APP_CACHE."/spider.{$pid}.log";
                 echo date("Y-m-d H:i:s ")."\033[33m采集数据统结果\033[0m\n";
                 print_r($pubAllCount);
                 echo date("Y-m-d H:i:s ")."\033[33m全部采集完成\033[0m\n";
+                echo date("Y-m-d H:i:s ")."\033[33m用时:".format_time((self::$timer[1]-self::$timer[0]),'cn').",".date("Y-m-d H:i:s",self::$timer[0])."-".date("Y-m-d H:i:s",self::$timer[1])."\033[0m\n";
                 echo date("Y-m-d H:i:s ")."\033[33m详细采集结果请查看:".iSecurity::filter_path($logfile)."\033[0m\n";
                 echo str_repeat("=", 30).PHP_EOL;
 
@@ -435,12 +440,12 @@ class spider_urls {
      * @param  [type] $urls [description]
      * @return [type]       [description]
      */
-    public static function make_list_urls($urls){
+    public static function make_list_urls($urls,$work){
         $urlsArray  = explode("\n", $urls);
         $urlsArray  = array_filter($urlsArray);
         $_urlsArray = $urlsArray;
         $urlsList   = array();
-        if(self::$work=='shell'){
+        if($work=='shell'){
             // echo "$urls\n";
             print_r($urlsArray);
         }
@@ -458,7 +463,7 @@ class spider_urls {
              * url使用[rid]规则采集并返回列表结果
              */
             if(strpos($_url, 'RULE@')!==false){
-                if(self::$work=='shell'){
+                if($work=='shell'){
                     echo str_repeat("-=", 30).PHP_EOL;
                 }
                 list($___s,$_rid,$_urls) = explode('@', $_url);
@@ -466,9 +471,9 @@ class spider_urls {
                     print_r('<b>使用[rid:'.$_rid.']规则抓取列表</b>:'.$_urls);
                     echo "<hr />";
                 }
-                $_urlsList = spider_urls::crawl(self::$work,false,$_rid,$_urls,'CALLBACK@URL');
+                $_urlsList = (array)spider_urls::crawl($work,false,$_rid,$_urls,'CALLBACK@URL');
 
-                if(self::$work=='shell'){
+                if($work=='shell'){
                     echo date("Y-m-d H:i:s ").'使用[rid:'.$_rid.']规则抓取列表'.PHP_EOL;
                     echo date("Y-m-d H:i:s ")."获取链接:".count($_urlsList).'条记录'.PHP_EOL;
                 }
@@ -482,7 +487,7 @@ class spider_urls {
                 }
                 $_urlsList && $urlsList  = array_merge($urlsList,$_urlsList);
                 unset($urlsArray[$_key]);
-                if(self::$work=='shell'){
+                if($work=='shell'){
                     echo str_repeat("-=", 30).PHP_EOL;
                 }
             }else{

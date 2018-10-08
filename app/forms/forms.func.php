@@ -56,7 +56,9 @@ class formsFunc{
         $layout = '<input name="action" type="hidden" value="save" />';
         $layout.= '<input name="fid" type="hidden" value="'.$form['id'].'" />';
         $layout.= '<input name="signature" type="hidden" value="'.$form['signature'].'" />';
-        $layout.= former::layout("#former_".$form['id']);
+        //设置 layout="false" 不输出表单给构 可以自定义
+        !isset($vars['layout']) && $vars['layout'] = true;
+        $vars['layout'] && $layout.= former::layout("#former_".$form['id']);
 
         if($vars['assign']){
             iView::assign('form',$form);

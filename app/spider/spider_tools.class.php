@@ -191,6 +191,7 @@ class spider_tools {
         $rule = str_replace(array('<%', '%>'), '', $rule);
         unset($pregArray,$pregflip,$matches);
         gc_collect_cycles();
+        // var_dump(htmlspecialchars($rule));
         return $rule;
     }
     public static function dataClean($rules, $content) {
@@ -663,7 +664,7 @@ class spider_tools {
     public static function remote($url, $_count = 0) {
         if(self::safe_url($url)===false) return false;
 
-        iPHP_SHELL && print date("Y-m-d H:i:s ")."\033[36mspider_tools::remote\033[0m [count:".($_count+1)."] => ".$url.PHP_EOL;
+        iPHP_SHELL && print date("Y-m-d H:i:s ")."\033[36mspider_tools::remote\033[0m [".($_count+1)."] => ".$url.PHP_EOL;
 
         $parsed = parse_url($url);
         $url = str_replace('&amp;', '&', $url);
