@@ -24,6 +24,10 @@ class articleAdmincp{
         self::$config    = iCMS::$config['article'];
         tag::$appid      = self::$appid;
         category::$appid = self::$appid;
+
+        //iCMS::$config['plugin']['baidu']['xzh']['appid'] = 'appid';
+        //iCMS::$config['plugin']['baidu']['xzh']['token'] = 'token';
+
     }
 
     public function do_config(){
@@ -116,6 +120,18 @@ class articleAdmincp{
                     $msg.= $this->do_baiduping($id,false);
                 }
                 iUI::success($msg,'js:1');
+            break;
+            case 'baiduping_original':
+                foreach((array)$_POST['id'] AS $id) {
+                    $this->do_baiduping_original($id,false);
+                }
+                iUI::success('推送完成!','js:1');
+            break;
+            case 'baidu_xzh':
+                foreach((array)$_POST['id'] AS $id) {
+                    $this->do_baidu_xzh($id,false);
+                }
+                iUI::success('推送完成!','js:1');
             break;
     		case 'move':
 		        $_POST['cid'] OR iUI::alert("请选择目标栏目!");
@@ -287,6 +303,46 @@ class articleAdmincp{
         }else{
             iUI::code(1);
         }
+    }
+
+    public function do_baiduping_original($id = null,$dialog=true){
+        $id===null && $id=$this->id;
+        $id OR iUI::alert('请选择要推送的文章!');
+        $rs   = article::row($id);
+        $C    = category::get($rs['cid']);
+        $iurl = (array)iURL::get('article',array($rs,$C));
+        $urls = array();
+        $urls[] = $iurl['href'];
+        if($iurl['mobile']['url']){
+            $urls[] = $iurl['mobile']['url'];
+        }
+        $res = plugin_baidu::ping($urls,'original');
+
+        if($res===true){
+            $msg = '推送完成';
+            $dialog && iUI::success($msg,'js:1');
+        }else{
+            $msg = '推送失败！['.$res->message.']';
+            $dialog && iUI::alert($msg,'js:1');
+        }
+        if(!$dialog) return $msg.'<br />';
+    }
+    public function do_baidu_xzh($id = null,$dialog=true){
+        $id===null && $id=$this->id;
+        $id OR iUI::alert('请选择要推送的文章!');
+        $rs   = article::row($id);
+        $C    = category::get($rs['cid']);
+        $iurl = (array)iURL::get('article',array($rs,$C));
+        $urls = array($iurl['mobile']['url']);
+        $res = plugin_baidu::xzh($urls,'realtime',$out);
+        if($res){
+            $msg = '推送完成';
+            $dialog && iUI::success($msg,'js:1');
+        }else{
+            $msg = '推送失败！['.$out['message'].']';
+            $dialog && iUI::alert($msg,'js:1');
+        }
+        if(!$dialog) return $msg.'<br />';
     }
     /**
      * [JSON数据]
@@ -1026,5 +1082,22 @@ class articleAdmincp{
     public static function _count($where=null){
         $sql = iSQL::where($where,true);
         return iDB::value("SELECT count(*) FROM `#iCMS@__article` WHERE 1=1 {$sql}");
+    }
+    function fopen_url($url,$mo=false) {
+        $uri=parse_url($url);
+        $curl_handle = curl_init();
+        curl_setopt($curl_handle, CURLOPT_URL, $url);
+        curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT,2);
+        curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER,1);
+        curl_setopt($curl_handle, CURLOPT_FAILONERROR,1);
+        curl_setopt($curl_handle, CURLOPT_REFERER,$uri['scheme'].'://'.$uri['host']);
+        if($mo){
+        curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19');
+        }else{
+        curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/532.0 (KHTML, like Gecko) Chrome/3.0.195.38 Safari/532.0');
+        }
+        $file_content = curl_exec($curl_handle);
+        curl_close($curl_handle);
+        return $file_content;
     }
 }

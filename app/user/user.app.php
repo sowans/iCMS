@@ -1100,7 +1100,7 @@ class userApp {
 		}
 	}
 	public function forward($flag=null) {
-		$this->forward = iSecurity::getGP('forward');
+		$this->forward = iSecurity::request('forward');
 		if(empty($this->forward)){
 			$this->forward = iPHP::get_cookie('forward');
 			if(empty($this->forward)){

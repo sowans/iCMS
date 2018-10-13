@@ -7,64 +7,6 @@
  */
 class iSecurity {
 	/**
-	 * 整型数过滤
-	 * @param $param
-	 * @return int
-	 */
-	public static function int($param) {
-		return intval($param);
-	}
-	/**
-	 * 字符过滤
-	 * @param $param
-	 * @return string
-	 */
-	public static function str($param) {
-		return trim($param);
-	}
-	/**
-	 * 是否对象
-	 * @param $param
-	 * @return boolean
-	 */
-	public static function isObj($param) {
-		return is_object($param) ? true : false;
-	}
-	/**
-	 * 是否数组
-	 * @param $params
-	 * @return boolean
-	 */
-	public static function isArray($params) {
-		return (!is_array($params) || !count($params)) ? false : true;
-	}
-	/**
-	 * 变量是否在数组中存在
-	 * @param $param
-	 * @param $params
-	 * @return boolean
-	 */
-	public static function inArray($param, $params) {
-		return (!in_array((string)$param, (array)$params)) ? false : true;
-	}
-	/**
-	 * 是否是布尔型
-	 * @param $param
-	 * @return boolean
-	 */
-	public static function isBool($param) {
-		return is_bool($param) ? true : false;
-	}
-	/**
-	 * 是否是数字型
-	 * @param $param
-	 * @return boolean
-	 */
-	public static function isNum($param) {
-		return is_numeric($param) ? true : false;
-	}
-
-	/**
 	 * html转换输出
 	 * @param $param
 	 * @return string
@@ -73,20 +15,12 @@ class iSecurity {
 		return trim(str_replace("\0", "&#0;", htmlspecialchars($param, ENT_QUOTES, 'utf-8')));
 	}
 	/**
-	 * 过滤标签
-	 * @param $param
-	 * @return string
-	 */
-	public static function stripTags($param) {
-		return trim(strip_tags($param));
-	}
-	/**
-	 * 初始化$_GET/$_POST全局变量
+	 * 初始化$_GET/$_POST为全局变量
 	 * @param $keys
 	 * @param $method
 	 * @param $cvtype
 	 */
-	public static function GP($keys, $method = null, $cvtype = 1,$istrim = true) {
+	public static function globals($keys, $method = null, $cvtype = 1,$istrim = true) {
 		!is_array($keys) && $keys = array($keys);
 		foreach ($keys as $key) {
 			if ($key == 'GLOBALS') continue;
@@ -107,7 +41,7 @@ class iSecurity {
 	 * @param $key
 	 * @param $method
 	 */
-	public static function getGP($key, $method = null) {
+	public static function request($key, $method = null) {
 		if ($method == 'G' || $method != 'P' && isset($_GET[$key])) {
 			$value = $_GET[$key];
 		}else{
@@ -115,6 +49,18 @@ class iSecurity {
 		}
 		return self::escapeStr($value);
 	}
+
+	public static function get($key=null) {
+		$value = self::escapeStr($key===null?$_GET:$_GET[$key]);
+		$key===null && $_GET = $value;
+		return $value;
+	}
+	public static function post($key=null) {
+		$value = self::escapeStr($key===null?$_POST:$_POST[$key]);
+		$key===null && $_POST = $value;
+		return $value;
+	}
+
 	/**
 	 * 全局变量过滤
 	 */
@@ -128,12 +74,12 @@ class iSecurity {
 		}
 
 		if (!get_magic_quotes_gpc()) {
-			self::_addslashes($_POST);
-			self::_addslashes($_GET);
-			self::_addslashes($_COOKIE);
-			self::_addslashes($_FILES);
+			self::slashes($_POST);
+			self::slashes($_GET);
+			self::slashes($_COOKIE);
+			self::slashes($_FILES);
 		}
-		self::getServer(array(
+		self::get_server(array(
 			'HTTP_REFERER','HTTP_HOST','HTTP_X_FORWARDED_FOR','HTTP_USER_AGENT',
 			'HTTP_CLIENT_IP','HTTP_SCHEME','HTTPS','PHP_SELF','REMOTE_ADDR',
 			'REQUEST_URI','REQUEST_METHOD','SCRIPT_NAME','REQUEST_TIME',
@@ -142,7 +88,6 @@ class iSecurity {
 			'QUERY_STRING','argv','argc',
 			'Authorization','HTTP_AUTHORIZATION'
 		));
-
 	}
 	public static function filter_path($text) {
 	    $text = str_replace('\\', '/', $text);
@@ -158,42 +103,7 @@ class iSecurity {
 	    }
 		return $text;
 	}
-	/**
-	 * 路径转换
-	 * @param $fileName
-	 * @param $ifCheck
-	 * @return string
-	 */
-	public static function escapePath($fileName, $ifCheck = true) {
-		if (!self::_escapePath($fileName, $ifCheck)) {
-			trigger_error('What are you doing?',E_USER_ERROR);
-		}
-		return $fileName;
-	}
-	/**
-	 * 私用路径转换
-	 * @param $fileName
-	 * @param $ifCheck
-	 * @return boolean
-	 */
-	public static function _escapePath($fileName, $ifCheck = true) {
-		$tmpname = strtolower($fileName);
-		$tmparray = array('://',"\0");
-		$ifCheck && $tmparray[] = '..';
-		if (str_replace($tmparray, '', $tmpname) != $tmpname) {
-			return false;
-		}
-		return true;
-	}
-	/**
-	 * 目录转换
-	 * @param unknown_type $dir
-	 * @return string
-	 */
-	public static function escapeDir($dir) {
-		$dir = str_replace(array("'",'#','=','`','$','%','&',';'), '', $dir);
-		return rtrim(preg_replace('/(\/){2,}|(\\\){1,}/', '/', $dir), '/');
-	}
+
 	/**
 	 * 通用多类型转换
 	 * @param $mixed
@@ -215,69 +125,51 @@ class iSecurity {
 	}
 	/**
 	 * 字符转换
-	 * @param $string
+	 * @param $data
 	 * @return string
 	 */
-	public static function escapeStr($string) {
-	    if(is_array($string)) {
-	        foreach($string as $key => $val) {
-	            $string[$key] = self::escapeStr($val);
-	        }
-	    } else {
-	        $string = str_replace(array("\0","\x0B", "%00"), '', $string);
-			$string = str_replace(array('&', '"',"'"), array('&amp;', '&quot;','&#039;'), $string);
-	    	$string = str_replace('\\\\', '&#92;', $string);
-	        $string = str_replace(array("%3C", '<'), '&lt;', $string);
-	        $string = str_replace(array("%3E", '>'), '&gt;', $string);
-			$string = preg_replace('/&amp;((#(\d{3,5}|x[a-fA-F0-9]{4})|[a-zA-Z][a-z0-9]{2,5});)/', '&\\1',$string);
+	public static function escapeStr($data) {
+		if (is_array($data)) {
+			$data = array_map(array(__CLASS__,'escapeStr'), $data);
+		}else{
+	        $data = str_replace(array("\0","%00","\r"),'',$data);
+			$data = preg_replace('/[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]/','', $data);
+			//& => &amp;
+			$data = preg_replace('/&(?!(#[0-9]+|[a-z]+);)/is', '&amp;', $data);
+			//&amp;#xA9 => &#xA9;
+			$data = preg_replace('/&amp;#x([a-fA-F0-9]{2,4});/', '&#x\\1',$data);
+			// $data = str_replace(array('#','%','(',')'), array('&#35;','&#37;','&#40;','&#41;'), $data);
+			$data = str_replace(array('"',"'"), array('&#34;','&#39;'), $data);
+	        $data = str_replace(array("%3C", '<'), '&#60;', $data);
+	        $data = str_replace(array("%3E", '>'), '&#62;', $data);
 	    }
-	    return $string;
+	    return $data;
 	}
 	public static function html_decode($string) {
 		$string = htmlspecialchars_decode($string);
 		$string = str_replace('&#92;', '\\', $string);
 		return $string;
 	}
-	/**
-	 * 变量检查
-	 * @param $var
-	 */
-	public static function checkVar(&$var) {
-		if (is_array($var)) {
-			foreach ($var as $key => $value) {
-				self::checkVar($var[$key]);
-			}
-		} elseif (str_replace(array('<iframe','<meta','<script'), '', $var) != $var) {
-			trigger_error('XXS',E_USER_ERROR);
-		}else{
-			$var = str_replace(array('..',')','<','='), array('&#46;&#46;','&#41;','&#60;','&#61;'), $var);
-		}
-	}
 
 	/**
 	 * 变量转义
 	 * @param $array
 	 */
-	public static function _addslashes(&$array) {
-		if (is_object($array)) {
-			foreach ($array as $key => $value) {
-				if (is_object($value)) {
-					self::_addslashes($value);
-				} else {
-					$array->$key = addslashes($value);
-				}
+	public static function _addslashes(&$data) {
+		$data = self::slashes($data);
+		return $data;
+	}
+	public static function slashes(&$data) {
+		if (is_object($data)) {
+			foreach ($data as $key => &$value) {
+				self::slashes($value);
 			}
-		}elseif (is_array($array)) {
-			foreach ($array as $key => $value) {
-				if (is_array($value)) {
-					self::_addslashes($value);
-				} else {
-					$array[$key] = addslashes($value);
-				}
-			}
+		}elseif (is_array($data)) {
+			$data = array_map(array(__CLASS__,'slashes'), $data);
 		}else{
-			$array = addslashes($array);
+			$data = addslashes($data);
 		}
+		return $data;
 	}
 
 	/**
@@ -285,7 +177,7 @@ class iSecurity {
 	 * @param $keys
 	 * @return string
 	 */
-	public static function getServer($keys) {
+	public static function get_server($keys) {
 		// Fix for IIS when running with PHP ISAPI
 		if ( empty($_SERVER['REQUEST_URI'] ) || ( php_sapi_name() != 'cgi-fcgi' && preg_match( '/^Microsoft-IIS\//',$_SERVER['SERVER_SOFTWARE'] ) ) ) {
 		    if (isset($_SERVER['HTTP_X_ORIGINAL_URL'])) {
@@ -326,11 +218,13 @@ class iSecurity {
 
 		foreach ($_SERVER as $key=>$sval){
 			if (in_array($key, $keys)) {
-				$_SERVER[$key] = str_replace(array('<','>','"',"'",'%3C','%3E','%22','%27','%3c','%3e'), '',$sval);
+				$sval = str_replace(array('<','>','"',"'",'%3C','%3E','%22','%27','%3c','%3e'), '',$sval);
+				$_SERVER[$key] = str_replace(array("\0","\x0B", "%00", "\r"), '', $sval);
 			}else{
 				unset($_SERVER[$key]);
 			}
 		}
+		self::slashes($_SERVER);
 	}
     public static function encoding($string,$code='UTF-8') {
         $encode = mb_detect_encoding($string, array("ASCII","UTF-8","GB2312","GBK","BIG5"));

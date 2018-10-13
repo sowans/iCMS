@@ -13,7 +13,7 @@ class formsAdmincp{
     public function __construct($fid=null) {
       $this->appid = iCMS_APP_FORMS;
       $this->id = (int)$_GET['id'];
-      $fid===null && $fid = iSecurity::getGP('fid');
+      $fid===null && $fid = iSecurity::request('fid');
       $this->fid = (int)$fid;
     }
     public function form_init(){

@@ -36,7 +36,7 @@ class iDevice {
         if(empty(self::$device)){
             //有设置其它设备
             if(self::$config['device']){
-                iSecurity::getGP('device')&& $device = self::check('device');   //判断指定设备
+                iSecurity::request('device')&& $device = self::check('device');   //判断指定设备
                 empty($device)    && $device = self::check('domain');   //无指定设备 判断域名模板
                 empty($device)    && $device = self::check('ua');       //无指定域名 判断USER_AGENT
                 $device && list($device_name, $device_tpl,$device_index,self::$domain) = $device;
@@ -184,7 +184,7 @@ class iDevice {
                 if ($flag == 'ua') {
                     $device['ua'] && $check = self::agent($device['ua']);
                 } elseif ($flag == 'device') {
-                    $_device = iSecurity::getGP('device');
+                    $_device = iSecurity::request('device');
                     if ($device['ua'] == $_device || $device['name'] == $_device) {
                         $check = true;
                     }

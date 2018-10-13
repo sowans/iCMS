@@ -381,7 +381,8 @@ $(function(){
                       <li><a data-toggle="batch" data-action="postype"><i class="fa fa-cog"></i> 设置发布类型</a></li>
                       <li class="divider"></li>
                       <?php if(iCMS::$config['api']['baidu']['sitemap']['site'] && iCMS::$config['api']['baidu']['sitemap']['access_token']){ ?>
-                      <li><a data-toggle="batch" data-action="baiduping" title="百度站长平台主动推送"><i class="fa fa-send"></i> 百度主动推送</a></li>
+                      <li><a data-toggle="batch" data-action="baiduping" title="百度站长平台-主动推送"><i class="fa fa-send"></i> 百度主动推送</a></li>
+                      <li><a data-toggle="batch" data-action="baiduping_original" title="百度站长平台-原创提交"><i class="fa fa-send"></i> 原创提交</a></li>
                       <li class="divider"></li>
                       <?php } ?>
                       <li><a data-toggle="batch" data-action="status:2"><i class="fa fa-trash-o"></i> 移入回收站</a></li>

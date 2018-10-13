@@ -380,8 +380,8 @@ class iView {
         $tpl===null && $tpl = iSecurity::escapeStr($_GET['tpl']);
         if($tpl){
             $tpl.= '.htm';
-            $tpl = iSecurity::escapeDir(ltrim($tpl,'/'));
-            if(iSecurity::_escapePath($tpl)){
+            $tpl = iFS::escape_dir(ltrim($tpl,'/'));
+            if(iFS::check($tpl)){
                 $tplpath = iPHP_TPL_DIR . '/' .self::$config['template']['dir'].'/'.$tpl;
                 if (is_file($tplpath)) {
                     $iTPL = '{iTPL}/'.$tpl;

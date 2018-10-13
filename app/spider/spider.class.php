@@ -264,7 +264,7 @@ class spider{
             }
         }
 
-        iSecurity::_addslashes($_POST);
+        iSecurity::slashes($_POST);
         $fun    = $postArgs->fun;
         $return = "1001";
         if(iFS::checkHttp($fun)){

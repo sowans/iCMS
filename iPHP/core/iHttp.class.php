@@ -18,6 +18,7 @@ class iHttp{
     public static $CURL_HTTP_CODE         = null;
     public static $CURL_CONTENT_TYPE      = null;
     public static $CURL_PROXY             = null;
+    public static $CURL_PROXY_IP          = null;
     public static $CURL_PROXY_ARRAY       = array();
 
     public static $CURLOPT_ENCODING       = '';
@@ -58,32 +59,31 @@ class iHttp{
             $test = call_user_func_array(self::$callback['proxy_test'],array($options));
             if($test===false) return false;
         }
-
-        if (empty(self::$CURL_PROXY_ARRAY)) {
-            if (self::$CURL_PROXY && is_string(self::$CURL_PROXY)) {
-                self::$CURL_PROXY_ARRAY = explode("\n", self::$CURL_PROXY); // socks5://127.0.0.1:1080@username:password
-                self::$CURL_PROXY = null;
+        if(self::$CURL_PROXY_IP){
+            $proxy = self::$CURL_PROXY_IP;
+        }else{
+            if (empty(self::$CURL_PROXY_ARRAY)) {
+                if (self::$CURL_PROXY && is_string(self::$CURL_PROXY)) {
+                    self::$CURL_PROXY_ARRAY = explode("\n", self::$CURL_PROXY); // socks5://127.0.0.1:1080@username:password
+                    self::$CURL_PROXY = null;
+                }
             }
+
+            if (self::$callback['proxy_array'] && is_callable(self::$callback['proxy_array'])) {
+                call_user_func_array(self::$callback['proxy_array'],array(&self::$CURL_PROXY_ARRAY));
+            }
+
+            self::$CURL_PROXY_ARRAY = array_unique(self::$CURL_PROXY_ARRAY);
+            self::$CURL_PROXY_ARRAY = array_filter(self::$CURL_PROXY_ARRAY);
+
+            if (empty(self::$CURL_PROXY_ARRAY)) {
+                return false;
+            }
+
+            $index = array_rand(self::$CURL_PROXY_ARRAY, 1);
+            $proxy = self::$CURL_PROXY_ARRAY[$index];
+            $proxy = trim($proxy);
         }
-
-        if (self::$callback['proxy_array'] && is_callable(self::$callback['proxy_array'])) {
-            call_user_func_array(self::$callback['proxy_array'],array(&self::$CURL_PROXY_ARRAY));
-        }
-
-        self::$CURL_PROXY_ARRAY = array_unique(self::$CURL_PROXY_ARRAY);
-        self::$CURL_PROXY_ARRAY = array_filter(self::$CURL_PROXY_ARRAY);
-
-        if (empty(self::$CURL_PROXY_ARRAY)) {
-            return false;
-        }
-
-        $index = array_rand(self::$CURL_PROXY_ARRAY, 1);
-        $proxy = self::$CURL_PROXY_ARRAY[$index];
-        $proxy = trim($proxy);
-
-        // if($count[$proxy]>10){
-        //     return false;
-        // }
 
         $options = array(
             CURLOPT_URL            => 'http://www.baidu.com',
@@ -108,16 +108,18 @@ class iHttp{
         $curl_error = curl_error($ch);
         curl_close($ch);
 
-        iPHP_SHELL && print date("Y-m-d H:i:s ").'iHttp::proxy_test [proxy:'.$index.'] => '.$proxy;
+        iPHP_SHELL && print date("Y-m-d H:i:s ").'iHttp::proxy_test [count:'.$_count.'][index:'.$index.'] => '.$proxy;
         if ($info['http_code'] == 200) {
             iPHP_SHELL && print ' SUCCESS...'.PHP_EOL;
+            self::$CURL_PROXY_IP = $proxy;
             return $proxy;
         } else {
-            iPHP_SHELL && print ' FAIL...'.PHP_EOL;
-            iPHP_SHELL && print date("Y-m-d H:i:s ")."iHttp::proxy_test [error:$errno] => $curl_error".PHP_EOL;
-            iPHP_SHELL && print date("Y-m-d H:i:s ");
-            iPHP_SHELL && print PHP_EOL;
+            iPHP_SHELL && print " FAIL... [errno:$errno] [error:$curl_error]".PHP_EOL;
+            // iPHP_SHELL && print date("Y-m-d H:i:s ");
+            // iPHP_SHELL && print PHP_EOL;
+            self::$CURL_PROXY_IP = null;
             unset(self::$CURL_PROXY_ARRAY[$index]);
+            ++$_count;
             return self::proxy_test($options,$_count);
         }
     }

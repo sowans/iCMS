@@ -22,7 +22,7 @@ class contentAdmincp{
 
     public function __construct($data=null,$dir=null) {
         if($data===null){
-            $id = iSecurity::getGP('appid');
+            $id = iSecurity::request('appid');
             $data = apps::get_app($id);
         }else if(!is_array($data)){
             $data = apps::get_app($data);

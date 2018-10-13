@@ -10,7 +10,7 @@
 class databaseAdmincp {
 	public function __construct() {
 		$this->bakdir = $_GET['dir'];
-		iFS::check($this->bakdir);
+		iFS::check($this->bakdir,true);
 	}
 	/**
 	 * [数据库恢复页]
@@ -93,7 +93,7 @@ class databaseAdmincp {
 		!$tableA && !$tablesel && iUI::alert('没有选择操作对象');
 		!$tableA && $tableA = explode("|", $tablesel);
 		!$step && $this->sizelimit /= 2;
-		iFS::check($bdir);
+		iFS::check($bdir,true);
 
 		$bakupdata = $this->bakupdata($tableA, $this->start);
 		$bakTag = "# iCMS Backup SQL File\n# Version:iCMS " . iCMS_VERSION . "\n# Time: " . get_date(0, "Y-m-d H:i:s") . "\n# iCMS: https://www.icmsdev.com\n# --------------------------------------------------------\n\n\n";

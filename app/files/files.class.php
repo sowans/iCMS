@@ -174,7 +174,7 @@ class files {
         $data['time']   = time();
         $data['type']   = $type;
         $data['status'] = $status;
-        iSecurity::_addslashes($data);
+        iSecurity::slashes($data);
         $data = iSecurity::escapeStr($data);
         iWAF::check_data($data);
         iDB::insert(self::$TABLE_DATA, $data);
@@ -188,7 +188,7 @@ class files {
         $userid = self::$userid === false ? 0 : self::$userid;
         $data['userid'] = $userid;
         $data['time'] = time();
-        iSecurity::_addslashes($data);
+        iSecurity::slashes($data);
         $data = iSecurity::escapeStr($data);
         iWAF::check_data($data);
         iDB::update(self::$TABLE_DATA, $data, array('id' => $fid));

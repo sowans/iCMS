@@ -394,7 +394,7 @@ function authcode($string, $operation = 'DECODE', $key = '', $expiry = 0) {
 	$cryptkey      = $keya.md5($keya.$keyc);
 	$key_length    = strlen($cryptkey);
 
-	$string        = $operation == 'DECODE' ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? (int)$expiry + time() : 0).substr(md5($string.$keyb), 0, 16).$string;
+	$string        = $operation == 'DECODE' ? urlsafe_b64decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? (int)$expiry + time() : 0).substr(md5($string.$keyb), 0, 16).$string;
 	$string_length = strlen($string);
 
 	$result        = '';
@@ -428,9 +428,22 @@ function authcode($string, $operation = 'DECODE', $key = '', $expiry = 0) {
             return '';
         }
     } else {
-        return $keyc.str_replace('=', '', base64_encode($result));
+        return $keyc.urlsafe_b64encode($result);
     }
 }
+function urlsafe_b64decode($input){
+    $remainder = strlen($input) % 4;
+    if ($remainder) {
+        $padlen = 4 - $remainder;
+        $input .= str_repeat('=', $padlen);
+    }
+    return base64_decode(strtr($input, '-_!', '+/%'));
+}
+
+function urlsafe_b64encode($input){
+    return str_replace('=', '', strtr(base64_encode($input), '+/%', '-_!'));
+}
+
 function str_exists($string, $find) {
     return !(strpos($string, $find) === FALSE);
 }

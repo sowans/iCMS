@@ -68,8 +68,18 @@ class iFS {
 		return @filemtime($file);
 	}
 
-	public static function check($fn) {
-		strpos($fn, '..') !== false && trigger_error('What are you doing?',E_USER_ERROR);
+	public static function check($fn,$throw=false) {
+		$tmpname = strtolower($fileName);
+		$tmparray = array('://',"\0");
+		$ifCheck && $tmparray[] = '..';
+		if (str_replace($tmparray, '', $tmpname) != $tmpname) {
+			if($throw){
+				trigger_error('What are you doing?',E_USER_ERROR);
+			}else{
+				return false;
+			}
+		}
+		return true;
 	}
 	public static function checkHttp($url) {
 		if (stripos($url, 'http://') === false && stripos($url, 'https://') === false) {
@@ -121,6 +131,11 @@ class iFS {
 		}
 		return false;
 	}
+	/**
+	 * 目录转换
+	 * @param  $dir
+	 * @return string
+	 */
 	public static function escape_dir($dir) {
 		$dir = str_replace(array("'", '#', '=', '`', '$', '%', '&', ';',"\0"), '', $dir);
 		return rtrim(preg_replace('/(\/){2,}|(\\\){1,}/', '/', $dir), '/');

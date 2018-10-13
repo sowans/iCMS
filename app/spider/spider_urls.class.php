@@ -106,7 +106,7 @@ class spider_urls {
             $url = trim($url);
             spider::$urlslast = $url;
 
-            if($pid){
+            if($pid && $work=='shell'){
                 if(file_exists($lastkey_file)){
                     $lastkey     = file_get_contents($lastkey_file);
                     $lastkeytime = filemtime($lastkey_file);

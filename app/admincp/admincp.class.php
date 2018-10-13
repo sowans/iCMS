@@ -43,7 +43,7 @@ class admincp {
 		iDB::$show_explain    = false;
 
 		members::$LOGIN_PAGE  = ACP_PATH.'/template/admincp.login.php';
-		members::$GATEWAY     = iSecurity::getGP('gateway');
+		members::$GATEWAY     = iSecurity::request('gateway');
 		members::check_login(array("admincpApp","check_seccode")); //用户登陆验证
 		members::check_priv('ADMINCP','page');//检查是否有后台权限
 
@@ -64,7 +64,7 @@ class admincp {
 	public static function run($app = NULL, $do = NULL, $args = NULL, $prefix = "do_") {
 		self::init();
 
-		$app OR $app = iSecurity::getGP('app');
+		$app OR $app = iSecurity::request('app');
 		$do  OR $do  = iSecurity::escapeStr($_GET['do']);
 		$app OR $app = 'admincp';
 		$do  OR $do  = 'iCMS';

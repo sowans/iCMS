@@ -50,7 +50,7 @@ class iPHP {
 		iWAF::filter();
 		//security
 		iSecurity::filter();
-		iSecurity::GP('page','GP',2);
+		iSecurity::globals('page','GP',2);
 		iDefine::request();
 	}
 	public static function autoload($class,$core=null){
@@ -133,7 +133,7 @@ class iPHP {
         defined('iPHP_MOBILE') OR define('iPHP_MOBILE', $mobile);
     }
 	public static function run($app = NULL, $do = NULL, $args = NULL, $prefix = "do_") {
-		empty($app) && $app = iSecurity::getGP('app'); //单一入口
+		empty($app) && $app = iSecurity::request('app'); //单一入口
 		if (empty($app)) {
 			$fi = iFS::name(iPHP_SELF);
 			$app = $fi['name'];
@@ -594,16 +594,22 @@ class iPHP {
 	        case E_RECOVERABLE_ERROR:  $type = "Recoverable Error";      break;
 	        default:                   $type = "Unknown error ($errno)"; break;
 		}
-		$html = "<pre style='font-size: 14px;'>";
-		$html.= "<b>{$type}:</b> {$errstr} IN <b>{$errfile}</b> on line <b>{$errline}</b>\n";
+		$html = "<pre style='font-size: 14px;white-space: normal;'>";
+		$html.= "<b style='font-size: 18px;color:red;'>{$type}</b>\n{$errstr}";
+		$html.= " in <b>{$errfile}</b> on line <b>{$errline}</b>\n";
 		if (function_exists('debug_backtrace')) {
 			$backtrace = debug_backtrace();
-			foreach ($backtrace as $i => $l) {
-				$html .= "[$i] in function <b>{$l['class']}{$l['type']}{$l['function']}</b>";
-				$l['file'] && $html .= " in <b>{$l['file']}</b>";
-				$l['line'] && $html .= " on line <b>{$l['line']}</b>";
+			krsort($backtrace);
+			$c = count($backtrace);
+			$html.= "<pre style='font-size: 14px;white-space: normal;'>";
+			foreach ($backtrace as $i => $bt) {
+				$html .= ($c-$i).". <b>{$bt['class']}{$bt['type']}{$bt['function']}()</b>";
+				// $html .= '(' . implode(', ', $bt['args']) . ')';
+				$bt['file'] && $html .= " in <b>{$bt['file']}</b>";
+				$bt['line'] && $html .= " on line <b>{$bt['line']}</b>";
 				$html .= "\n";
 			}
+			$html .= "</pre>";
 		}
 		$html .= "</pre>";
 		$html = iSecurity::filter_path($html);

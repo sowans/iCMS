@@ -15,7 +15,7 @@ class contentApp extends appsApp {
 
     public function __construct($data=null) {
         if($data===null){
-            $id = iSecurity::getGP('appid');
+            $id = iSecurity::request('appid');
             $data = apps::get_app($id);
         }else if(!is_array($data)){
             $data = apps::get_app($data);

@@ -51,7 +51,7 @@ class iDB {
         $config && self::$config = $config;
     }
     public static function connect($flag=null) {
-        extension_loaded('mysqli') OR self::bail('mysqli extension is missing. Please check your PHP configuration');
+        extension_loaded('mysqli') OR self::print_error('mysqli extension is missing. Please check your PHP configuration');
 
         self::config();
         if(isset($GLOBALS[self::$dbFlag])){
@@ -62,11 +62,12 @@ class iDB {
             }
         }
         self::$link = new mysqli(self::$config['HOST'], self::$config['USER'], self::$config['PASSWORD'],null,self::$config['PORT']);
+
         if($flag==='link'){
             return self::$link;
         }
 
-        self::$link->connect_errno && self::bail('Connect Error ('.self::$link->connect_errno.') '.self::$link->connect_error);
+        self::$link->connect_errno && self::print_error('Connect Error ('.self::$link->connect_errno.') '.self::$link->connect_error);
 
         $GLOBALS[self::$dbFlag] = self::$link;
         self::pre_set();
@@ -81,7 +82,7 @@ class iDB {
     public static function select_db($var=false) {
         $sel = self::$link->select_db(self::$config['DB']);
         if($var) return $sel;
-        $sel OR self::bail('Connect Error ('.self::$link->errno.') '.self::$link->error);
+        $sel OR self::print_error('Connect Error ('.self::$link->errno.') '.self::$link->error);
     }
     // ==================================================================
     /** Quote string to use in SQL
@@ -120,7 +121,7 @@ class iDB {
     public static function query($query,$QT=NULL) {
         if(empty($query)){
             if (self::$show_errors) {
-                self::bail("SQL IS EMPTY");
+                self::print_error("SQL IS EMPTY");
             } else {
                 return false;
             }
@@ -251,7 +252,6 @@ class iDB {
         }
         return self::query("UPDATE ".iPHP_DB_PREFIX_TAG."{$table} SET " . implode( ', ', $bits ) . ' WHERE ' . implode( ' AND ', $wheres ) . ' LIMIT 1;' );
     }
-
     /**
      * Get one variable from the database
      * @param string $query (can be null as well, for caching, see codex)
@@ -390,13 +390,12 @@ class iDB {
         }
     }
     public static function version() {
-
         self::$link OR self::connect();
         // Make sure the server has MySQL 4.0
         $mysql_version = preg_replace('|[^0-9\.]|', '', self::$link->server_info);
 
         if ( version_compare($mysql_version, '4.0.0', '<') ){
-            self::bail('mysql version error,iPHP requires MySQL 4.0.0 or higher');
+            self::print_error('mysql version error,iPHP requires MySQL 4.0.0 or higher');
         }else{
             return $mysql_version;
         }
@@ -448,11 +447,7 @@ class iDB {
             echo "-->\n";
         }
     }
-    // public static function show_errors(){
-    //     if(!self::$show_errors) return false;
-    //     self::bail('<strong>iDB SQL error:</strong>'.self::$last_query);
-    // }
-    //
+
     //  Print SQL/DB error.
 
     public static function print_error($error = '') {
@@ -465,7 +460,8 @@ class iDB {
         $query = htmlspecialchars(self::$last_query, ENT_QUOTES);
         // Is error output turned on or not..
         if ($error) {
-            self::bail("<strong>iDB error:</strong> [$error]<br /><code>$query</code>");
+            $message = "<strong>iDB error:</strong> [$error]<br /><code>$query</code>";
+            trigger_error($message,E_USER_ERROR);
         } else {
             return false;
         }
@@ -483,14 +479,5 @@ class iDB {
         }
         self::$trace_info[] = array('sql'=>$query, 'exec_time'=>self::timer_stop(true),'backtrace'=>$trace);
         unset($trace,$backtrace);
-    }
-    /**
-     * Wraps fatal errors in a nice header and footer and dies.
-     * @param string $message
-     */
-    public static function bail($message=null){ // Just wraps errors in a nice header and footer
-        if(!self::$show_errors) return;
-        empty($message) && $message = 'mysql Error ('.self::$link->errno.') '.self::$link->error;
-        trigger_error($message,E_USER_ERROR);
     }
 }

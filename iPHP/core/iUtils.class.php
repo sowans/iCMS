@@ -14,7 +14,7 @@ class iUtils {
                     parse_str($input, $data);
                 }
             }
-            iSecurity::_addslashes($data);
+            iSecurity::slashes($data);
             iWAF::check_data($data);
             return $data;
         }else{

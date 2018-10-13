@@ -15,7 +15,7 @@ define('ARRAY_N', 'ARRAY_N');
 defined('iPHP_DB_PORT') OR define('iPHP_DB_PORT', '3306');
 defined('iPHP_DB_NEW_LINK') OR define('iPHP_DB_NEW_LINK', null);
 
-class iDB{
+class iDB {
     public static $print_sql = false;
     public static $show_trace = false;
     public static $show_errors = false;
@@ -52,10 +52,10 @@ class iDB{
         $config && self::$config = $config;
     }
     public static function connect($flag=null) {
-        extension_loaded('mysql') OR self::bail('mysql extension is missing. Please check your PHP configuration');
+        extension_loaded('mysql') OR self::print_error('mysql extension is missing. Please check your PHP configuration');
 
         defined('iPHP_DB_COLLATE') &&self::$collate = iPHP_DB_COLLATE;
-
+	
         self::config();
         if(isset($GLOBALS[self::$dbFlag])){
             self::$link = $GLOBALS[self::$dbFlag];
@@ -70,7 +70,7 @@ class iDB{
             return self::$link;
         }
 
-        self::$link OR self::bail();
+        self::$link OR self::print_error();
 
         $GLOBALS[self::$dbFlag] = self::$link;
         self::pre_set();
@@ -86,7 +86,7 @@ class iDB{
     public static function select_db($var=false) {
         $sel = @mysql_select_db(self::$config['DB'], self::$link);
         if($var) return $sel;
-        $sel OR self::bail();
+        $sel OR self::print_error();
     }
     // ==================================================================
     /** Quote string to use in SQL
@@ -125,7 +125,7 @@ class iDB{
     public static function query($query,$QT=NULL) {
         if(empty($query)){
             if (self::$show_errors) {
-                self::bail("SQL IS EMPTY");
+                self::print_error("SQL IS EMPTY");
             } else {
                 return false;
             }
@@ -162,7 +162,6 @@ class iDB{
             // If there is an error then take note of it..
             return self::print_error();
         }
-
         if(strpos($query,'EXPLAIN')===false){
             self::$num_queries++;
             self::$show_trace && self::backtrace($query);
@@ -235,7 +234,6 @@ class iDB{
             return self::query("INSERT INTO ".iPHP_DB_PREFIX_TAG."{$table} (`" . implode('`,`',$fields) . "`) VALUES ".implode(',',$datasql));
         }
     }
-
     /**
      * Update a row in the table with an array of data
      * @param string $table WARNING: not sanitized!
@@ -244,7 +242,6 @@ class iDB{
      * @return mixed results of self::query()
      */
     public static function update($table, $data, $where) {
-//      $data = add_magic_quotes($data);
         $bits = $wheres = array();
         foreach ( array_keys($data) as $k ){
             $bits[] = "`$k` = '$data[$k]'";
@@ -398,8 +395,9 @@ class iDB{
         self::$link OR self::connect();
         // Make sure the server has MySQL 4.0
         $mysql_version = preg_replace('|[^0-9\.]|', '', @mysql_get_server_info(self::$link));
+
         if ( version_compare($mysql_version, '4.0.0', '<') ){
-            self::bail('mysql version error,iPHP requires MySQL 4.0.0 or higher');
+            self::print_error('mysql version error,iPHP requires MySQL 4.0.0 or higher');
         }else{
             return $mysql_version;
         }
@@ -451,15 +449,12 @@ class iDB{
             echo "-->\n";
         }
     }
-    // public static function show_errors(){
-    //     if(!self::$show_errors) return false;
-    //     self::bail('<strong>iDB SQL error:</strong>'.self::$last_query);
-    // }
-    //
+
     //  Print SQL/DB error.
 
     public static function print_error($error = '') {
         if(!self::$show_errors) return;
+
         self::$last_error = mysql_error(self::$link);
         $error OR $error = self::$last_error;
 
@@ -467,7 +462,8 @@ class iDB{
         $query = htmlspecialchars(self::$last_query, ENT_QUOTES);
         // Is error output turned on or not..
         if ($error) {
-            self::bail("<strong>iDB error:</strong> [$error]<br /><code>$query</code>");
+            $message = "<strong>iDB error:</strong> [$error]<br /><code>$query</code>";
+            trigger_error($message,E_USER_ERROR);
         } else {
             return false;
         }
@@ -485,14 +481,5 @@ class iDB{
         }
         self::$trace_info[] = array('sql'=>$query, 'exec_time'=>self::timer_stop(true),'backtrace'=>$trace);
         unset($trace,$backtrace);
-    }
-    /**
-     * Wraps fatal errors in a nice header and footer and dies.
-     * @param string $message
-     */
-    public static function bail($message=null){ // Just wraps errors in a nice header and footer
-        if(!self::$show_errors) return;
-        empty($message) && $message = mysql_error();
-        trigger_error($message,E_USER_ERROR);
     }
 }

@@ -148,7 +148,7 @@ function _GET($REQUEST_URI,$REQ){
     parse_str($parse['query'], $request);
     parse_str($REQ['query'], $query);
     $_GET = array_merge($request,$query);
-    iSecurity::_addslashes($_GET);
+    iSecurity::slashes($_GET);
     iWAF::check_data($_GET);
 }
 
