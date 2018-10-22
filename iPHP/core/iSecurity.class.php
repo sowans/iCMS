@@ -156,8 +156,7 @@ class iSecurity {
 	 * @param $array
 	 */
 	public static function _addslashes(&$data) {
-		$data = self::slashes($data);
-		return $data;
+		return self::slashes($data);
 	}
 	public static function slashes(&$data) {
 		if (is_object($data)) {

@@ -94,7 +94,8 @@ class iFileCache {
     private function file_list($dir,$pattern='*'){
         $lists = array();
         $dir   = trim($dir, '/');
-        foreach(glob($dir.'/'.$pattern) as $value){
+        $array = glob($dir.'/'.$pattern);
+        if($array)foreach($array as $value){
             $lists[] = $value;
             if(is_dir($value)){
               $_lists = $this->file_list($value,$pattern);

@@ -488,8 +488,9 @@ class iFS {
 
 		if ($_FILES[$field]['name']) {
 			$tmp_file = $_FILES[$field]['tmp_name'];
-			if (!is_uploaded_file($tmp_file)) {
-				return self::_error(array('code' => 0, 'state' => 'UNKNOWN'));
+			$_tmp_file = str_replace('\\\\', '\\', $tmp_file);
+			if (!is_uploaded_file($_tmp_file)) {
+				return self::_error(array('code' => 0, 'state' => 'Error'));
 			}
 			if ($_FILES[$field]['error'] > 0) {
 				switch ((int) $_FILES[$field]['error']) {
