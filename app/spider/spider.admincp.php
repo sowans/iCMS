@@ -472,6 +472,7 @@ echo '</script>';
 			if ($data) {
 				$data = base64_decode($data);
 				$data = unserialize($data);
+				$data = iSecurity::slashes($data);
 				iDB::insert("spider_rule", $data);
 			}
 			@unlink($path);
@@ -760,6 +761,7 @@ echo '</script>';
                 $data = base64_decode($data);
                 $data = unserialize($data);
                 foreach ((array)$data as $key => $value) {
+                	$value = iSecurity::slashes($value);
                     iDB::insert("spider_project",$value);
                 }
             }

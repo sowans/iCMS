@@ -138,8 +138,7 @@ class iSecurity {
 			$data = preg_replace('/&(?!(#[0-9]+|[a-z]+);)/is', '&amp;', $data);
 			//&amp;#xA9 => &#xA9;
 			$data = preg_replace('/&amp;#x([a-fA-F0-9]{2,4});/', '&#x\\1',$data);
-			// $data = str_replace(array('#','%','(',')'), array('&#35;','&#37;','&#40;','&#41;'), $data);
-			$data = str_replace(array('"',"'"), array('&#34;','&#39;'), $data);
+			$data = str_replace(array('\"',"\'","\\\\"), array('&#34;','&#39;','&#92;'), $data);
 	        $data = str_replace(array("%3C", '<'), '&#60;', $data);
 	        $data = str_replace(array("%3E", '>'), '&#62;', $data);
 	    }
