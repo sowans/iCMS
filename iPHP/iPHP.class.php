@@ -443,10 +443,13 @@ class iPHP {
     }
     public static function is_callable($callback) {
     	self::$is_callable = true;
+
     	if(is_array($callback)){
     		return (class_exists($callback[0]) && method_exists($callback[0],$callback[1]));
+    	}elseif (is_string($callback)) {
+			return function_exists($callback);
     	}else{
-    		return function_exists($callback);
+    		return is_callable($callback);
     	}
     }
 	public static function vendor($name, $args = null,$self=false) {
