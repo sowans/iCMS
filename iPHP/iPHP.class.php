@@ -436,15 +436,18 @@ class iPHP {
     }
     public static function callfunc($callback,$value) {
 	    $callable = self::$is_callable;
-	    self::$is_callable = true;
-	    if(is_callable($callback)){
+	    if(self::is_callable($callback)){
 	    	return call_user_func_array($callback,(array)$value);
 	    }
 	    self::$is_callable = $callable;
     }
     public static function is_callable($callback) {
     	self::$is_callable = true;
-    	return is_callable($callback);
+    	if(is_array($callback)){
+    		return (class_exists($callback[0]) && method_exists($callback[0],$callback[1]));
+    	}else{
+    		return function_exists($callback);
+    	}
     }
 	public static function vendor($name, $args = null,$self=false) {
 		$vendor = '/vendor/Vendor.' . $name . '.php';

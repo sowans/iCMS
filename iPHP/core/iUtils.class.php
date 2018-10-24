@@ -1,6 +1,8 @@
 <?php
 
 class iUtils {
+    public static $debug = false;
+
     public static function INPUT($input=null,$name=false){
         $input===null && $input = file_get_contents("php://input");
         $name===null && self::LOG($input,'input');
@@ -23,7 +25,7 @@ class iUtils {
     }
 
     public static function LOG($output=null,$name='debug'){
-        if(iPHP_DEBUG){
+        if(iPHP_DEBUG||self::$debug){
             if($output==='RAW'){
                 $output = file_get_contents("php://input");
             }
