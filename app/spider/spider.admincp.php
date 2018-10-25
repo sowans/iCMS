@@ -342,39 +342,52 @@ class spiderAdmincp {
 
 		$_count    = count($pubArray);
 		$jsonArray = array();
-		// foreach ((array) $pubArray as $i => $a) {
-		// 	$a['index']    = $i;
-		// 	$a['dialog']   = 0;
-		// 	$a['md5']      = md5($a['url']);
-		// 	$jsonArray[$i] = $a;
-		// }
+
+		foreach ((array) $pubArray as $i => $a) {
+			$a['index']    = $i;
+			$a['dialog']   = 0;
+			$a['md5']      = md5($a['url']);
+			$jsonArray[$i] = $a;
+		}
 
 		iUI::$break = false;
 		iUI::flush_start();
 		iUI::dialog('开始采集', '', false, 0, false);
 echo '
 <script type="text/javascript">
-// var crawl_data = \'.json_encode($jsonArray).\';
-// var crawl_count = crawl_data.length,crawl_complete = 0;
 
-// if(crawl_count>0){
-// 	crawl_data.forEach(function(v,i){
-// 		crawl(v);
-// 	});
-// }
+var $crawl_request = new Array();
+var $crawl_data = '.json_encode($jsonArray).';
+var $crawl_count = $crawl_data.length,$crawl_complete = 0;
 
-// top.$.ajaxSetup({
-// 	cache : false,
-// 	compelete:function(jqXHR){
-// 	    delete jqXHR;
-// 	    jqXHR = null;
-// 	}
-// });
+d.addEventListener("remove", function(){
+	crawl_stop();
+});
 
-var crawl_count = '.$_count.',crawl_complete = 0;
+if($crawl_count>0){
+	$crawl_data.forEach(function(v,i){
+		crawl_run(v);
+	});
+}
 
+top.$.ajaxSetup({
+	cache : false,
+	compelete:function(jqXHR){
+	    delete jqXHR;
+	    jqXHR = null;
+	}
+});
+
+function crawl_stop(){
+	for(var i=0;i<$crawl_request.length;i++){
+         $crawl_request[i].abort();
+    }
+    $crawl_request = new Array();
+
+	window.stop ? window.stop() : document.execCommand("Stop");
+}
 function is_complete(){
-	if(crawl_complete==crawl_count){
+	if($crawl_complete==$crawl_count){
 	    d.content(\'<table class=\"ui-dialog-table\" align=\"center\"><tr><td valign=\"middle\">全部采集完成!</td></tr></table>\');
 	    top.$.get("'.APP_URI.'&do=update_project_lastupdate",{"id":"'. $this->pid.'"});
 
@@ -383,30 +396,33 @@ function is_complete(){
 	    },1000);
 	}
 }
-function crawl(a){
-	top.$.ajax(
-	type: "POST",
-	url:"'.APP_URI.'&do=crawl&CSRF_TOKEN='.iPHP_WAF_CSRF_TOKEN.'",
-	data:a,
-	success:function(msg){
-	    ++crawl_complete;
-	    d.content(\'<table class=\"ui-dialog-table\" align=\"center\"><tr><td valign=\"middle\">\'+msg+\'[\'+a.index+\']采集完成 (\'+crawl_complete+\':\'+crawl_count+\')</td></tr></table>\');
-		parent.$("#"+a.md5).remove();
-		is_complete();
+function crawl_run(a){
+	var $request = top.$.ajax({
+		type: "POST",
+		url:"'.APP_URI.'&do=crawl&CSRF_TOKEN='.iPHP_WAF_CSRF_TOKEN.'",
+		data:a,
+		success:function(msg){
+		    ++$crawl_complete;
+		    d.content(\'<table class=\"ui-dialog-table\" align=\"center\"><tr><td valign=\"middle\">\'+msg+\'[\'+a.index+\']采集完成 (\'+$crawl_complete+\':\'+$crawl_count+\')</td></tr></table>\');
+			parent.$("#"+a.md5).remove();
+			is_complete();
+		}
 	});
+	$crawl_request.push($request);
 }
+// var $crawl_count = '.$_count.',$crawl_complete = 0;
 </script>';
 
-echo '<script type="text/javascript">';
-		foreach ((array) $pubArray as $i => $a) {
-			$a['index']    = $i;
-			$a['dialog']   = 0;
-			$a['md5']      = md5($a['url']);
-			// $jsonArray[$i] = $a;
-			echo 'var a = '.json_encode($a).';crawl(a);'.PHP_EOL;
-			iUI::flush();
-		}
-echo '</script>';
+// echo '<script type="text/javascript">';
+// 		foreach ((array) $pubArray as $i => $a) {
+// 			$a['index']    = $i;
+// 			$a['dialog']   = 0;
+// 			$a['md5']      = md5($a['url']);
+// 			// $jsonArray[$i] = $a;
+// 			echo 'var a = '.json_encode($a).';crawl_run(a);'.PHP_EOL;
+// 			iUI::flush();
+// 		}
+// echo '</script>';
 		iUI::flush();
 
 	}
