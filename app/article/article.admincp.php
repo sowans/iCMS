@@ -944,7 +944,6 @@ class articleAdmincp{
         isset($_POST['dellink']) && $body = preg_replace("/<a[^>].*?>(.*?)<\/a>/si", "\\1",$body);
 
         if($_POST['markdown']){
-            $body = addslashes($body);
         }else{
             self::$config['autoformat'] && $body = addslashes(autoformat($body));
         }

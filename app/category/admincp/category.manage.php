@@ -292,8 +292,13 @@ iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
           </div>
         </div>
         <div id="statusBatch">
-          <div class="switch" data-on-label="显示" data-off-label="隐藏">
-            <input type="checkbox" data-type="switch" name="status" id="status"/>
+          <div class="input-prepend"> <span class="add-on">栏目状态</span>
+            <select name="status" id="status" class="span3">
+              <option value="0">隐藏[status="0"]</option>
+              <option value="1">显示[status="1"]</option>
+              <option value="2">不调用[status="2"]</option>
+              <?php echo propAdmincp::get("status") ; ?>
+            </select>
           </div>
         </div>
         <div id="ruleBatch" style="width: 560px;min-height:260px;text-align: left;"  class="form-inline">

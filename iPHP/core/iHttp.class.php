@@ -20,12 +20,15 @@ class iHttp{
     public static $CURL_PROXY             = null;
     public static $CURL_PROXY_IP          = null;
     public static $CURL_PROXY_ARRAY       = array();
-
+    public static $CURL_INFO              = null;
+    public static $CURL_ERRNO             = 0;
+    public static $CURL_ERROR             = null;
     public static $CURLOPT_ENCODING       = '';
     public static $CURLOPT_REFERER        = null;
     public static $CURLOPT_TIMEOUT        = 10; //数据传输的最大允许时间
     public static $CURLOPT_CONNECTTIMEOUT = 5; //连接超时时间
     public static $CURLOPT_USERAGENT      = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36';
+    public static $CURLOPT_COOKIE         = null;
     public static $CURLOPT_COOKIEFILE     = null;
     public static $CURLOPT_COOKIEJAR      = null;
     public static $CURLOPT_HTTPHEADER     = null;
@@ -224,7 +227,9 @@ class iHttp{
                 $options[CURLOPT_POST] = 1;
                 $options[CURLOPT_POSTFIELDS] = $postdata;
             }
-
+            if (self::$CURLOPT_COOKIE) {
+                $options[CURLOPT_COOKIE] = self::$CURLOPT_COOKIE;
+            }
             if (self::$CURLOPT_COOKIEFILE) {
                 $options[CURLOPT_COOKIEFILE] = self::$CURLOPT_COOKIEFILE;
             }
@@ -261,8 +266,10 @@ class iHttp{
                 return self::$handle;
             }
             $responses = curl_exec(self::$handle);
-            $info  = curl_getinfo(self::$handle);
-            $errno = curl_errno(self::$handle);
+            $info  = self::$CURL_INFO   = curl_getinfo(self::$handle);
+            self::$CURL_ERRNO  = curl_errno(self::$handle);
+            self::$CURL_ERRNO && self::$CURL_ERROR = curl_error(self::$handle);
+
             if (self::$CURL_HTTP_CODE !== null) {
                 if (self::$CURL_HTTP_CODE == $info['http_code']) {
                     return $responses;
@@ -309,18 +316,17 @@ class iHttp{
                 }
             }
 
-            if ($errno > 0 || empty($responses) || empty($info['http_code'])) {
+            if (self::$CURL_ERRNO > 0 || empty($responses) || empty($info['http_code'])) {
                 if (self::$_count < self::$CURL_COUNT) {
                     self::$_count++;
                     curl_close(self::$handle);
                     unset($responses, $info);
                     return self::remote($url, $postdata,$filepath);
                 } else {
-                    $curl_error = curl_error(self::$handle);
                     curl_close(self::$handle);
                     unset($responses, $info);
                     echo $url . " remote:".self::$_count."\n";
-                    echo "cURL Error ($errno): $curl_error\n";
+                    echo "cURL Error (".self::$CURL_ERRNO."): ".self::$CURL_ERROR."\n";
                     return false;
                 }
             }

@@ -196,7 +196,7 @@ class iFS {
 	//获取文件夹下所有文件/文件夹列表
     public static function fileList($dir,$pattern='*'){
 		$lists = array();
-		$dir   = trim($dir, '/');
+		$dir   = rtrim($dir, '/');
 		foreach(glob($dir.'/'.$pattern) as $value){
 			$lists[] = $value;
 			if(is_dir($value)){

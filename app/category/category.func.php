@@ -25,7 +25,10 @@ class categoryFunc{
 			$apps = apps::get_app($vars['apps'],false);
 			$apps['id'] && $where_sql.= iSQL::in($apps['id'],'appid');
 		}
-
+		if(!is_numeric($vars['appid'])){
+			$apps = apps::get_app($vars['appid'],false);
+			$apps['id'] && $vars['appid'] = $apps['id'];
+		}
 		isset($vars['appid'])  && $where_sql.= iSQL::in($vars['appid'],'appid');
 		isset($vars['mode'])   && $where_sql.= iSQL::in($vars['mode'],'mode');
 		isset($vars['dir'])    && $where_sql.= iSQL::in($vars['dir'],'dir');
@@ -98,9 +101,10 @@ class categoryFunc{
 			$limit = '';
 		}
 
-		$hash = md5($where_sql.$order_sql.$limit);
+		$hash = md5($where_sql.$order_sql.$limit.$cache_time);
 		if($vars['cache']){
 			$cache_name = iPHP_DEVICE.'/category/'.$hash;
+			isset($vars['cache_name']) && $cache_name = $vars['cache_name'];
 	        $vars['page'] && $cache_name.= "/".(int)$GLOBALS['page'];
 			$resource = iCache::get($cache_name);
 	        if(is_array($resource)) return $resource;

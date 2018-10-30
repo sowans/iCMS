@@ -145,8 +145,15 @@ class iSecurity {
 	    return $data;
 	}
 	public static function html_decode($string) {
-		$string = htmlspecialchars_decode($string);
-		$string = str_replace('&#92;', '\\', $string);
+		if (is_array($string)) {
+			$string = array_map(array(__CLASS__,'html_decode'), $string);
+		}else{
+			$string = htmlspecialchars_decode($string);
+			$string = str_replace(
+				array('&#92;','&#60;','&#62;','&#39;','&#34;'),
+				array('\\','<','>',"'",'"'),
+			$string);
+		}
 		return $string;
 	}
 

@@ -295,6 +295,8 @@ class iView {
             $_tpl = str_replace($flag, self::$config['template']['dir'], $tpl);
         }
 
+        $_tpl = str_replace('{DEVICE}', self::$config['template']['device'], $_tpl);
+
         if (is_file(iPHP_TPL_DIR . "/" . $_tpl)) {
             return $_tpl;
         } else {
