@@ -85,11 +85,11 @@ class TBAPI {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $postResult = curl_exec($ch);
         if (curl_errno($ch)){
-            throw new Exception(curl_error($ch), 0);
+            trigger_error(curl_error($ch), 0);
         }else{
             $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if (200 !== $httpStatusCode) {
-                throw new Exception($postResult, $httpStatusCode);
+                trigger_error($postResult, $httpStatusCode);
             }
         }
         curl_close($ch);
@@ -157,11 +157,11 @@ class TBAPI {
 //        print_r($postResult);
 
         if (curl_errno($ch)){
-            throw new Exception(curl_error($ch), 0);
+            trigger_error(curl_error($ch), 0);
         }else{
             $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if (200 !== $httpStatusCode) {
-                throw new Exception($postResult, $httpStatusCode);
+                trigger_error($postResult, $httpStatusCode);
             }
         }
         curl_close($ch);
