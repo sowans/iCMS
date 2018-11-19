@@ -241,6 +241,9 @@ class spider_urls {
 
             if (spider::$callback['urls'] && is_callable(spider::$callback['urls'])) {
                 $_work = call_user_func_array(spider::$callback['urls'],array(&$urlsData,$url));
+                if($_work===false){
+                    continue;
+                }
                 $_work && $work = $_work;
             }
 

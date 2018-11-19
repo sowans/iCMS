@@ -8,8 +8,8 @@ function tpl_output_mip(&$html,&$tpl){
         array(
             '@on(\w+)=(["\']?)+\\1@is',
             '@style=(["|\']?)+\\1@is',
-            '@<script[^>]*>.*?</script>@is',
             /*
+            '@<script[^>]*>.*?</script>@is',
             '@<style[^>]*>.*?</style>@is',
             '@<link.*?rel=(["|\']?)stylesheet\\1.*?>@is',
             '@<link.*?type=(["|\']?)text/css\\1.*?>@is',
@@ -19,17 +19,16 @@ function tpl_output_mip(&$html,&$tpl){
     );
 
     $html = preg_replace(
-        array(/*
+        array(
             '@<!doctype.*?>@is',
             '@<html.*?>@is',
-            */
             '@<img[^>]+src=(["\']?)(.*?)\\1[^>]*?>@is',
             '@<a[^>]+href=(["\']?)(.*?)\\1[^>]*?>(.*?)</a>@is',
             '@<video[^>](.*?)>(.*?)</video>@is',
         ),
-        array(/*
-            '<!doctype html>',
-            '<html mip>',*/
+        array(
+            '<!DOCTYPE html>',
+            '<html mip>',
             '<mip-img layout="responsive" src="$2"></mip-img>',
             '<mip-link href="$2">$3</mip-link>',
             '<mip-video $1>$2</mip-video>'

@@ -445,6 +445,34 @@ class iPHP {
     	self::$is_callable = true;
     	return is_callable($callback);
     }
+	public static function is_callback($var){
+	    if (is_array($var) && count($var) == 2) {
+	        $var = array_values($var);
+	        if ((!is_string($var[0]) && !is_object($var[0])) || (is_string($var[0]) && !class_exists($var[0]))) {
+	            return false;
+	        }
+	        $isObj = is_object($var[0]);
+	        $class = new ReflectionClass($isObj ? get_class($var[0]) : $var[0]);
+	        if ($class->isAbstract()) {
+	            return false;
+	        }
+	        try {
+	            $method = $class->getMethod($var[1]);
+	            if (!$method->isPublic() || $method->isAbstract()) {
+	                return false;
+	            }
+	            if (!$isObj && !$method->isStatic()) {
+	                return false;
+	            }
+	        } catch (ReflectionException $e) {
+	            return false;
+	        }
+	        return true;
+	    } elseif (is_string($var) && function_exists($var)) {
+	        return true;
+	    }
+	    return false;
+	}
 	public static function vendor($name, $args = null,$self=false) {
 		$vendor = '/vendor/Vendor.' . $name . '.php';
 		$path = iPHP_APP_LIB.$vendor;
@@ -564,8 +592,20 @@ class iPHP {
         }
 		iPHP_DEBUG && self::error_throw($msg, $code);
 		self::http_status(404, $code);
+
 		if (defined('iPHP_URL_404')) {
-			iPHP_URL_404 && self::redirect(iPHP_URL_404 . '?url=' . urlencode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+			if(iPHP_URL_404){
+				if(iHttp::is_url(iPHP_URL_404)){
+					self::redirect(iPHP_URL_404 . '?url=' . urlencode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+				}else{
+					$tpl = iPHP_APP."://".iPHP_URL_404;
+					if(iView::tpl_exists($tpl)){
+						iView::display($tpl);
+					}else{
+						iView::display(iPHP_APP."://404.htm");
+					}
+				}
+			}
 		}
 		exit();
 	}

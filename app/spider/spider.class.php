@@ -84,7 +84,14 @@ class spider{
             $work=="DATA@RULE" && $project_checker = '1';
             switch ($project_checker) {
                 case '1'://按网址检查
-                    $sql   = "`url` = '$url'";
+                    $scheme = parse_url($url, PHP_URL_SCHEME);
+                    if($scheme){
+                        $_url  = str_replace($scheme.'://', '', $url);
+                        $urls = array($_url,'http://'.$_url,'https://'.$_url);
+                        $sql  = "`url` IN ('".implode("','", $urls)."')";
+                    }else{
+                        $sql  = "`url` = '$url'";
+                    }
                     $label = $url.PHP_EOL;
                     $msg   = $label.'该网址的文章已经发布过!请检查是否重复';
                 break;
@@ -181,8 +188,16 @@ class spider{
             echo '<b>'.$msg.'</b><hr />';
         }
     }
-    public static function publish($work = null) {
+    public static function publish($work = null,$check=false) {
         @set_time_limit(0);
+
+        if($check){
+            $checker = spider::checker($work,spider::$pid,spider::$url,spider::$title);
+            if($checker!==true){
+                return $checker;
+            }
+        }
+
         $_POST = spider_data::crawl();
 
         spider_tools::listItemCache($_POST['reurl'],'delete');
@@ -193,9 +208,8 @@ class spider{
                 return null;
             }
         }
-        if($_POST===false){
-            return false;
-        }
+        if($_POST===false) return false;
+
         if(spider::$work && $work===null) $work = spider::$work;
 
         // if($work=='shell'){
@@ -231,7 +245,12 @@ class spider{
         $url   = addslashes($_POST['reurl']);
         $hash  = md5($url);
         if(empty(spider::$sid)){
-            $spider_url = iDB::row("SELECT `id`,`publish`,`indexid` FROM `#iCMS@__spider_url` where `url`='$url'",ARRAY_A);
+            $scheme = parse_url($url, PHP_URL_SCHEME);
+            $surl   = str_replace($scheme.'://', '', $url);
+            $urls   = array($surl,'http://'.$surl,'https://'.$surl);
+            $sql    = "`url` IN ('".implode("','", $urls)."')";
+
+            $spider_url = iDB::row("SELECT `id`,`publish`,`indexid` FROM `#iCMS@__spider_url` WHERE {$sql}",ARRAY_A);
             if(empty($spider_url)){
                 $spider_url_data = array(
                     'appid'   => $app['id'],
@@ -263,6 +282,7 @@ class spider{
                 return $_POST;
             }
         }
+        if($_POST===false) return false;
 
         iSecurity::slashes($_POST);
         $fun    = $postArgs->fun;

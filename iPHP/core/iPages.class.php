@@ -11,7 +11,7 @@
 //$GLOBALS['iPage']['url']="/index_";
 //$GLOBALS['iPage']['config']['enable']=true;
 class iPages {
-
+	public $page_sign  = '{P}';
 	public $page_name  = "page";//page标签，用来控制url页。比如说xxx.php?page=2中的page
 	public $is_ajax    = false;//是否支持AJAX分页模式
 	public $ajax_fun   = null;   //AJAX动作名
@@ -232,7 +232,7 @@ class iPages {
 	* @return string
 	*/
 	public function show($mode=0){
-		if(empty($this->totalpage)){
+		if($this->totalpage<2){
 			return '';
 		}
 		switch ($mode){
@@ -285,7 +285,7 @@ class iPages {
 			$total_type ==="G" && $query['total_num'] = $this->total;
 			$query[$this->page_name] ="---PN---";
 			$this->url = iURL::make($query,$url);
-			$this->url = str_replace('---PN---','{P}',$this->url);
+			$this->url = str_replace('---PN---',$this->page_sign,$this->url);
 		}
 	}
 
@@ -324,11 +324,11 @@ class iPages {
 				return $this->config['index'];
 			}
 			$url = $this->url;
-			$this->config['enable'] OR $url = str_replace(array('?'.$this->page_name.'={P}','&'.$this->page_name.'={P}'),'',$this->url);
+			$this->config['enable'] OR $url = str_replace(array('?'.$this->page_name.'='.$this->page_sign,'&'.$this->page_name.'='.$this->page_sign),'',$this->url);
 			$url = preg_replace('@&total_num=\d+@is', '', $url);
-			return str_replace(array('_{P}','{P}'),array('',1),$url);
+			return str_replace(array('_'.$this->page_sign,$this->page_sign),array('',1),$url);
 		}
-		return str_replace('{P}',$pageno,$this->url);
+		return str_replace($this->page_sign,$pageno,$this->url);
 	}
 
 	/**

@@ -4,6 +4,7 @@
         UMEDITOR_HOME_URL : URL
         ,imageUrl:window.iCMS.CONFIG.API + '?app=user&do=uploadimage'
         ,imageFieldName:"upfile"
+        ,imagePath:''
         ,toolbar:[
             'preview | undo redo | bold italic underline strikethrough | superscript subscript | forecolor backcolor |',
             'insertorderedlist insertunorderedlist | paragraph | fontsize' ,

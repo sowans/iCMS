@@ -211,6 +211,9 @@ class spider_tools {
             }else if(strpos($rule, 'CUT::')!==false){
               $len = str_replace('CUT::','', $rule);
               $content = csubstr($content,$len);
+            }else if(strpos($rule, 'SPLIT::')!==false){
+              $delimiter = str_replace('SPLIT::','', $rule);
+              $content = explode($delimiter, $content);
             }else if(strpos($rule, '<%SELF%>')!==false){
               $content = str_replace('<%SELF%>',$content, $rule);
             }else if(strpos($rule, 'HTML::')!==false){
@@ -290,9 +293,10 @@ class spider_tools {
                 $pattern[$key] = '|' . self::pregTag($_pattern) . '|is';
                 $content = preg_replace($pattern, $replacement, $content);
             }else if(strpos($rule, 'FUNC::')!==false){
-              $funcText = str_replace('FUNC::','', $rule);
-              $param    = explode(',', $funcText);
-              $func     = $param[0];unset($param[0]);
+              preg_match('/FUNC::(\w+)\(/is', $rule,$func_match);
+              $func = $func_match[1];
+              preg_match_all('/[\"|\'](.*?)[\"|\']/is',$rule,$param_match);
+              $param = $param_match[1];
               foreach ($param as $key => $value) {
                   if($value=='@me'){
                     $param[$key] = $content;
@@ -484,9 +488,10 @@ class spider_tools {
             if($num<0){
                 $num = 1;
             }
-            $end = $start+$num;
+            $end = $start+$num*$step;
         }else if($format==1){
-            $end = $start*pow($step,$num-1);
+            // $end = $start*pow($step,$num-1);
+            $end = $start+$num*$step;
         }else if($format==2){
             $start = ord($begin);
             $end   = ord($num);
@@ -507,11 +512,11 @@ class spider_tools {
                     $id  = sprintf("%0{$len}d", $i);
                 }
                 $urls[]=str_replace('<*>',$id,$url);
-                if($format==1){
-                  $i=$i/$step;
-                }else{
+                // if($format==1){
+                //   $i=$i/$step;
+                // }else{
+                // }
                   $i=$i-$step;
-                }
             }
         }else{
             for($i=$start;$i<=$end;){
@@ -525,11 +530,11 @@ class spider_tools {
                     $id  = sprintf("%0{$len}d", $i);
                 }
                 $urls[]=str_replace('<*>',$id,$url);
-                if($format==1){
-                  $i=$i*$step;
-                }else{
+                // if($format==1){
+                //   $i=$i*$step;
+                // }else{
+                // }
                   $i=$i+$step;
-                }
             }
         }
         return $urls;

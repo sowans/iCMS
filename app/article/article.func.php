@@ -164,6 +164,12 @@ class articleFunc{
 
 		$hash = md5(json_encode($vars) . $order_sql . $limit);
 
+		if ($vars['cache']) {
+			$cache_name = iPHP_DEVICE . '/article/' . $hash;
+			$resource = iCache::get($cache_name);
+			if(is_array($resource)) return $resource;
+		}
+
 		if ($offset) {
 			if ($vars['cache']) {
 				$map_cache_name = iPHP_DEVICE . '/article_page/' . $hash;
@@ -178,22 +184,16 @@ class articleFunc{
 			if ($map_order_sql) {
 				$order_sql = $map_order_sql;
 			}
+			$ids_array = iDB::all("SELECT `#iCMS@__article`.`id` FROM `#iCMS@__article` {$where_sql} {$order_sql} {$limit}");
 		}
+
 		if ($ids_array) {
 			$ids = iSQL::values($ids_array);
 			$ids = $ids ? $ids : '0';
 			$where_sql = "WHERE `#iCMS@__article`.`id` IN({$ids})";
 			$limit = '';
 		}
-		if ($vars['cache']) {
-			$cache_name = iPHP_DEVICE . '/article/' . $hash;
-			$resource = iCache::get($cache_name);
-			if(is_array($resource)) return $resource;
-		}
-		// $func = 'article_array';
-		// if($vars['func']=="user_home"){ //暂时只有一个选项
-		//     $func = '__article_user_home_array';
-		// }
+
 		if (empty($resource)) {
 			$resource = iDB::all("SELECT `#iCMS@__article`.* FROM `#iCMS@__article` {$where_sql} {$order_sql} {$limit}");
 			$resource = articleFunc::article_array($vars, $resource);

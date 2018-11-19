@@ -364,7 +364,7 @@ function template_device_td($key,$device=array()){
             <div class="input-prepend"> <span class="add-on">404页面</span>
               <input type="text" name="config[router][404]" class="span4" id="router_404" value="<?php echo $config['router']['404'] ; ?>"/>
             </div>
-            <span class="help-inline">404时跳转到的页面</span>
+            <span class="help-inline">404页面,可填写模板文件,如果填写的是网址则跳转,留空只返回404状态码</span>
             <div class="clearfloat mb10"></div>
             <div class="input-prepend"> <span class="add-on">公共资源URL</span>
               <input type="text" name="config[router][public]" class="span4" id="router_public" value="<?php echo $config['router']['public'] ; ?>"/>

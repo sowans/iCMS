@@ -74,18 +74,20 @@ $(function(){
       var num=parseInt(num)-1;
       if(num<0) num=0;
       start = parseInt(begin);
-      end   = start+parseInt(num);
+      // end   = start+parseInt(num);
+      end = start+step*num;
     }else if(format==1){
-      if(parseInt(step)==1){
-        iCMS.alert("等比不能为1");
-        return;
-      }
+      // if(parseInt(step)==1){
+      //   iCMS.alert("等比不能为1");
+      //   return;
+      // }
       if(num>32){
         iCMS.alert("等比数列数值太大,请重新设置初始值,项数,比值");
         return;
       }
       start = parseInt(begin);
-      end   = start*Math.pow(parseInt(step), num-1);//parseInt(num)*parseInt(step);
+      // end   = start*Math.pow(parseInt(step), num-1);//parseInt(num)*parseInt(step);
+      end = start+step*num;
     }else if(format==2){
       start = begin.charCodeAt(0);
       end   = num.charCodeAt(0);
@@ -107,11 +109,11 @@ $(function(){
           break;
         }
         n++;
-        if(format==1){
-          i=i/step;
-        }else{
+        // if(format==1){
+        //   i=i/step;
+        // }else{
+        // }
           i=i-step;
-        }
       }
 
       if(num>5){
@@ -126,11 +128,11 @@ $(function(){
           break;
         }
         n++;
-        if(format==1){
-          i=i*step;
-        }else{
+        // if(format==1){
+        //   i=i*step;
+        // }else{
+        // }
           i=i+step;
-        }
       }
       if(num>5){
         urls+= '..................<br />';

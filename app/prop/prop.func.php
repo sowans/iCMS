@@ -76,6 +76,7 @@ class propFunc{
         $offset = $vars['start']?$vars['start']:0;
 		$vars['row'] && $variable = array_slice($variable,$offset, $vars['row']);
         $variable = self::prop_value($vars,$variable);
+        sort($variable);
 		return $variable;
 	}
     public static function prop_value($vars,$variable){

@@ -23,8 +23,13 @@
  * @param string
  * @return string
  */
-function tpl_modifier_cat($string, $cat)
+function tpl_modifier_cat($string)
 {
-    return $string . $cat;
+    $arg_list = func_get_args ();
+    //{'字符'|cat:'字符1':'字符2':'字符3'}
+    $pieces = array_slice($arg_list, 1);
+    print_r($arg_list);
+    print_r($pieces);
+    return $string . implode('', $pieces);
 }
 
