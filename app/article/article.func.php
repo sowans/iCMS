@@ -181,9 +181,7 @@ class articleFunc{
 				$vars['cache'] && iCache::set($map_cache_name, $ids_array, $cache_time);
 			}
 		} else {
-			if ($map_order_sql) {
-				$order_sql = $map_order_sql;
-			}
+			$map_order_sql && $order_sql = $map_order_sql;
 			$ids_array = iDB::all("SELECT `#iCMS@__article`.`id` FROM `#iCMS@__article` {$where_sql} {$order_sql} {$limit}");
 		}
 
@@ -191,6 +189,7 @@ class articleFunc{
 			$ids = iSQL::values($ids_array);
 			$ids = $ids ? $ids : '0';
 			$where_sql = "WHERE `#iCMS@__article`.`id` IN({$ids})";
+			$order_sql = "ORDER BY FIELD(`id`,{$ids})";
 			$limit = '';
 		}
 
@@ -321,9 +320,11 @@ class articleFunc{
 			$sql = " AND `cid`='{$vars['cid']}' ";
 		}
 		if ($vars['order'] == 'p') {
-			$sql .= " AND `id` < '{$vars['id']}' ORDER BY id DESC LIMIT 1";
+			$field = 'max(id)';
+			$sql .= " AND `id` < '{$vars['id']}'";
 		} else if ($vars['order'] == 'n') {
-			$sql .= " AND `id` > '{$vars['id']}' ORDER BY id ASC LIMIT 1";
+			$field = 'min(id)';
+			$sql .= " AND `id` > '{$vars['id']}'";
 		}
 		$hash = md5($sql);
 		if ($vars['cache']) {
@@ -333,9 +334,7 @@ class articleFunc{
 		if (empty($array)) {
 			$rs = iDB::row("
 				SELECT * FROM `#iCMS@__article`
-				WHERE `id` =(
-					SELECT `id` FROM `#iCMS@__article` WHERE `status`='1' {$sql}
-				)
+				WHERE `id` =(SELECT {$field} FROM `#iCMS@__article` WHERE `status`='1' {$sql})
 			");
 			if ($rs) {
 				$category = categoryApp::get_cahce_cid($rs->cid);
