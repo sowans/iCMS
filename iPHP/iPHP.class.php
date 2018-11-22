@@ -171,7 +171,7 @@ class iPHP {
         self::define_device();
 		self::callback(self::$callback['run']['begin']);
 		if(self::$app===null){
-			self::app_startup($app,$class_name,$prefix);
+			$class_name = self::app_startup($app,$prefix);
 			// require_once self::$app_file;
 			// self::$app = new $class_name();
 			self::callback(self::$callback['run']['init'],array(self::$app));
@@ -199,22 +199,24 @@ class iPHP {
 			iPHP::error_404('Unable to find method <b>' . $class_name . '::'.self::$app_method.'</b>', '0005');
 		}
 	}
-	public static function app_startup($app,&$class_name,$prefix=null) {
+	public static function app_startup($app,$prefix=null) {
 		$prefix = strtoupper($prefix);
 		$path   = self::$app_path . '/'.$prefix.$app.'.app.php';
 		// a/API_a.app.php
 		// a/ACTION_a.app.php
 		if(is_file($path)){
-			self::$app_file = $path;
+			require_once $path;
 			$class_name = $prefix.$app.'App';
-			require_once self::$app_file;
-			self::$app = new $class_name();
-			if(!method_exists(self::$app, self::$app_method) && $prefix){
-				self::app_startup($app,$class_name);
+			if(class_exists($class_name,false)){
+				self::$app_file = $path;
+				self::$app      = new $class_name();
+				$class_methods  = get_class_methods(self::$app);
+				if(in_array(self::$app_method, $class_methods)){
+					return $class_name;
+				}
 			}
-		}else{
-			self::app_startup($app,$class_name);
 		}
+		return self::app_startup($app);
 	}
 	public static function auto_require($name) {
 		$o_name = $name;

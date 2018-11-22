@@ -251,29 +251,39 @@ class iSQL {
     }
     public static function optimize_in($sql,$limit=true){
         // print($sql);
-        preg_match_all("@SELECT\s*`.+`\.`(\w+)`\s*(FROM.+WHERE.+AND)\s*`(\w+)`\s*IN(.*?)\s*(ORDER\s*BY\s*`(.+)`\s*\w+)\s*(LIMIT\s*\d+,\d+)@is", $sql, $matches);
+        preg_match_all("@SELECT\s*`.+`\.`(\w+)`\s*FROM(.+)\s*(`(\w+)`\s*IN\s*\((.+)\))(.*?)\s*(ORDER\s*BY\s*`(.+)`\s*\w+)\s*(LIMIT\s*\d+,\d+)@is", $sql, $matches);
         // var_dump($matches);
-        if($matches[4][0]){
-            preg_match_all("@'(\d+)'@is", $matches[4][0],$cids_match);
-            // print_r($cid_match);
-            if($cids_match[1]){
-                $where = $matches[2][0];
-                if (strpos($matches[2][0], 'NOT IN')!==false){
-                    $where = preg_replace("/AND `".$matches[3][0]."` NOT IN \(.+\)/", '', $where);
+        $cids = str_replace("'", '', $matches[5][0]);
+        if($cids){
+            $cidArray = explode(',', $cids);
+            if($cidArray && count($cidArray)>1){
+                $primary        = $matches[1][0];
+                $from_where     = $matches[2][0];
+                $orderby_field  = $matches[8][0];
+                $optimize_field = $matches[4][0];
+                $where_sql      = $matches[6][0];
+                $orderby_sql    = $matches[7][0];
+                $limit_sql      = $matches[9][0];
+                if (strpos($from_where, 'NOT IN')!==false){
+                    $from_where = preg_replace("/AND\s*`".$optimize_field."`\s*NOT\s*IN\s*\(.+\)/", '', $from_where);
                 }
-                foreach ($cids_match[1] as $key => $value) {
-                    $pieces[$key] = '(SELECT `'.$matches[1][0].'` ';
-                    if($matches[6][0]!==$matches[1][0]){
-                        $pieces[$key].= ',`'.$matches[6][0].'` ';
+                $sqlArray[] = array();
+                foreach ($cidArray as $key => $value) {
+                    $pieces = array();
+                    $pieces[] = '(SELECT `'.$primary.'`';
+                    if($orderby_field!==$primary){
+                        $pieces[]= ',`'.$orderby_field.'`';
                     }
-                    $pieces[$key].= $where.' ';// FROM AND
-                    $pieces[$key].= $matches[3][0]." = '".$value."' ";
-                    $pieces[$key].= $matches[5][0].' '; //ORDER BY
-                    $limit && $pieces[$key].= $matches[7][0].' '; //LIMIT
-                    $pieces[$key].= ')';
+                    $pieces[]= 'FROM '.$from_where;// FROM AND
+                    $pieces[]= $optimize_field." = '".$value."'";
+                    $pieces[]= $where_sql; //ORDER BY
+                    $pieces[]= $orderby_sql; //ORDER BY
+                    $limit && $pieces[]= $limit_sql; //LIMIT
+                    $pieces[]= ')';
+                    $sqlArray[$key] = implode(' ', $pieces);
                 }
+                return implode("\nUNION ALL\n", $sqlArray)."\n".$orderby_sql.' '.$limit_sql;
             }
-            return implode("\nUNION ALL\n", $pieces)."\n".$matches[5][0].' '.$matches[7][0];
         }
     }
 }
