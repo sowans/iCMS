@@ -222,7 +222,7 @@ class articleAdmincp{
     		case 'thumb':
 		        foreach((array)$_POST['id'] AS $id) {
 		            $body	= article::body($id);
-                    $picurl = filesAdmincp::remotepic($body,'autopic',$id);
+                    $picurl = filesAdmincp::remotepic($body,'autopic');
                     $this->set_pic($picurl,$id);
 		        }
 		        iUI::success('成功提取缩略图!','js:1');
@@ -989,7 +989,7 @@ class articleAdmincp{
         return $id;
     }
     public static function autodesc($body){
-        if(self::$config['autodesc'] && self::$config['descLen']) {
+        if(iCMS::$config['article']['autodesc'] && iCMS::$config['article']['descLen']) {
             is_array($body) && $bodyText   = implode("\n",$body);
             $bodyText   = str_replace('#--iCMS.PageBreak--#',"\n",$bodyText);
             $bodyText   = str_replace('</p><p>', "</p>\n<p>", $bodyText);
@@ -1004,7 +1004,7 @@ class articleAdmincp{
                 // $outputLen = strlen($output);
                 $output    = implode('',$resource);
                 $outputLen = strlen($output);
-                if($outputLen>self::$config['descLen']){
+                if($outputLen>iCMS::$config['article']['descLen']){
                     // $pageNum++;
                     // $resource[$pageNum] = $p;
                     break;
@@ -1013,7 +1013,7 @@ class articleAdmincp{
                 }
             }
             $description = implode("\n", $resource);
-            $description = csubstr($description,self::$config['descLen']);
+            $description = csubstr($description,iCMS::$config['article']['descLen']);
             $description = addslashes(trim($description));
             $description = str_replace('#--iCMS.PageBreak--#','',$description);
             $description = preg_replace('/^[\s|\n|\t]{2,}/m','',$description);

@@ -85,7 +85,7 @@ class cacheAdmincp{
      */
     public function do_article_count($dialog=true){
         $categoryAdmincp = new article_categoryAdmincp();
-    	$categoryAdmincp->re_app_count();
+    	$categoryAdmincp->do_recount(false);
     	$dialog && iUI::success('更新完成');
     }
     /**

@@ -249,4 +249,31 @@ class iSQL {
             }
         }
     }
+    public static function optimize_in($sql,$limit=true){
+        // print($sql);
+        preg_match_all("@SELECT\s*`.+`\.`(\w+)`\s*(FROM.+WHERE.+AND)\s*`(\w+)`\s*IN(.*?)\s*(ORDER\s*BY\s*`(.+)`\s*\w+)\s*(LIMIT\s*\d+,\d+)@is", $sql, $matches);
+        // var_dump($matches);
+        if($matches[4][0]){
+            preg_match_all("@'(\d+)'@is", $matches[4][0],$cids_match);
+            // print_r($cid_match);
+            if($cids_match[1]){
+                $where = $matches[2][0];
+                if (strpos($matches[2][0], 'NOT IN')!==false){
+                    $where = preg_replace("/AND `".$matches[3][0]."` NOT IN \(.+\)/", '', $where);
+                }
+                foreach ($cids_match[1] as $key => $value) {
+                    $pieces[$key] = '(SELECT `'.$matches[1][0].'` ';
+                    if($matches[6][0]!==$matches[1][0]){
+                        $pieces[$key].= ',`'.$matches[6][0].'` ';
+                    }
+                    $pieces[$key].= $where.' ';// FROM AND
+                    $pieces[$key].= $matches[3][0]." = '".$value."' ";
+                    $pieces[$key].= $matches[5][0].' '; //ORDER BY
+                    $limit && $pieces[$key].= $matches[7][0].' '; //LIMIT
+                    $pieces[$key].= ')';
+                }
+            }
+            return implode("\nUNION ALL\n", $pieces)."\n".$matches[5][0].' '.$matches[7][0];
+        }
+    }
 }

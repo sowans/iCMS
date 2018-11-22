@@ -445,6 +445,13 @@ class categoryAdmincp {
 		$expanded=$_GET['expanded']?true:false;
 	 	echo $this->tree((int)$_GET["root"],$expanded);
     }
+    public function do_recount($dialog=true){
+        $rs = iDB::all("SELECT `cid` FROM `#iCMS@__category` where `appid`='$this->appid'");
+        foreach ((array)$rs as $key => $value) {
+            $this->update_app_count($value['cid']);
+        }
+        $dialog && iUI::success('更新完成');
+    }
     /**
      * [获取内容元属性设置]
      * @return [type] [description]
@@ -635,12 +642,7 @@ class categoryAdmincp {
         //iDB::query("UPDATE `#iCMS@__push` SET `cid` ='$tocid' WHERE `cid` ='$cid'");
         iDB::query("UPDATE `#iCMS@__prop` SET `cid` ='$tocid' WHERE `cid` ='$cid'");
     }
-    public function re_app_count(){
-        $rs = iDB::all("SELECT `cid` FROM `#iCMS@__category` where `appid`='$this->appid'");
-        foreach ((array)$rs as $key => $value) {
-            $this->update_app_count($value['cid']);
-        }
-    }
+
     public function update_app_count($cid){
         $cc = iDB::value("SELECT count(*) FROM `#iCMS@__".$this->_app_table."` where `".$this->_app_cid."`='$cid'");
         iDB::query("UPDATE `#iCMS@__category` SET `count` ='$cc' WHERE `cid` ='$cid'");

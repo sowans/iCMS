@@ -251,6 +251,13 @@ class iPHP {
 				list($flag,$app) = explode('_', $app);
 			}
 			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
+		}else if(substr($name,-4,4) == 'Tmpl') {
+			$app  = substr($name,0,-4);
+			$file = $app.'.tmpl';
+			if(strpos($app,'_') !== false) {
+				list($flag,$app) = explode('_', $app);
+			}
+			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
 		}else if(substr($name,-7,7) == 'Admincp') {
 			//app.admincp.php
 			$app  = substr($name,0,-7);

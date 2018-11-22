@@ -177,12 +177,28 @@ class articleFunc{
 			}
 			if (empty($ids_array)) {
 				$ids_order_sql = $map_order_sql ? $map_order_sql : $order_sql;
-				$ids_array = iDB::all("SELECT `#iCMS@__article`.`id` FROM `#iCMS@__article` {$where_sql} {$ids_order_sql} {$limit}");
+
+				$sql = "SELECT `#iCMS@__article`.`id` FROM `#iCMS@__article` {$where_sql} {$ids_order_sql} {$limit}";
+
+				if (strpos($sql, '`cid` IN')!==false && empty($map_order_sql) && iCMS::$config['debug']['db_optimize_in']){
+					$_sql = iSQL::optimize_in($sql,false);
+					$_sql && $sql = $_sql;
+				}
+
+				$ids_array = iDB::all($sql);
 				$vars['cache'] && iCache::set($map_cache_name, $ids_array, $cache_time);
 			}
 		} else {
 			$map_order_sql && $order_sql = $map_order_sql;
-			$ids_array = iDB::all("SELECT `#iCMS@__article`.`id` FROM `#iCMS@__article` {$where_sql} {$order_sql} {$limit}");
+
+			$sql = "SELECT `#iCMS@__article`.`id` FROM `#iCMS@__article` {$where_sql} {$order_sql} {$limit}";
+
+			if (strpos($sql, '`cid` IN')!==false && empty($map_order_sql) && iCMS::$config['debug']['db_optimize_in']){
+				$_sql = iSQL::optimize_in($sql);
+				$_sql && $sql = $_sql;
+			}
+
+			$ids_array = iDB::all($sql);
 		}
 
 		if ($ids_array) {

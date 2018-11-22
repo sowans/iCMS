@@ -180,17 +180,17 @@ class appsApp {
         if($view) return array($view,$data);
     }
 
-    public static function custom_data(&$data,$vars=null){
+    public static function custom_data(&$data,$vars=null,$appid=null){
         if(is_array($data)){
-            $app_name = self::$s_app;
-            if(empty($app_name) && $data['category']){
-                $app_name =$data['category']['app']['app'];
+            $appid===null && $appid = self::$s_app;
+            if(empty($appid) && $data['category']){
+                $appid =$data['category']['app']['app'];
             }
-            $meta = (array)apps_meta::data($app_name,$data['id']);
+            $meta = (array)apps_meta::data($appid,$data['id']);
             $data = array_merge($data,$meta);
-            $app  = apps::get_app($app_name);
+            $app  = apps::get_app($appid);
             $data['sapp'] = apps::get_app_lite($app);
-            $app['fields'] && formerApp::data($data['id'],$app,$app_name,$data,$vars,$data['category']);
+            $app['fields'] && formerApp::data($data['id'],$app,$appid,$data,$vars,$data['category']);
         }
     }
 

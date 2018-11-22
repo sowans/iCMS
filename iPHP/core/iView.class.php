@@ -57,17 +57,27 @@ class iView {
     public static function set_template_dir($dir) {
         self::$handle->template_dir = $dir;
     }
+    /**
+     * [callback_register 模板方法注册]
+     * @param  [type] $func [方法]
+     * @param  [type] $type [类型]
+     * @return [type]       [description]
+     */
     public static function callback_register($func,$type) {
         list($app,$method) = explode(':', $func);
-        if(self::check_func_file($app)){
-            $callback = array($app.'Func',$type.($method?'_'.$method:''));
+        //app:method => testTmpl::block_cut
+        //payment:cut
+        if(self::check_file($app)){
+            $typeMap  = array('compiler','block','function','output');
+            $class    = in_array($type, $typeMap)?'Tmpl':'Func';
+            $callback = array($app.$class,$type.($method?'_'.$method:''));
             if(class_exists($callback[0]) && method_exists($callback[0], $callback[1])){
                 return implode('::', $callback);
             }
         }
     }
-    public static function check_func_file($app) {
-        $path = iPHP_APP_DIR . '/' . $app . '/' . $app . '.func.php';
+    public static function check_file($app,$type='func') {
+        $path = iPHP_APP_DIR . '/' . $app . '/' . $app . '.'.$type.'.php';
         return is_file($path);
     }
     public static function callback_output(&$content) {
@@ -116,7 +126,7 @@ class iView {
             if(self::$config['define']){
                 $apps = self::$config['define']['apps'];
                 $func = self::$config['define']['func'];
-                if(!self::check_func_file($args['app']) && $apps[$args['app']]){
+                if(!self::check_file($args['app']) && $apps[$args['app']]){
                     // 判断自定义APP app/test/test.func.php 程序是否存在
                     // 程序不存在调用 contentFunc::content_list
                     $callback = array(
@@ -139,8 +149,8 @@ class iView {
                 iPHP::error_throw("Unable to find method '{$callback[0]}::{$callback[1]}'");
             }
         }else{
-            //iPHP:func app="ooxx"
-            $callback = self::app_func($args['app']);
+            //iPHP:func
+            $callback = self::system_func($args['app']);
         }
         if(isset($args['vars'])){
             $vars = $args['vars'];
@@ -157,18 +167,11 @@ class iView {
             $tpl->assign($keys,$callback($args));
         }
     }
-    public static function app_func($func,$run=false,$vars=array()){
-        //iPHP:func app="ooxx"
-        $func_path = iPHP_TPL_FUN."/".iPHP_APP."/".iPHP_APP.".".$func.".php";
-        // if($args['_app']){
-        //     //判断 iPHP.app.php是否存在 不存用检测,原设置_app
-        //     if(!is_file($func_path)){
-        //         $args['app'] = $args['_app'];
-        //         $func_path = iPHP_TPL_FUN."/".iPHP_APP.".".$args['_app'].".php";
-        //     }
-        // }
+    public static function system_func($func,$run=false,$vars=array()){
         //iPHP:func >> iPHP_func
-        $callback = iPHP_APP.'_' . $func;
+        //app/func/iPHP/iPHP.func.php
+        $func_path = iPHP_TPL_FUN."/".iPHP_APP."/".iPHP_APP.".".$func.".php";
+        $callback  = iPHP_APP.'_' . $func;
         function_exists($callback) OR require_once($func_path);
         if($run){
             return call_user_func_array($callback, array($vars));

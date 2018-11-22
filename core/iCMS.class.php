@@ -23,7 +23,7 @@ class iCMS {
         self::set_tpl_const();
         self::send_access_control();
 
-        iView::app_func('site',true);
+        iView::system_func('site',true);
     }
     /**
      * [config 对框架各系统进行配置]

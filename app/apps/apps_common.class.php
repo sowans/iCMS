@@ -96,6 +96,14 @@ class apps_common {
         );
     }
 
+    public static function fields(){
+        if(is_array(self::$data)){
+            $app  = apps::get_app(self::$name);
+            self::$data['sapp'] = apps::get_app_lite($app);
+            $app['fields'] && formerApp::data(self::$data['id'],$app,self::$name,self::$data,self::$vars,self::$data['category']);
+        }
+    }
+
     public static function data($ids=0,$table,$primary='id',$fields="*",$Dtable='data'){
         if(empty($ids)) return array();
         list($ids,$is_multi)  = iSQL::multi_var($ids);
@@ -127,4 +135,5 @@ class apps_common {
         }
         return $data;
     }
+
 }

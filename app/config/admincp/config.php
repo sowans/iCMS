@@ -228,6 +228,16 @@ function modal_tpl_index(el,a){
               </div>
               <span class="help-inline">开启后将显示 SQL EXPLAIN 信息</span>
             </div>
+            <hr />
+            <h3 class="title">实验功能</h3>
+            <div class="clearfloat mb10"></div>
+            <div class="input-prepend">
+              <span class="add-on">数据优化</span>
+              <div class="switch">
+                <input type="checkbox" data-type="switch" name="config[debug][db_optimize_in]" id="debug_db_optimize_in" <?php echo $config['debug']['db_optimize_in']?'checked':''; ?>/>
+              </div>
+            </div>
+            <span class="help-inline">开启后,iCMS:article:list 相关性能将大大提升.如果文章数据量大,服务器负载很高可尝试开启</span>
           </div>
           <div id="config-tpl" class="tab-pane hide">
             <div class="input-prepend"> <span class="add-on">首页静态跳转</span>
