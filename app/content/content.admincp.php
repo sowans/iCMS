@@ -344,16 +344,7 @@ class contentAdmincp{
         isset($_GET['postype'])&& $uriArray['postype'] = $_GET['postype'];
         isset($_GET['cid'])    && $uriArray['cid']     = $_GET['cid'];
 
-        list($orderby,$orderby_option) = get_orderby(array(
-            content::$primary =>"ID",
-            'hits'       =>"点击",
-            'hits_week'  =>"周点击",
-            'hits_month' =>"月点击",
-            'good'       =>"顶",
-            'postime'    =>"时间",
-            'pubdate'    =>"发布时间",
-            'comments'   =>"评论数",
-        ));
+        list($orderby,$orderby_option) = $this->get_orderby();
 
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:20;
 
@@ -441,7 +432,18 @@ class contentAdmincp{
         }
 		$dialog && iUI::success("{$this->app['title']}删除完成",'js:parent.$("#id'.$id.'").remove();');
     }
-
+    public function get_orderby(){
+        return get_orderby(array(
+            content::$primary =>"ID",
+            'hits'       =>"点击",
+            'hits_week'  =>"周点击",
+            'hits_month' =>"月点击",
+            'good'       =>"顶",
+            'postime'    =>"时间",
+            'pubdate'    =>"发布时间",
+            'comments'   =>"评论数",
+        ));
+    }
     // public static function menu($menu){
     //     $path     = iPHP_APP_DIR.'/apps/etc/content.menu.json.php';
     //     $json     = file_get_contents($path);

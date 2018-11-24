@@ -122,12 +122,14 @@ class admincp {
 		define('APP_BOXID', self::$APP_NAME . '-box');
 		define('APP_FORMID', 'iCMS-' . APP_BOXID);
 
-		if($app==='admincp'){
+		$obj_flag = self::app_startup(self::$APP_NAME,$prefix);
+		if($obj_flag===false){
 			require_once self::$APP_FILE;
 			self::$APP_OBJ = new $obj_name($appData?$appData:null);
 		}else{
-			$obj_name = self::app_startup(self::$APP_NAME,$prefix);
+			$obj_name = $obj_flag;
 		}
+
 		$app_methods = get_class_methods(self::$APP_OBJ);
 		in_array(self::$APP_METHOD, $app_methods) OR iPHP::error_throw('Call to undefined method <b>' . $obj_name . '::' . self::$APP_METHOD . '</b>', 1003);
 
@@ -161,9 +163,10 @@ class admincp {
 	public static function app_startup($app,$prefix=null) {
 		$prefix = strtoupper($prefix);
 		$path   = self::$APP_PATH . '/'.$prefix.$app.'.admincp.php';
+		// var_dump($path);
 		// a/DO_a.admincp.php
 		// a/ACTION_a.admincp.php
-		if(is_file($path)){
+		if(is_file($path) && $prefix){
 			$class_name = $prefix.$app.'Admincp';
 			require_once $path;
 			if(class_exists($class_name,false)){
@@ -174,8 +177,10 @@ class admincp {
 					return $class_name;
 				}
 			}
+		}else{
+			return false;
 		}
-		return self::app_startup($app);
+		// return self::app_startup($app);
 	}
 	public static function view($name = NULL, $dir=null) {
 		self::$view['name']&& $name = self::$view['name'];

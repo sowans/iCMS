@@ -185,6 +185,7 @@ iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
               <th style="width:10px;"><i class="fa fa-arrows-v"></i></th>
               <th style="width:24px;">CID</th>
               <th><?php echo $this->category_name;?></th>
+              <th>排序</th>
               <th>目录</th>
               <th>父<?php echo $this->category_name;?></th>
               <?php if(admincp::$APP_NAME=='category'){?><th style="width:40px;">APPID</th><?php } ?>
@@ -210,6 +211,7 @@ iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
                   propAdmincp::flag($rs[$i]['pid'],$propArray,APP_DOURI.'&pid={PID}&'.$uri);
                 } ?>
               </td>
+              <td><input type="text" class="span1" name="sortnum[<?php echo $rs[$i]['cid'] ; ?>]" value="<?php echo $rs[$i]['sortnum'] ; ?>" /></td>
               <td><input type="text" class="span3" name="dir[<?php echo $rs[$i]['cid'] ; ?>]" value="<?php echo $rs[$i]['dir'] ; ?>" /></td>
               <td><a href="<?php echo APP_DOURI; ?>&rootid=<?php echo $rs[$i]['rootid'] ; ?>"><?php echo  $root?$root->name:'顶级'.$this->category_name ; ?></a></td>
               <?php if(admincp::$APP_NAME=='category'){?>

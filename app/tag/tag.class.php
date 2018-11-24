@@ -192,7 +192,7 @@ class tag {
             ");
 	    }
 	}
-    public function merge($tocid,$cid){
+    public static function merge($tocid,$cid){
         iDB::query("UPDATE `#iCMS@__tag` SET `cid` ='$tocid' WHERE `cid` ='$cid'");
     }
 }

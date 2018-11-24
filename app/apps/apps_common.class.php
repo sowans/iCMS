@@ -40,30 +40,25 @@ class apps_common {
         isset(self::$data['picdata']) && $picArray = filesApp::get_picdata(self::$data['picdata']);
 
         if(isset(self::$data['pic'])){
-            self::$data['pic']  = filesApp::get_pic(
-                self::$data['pic'],
-                $picArray['p'],
-                filesApp::get_twh(
-                    self::$vars['ptw'],
-                    self::$vars['pth']
-                )
+            self::$data['pic']  = self::picArray(
+                self::$data['pic'],$picArray['p'],
+                self::$vars['ptw'],self::$vars['pth']
             );
         }
         $sizeMap = array('b','m','s');
         foreach ($sizeMap as $key => $size) {
             $k = $size.'pic';
             if(isset(self::$data[$k])){
-                self::$data[$k] = filesApp::get_pic(
-                    self::$data[$k],
-                    $picArray[$size],
-                    filesApp::get_twh(
-                        self::$vars[$size.'tw'],
-                        self::$vars[$size.'th']
-                    )
+                self::$data[$k] = self::picArray(
+                    self::$data[$k],$picArray[$size],
+                    self::$vars[$size.'tw'],self::$vars[$size.'th']
                 );
             }
         }
         unset(self::$data['picdata'],$picArray);
+    }
+    public static function picArray($pic,$size,$tw,$th) {
+        return filesApp::get_pic($pic,$size,filesApp::get_twh($tw,$th));
     }
     public static function user() {
         if (self::$vars['user']) {

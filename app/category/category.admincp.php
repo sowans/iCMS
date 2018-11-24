@@ -257,7 +257,7 @@ class categoryAdmincp {
                 $tocid = (int)$_POST['tocid'];
                 foreach($idArray as $k=>$cid){
                     if($tocid!=$cid){
-                        $this->mergecontent($tocid,$cid);
+                        $this->merge($tocid,$cid);
                         $this->do_del($cid,false);
                     }
                 }
@@ -292,13 +292,14 @@ class categoryAdmincp {
             break;
             case 'update':
                 foreach($idArray as $k=>$cid){
-                    $name = iSecurity::escapeStr($_POST['name'][$cid]);
-                    $dir = iSecurity::escapeStr($_POST['dir'][$cid]);
-                    iDB::query("
-                        UPDATE `#iCMS@__category`
-                        SET `name` = '$name',`dir` = '$dir'
-                        WHERE `cid` ='".(int)$cid."' LIMIT 1
-                    ");
+                    iDB::update('category',
+                        array(
+                            'name'    => iSecurity::escapeStr($_POST['name'][$cid]),
+                            'dir'     => iSecurity::escapeStr($_POST['dir'][$cid]),
+                            'sortnum' => intval($_POST['sortnum'][$cid]),
+                        ),
+                        array('cid'=>(int)$cid)
+                    );
                 }
                 iUI::success('更新完成!','js:1');
             break;
@@ -391,11 +392,8 @@ class categoryAdmincp {
         if(isset($_GET['rootid']) &&$_GET['rootid']!='-1') {
             $sql.=" AND `rootid`='{$_GET['rootid']}'";
         }
-        list($orderby,$orderby_option) = get_orderby(array(
-            'cid'   =>"CID",
-            'dir'   =>"目录值",
-            'count' =>"记录数",
-        ));
+        list($orderby,$orderby_option) = $this->get_orderby();
+
         $maxperpage = $_GET['perpage']>0?(int)$_GET['perpage']:50;
         $total      = iPagination::totalCache("SELECT count(*) FROM `#iCMS@__category` {$sql}","G");
         iUI::pagenav($total,$maxperpage);
@@ -635,6 +633,14 @@ class categoryAdmincp {
     //接口
     public function del_content($cid){
 
+    }
+    public function get_orderby(){
+        return get_orderby(array(
+            'cid'     =>"CID",
+            'sortnum' =>"排序值",
+            'dir'     =>"目录值",
+            'count'   =>"记录数",
+        ));
     }
     public function merge($tocid,$cid){
         iDB::query("UPDATE `#iCMS@__".$this->_app_table."` SET `".$this->_app_cid."` ='$tocid' WHERE `".$this->_app_cid."` ='$cid'");
