@@ -488,7 +488,6 @@ function crawl_run(a){
 			if ($data) {
 				$data = base64_decode($data);
 				$data = unserialize($data);
-				$data = iSecurity::slashes($data);
 				iDB::insert("spider_rule", $data);
 			}
 			@unlink($path);

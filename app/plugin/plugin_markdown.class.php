@@ -14,7 +14,7 @@ class plugin_markdown {
      */
     public static function HOOK($content,&$resource=null) {
         plugin::init(__CLASS__);
-        if($resource['markdown']){
+        if($resource['markdown']==="1"){
             $content = plugin_download::markdown($content);
 
             plugin::library('Parsedown');

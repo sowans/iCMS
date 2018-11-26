@@ -11,6 +11,7 @@
 class iHttp{
     public static $callback  = array();
     public static $handle    = null;
+    public static $debug     = true;
     public static $PROXY_URL = null;
 
     public static $CURL_MULTI             = false;
@@ -167,7 +168,7 @@ class iHttp{
     public static function remote($url, $postdata = null,$files = array()) {
         $url = str_replace(array(' ','&amp;'), array('%20','&'), $url);
 
-        iPHP_SHELL && print 'iHttp::remote [count:' . self::$_count . '] => ' . $url . "\n";
+        (iPHP_SHELL && self::$debug) && print date("Y-m-d H:i:s ")."\033[36miHttp::remote\033[0m [".(self::$_count+1)."] => ".$url.PHP_EOL;
 
         if (empty($url)) {
             echo "url:empty\n";

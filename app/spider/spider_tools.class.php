@@ -17,6 +17,7 @@ class spider_tools {
     public static $curl_proxy  = false;
     public static $proxy_array = array();
     public static $callback    = array();
+    public static $debug       = true;
 
     public static $CURLOPT_COOKIE         = null;
     public static $CURLOPT_COOKIEFILE     = null;
@@ -675,7 +676,7 @@ class spider_tools {
     public static function remote($url, $_count = 0) {
         if(self::safe_url($url)===false) return false;
 
-        iPHP_SHELL && print date("Y-m-d H:i:s ")."\033[36mspider_tools::remote\033[0m [".($_count+1)."] => ".$url.PHP_EOL;
+        (iPHP_SHELL && self::$debug) && print date("Y-m-d H:i:s ")."\033[36mspider_tools::remote\033[0m [".($_count+1)."] => ".$url.PHP_EOL;
 
         $parsed = parse_url($url);
         $url = str_replace('&amp;', '&', $url);

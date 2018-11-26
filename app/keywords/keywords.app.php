@@ -24,8 +24,8 @@ class keywordsApp {
             return $content;
         }
         $array = iCache::get(keywordsApp::CACHE_KEY);
-        if($array){
-            return self::replace($array,stripslashes($content),iCMS::$config['keywords']['limit']);
+        if($array && is_string($content)){
+            return self::replace($array,$content,iCMS::$config['keywords']['limit']);
         }
         return $content;
     }
