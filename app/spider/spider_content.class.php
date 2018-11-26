@@ -113,7 +113,13 @@ class spider_content {
         //     echo "<hr />";
         // }
         if ($data['cleanbefor']) {
-            $content = spider_tools::dataClean($data['cleanbefor'], $content);
+            if(is_array($content)){
+                foreach ($content as $key => $value) {
+                    $content[$key] = spider_tools::dataClean($data['cleanbefor'], $value);
+                }
+            }else{
+                $content = spider_tools::dataClean($data['cleanbefor'], $content);
+            }
             if (spider::$dataTest) {
                 echo "<b>1.规则后处理</b>".htmlspecialchars($data['cleanbefor']).'<br />';
             }
@@ -146,7 +152,14 @@ class spider_content {
             }
         }
         if ($data['cleanafter']) {
-            $content = spider_tools::dataClean($data['cleanafter'], $content);
+            if(is_array($content)){
+                foreach ($content as $key => $value) {
+                    $content[$key] = spider_tools::dataClean($data['cleanafter'], $value);
+                }
+            }else{
+                $content = spider_tools::dataClean($data['cleanafter'], $content);
+            }
+
             if (spider::$dataTest) {
                 echo "<b>3.发布前处理</b>".htmlspecialchars($data['cleanafter']).'<br />';
             }

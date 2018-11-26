@@ -19,7 +19,7 @@ class files_cloud_UpYun extends UpYun {
      * @return [type]           [description]
      */
     public function _upload_file($fileRootPath,$filePath){
-    	$filePath = '/'.ltrim(iCMS::$config['FS']['dir'],'/').'/'.ltrim($filePath,'/');
+    	$filePath = '/'.ltrim($filePath,'/');
 		$response = $this->writeFile($filePath, file_get_contents($fileRootPath));
         return json_encode(array(
                 'error' => $response['code']==200?false:true,
@@ -33,7 +33,7 @@ class files_cloud_UpYun extends UpYun {
      * @return [type]           [description]
      */
     public function _delete_file($filePath){
-    	$filePath = '/'.ltrim(iCMS::$config['FS']['dir'],'/').'/'.ltrim($filePath,'/');
+    	$filePath = '/'.ltrim($filePath,'/');
         $response = $this->delete($filePath);
         return json_encode(array(
                 'error' => $response['code']==200?false:true,

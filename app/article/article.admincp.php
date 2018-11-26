@@ -991,9 +991,9 @@ class articleAdmincp{
     }
     public static function autodesc($body){
         if(iCMS::$config['article']['autodesc'] && iCMS::$config['article']['descLen']) {
-            is_array($body) && $bodyText   = implode("\n",$body);
-            $bodyText   = str_replace('#--iCMS.PageBreak--#',"\n",$bodyText);
-            $bodyText   = str_replace('</p><p>', "</p>\n<p>", $bodyText);
+            $bodyText = is_array($body)?implode("\n",$body):$body;
+            $bodyText = str_replace('#--iCMS.PageBreak--#',"\n",$bodyText);
+            $bodyText = str_replace('</p><p>', "</p>\n<p>", $bodyText);
 
             $textArray = explode("\n", $bodyText);
             $pageNum   = 0;

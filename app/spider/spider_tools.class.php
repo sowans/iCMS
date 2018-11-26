@@ -215,6 +215,12 @@ class spider_tools {
             }else if(strpos($rule, 'AFTER::')!==false){
               $after = str_replace('AFTER::','', $rule);
               $content = $content.$after;
+            }else if(strpos($rule, 'IF::')!==false){
+              list($expr,$tf) = explode('?', $rule);
+              $find = str_replace('IF::','', $expr);
+              empty($tf) && $tf = '1:0';
+              list($t,$f) = explode(':', $tf);
+              $content = strpos($content, $find)===false?$f:$t;
             }else if(strpos($rule, 'CUT::')!==false){
               $len = str_replace('CUT::','', $rule);
               $content = csubstr($content,$len);
