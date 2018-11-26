@@ -119,6 +119,8 @@ class categoryAdmincp {
         $rule         = iSecurity::escapeStr($_POST['rule']);
         $template     = iSecurity::escapeStr($_POST['template']);
         $config       = (array)iSecurity::escapeStr($_POST['config']);
+        $creator      = iSecurity::escapeStr($_POST['creator']);
+        $userid       = (int)$_POST['userid'];
 
         if($_rootid_hash){
             $_rootid = auth_decode($_rootid_hash);
@@ -177,6 +179,7 @@ class categoryAdmincp {
             'rootid','pid','appid','sortnum','name','subname','password',
             'title','keywords','description','dir',
             'mode','domain','url','pic','mpic','spic','htmlext',
+            'userid','creator',
             'rule','template','config','status');
         $data   = compact ($fields);
 
@@ -198,8 +201,6 @@ class categoryAdmincp {
                 $mode=="2" && $this->check_dir($dir,$this->appid,$url);
                 $data['name']     = $_name;
                 $data['dir']      = $dir;
-                $data['userid']   = members::$userid;
-                $data['creator']  = members::$nickname;
                 $data['addtime']  = time();
                 $data['count']    = '0';
                 $data['comments'] = '0';
@@ -383,6 +384,8 @@ class categoryAdmincp {
         if($_GET['keywords']) {
             if($_GET['st']=="name") {
                 $sql.=" AND `name` REGEXP '{$_GET['keywords']}'";
+            }else if($_GET['st']=="appid") {
+                $sql.=" AND `appid`='{$_GET['keywords']}'";
             }else if($_GET['st']=="cid") {
                 $sql.=" AND `cid` REGEXP '{$_GET['keywords']}'";
             }else if($_GET['st']=="tkd") {
@@ -391,6 +394,9 @@ class categoryAdmincp {
         }
         if(isset($_GET['rootid']) &&$_GET['rootid']!='-1') {
             $sql.=" AND `rootid`='{$_GET['rootid']}'";
+        }
+        if(isset($_GET['status']) &&$_GET['status']!='') {
+            $sql.=" AND `status`='{$_GET['status']}'";
         }
         list($orderby,$orderby_option) = $this->get_orderby();
 

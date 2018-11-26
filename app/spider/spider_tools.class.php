@@ -17,6 +17,12 @@ class spider_tools {
     public static $curl_proxy  = false;
     public static $proxy_array = array();
     public static $callback    = array();
+
+    public static $CURLOPT_COOKIE         = null;
+    public static $CURLOPT_COOKIEFILE     = null;
+    public static $CURLOPT_COOKIEJAR      = null;
+    public static $CURLOPT_HTTPHEADER     = null;
+
     /**
      * 在数据项里调用之前采集的数据[DATA@name][DATA@name.key]
      * [DATA@list:name]调用列表其它数据
@@ -696,6 +702,19 @@ class spider_tools {
             // CURLOPT_MAXREDIRS => 7,//查找次数，防止查找太深
         );
         spider::$cookie && $options[CURLOPT_COOKIE] = spider::$cookie;
+
+        if (self::$CURLOPT_COOKIE) {
+            $options[CURLOPT_COOKIE] = self::$CURLOPT_COOKIE;
+        }
+        if (self::$CURLOPT_COOKIEFILE) {
+            $options[CURLOPT_COOKIEFILE] = self::$CURLOPT_COOKIEFILE;
+        }
+        if (self::$CURLOPT_COOKIEJAR) {
+            $options[CURLOPT_COOKIEJAR] = self::$CURLOPT_COOKIEJAR;
+        }
+        if (self::$CURLOPT_HTTPHEADER) {
+            $options[CURLOPT_HTTPHEADER] = self::$CURLOPT_HTTPHEADER;
+        }
         if(spider::$curl_proxy||spider_tools::$curl_proxy){
             $proxy = self::proxy_test($options);
             if (spider::$dataTest || spider::$ruleTest) {
@@ -784,6 +803,22 @@ class spider_tools {
         }
         spider::$url = $url;
         return $responses;
+    }
+    public static function get_cookie($url,$data=null,$flag=false){
+        iHttp::$CURLOPT_TIMEOUT        = 60; //数据传输的最大允许时间
+        iHttp::$CURLOPT_CONNECTTIMEOUT = 10;  //连接超时时间
+        $host = parse_url($url, PHP_URL_HOST);
+        $path = iPHP_APP_CACHE.'/spider/cookie.'.$host.'.txt';
+        iFS::mkdir(dirname($path));
+        iHttp::$CURLOPT_COOKIEJAR = $path;
+        if($data && is_string($data)){
+            parse_str($data, $output);
+            $data = $output;
+        }
+        $ret = iHttp::post($url,$data);
+        $flag===true && self::$CURLOPT_COOKIEFILE = $path;
+        is_callable(self::$callback['get_cookie']) && call_user_func_array(self::$callback['get_cookie'],array($ret,$path));
+        return array($ret,$path);
     }
     public static function proxy_test($options=null){
         iHttp::$CURL_PROXY = self::$curl_proxy?:spider::$curl_proxy;

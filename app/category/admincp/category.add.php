@@ -157,9 +157,16 @@ $(function(){
             <span class="help-inline"><span class="label label-important">外部链接设置后所有项目无效,此<?php echo $this->category_name;?>仅为一个链接.不设置请留空</span></span>
             <div class="clearfloat mb10"></div>
             <div class="input-prepend"> <span class="add-on"><?php echo $this->category_name;?>排序</span>
-              <input id="sortnum" class="span1" value="<?php echo $rs['sortnum'] ; ?>" name="sortnum" type="text"/>
+              <input id="sortnum" class="span3" value="<?php echo $rs['sortnum'] ; ?>" name="sortnum" type="text"/>
             </div>
             <div class="clearfloat mb10"></div>
+            <?php if($rs['userid'] && $rs['userid']==members::$userid){?>
+            <div class="input-prepend"> <span class="add-on">创建者</span>
+              <input name="creator" id="creator" class="span3" value="<?php echo $rs['creator']?$rs['creator']:members::$nickname ; ?>" type="text"/>
+              <input name="userid" type="hidden" value="<?php echo $rs['userid']?$rs['userid']:members::$userid ; ?>" />
+            </div>
+            <div class="clearfloat mb10"></div>
+            <?php }?>
             <div class="input-prepend input-append"> <span class="add-on"><?php echo $this->category_name;?>状态</span>
               <select name="status" id="status" class="chosen-select span3">
                 <option value="0">隐藏[status="0"]</option>

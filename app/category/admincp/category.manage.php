@@ -82,6 +82,7 @@ $(function(){
 <?php if($_GET['st']){ ?>
 iCMS.select('st',"<?php echo $_GET['st'] ; ?>");
 <?php } ?>
+iCMS.select('status',"<?php echo $_GET['status'] ; ?>");
 <?php if($_GET['orderby']){ ?>
 iCMS.select('orderby',"<?php echo $_GET['orderby'] ; ?>");
 <?php } ?>
@@ -127,10 +128,20 @@ iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
             <optgroup label="升序"><?php echo $orderby_option['ASC'];?></optgroup>
           </select>
         </div>
+        <div class="input-prepend"> <span class="add-on">状态</span>
+          <select name="status" id="status" class="span2">
+            <option value="">全部</option>
+            <option value="0">隐藏[status="0"]</option>
+            <option value="1">显示[status="1"]</option>
+            <option value="2">不调用[status="2"]</option>
+            <?php echo propAdmincp::get("status") ; ?>
+          </select>
+        </div>
         <div class="input-prepend"> <span class="add-on">查找方式</span>
           <select name="st" id="st" class="chosen-select" style="width:120px;">
             <option value="name"><?php echo $this->category_name;?>名</option>
             <option value="cid">CID</option>
+            <option value="appid">APPID</option>
             <option value="tkd">标题/关键字/简介</option>
           </select>
         </div>
@@ -240,7 +251,7 @@ iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="8"><div class="pagination pagination-right" style="float:right;"><?php echo iPagination::$pagenav ; ?></div>
+              <td colspan="9"><div class="pagination pagination-right" style="float:right;"><?php echo iPagination::$pagenav ; ?></div>
                 <div class="input-prepend input-append mt20"> <span class="add-on">全选
                   <input type="checkbox" class="checkAll checkbox" data-target="#<?php echo APP_BOXID;?>" />
                   </span>
