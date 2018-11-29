@@ -44,6 +44,16 @@ admincp::head();
 .store-card .column-downloaded, .store-card .column-rating { float: left; clear: left; max-width: 180px }
 .store-card .column-compatibility, .store-card .column-updated { text-align: right; float: right; clear: right; width: 65%; width: calc(100% - 180px) }
 .premium .label { font-weight: normal; padding: 4px 5px; font-size: 14px; margin-bottom: 3px;}
+@media (max-width:1000px) {
+.store-icon{display: none;}
+.store-card .desc, .store-card .name{margin: 0px;}
+.store-card .action-links{position: unset;width: 100%;}
+.store-action-buttons{float: none;margin: 0px;text-align: left;}
+.store-action-buttons li{display: inline;width: 50%;}
+.store-action-buttons li .clearfix{display: none;}
+
+.store-card .column-rating,.store-card .column-downloaded,.store-card .column-compatibility, .store-card .column-updated{width: 100%;text-align: left;float:none;}
+}
 </style>
 <script type="text/javascript">
 var tipDialog;
@@ -86,6 +96,14 @@ function clear_pay_notify_timer() {
   tipDialog.close().remove();
   clear_timer = true;
   pay_notify_timer.stop();
+}
+function uninstall($msg,$a) {
+  if(confirm($msg)){
+    var href = $($a).attr('href')+'&confirm=true';
+    $($a).attr('href',href);
+    return true;
+  }
+  return false;
 }
 </script>
 <div class="iCMS-container">
@@ -158,11 +176,11 @@ function clear_pay_notify_timer() {
                             <a href="<?php echo APP_FURI; ?>&do=<?php echo admincp::$APP_DO; ?>_uninstall&sid=<?php echo $sid;?>&id=<?php echo $appconf['appid'];?>"
                               target="iPHP_FRAME" class="btn btn-danger tip-top"
                               <?php if($value['type']){?>
-                              title="删除此模板文件夹下的所有文件"
-                              onclick="return confirm('确定要删除此模板?');"
+                              title="删除此<?php echo $title; ?>的所有文件"
+                              onclick="return uninstall('确定要删除此<?php echo $title; ?>?',this);"
                               <?php }else{ ?>
                               title="卸载应用会清除应用所有数据！"
-                              onclick="return confirm('卸载应用会清除应用所有数据！\n卸载应用会清除应用所有数据！\n卸载应用会清除应用所有数据！\n确定要卸载?\n确定要卸载?\n确定要卸载?');"
+                              onclick="return uninstall('卸载应用会清除应用所有数据！\n卸载应用会清除应用所有数据！\n卸载应用会清除应用所有数据！\n确定要卸载?\n确定要卸载?\n确定要卸载?',this);"
                               <?php } ?>
                             >
                               <i class="fa fa-trash-o"></i> 卸载<?php echo $title;?>

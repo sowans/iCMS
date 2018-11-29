@@ -15,10 +15,7 @@ class apps_storeAdmincp extends appsAdmincp {
      * @return [type] [description]
      */
     public function do_template(){
-      $title      = '模板';
-      $storeArray = apps_store::get_array(array('type'=>'1'));
-      $dataArray  = apps_store::remote_all('template');
-      include admincp::view("apps.store");
+      $this->store_view('1','template','模板');
     }
     public function do_template_update(){
       $this->do_store_update('template','模板');
@@ -57,19 +54,21 @@ class apps_storeAdmincp extends appsAdmincp {
     public function do_template_premium_install(){
       $this->do_store_premium_install('template');
     }
+    public function do_plugin(){
+        admincp::$APP_DO = 'store';
+        $this->store_view(2,'plugin','插件');
+    }
     /**
      * [应用市场]
      * @return [type] [description]
      */
-    public function do_store($name=null){
-      $title      = '应用';
-      $storeArray = apps_store::get_array(array('type'=>'0'));
-      $dataArray  = apps_store::remote_all();
-      include admincp::view("apps.store");
+    public function do_store(){
+      $this->store_view(0,'app','应用');
     }
     public function do_store_uninstall(){
-      $this->do_uninstall();
+      $this->store_uninstall();
     }
+
     public function do_store_update($type='app',$title='应用'){
       $sid   = (int)$_GET['sid'];
       $data  = apps_store::get($sid);
@@ -171,5 +170,20 @@ class apps_storeAdmincp extends appsAdmincp {
     }
     public function do_pay_notify(){
       apps_store::pay_notify();
+    }
+    public function store_view($type=0,$app=null,$title=null){
+      $storeArray = apps_store::get_array(array('type'=>$type));
+      $dataArray  = apps_store::remote_all($app);
+      include admincp::view("apps.store");
+    }
+    public function store_uninstall(){
+      $id  = (int)$_GET['id'];
+      $sid = (int)$_GET['sid'];
+      parent::do_uninstall($id,false);
+      $data = apps_store::get($sid);
+      if($data){
+        apps_store::del($sid);
+        iUI::alert('应用已经删除','js:1');
+      }
     }
 }

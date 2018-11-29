@@ -25,6 +25,14 @@ $(function(){
       });
   });
 });
+function uninstall($msg,$a) {
+  if(confirm($msg)){
+    var href = $($a).attr('href')+'&confirm=true';
+    $($a).attr('href',href);
+    return true;
+  }
+  return false;
+}
 </script>
 <div class="iCMS-container">
   <div class="widget-box">
@@ -152,7 +160,7 @@ $(function(){
                         <?php }else{?>
                           <a href="<?php echo APP_URI; ?>&do=update&_args=status:1&id=<?php echo $data['id'] ; ?>" target="iPHP_FRAME" class="btn btn-small btn-success"><i class="fa fa-check"></i> 启用</a>
                         <?php }?>
-                        <a href="<?php echo APP_FURI; ?>&do=uninstall&id=<?php echo $data['id'] ; ?>" target="iPHP_FRAME" class="del btn btn-small btn-danger" title='永久删除'  onclick="return confirm('卸载应用会清除应用所有数据！\n卸载应用会清除应用所有数据！\n卸载应用会清除应用所有数据！\n确定要卸载?\n确定要卸载?\n确定要卸载?');"/><i class="fa fa-trash-o"></i> 卸载</a>
+                        <a href="<?php echo APP_FURI; ?>&do=uninstall&id=<?php echo $data['id'] ; ?>" target="iPHP_FRAME" class="del btn btn-small btn-danger" title='永久删除'  onclick="return uninstall('卸载应用会清除应用所有数据！\n卸载应用会清除应用所有数据！\n卸载应用会清除应用所有数据！\n确定要卸载?\n确定要卸载?\n确定要卸载?',this);"/><i class="fa fa-trash-o"></i> 卸载</a>
                       <?php }else{?>
                       <?php }?>
                     <?php }?>

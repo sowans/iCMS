@@ -903,7 +903,8 @@ class articleAdmincp{
         if(isset($_POST['ischapter']) || is_array($_POST['data_id'])){
             $adidArray    = (array)$_POST['data_id'];
             $chaptertitle = $_POST['chaptertitle'];
-            $chapter      = count($bodyArray);
+            $chapter      = $_POST['chapternum'];
+            empty($chapter) && $chapter = count($bodyArray);
             foreach ($bodyArray as $key => $body) {
                 if(is_array($body)){
                     $body['body'] && $this->body($body['body'],$body['subtitle'],$aid,null,$haspic);

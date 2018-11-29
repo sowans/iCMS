@@ -55,6 +55,30 @@ class apps_store {
         }
         return $msg;
     }
+    public static function install_default($app=null) {
+        self::$success = false;
+
+        $archive_files = self::setup_zip();
+
+        $setup_msg = self::setup_app_file($archive_files,$app);
+        if(is_array($setup_msg)){
+            $msg.= $setup_msg[0];
+        }else{
+            return self::msg($msg.$setup_msg);
+        }
+
+        self::$test OR iFS::rm(self::$zip_file);
+
+        if(self::$is_update){
+            $msg.= self::setup_update($app);
+        }else{
+            $msg.= self::setup_install($app);
+        }
+
+        $msg.= self::msg('安装完成',true);
+        self::$success = true;
+        return $msg;
+    }
     public static function install_template($dir=null) {
         self::$success = false;
         $archive_files = self::setup_zip();
@@ -239,7 +263,7 @@ class apps_store {
         $msg.= self::extract($archive_files,$ROOTPATH,$bakdir);
         return array($msg,true);
     }
-    public static function setup_update($app){
+    public static function setup_update($app,$flag=false){
         $ROOTPATH = iPHP_APP_DIR.'/'.$app.'/';
         foreach (glob($ROOTPATH."iCMS.APP.UPDATE.*.php") as $filename) {
             $d    = str_replace(array($ROOTPATH,'iCMS.APP.UPDATE.','.php'), '', $filename);
@@ -248,12 +272,24 @@ class apps_store {
                 $files[$d] = $filename;
             }
         }
-
+        //插件
+        $ROOTPATH = iPHP_APP_DIR.'/';
+        foreach (glob($ROOTPATH."iCMS.".$app.".UPDATE.*.php") as $filename) {
+            $d    = str_replace(array($ROOTPATH,'iCMS.'.$app.'.UPDATE.','.php'), '', $filename);
+            $time = strtotime($d.'00');
+            if($time>self::$uptime){
+                $files[$d] = $filename;
+            }
+        }
         if($files){
             ksort($files);
             foreach ($files as $key => $file) {
-                $name = $app.'_'.str_replace(array('.php','.'), array('','_'), basename($file));
-                $msg.= self::setup_exec($file,$name,'升级');
+                if($flag==='delete'){
+                    iFS::del($file);
+                }else{
+                    $name = $app.'_'.str_replace(array('.php','.'), array('','_'), basename($file));
+                    $msg.= self::setup_exec($file,$name,'升级');
+                }
             }
         }
         return $msg;
@@ -279,6 +315,8 @@ class apps_store {
     }
     public static function setup_install($app){
         $path = iPHP_APP_DIR.'/'.$app.'/iCMS.APP.INSTALL.php';
+        is_file($path) OR $path = iPHP_APP_DIR.'/iCMS.'.$app.'.INSTALL.php';
+        self::setup_update($app,'delete');
         if(is_file($path)){
             return self::setup_exec($path,$app,'安装');
         }
@@ -562,6 +600,17 @@ class apps_store {
                     return true;
                 }
             break;
+            default:
+                $msg.= self::install_default($store['app']);
+                if(self::$success){
+                    $data['appid'] = 0;
+                    self::save($data,$sid);
+                    iUI::dialog(
+                      '<div style="overflow-y: auto;max-height: 500px;">'.$msg.'</div>',
+                      'js:1',1000000
+                    );
+                    return true;
+                }
         }
         iUI::dialog('<div style="overflow-y: auto;max-height: 500px;">'.$msg.'</div>','js:1',1000000);
     }

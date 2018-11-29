@@ -312,21 +312,17 @@ class appsAdmincp{
      * @return [type] [description]
      */
     public function do_uninstall($id = null,$dialog=true){
+      if(!isset($_GET['confirm'])||!$_GET['confirm']){
+        iUI::alert('非正常删除','js:1');
+      }
       $id===null && $id=$this->id;
       $app = apps::get($id);
-
-      if($app['type'] && $app['apptype']){
+      if($app && $app['type'] && $app['apptype']){
         apps::uninstall($app);
         apps::cache();
         menu::cache();
-        apps_store::del($id);
-        $msg = '应用已经删除';
-      }else{
-        $msg = '应用已被禁止删除';
       }
-      empty($app) && apps_store::del($id);
-
-      $dialog && iUI::alert($msg,'js:1');
+      $dialog && iUI::alert('应用已经删除','js:1');
     }
     /**
      * [本地安装应用]

@@ -200,6 +200,8 @@ class spider{
 
         $_POST = spider_data::crawl();
 
+        if($_POST===false) return false;
+
         spider_tools::listItemCache($_POST['reurl'],'delete');
 
         foreach ((array)$_POST as $key => $value) {
@@ -208,7 +210,6 @@ class spider{
                 return null;
             }
         }
-        if($_POST===false) return false;
 
         if(spider::$work && $work===null) $work = spider::$work;
 
