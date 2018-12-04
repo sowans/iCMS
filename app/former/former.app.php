@@ -170,7 +170,7 @@ class formerApp{
     public static function vars($field,$key,&$rs,$vars=null,$category=null,$app=null){
         $option_array = array();
         $value        = $rs[$key];
-        $values       = array();
+        $ret          = array();
         $nkey         = null;
         switch ($field['type']) {
             case 'multi_image':
@@ -185,17 +185,17 @@ class formerApp{
                     $valArray = explode("\n", $value);
                 }
                 if(is_array($valArray))foreach ($valArray as $i => $val) {
-                    $val && $values[$i]= filesApp::get_pic(trim($val));
+                    $val && $ret[$i]= filesApp::get_pic(trim($val));
                 }
             break;
             case 'image':
                 $nkey   = $key.'_array';
-                $values = filesApp::get_pic($value);
+                $ret = filesApp::get_pic($value);
             break;
             case 'file':
                 $nkey = $key.'_file';
                 $pi   = pathinfo($value);
-                $values   = array(
+                $ret   = array(
                     'name' => $pi['filename'],
                     'ext'  => $pi['extension'],
                     'dir'  => $pi['dirname'],
@@ -216,7 +216,7 @@ class formerApp{
                 if(is_array($valArray))foreach ($valArray as $i => $val) {
                     if($val){
                         $pi   = pathinfo($val);
-                        $values[$i]   = array(
+                        $ret[$i]   = array(
                             'name' => $pi['filename'],
                             'ext'  => $pi['extension'],
                             'dir'  => $pi['dirname'],
@@ -231,23 +231,23 @@ class formerApp{
                 }
                 $nkey      = $key.'_category';
                 $_category = categoryApp::get_cahce_cid($value);
-                $values    = categoryApp::get_lite($_category);
+                $ret    = categoryApp::get_lite($_category);
             break;
             case 'multi_category':
                 $nkey   = $key.'_category';
                 $valArray = explode(",", $value);
                 foreach ($valArray as $i => $val) {
                     $_category  = categoryApp::get_cahce_cid($val);
-                    $values[$i] = categoryApp::get_lite($_category);
+                    $ret[$i] = categoryApp::get_lite($_category);
                 }
             break;
             case 'userid':
                 if($vars['user']){
                     $nkey   = $key.'_user';
                     if ($rs['postype']) {
-                        $values = user::empty_info($value,'###');
+                        $ret = user::empty_info($value,'###');
                     } else {
-                        $values = user::info($value);
+                        $ret = user::info($value);
                     }
                 }
             break;
@@ -260,18 +260,18 @@ class formerApp{
                 }
                 $nkey   = $key.'_prop';
                 $propArray = propApp::field($key,$app);
-                // empty($values['prop']) && $propArray = propApp::value($key);
+                // empty($ret['prop']) && $propArray = propApp::value($key);
                 if($field['type']=='multi_prop'||$field['type']=='checkbox_prop'){
                     $valArray = explode(",", $value);
                     if($propArray)foreach ($propArray as $i => $val) {
                         if(in_array($val['val'], $valArray)){
-                            $values[$val['val']] = $val;
+                            $ret[$val['val']] = $val;
                         }
                     }
                 }else{
-                    $values = $propArray[$value];
+                    $ret = $propArray[$value];
                 }
-                empty($values) && $values = array();
+                empty($ret) && $ret = array();
                 $field['option'] = null;
             break;
             case 'tag':
@@ -288,8 +288,13 @@ class formerApp{
                     $rs[$key] = iPHP::callback(array("plugin_markdown","HOOK"),array($value,&$plugin));
                 }
             break;
+           case 'json';
+                if($value){
+                    $rs[$key]  = json_decode($value,true);
+                }
+            break;
             default:
-                // $values = $value;
+                // $ret = $value;
             break;
         }
         if($field['option'] && !in_array($key, array('creative','status'))){
@@ -301,22 +306,22 @@ class formerApp{
                 if($val){
                     list($opt_text,$opt_value) = explode("=", $val);
                     $option_array[$key][$opt_value] = $opt_text;
-                    // $values['option'][$opt_value] = $opt_text;
+                    // $ret['option'][$opt_value] = $opt_text;
                     if($field['multiple']){
                         if(in_array($opt_value, $valArray)){
-                            $values[$opt_value] = $opt_text;
+                            $ret[$opt_value] = $opt_text;
                         }
                     }else{
                         if($opt_value==$value){
                             $nkey = $key.'_value';
-                            $values = $opt_text;
+                            $ret = $opt_text;
                             break;
                         }
                     }
                 }
             }
         }
-        $nkey && $rs[$nkey] = $values;
+        $nkey && $rs[$nkey] = $ret;
         $option_array && iView::assign('option_array', $option_array);
     }
 }

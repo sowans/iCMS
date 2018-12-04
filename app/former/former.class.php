@@ -146,6 +146,7 @@ class former {
             if($default && $value===null){
                 $value = $default;
             }
+            $value = self::field_value($value,$type);
 
             $field['label']      && $label  = self::display($field['label'],'label');
             $field['help']       && $help   = self::display($field['help'],'help');
@@ -240,11 +241,6 @@ class former {
                     $attr['class'].= ' ui-datepicker';
                     $attr['type'] = 'text';
                     $input = self::widget('input',$attr);
-                    if($type=='date'){
-                        $value = get_date($value,'Y-m-d');
-                    }else{
-                        $value = get_date($value,'Y-m-d H:i:s');
-                    }
                     $input->val($value);
                 break;
                 case 'user_category':
@@ -635,7 +631,16 @@ class former {
 
         return $javascript;
     }
-    //字段数据输出处理
+    public static function field_value($value,$type) {
+        if($value){
+        //时间转换
+            $type =='date'     && $value = get_date($value,'Y-m-d');
+            $type =='datetime' && $value = get_date($value,'Y-m-d H:i:s');
+            $type =='json'     && $value = addslashes($value);
+        }
+        return $value;
+    }
+    //字段数据输出处理(后台 自定义表单)
     public static function field_output($value,$fields,$vArray=null) {
         //字段数据类型
         $field = $fields['field'];
@@ -643,14 +648,7 @@ class former {
         //字段类型
         list($type,$_type) = explode(':', $fields['type']);
 
-        //时间转换
-        if($type=='date'){
-          $value && $value = get_date($value,'Y-m-d');
-        }
-
-        if($type=='datetime'){
-          $value && $value = get_date($value,'Y-m-d H:i:s');
-        }
+        $value = self::field_value($value,$type);
 
         if(in_array($type, array('category','multi_category'))){
             $variable = self::$variable[$fields['name']];
@@ -724,6 +722,9 @@ class former {
                 $value = filesAdmincp::remotepic($value,true);
                 // files::set_file_iid($body,$aid,self::$appid);
             }
+        }elseif($type=='json'){
+            $value = json_decode(stripcslashes($value));
+            $value = addslashes(json_encode($value));
         }else{
             $value = iSecurity::escapeStr($value);
         }

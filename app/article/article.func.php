@@ -9,6 +9,9 @@
 */
 defined('iPHP') OR exit('What are you doing?');
 class articleFunc{
+	public static $app   = 'article';
+	public static $appid = iCMS_APP_ARTICLE;
+	public static $table = '#iCMS@__article';
 	public static function article_list($vars) {
 		if ($vars['loop'] === "rel" && empty($vars['id'])) {
 			return false;
@@ -48,7 +51,7 @@ class articleFunc{
 			$vars['sub'] && $cids += categoryApp::get_cids($vars['cids'], true);
 
 			if ($cids) {
-				iMap::init('category', iCMS_APP_ARTICLE,'cid');
+				iMap::init('category', self::$appid,'cid');
 				$map_where += iMap::where($cids);
 			}
 		}
@@ -61,16 +64,33 @@ class articleFunc{
             $where_sql.= iSQL::in($vars['pid!'],'pid','not');
         }
 		if (isset($vars['pids']) && !isset($vars['pid'])) {
-			iMap::init('prop', iCMS_APP_ARTICLE,'pid');
+			iMap::init('prop', self::$appid,'pid');
 			$map_where += iMap::where($vars['pids']);
 		}
-
+        if (isset($vars['tag[]']) && is_array($vars['tag[]'])) {
+            $tagvars = $vars['tag[]'];
+            foreach ($tagvars as $key => $tid) {
+                iMap::init('tag', self::$appid,$key);
+                $tag_map_sql = iMap::where($tid);
+            }
+            $tag_map_sql && $map_where += $tag_map_sql;
+            iMap::$distinct = true;
+        }
+        if (isset($vars['tag']) && is_array($vars['tag'])) {
+            $tids  = $vars['tag']['id'];
+            $field = $vars['tag']['field'];
+            if(is_array($vars['tag'][0])){
+                $tids  = array_column($vars['tag'], 'id');
+                $field = $vars['tag'][0]['field'];
+            }
+            iMap::init('tag', self::$appid,$field);
+            $map_where += iMap::where($tids);
+        }
 		if (isset($vars['tids'])) {
-			iMap::init('tag', iCMS_APP_ARTICLE,'tags');
+			iMap::init('tag', self::$appid,'tags');
 			$map_where += iMap::where($vars['tids']);
 		}
-		if (isset($vars['keywords'])) {
-	//最好使用 iCMS:article:search
+        if (isset($vars['keywords'])) {
 			if (empty($vars['keywords'])) {
 				return;
 			}
@@ -79,11 +99,10 @@ class articleFunc{
 				$vars['keywords'] = str_replace(array('%', '_'), array('\%', '\_'), $vars['keywords']);
 				$where_sql .= " AND CONCAT(title,keywords,description) like '%" . addslashes($vars['keywords']) . "%'";
 			} else {
-				$kws = explode(',', $vars['keywords']);
-				foreach ($kws AS $kwv) {
-					$keywords .= addslashes($kwv) . "|";
-				}
-				$keywords = substr($keywords, 0, -1);
+                $pieces   = explode(',', $vars['keywords']);
+                $pieces   = array_filter ($pieces);
+                $pieces   = array_map('addslashes', $pieces);
+                $keywords = implode('|', $pieces);
 				$where_sql .= " AND CONCAT(title,keywords,description) REGEXP '$keywords' ";
 			}
 		}
@@ -112,22 +131,27 @@ class articleFunc{
 		isset($vars['enddate']) && $where_sql .= " AND `pubdate`<='" . strtotime($vars['enddate']) . "'";
 		isset($vars['where']) && $where_sql .= $vars['where'];
 
-		if ($map_where) {
+        $vars['distinct'] && iMap::$distinct = true;
+        $distinct_sql = iMap::distinct(self::$table);
+
+        if($map_where){
 			$map_sql = iSQL::select_map($map_where, 'join');
 			//join
 			//empty($vars['cid']) && $map_order_sql = " ORDER BY map.`iid` $by";
 			$map_table = 'map';
 			$vars['map_order_table'] && $map_table = $vars['map_order_table'];
 			$map_order_sql = " ORDER BY {$map_table}.`iid` $by";
-			//$map_order_sql = " ORDER BY `icms_article`.`id` $by";
+			//$map_order_sql = " ORDER BY `".self::$table."`.`id` $by";
 			//
 			$where_sql .= ' AND ' . $map_sql['where'];
-			$where_sql = ",{$map_sql['from']} {$where_sql} AND `#iCMS@__article`.`id` = {$map_table}.`iid`";
+			$where_sql = ",{$map_sql['from']} {$where_sql} AND `".self::$table."`.`id` = {$map_table}.`iid`";
 			//derived
 			// $where_sql = ",({$map_sql}) map {$where_sql} AND `id` = map.`iid`";
 		}
 		$offset = (int)$vars['offset'];
 		if ($vars['page']) {
+            $countField = '*';
+            $distinct_sql && $countField = "DISTINCT `".self::$table."`.id";
 			$total_type = $vars['total_cache'] ? 'G' : null;
 			$total      = (int)$vars['total'];
 			if(isset($vars['pageNum'])){
@@ -135,7 +159,7 @@ class articleFunc{
 			}
 			if(!isset($vars['total']) && !isset($vars['pageNum'])){
 				$total = iPagination::totalCache(
-					"SELECT count(*) FROM `#iCMS@__article` {$where_sql}",
+					"SELECT count(".$countField.") FROM `".self::$table."` {$where_sql}",
 					$total_type,
 					iCMS::$config['cache']['page_total']
 				);
@@ -151,76 +175,63 @@ class articleFunc{
 				'nowindex'   => $GLOBALS['page']
 			));
 			$offset     = $multi->offset;
-			iView::assign("article_list_total", $total);
+            iView::assign(self::$app."_list_total", $total);
 		}
 		$limit = "LIMIT {$offset},{$maxperpage}";
 		//随机特别处理
 		if ($vars['orderby'] == 'rand') {
-			$ids_array = iSQL::get_rand_ids('#iCMS@__article', $where_sql, $maxperpage, 'id');
+			$ids_array = iSQL::get_rand_ids(self::$table, $where_sql, $maxperpage, 'id');
 			if ($map_order_sql) {
-				$map_order_sql = " ORDER BY `#iCMS@__article`.`id` $by";
+				$map_order_sql = " ORDER BY `".self::$table."`.`id` $by";
 			}
 		}
 
 		$hash = md5(json_encode($vars) . $order_sql . $limit);
 
 		if ($vars['cache']) {
-			$cache_name = iPHP_DEVICE . '/article/' . $hash;
+			$cache_name = iPHP_DEVICE . '/'.self::$app.'/' . $hash;
 			$resource = iCache::get($cache_name);
 			if(is_array($resource)) return $resource;
 		}
 
 		if ($offset) {
 			if ($vars['cache']) {
-				$map_cache_name = iPHP_DEVICE . '/article_page/' . $hash;
-				$ids_array = iCache::get($map_cache_name);
+                $page_cache_name = iPHP_DEVICE . '/'.self::$app.'_page/' . $hash;
+				$ids_array = iCache::get($page_cache_name);
 			}
-			if (empty($ids_array)) {
-				$ids_order_sql = $map_order_sql ? $map_order_sql : $order_sql;
-
-				$sql = "SELECT `#iCMS@__article`.`id` FROM `#iCMS@__article` {$where_sql} {$ids_order_sql} {$limit}";
-
-				if (strpos($sql, '`cid` IN')!==false && empty($map_order_sql) && iCMS::$config['debug']['db_optimize_in']){
-					$_sql = iSQL::optimize_in($sql,false);
-					$_sql && $sql = $_sql;
-				}
-
-				$ids_array = iDB::all($sql);
-				$vars['cache'] && iCache::set($map_cache_name, $ids_array, $cache_time);
-			}
-		} else {
-			$map_order_sql && $order_sql = $map_order_sql;
-
-			$sql = "SELECT `#iCMS@__article`.`id` FROM `#iCMS@__article` {$where_sql} {$order_sql} {$limit}";
-
+		}
+		$map_order_sql && $order_sql = $map_order_sql;
+		if (empty($ids_array)) {
+			$sql = "SELECT ".$distinct_sql." `".self::$table."`.`id` FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}";
 			if (strpos($sql, '`cid` IN')!==false && empty($map_order_sql) && iCMS::$config['debug']['db_optimize_in']){
 				$_sql = iSQL::optimize_in($sql);
 				$_sql && $sql = $_sql;
 			}
-
 			$ids_array = iDB::all($sql);
+
+
+			if($vars['cache'] && $page_cache_name){
+				iCache::set($page_cache_name, $ids_array, $cache_time);
+			}
 		}
 
 		if ($ids_array) {
 			$ids = iSQL::values($ids_array);
 			$ids = $ids ? $ids : '0';
-			$where_sql = "WHERE `#iCMS@__article`.`id` IN({$ids})";
+			$where_sql = "WHERE `".self::$table."`.`id` IN({$ids})";
 			$order_sql = "ORDER BY FIELD(`id`,{$ids})";
 			$limit = '';
 		}
 
 		if (empty($resource)) {
-			$resource = iDB::all("SELECT `#iCMS@__article`.* FROM `#iCMS@__article` {$where_sql} {$order_sql} {$limit}");
+			$resource = iDB::all("SELECT `".self::$table."`.* FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}");
 			$resource = articleFunc::article_array($vars, $resource);
 			$vars['cache'] && iCache::set($cache_name, $resource, $cache_time);
 		}
-		//print_r($resource);
 		return $resource;
 	}
 	public static function article_search($vars) {
-		if (empty(iCMS::$config['sphinx']['host'])) {
-			return array();
-		}
+		if(empty(iCMS::$config['sphinx']['host'])) return array();
 
 		$resource = array();
 		$hidden = categoryApp::get_cahce('hidden');
@@ -289,33 +300,33 @@ class articleFunc{
 		$vars['@'] && $query = '@(' . $vars['@'] . ') ' . $query;
 
 		$res = $SPH->Query($query, iCMS::$config['sphinx']['index']);
-
+		$ids_array = array();
 		if (is_array($res["matches"])) {
 			foreach ($res["matches"] as $docinfo) {
-				$aid[] = $docinfo['id'];
+				$ids_array[] = $docinfo['id'];
 			}
-			$aids = implode(',', (array) $aid);
+			$ids = implode(',', (array) $ids_array);
 		}
-		if (empty($aids)) {
+		if (empty($ids)) {
 			return;
 		}
 
-		$where_sql = " `id` in($aids)";
+		$where_sql = " `id` in($ids)";
 		$offset = 0;
 		if ($vars['page']) {
 			$total = $res['total'];
-			iView::assign("article_search_total", $total);
+			iView::assign(self::$app."_search_total", $total);
 			$pagenav = isset($vars['pagenav']) ? $vars['pagenav'] : "pagenav";
 			$pnstyle = isset($vars['pnstyle']) ? $vars['pnstyle'] : 0;
 			$multi = iPagination::make(array('total' => $total, 'perpage' => $maxperpage, 'unit' => iUI::lang('iCMS:page:list'), 'nowindex' => $GLOBALS['page']));
 			$offset = $multi->offset;
 		}
-		$resource = iDB::all("SELECT * FROM `#iCMS@__article` WHERE {$where_sql} {$order_sql} LIMIT {$maxperpage}");
+		$resource = iDB::all("SELECT * FROM `".self::$table."` WHERE {$where_sql} {$order_sql} LIMIT {$maxperpage}");
 		$resource = articleFunc::article_array($vars, $resource);
 		return $resource;
 	}
 	public static function article_data($vars) {
-		$vars['aid'] OR iUI::warning('iCMS&#x3a;article&#x3a;data 标签出错! 缺少"aid"属性或"aid"值为空.');
+		$vars['aid'] OR iUI::warning('iCMS&#x3a;'.self::$app.'&#x3a;data 标签出错! 缺少"aid"属性或"aid"值为空.');
 		$data = iDB::row("SELECT body,subtitle FROM `#iCMS@__article_data` WHERE aid='" . (int) $vars['aid'] . "' LIMIT 1;", ARRAY_A);
 		articleApp::hooked($data);
 		return $data;
@@ -335,22 +346,24 @@ class articleFunc{
 		if (isset($vars['cid'])) {
 			$sql = " AND `cid`='{$vars['cid']}' ";
 		}
+		$field = '`id`';
 		if ($vars['order'] == 'p') {
-			$field = 'max(id)';
-			$sql .= " AND `id` < '{$vars['id']}'";
+			// $field = 'max(id)'; //INNODB
+			// $sql .= " AND `id` < '{$vars['id']}'";
+			$sql .= " AND `id` < '{$vars['id']}' ORDER BY id DESC LIMIT 1";//MyISAM
 		} else if ($vars['order'] == 'n') {
-			$field = 'min(id)';
-			$sql .= " AND `id` > '{$vars['id']}'";
+			// $field = 'min(id)';//INNODB
+			// $sql .= " AND `id` > '{$vars['id']}'";
+			$sql .= " AND `id` > '{$vars['id']}' ORDER BY id ASC LIMIT 1";//MyISAM
 		}
 		$hash = md5($sql);
 		if ($vars['cache']) {
-			$cache = iPHP_DEVICE . '/article/' . $hash;
+            $cache = iPHP_DEVICE . '/'.self::$app.'/' . $hash;
 			$array = iCache::get($cache);
 		}
 		if (empty($array)) {
 			$rs = iDB::row("
-				SELECT * FROM `#iCMS@__article`
-				WHERE `id` =(SELECT {$field} FROM `#iCMS@__article` WHERE `status`='1' {$sql})
+				SELECT * FROM `".self::$table."` WHERE `id` =(SELECT {$field} FROM `".self::$table."` WHERE `status`='1' {$sql})
 			");
 			if ($rs) {
 				$category = categoryApp::get_cahce_cid($rs->cid);
@@ -358,7 +371,7 @@ class articleFunc{
 					'id'    => $rs->id,
 					'title' => $rs->title,
 					'pic'   => filesApp::get_pic($rs->pic),
-					'url'   => iURL::get('article', array((array) $rs, $category))->href,
+					'url'   => iURL::get(self::$app, array((array) $rs, $category))->href,
 				);
 			}
 			$vars['cache'] && iCache::set($cache, $array, $cache_time);
@@ -369,14 +382,14 @@ class articleFunc{
 		$resource = array();
 		if ($variable) {
 	        if($vars['data']||$vars['pics']){
-	            $aidArray = iSQL::values($variable,'id','array',null);
-	            $aidArray && $article_data = (array) articleApp::data($aidArray);
-	            unset($aidArray);
+	            $idArray = iSQL::values($variable,'id','array',null);
+	            $idArray && $article_data = (array) articleApp::data($idArray);
+	            unset($idArray);
 	        }
 	        if($vars['meta']){
-	            $aidArray = iSQL::values($variable,'id','array',null);
-				$aidArray && $meta_data = (array)apps_meta::data('article',$aidArray);
-	            unset($aidArray);
+	            $idArray = iSQL::values($variable,'id','array',null);
+				$idArray && $meta_data = (array)apps_meta::data(self::$app,$idArray);
+	            unset($idArray);
 	        }
 
 	        if($vars['tags']){

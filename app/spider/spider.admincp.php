@@ -776,7 +776,7 @@ function crawl_run(a){
                 $data = base64_decode($data);
                 $data = unserialize($data);
                 foreach ((array)$data as $key => $value) {
-                	$value = iSecurity::slashes($value);
+                	// $value = iSecurity::slashes($value);
                     iDB::insert("spider_project",$value);
                 }
             }

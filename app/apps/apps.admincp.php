@@ -91,7 +91,7 @@ class appsAdmincp{
           $table  = addslashes(cnjson_encode($table_array));
         }
 
-        $config_array = $_POST['config'];
+        $config_array = iSecurity::escapeStr($_POST['config']);
         if($config_array['template']){
           $config_array['template'] = explode("\n", $config_array['template']);
           $config_array['template'] = array_map('trim', $config_array['template']);

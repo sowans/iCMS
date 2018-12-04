@@ -15,7 +15,7 @@
     <span class="help-inline">* 必填</span>
     <div class="clearfix"></div>
     <div class="input-prepend">
-      <span class="add-on">数据类型</span>
+      <span class="add-on">字段类型</span>
       <select name="field" id="iFormer-field" class="chosen-select" style="width:230px;" data-placeholder="请选择...">
         <optgroup label="字符类型">
           <option value='VARCHAR'>字符串(VARCHAR)</option>
@@ -53,7 +53,7 @@
       <div class="clearfix"></div>
     </div>
     <div class="input-prepend">
-      <span class="add-on">数据长度</span>
+      <span class="add-on">字段长度</span>
       <input type="text" name="len" class="span3" id="iFormer-len" value=""/>
     </div>
     <span class="help-inline">* 必填</span>
@@ -69,7 +69,7 @@
     </div>
     <span class="help-inline">选填,不熟悉的可不填</span>
     <div class="input-prepend">
-      <span class="add-on">字段类型</span>
+      <span class="add-on">数据类型</span>
       <input type="text" name="type" class="span3" id="iFormer-type" value=""/>
     </div>
     <span class="help-inline">* 必填 不熟悉的请勿修改</span>

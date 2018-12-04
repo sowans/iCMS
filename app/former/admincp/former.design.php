@@ -32,6 +32,10 @@
           <span class="fb-icon fb-icon-textarea"></span>
           <p>多行</p>
         </li>
+        <li i="field" tag="input" type="json" field="VARCHAR" len="5120" label="json">
+          <span class="fb-icon fb-icon-input"></span>
+          <p>json</p>
+        </li>
         <li i="field" tag="input" type="text" field="VARCHAR" len="255" label="邮箱">
           <span class="fb-icon fb-icon-mail"></span>
           <p>邮箱</p>

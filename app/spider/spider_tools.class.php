@@ -622,25 +622,33 @@ class spider_tools {
         unset($_content);
         return $content;
     }
+    public static function textlen($string){
+        return function_exists('mb_strlen')?mb_strlen($string, "UTF-8"):strlen($string);
+    }
     public static function autoBreakPage($content,$pageBit = '15000',$pageBreak='#--iCMS.PageBreak--#'){
         $text      = str_replace('</p><p>', "</p>\n<p>", $content);
         $textArray = explode("\n", $text);
         $pageNum   = 0;
         $resource  = array();
-        // $_count         = count($textArray);
+        $textLen   = strlen($text);
+        $resLen    = 0;
         foreach ($textArray as $key => $p) {
-            $text      = preg_replace(array('/<[\/\!]*?[^<>]*?>/is','/\s*/is'),'',$p);
-            $pageLen   = strlen($resource[$pageNum]);
-            $output    = implode('',array_slice($textArray,$key));
-            $outputLen = strlen($output);
-            if($pageLen>$pageBit && $outputLen>$pageBit){
+            $pageLen = strlen($resource[$pageNum]);
+            $pLen   += strlen($p);
+            $slen    = $pLen>0?$textLen-$pLen:0;
+            // echo $key.' '.$pageLen.' '.$textLen.' '.$pLen.' '.$slen.PHP_EOL;
+            if($pageLen>$pageBit && $slen>$pageBit){
                 $pageNum++;
                 $resource[$pageNum] = $p;
             }else{
                 $resource[$pageNum].= $p;
             }
+            unset($textArra[$key]);
         }
-        unset($text,$textArray,$output);
+        unset($text,$textArray);
+        if($pageBreak===false){
+            return $resource;
+        }
         return implode($pageBreak, (array)$resource);
     }
     public static function safe_url($url) {
