@@ -134,6 +134,7 @@ class formerApp{
                 if(empty($value[0])){
                     continue;
                 }
+                tag::$field = $key;
                 tag::$appid = $app['id'];
                 if($update){
                     $orig = $orig_post[$key];

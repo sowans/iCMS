@@ -18,12 +18,20 @@ class spider_tools {
     public static $proxy_array = array();
     public static $callback    = array();
     public static $debug       = true;
+    public static $handle      = null;
 
+    public static $CURL_INFO              = null;
+    public static $CURL_ERRNO             = 0;
+    public static $CURL_ERROR             = null;
+    public static $CURLOPT_ENCODING       = null;
+    public static $CURLOPT_REFERER        = null;
+    public static $CURLOPT_TIMEOUT        = 60; //数据传输的最大允许时间
+    public static $CURLOPT_CONNECTTIMEOUT = 15; //连接超时时间
+    public static $CURLOPT_USERAGENT      = null;
     public static $CURLOPT_COOKIE         = null;
     public static $CURLOPT_COOKIEFILE     = null;
     public static $CURLOPT_COOKIEJAR      = null;
     public static $CURLOPT_HTTPHEADER     = null;
-
     /**
      * 在数据项里调用之前采集的数据[DATA@name][DATA@name.key]
      * [DATA@list:name]调用列表其它数据
@@ -697,16 +705,16 @@ class spider_tools {
         if(empty(spider::$referer)){
             spider::$referer = $parsed['scheme'] . '://' . $parsed['host'];
         }
-        self::$curl_info = array();
+
         $options = array(
             CURLOPT_URL                  => $url,
-            CURLOPT_ENCODING             => spider::$encoding,
-            CURLOPT_REFERER              => spider::$referer,
-            CURLOPT_USERAGENT            => spider::$useragent,
-            CURLOPT_TIMEOUT              => 10,
-            CURLOPT_CONNECTTIMEOUT       => 10,
+            CURLOPT_REFERER              => self::$CURLOPT_REFERER?self::$CURLOPT_REFERER:spider::$referer,
+            CURLOPT_USERAGENT            => self::$CURLOPT_USERAGENT?self::$CURLOPT_USERAGENT:spider::$useragent,
+            CURLOPT_ENCODING             => self::$CURLOPT_ENCODING?self::$CURLOPT_ENCODING:spider::$encoding,
+            CURLOPT_TIMEOUT              => self::$CURLOPT_TIMEOUT,
+            CURLOPT_CONNECTTIMEOUT       => self::$CURLOPT_CONNECTTIMEOUT,
             CURLOPT_RETURNTRANSFER       => 1,
-            CURLOPT_FAILONERROR          => 1,
+            CURLOPT_FAILONERROR          => 0,
             CURLOPT_HEADER               => 0,
             CURLOPT_NOSIGNAL             => true,
             // CURLOPT_DNS_USE_GLOBAL_CACHE => true,
@@ -756,11 +764,13 @@ class spider_tools {
             call_user_func_array(self::$callback['options'],array(&$options));
         }
 
-        $ch = curl_init();
-        curl_setopt_array($ch,$options);
-        $responses = curl_exec($ch);
-        $info = curl_getinfo($ch);
-        self::$curl_info = $info;
+        self::$handle = curl_init();
+        curl_setopt_array(self::$handle,$options);
+        $responses = curl_exec(self::$handle);
+        $info  = self::$CURL_INFO   = curl_getinfo(self::$handle);
+        self::$CURL_ERRNO  = curl_errno(self::$handle);
+        self::$CURL_ERRNO && self::$CURL_ERROR = curl_error(self::$handle);
+
         if (spider::$dataTest || spider::$ruleTest) {
             echo "<b>{$url} 请求信息:</b>";
             echo "<pre style='max-height:90px;overflow-y: scroll;'>";
@@ -774,8 +784,8 @@ class spider_tools {
             $_count++;
             $newurl = $info['redirect_url'];
 	        if(empty($newurl)){
-		    	curl_setopt($ch, CURLOPT_HEADER, 1);
-		    	$header		= curl_exec($ch);
+		    	curl_setopt(self::$handle, CURLOPT_HEADER, 1);
+		    	$header		= curl_exec(self::$handle);
 		    	preg_match ('|Location: (.*)|i',$header,$matches);
 		    	$newurl 	= ltrim($matches[1],'/');
 			    if(empty($newurl)) return false;
@@ -786,12 +796,12 @@ class spider_tools {
 		    	}
 	        }
 	        $newurl	= trim($newurl);
-			curl_close($ch);
+			curl_close(self::$handle);
 			unset($responses,$info);
             return self::remote($newurl, $_count);
         }
         if (in_array($info['http_code'],array(404,500))) {
-			curl_close($ch);
+			curl_close(self::$handle);
 			unset($responses,$info);
             return false;
         }
@@ -802,14 +812,14 @@ class spider_tools {
                 echo $url . '<br />';
                 echo "获取内容失败,重试第{$_count}次...<br />";
             }
-			curl_close($ch);
+			curl_close(self::$handle);
 			unset($responses,$info);
             return self::remote($url, $_count);
         }
         $pos = stripos($info['content_type'], 'charset=');
         $pos!==false && $content_charset = trim(substr($info['content_type'], $pos+8));
         $responses = self::charsetTrans($responses,$content_charset,spider::$charset);
-		curl_close($ch);
+		curl_close(self::$handle);
 		unset($info);
         if (spider::$dataTest || spider::$ruleTest) {
             echo '<pre>';
