@@ -211,7 +211,18 @@ class appsAdmincp{
 
             //基本表 新旧数据计算交差集 origin 为旧字段名
             $sql_array = apps_db::make_alter_sql($json_field,$_json_field,$_POST['origin']);
-            $sql_array && apps_db::alter_table($array['app'],$sql_array);
+            if($sql_array){
+                $t_fields  = apps_db::fields('#iCMS@__'.$array['app']);
+                foreach ($sql_array as $skey => $sql) {
+                    $p = explode('`', $sql);
+                    if(strpos($sql, 'CHANGE')!==false || strpos($sql, 'DROP COLUMN')!==false){
+                        if(!$t_fields[$p[1]]){//检查当前表 字段是否存在
+                            unset($sql_array[$skey]);
+                        }
+                    }
+                }
+                $sql_array && apps_db::alter_table($array['app'],$sql_array);
+            }
 
             //MEDIUMTEXT类型字段 新旧数据计算交差集 origin 为旧字段名
             $addons_sql_array = apps_db::make_alter_sql($addons_json_field,$_addons_json_field,$_POST['origin']);

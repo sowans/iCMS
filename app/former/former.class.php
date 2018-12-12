@@ -636,7 +636,7 @@ class former {
         //时间转换
             $type =='date'     && $value = get_date($value,'Y-m-d');
             $type =='datetime' && $value = get_date($value,'Y-m-d H:i:s');
-            $type =='json'     && $value = addslashes($value);
+            $type =='json'     && $value = htmlspecialchars($value);
         }
         return $value;
     }

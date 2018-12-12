@@ -886,7 +886,41 @@ class iTemplateLite_Compiler extends iTemplateLite {
 			return $string;
 		}
 	}
+	function _dejson($string){
+		//简单判断 json 字符
+		if( (substr($string, 0,1)=='{' && substr($string, -1)=='}')||
+			(substr($string, 0,2)=='["' && substr($string, -2)=='"]')||
+			(substr($string, 0,2)=='[{' && substr($string, -2)=='}]')||
+			(substr($string, 0,2)=='[[' && substr($string, -2)==']]')
+		){
+			if(preg_match('/\$.+/', $string)){
+				preg_match_all('/(?:(' . $this->_var_regexp . '|' . $this->_svar_regexp . ')(' . $this->_mod_regexp . '*))(?:\s+(.*))?/xs', $string, $_variables);
+				$_varname = $this->_parse_variables($_variables[1], $_variables[2],false);
+				$replace = array();
+				foreach ((array)$_varname as $key => $var) {
+					$vkey = $this->_dequote($_variables[1][$key]);
+					if(substr($vkey, 0,1)=='$'){
+						$search[]  = "'$vkey'";
+						$replace[] = $this->_dequote($var);
+					}
+				}
+			}
 
+			$array = json_decode($string,true);
+			$error = json_last_error();
+			if($error===0){
+				$ret = var_export($array,true);
+				if($search && $replace){
+					$ret = str_replace($search, $replace, $ret);
+				}
+				return $ret;
+			}else{
+				return false;
+			}
+		}else{
+			return false;
+		}
+	}
 	function _parse_arguments($arguments){
 		$_match		= array();
 		$_result	= array();
@@ -899,13 +933,33 @@ class iTemplateLite_Compiler extends iTemplateLite {
 			 2 - expecting attribute value (not '=')
 		*/
 		$state = 0;
+		$key   = null;
 
 		foreach($_match[0] as $value){
 			switch($state){
 				case 0:
+					//解析 独立json
+					$ret = $this->_dejson($value);
+					if($ret!==false){
+						$key===null?$key=0:(is_numeric($key)?$key++:$key=0);
+						$_result[$key] = $ret;
+						$state = 0;
+						continue;
+					}
 					// valid attribute name
 					if (is_string($value)){
-						$a_name = $value;
+						$value = $this->_dequote($value);
+						//[]='aaa'
+						if(substr($value, 0,1)=='[' && substr($value, -1)==']'){
+							$_key = (int)str_replace(array('[',']'), '', $value);
+							if(empty($_key)){
+								$key===null?$key=0:$key++;
+							}else{
+								$key=$_key;
+							}
+						}else{
+							$key = $value;
+						}
 						$state  = 1;
 					}else{
 						$this->trigger_error("invalid attribute name: '$token'", E_USER_ERROR, __FILE__, __LINE__);
@@ -935,26 +989,25 @@ class iTemplateLite_Compiler extends iTemplateLite {
 						}
 
 						if(preg_match_all('/(?:(' . $this->_var_regexp . '|' . $this->_svar_regexp . ')(' . $this->_mod_regexp . '*))(?:\s+(.*))?/xs', $value, $_variables)){
+							// a="aa$cc" b="$aa$cc" c="$aa'cc'"
 							$_varname = $this->_parse_variables($_variables[1], $_variables[2],false);
-							// $_result[$a_name] = $this->_parse_variables($_variables[1], $_variables[2],false);
-							if(substr(trim($value),0,1)!="$"){
-								$value = stripslashes($value);
-								$replace = array();
-								foreach ((array)$_varname as $_vkey => $_vvvv) {
-									$replace[]="{$quote}.{$_vvvv}.{$quote}";
-								}
-								$_result[$a_name] = $quote.str_replace ($_variables[1],$replace,$value).$quote;
-							}else{
-								$_result[$a_name] = implode('.', $_varname);
+							$value = stripslashes($value);
+							$replace = array();
+							foreach ((array)$_varname as $_vkey => $_vvvv) {
+								$replace[]="{$quote}.{$_vvvv}.{$quote}";
 							}
+							$value = $quote.str_replace ($_variables[1],$replace,$value).$quote;
+							$_result[$key] = str_replace(array("{$quote}{$quote}.",".{$quote}{$quote}",), '', $value);
 						}else{
 							if(strpos($value,'\"') !==false||strpos($value,"\'") !==false){
 								$value =  stripslashes($value);
 							}
-							$_result[$a_name] = '"'.$value.'"';
+							$_result[$key] = "{$quote}{$value}{$quote}";
 							if (is_bool($value)){
-								$_result[$a_name] = $value ? 'true' : 'false';
+								$_result[$key] = $value ? 'true' : 'false';
 							}
+							$ret = $this->_dejson($value);
+							$ret===false OR $_result[$key] = $ret;
 						}
 						$state = 0;
 					}else{

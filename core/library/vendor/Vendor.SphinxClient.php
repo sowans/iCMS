@@ -13,18 +13,17 @@ require dirname(__FILE__) .'/SphinxClient/sphinx.class.php';
 
 function SphinxClient($hosts) {
 
-	if(isset($GLOBALS['iSPH'])) return $GLOBALS['iSPH'];
 	if(empty($hosts)){
 		return false;
 	}
 
-	$GLOBALS['iSPH'] = new SphinxClient();
+	$SC = new SphinxClient();
 	if(strstr($hosts, 'unix:')){
 		$hosts	= str_replace("unix://",'',$hosts);
-		$GLOBALS['iSPH']->SetServer($hosts);
+		$SC->SetServer($hosts);
 	}else{
 		list($host,$port)=explode(':',$hosts);
-		$GLOBALS['iSPH']->SetServer($host,(int)$port);
+		$SC->SetServer($host,(int)$port);
 	}
-	return $GLOBALS['iSPH'];
+	return $SC;
 }

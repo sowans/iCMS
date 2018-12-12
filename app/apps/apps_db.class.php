@@ -111,16 +111,15 @@ class apps_db {
 
         return $sql;
     }
+    /**
+     * [make_alter_sql description]
+     * @param  [type] $N_fields     [新字段]
+     * @param  [type] $O_fields     [旧字段]
+     * @param  [type] $field_origin [description]
+     * @return [type]               [description]
+     */
     public static function make_alter_sql($N_fields,$O_fields,$field_origin){
-        //新字段
-        $N_field_array  = $N_fields;
-        //旧的字段
-        $O_fields_array = $O_fields;
-
-        // print_r($O_fields_array);
-        // print_r($N_field_array);
-
-        $diff = array_diff_values($N_field_array,$O_fields_array);
+        $diff = array_diff_values($N_fields,$O_fields);
         $sql_array = array();
         //删除 或者更改过
         if($diff['-'])foreach ($diff['-'] as $key => $value) {
@@ -128,7 +127,7 @@ class apps_db {
               //新字段名
               $nfield = $field_origin[$key];
               //新数据json
-              $nvalue = $N_field_array[$nfield];
+              $nvalue = $N_fields[$nfield];
               if($nvalue){
                 $sql_array[]= apps_db::make_field_sql($nvalue,'CHANGE',$key);
                 //将更改的字段从新增数据里移除

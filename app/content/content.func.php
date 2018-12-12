@@ -98,15 +98,6 @@ class contentFunc {
 			iMap::init('prop', self::$appid,'pid');
             $map_where += iMap::where($vars['pids']);
 		}
-        if (isset($vars['tag[]']) && is_array($vars['tag[]'])) {
-            $tagvars = $vars['tag[]'];
-            foreach ($tagvars as $key => $tid) {
-                iMap::init('tag', self::$appid,$key);
-                $tag_map_sql = iMap::where($tid);
-            }
-            $tag_map_sql && $map_where += $tag_map_sql;
-            iMap::$distinct = true;
-        }
         if (isset($vars['tag']) && is_array($vars['tag'])) {
             $tids  = $vars['tag']['id'];
             $field = $vars['tag']['field'];
@@ -136,6 +127,43 @@ class contentFunc {
                 $where_sql.= " AND CONCAT(title) REGEXP '$keywords' ";
             }
         }
+        $distinct_stack = -1;
+        if (isset($vars['tag[]']) && is_array($vars['tag[]'])) {
+            $tagArray = $vars['tag[]'];
+            $fieldsArray = former::fields(self::$apps['fields']);
+            foreach ($tagArray as $field => $tid) {
+                $FA = $fieldsArray[$field];
+                if($FA && $FA['type']=='tag'){
+                    iMap::init('tag', self::$appid,$field);
+                    $_map_where = (array)iMap::where($tid);
+                    $map_where  = array_merge($map_where,$_map_where);
+                    unset($_map_where);
+                    $distinct_stack++;
+                }
+            }
+        }
+
+        if(isset($vars['prop[]']) && is_array($vars['prop[]'])){
+            $propArray = $vars['prop[]'];
+            isset($fieldsArray) OR $fieldsArray = former::fields(self::$apps['fields']);
+            foreach ($propArray as $field => $value) {
+                $FA = $fieldsArray[$field];
+                if($FA && in_array($FA['type'], array('radio_prop','multi_prop','prop'))){
+                    if($FA['multiple']){
+                        $distinct_stack++;
+                        iMap::init('prop', self::$appid,$field);
+                        $_map_where = (array)iMap::where($value);
+                        $map_where  = array_merge($map_where,$_map_where);
+                        unset($_map_where);
+                    }else{
+                        $where_sql .= iSQL::in($value, $field);
+                    }
+                }
+            }
+        }
+        $distinct = '';
+        $distinct_stack>0  && $vars['distinct'] = true;
+        $vars['distinct']&& $distinct = ' DISTINCT ';
 
         $vars['id'] && $where_sql .= iSQL::in($vars['id'], 'id');
         $vars['id!'] && $where_sql .= iSQL::in($vars['id!'], 'id', 'not');
@@ -159,8 +187,6 @@ class contentFunc {
         isset($vars['enddate']) && $where_sql .= " AND `pubdate`<='" . strtotime($vars['enddate']) . "'";
         isset($vars['where']) && $where_sql .= $vars['where'];
 
-        $vars['distinct'] && iMap::$distinct = true;
-        $distinct_sql = iMap::distinct(self::$table);
 
         if($map_where){
 			$map_sql = iSQL::select_map($map_where, 'join');
@@ -179,7 +205,7 @@ class contentFunc {
 		$offset = (int)$vars['offset'];
 		if ($vars['page']) {
             $countField = '*';
-            $distinct_sql && $countField = "DISTINCT `".self::$table."`.id";
+            $distinct && $countField = "DISTINCT `".self::$table."`.id";
 			$total_type = $vars['total_cache'] ? 'G' : null;
 			$total      = (int)$vars['total'];
 			if(isset($vars['pageNum'])){
@@ -230,14 +256,13 @@ class contentFunc {
 		}
 		$map_order_sql && $order_sql = $map_order_sql;
 		if (empty($ids_array)) {
-			$sql = "SELECT ".$distinct_sql." `".self::$table."`.`id` FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}";
+			$sql = "SELECT ".$distinct." `".self::$table."`.`id` FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}";
 			if (strpos($sql, '`cid` IN')!==false && empty($map_order_sql) && iCMS::$config['debug']['db_optimize_in']){
 				$_sql = iSQL::optimize_in($sql);
 				$_sql && $sql = $_sql;
 			}
 			$ids_array = iDB::all($sql);
-
-
+echo iDB::$last_query;
 			if($vars['cache'] && $page_cache_name){
 				iCache::set($page_cache_name, $ids_array, $cache_time);
 			}

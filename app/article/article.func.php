@@ -67,15 +67,22 @@ class articleFunc{
 			iMap::init('prop', self::$appid,'pid');
 			$map_where += iMap::where($vars['pids']);
 		}
+        $distinct_stack = -1;
         if (isset($vars['tag[]']) && is_array($vars['tag[]'])) {
-            $tagvars = $vars['tag[]'];
-            foreach ($tagvars as $key => $tid) {
-                iMap::init('tag', self::$appid,$key);
-                $tag_map_sql = iMap::where($tid);
+            $tagArray = $vars['tag[]'];
+            // $fieldsArray = former::fields(self::$apps['fields']);
+            foreach ($tagArray as $field => $tid) {
+                // $FA = $fieldsArray[$field];
+                // if($FA && $FA['type']=='tag'){
+                    iMap::init('tag', self::$appid,$field);
+                    $_map_where = (array)iMap::where($tid);
+                    $map_where  = array_merge($map_where,$_map_where);
+                    unset($_map_where);
+                    $distinct_stack++;
+                // }
             }
-            $tag_map_sql && $map_where += $tag_map_sql;
-            iMap::$distinct = true;
         }
+
         if (isset($vars['tag']) && is_array($vars['tag'])) {
             $tids  = $vars['tag']['id'];
             $field = $vars['tag']['field'];
@@ -106,6 +113,10 @@ class articleFunc{
 				$where_sql .= " AND CONCAT(title,keywords,description) REGEXP '$keywords' ";
 			}
 		}
+        $distinct = '';
+        $distinct_stack>0  && $vars['distinct'] = true;
+        $vars['distinct']&& $distinct = ' DISTINCT ';
+
 
 		$vars['id'] && $where_sql .= iSQL::in($vars['id'], 'id');
 		$vars['id!'] && $where_sql .= iSQL::in($vars['id!'], 'id', 'not');
@@ -131,9 +142,6 @@ class articleFunc{
 		isset($vars['enddate']) && $where_sql .= " AND `pubdate`<='" . strtotime($vars['enddate']) . "'";
 		isset($vars['where']) && $where_sql .= $vars['where'];
 
-        $vars['distinct'] && iMap::$distinct = true;
-        $distinct_sql = iMap::distinct(self::$table);
-
         if($map_where){
 			$map_sql = iSQL::select_map($map_where, 'join');
 			//join
@@ -151,7 +159,7 @@ class articleFunc{
 		$offset = (int)$vars['offset'];
 		if ($vars['page']) {
             $countField = '*';
-            $distinct_sql && $countField = "DISTINCT `".self::$table."`.id";
+            $distinct && $countField = "DISTINCT `".self::$table."`.id";
 			$total_type = $vars['total_cache'] ? 'G' : null;
 			$total      = (int)$vars['total'];
 			if(isset($vars['pageNum'])){
@@ -202,7 +210,7 @@ class articleFunc{
 		}
 		$map_order_sql && $order_sql = $map_order_sql;
 		if (empty($ids_array)) {
-			$sql = "SELECT ".$distinct_sql." `".self::$table."`.`id` FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}";
+			$sql = "SELECT ".$distinct." `".self::$table."`.`id` FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}";
 			if (strpos($sql, '`cid` IN')!==false && empty($map_order_sql) && iCMS::$config['debug']['db_optimize_in']){
 				$_sql = iSQL::optimize_in($sql);
 				$_sql && $sql = $_sql;
@@ -237,7 +245,6 @@ class articleFunc{
 		$hidden = categoryApp::get_cahce('hidden');
 		$hidden && $where_sql .= iSQL::in($hidden, 'cid', 'not');
 		$SPH = iPHP::vendor('SphinxClient',iCMS::$config['sphinx']['host']);
-		$SPH->init();
 		$SPH->SetArrayResult(true);
 		if (isset($vars['weights'])) {
 			//weights='title:100,tags:80,keywords:60,name:50'
@@ -300,6 +307,15 @@ class articleFunc{
 		$vars['@'] && $query = '@(' . $vars['@'] . ') ' . $query;
 
 		$res = $SPH->Query($query, iCMS::$config['sphinx']['index']);
+
+		if($res===false){
+			$msg = array();
+			$SPH->_error    && $msg[] = '[ERROR]'.$SPH->GetLastError();
+			$SPH->_warning  && $msg[] = '[WARNING]'.$SPH->GetLastWarning();
+			$SPH->_connerror&& $msg[] = '[connerror]'.$SPH->connerror;
+			iUI::warning(implode('<hr />', $msg));
+		}
+
 		$ids_array = array();
 		if (is_array($res["matches"])) {
 			foreach ($res["matches"] as $docinfo) {
