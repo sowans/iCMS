@@ -224,7 +224,7 @@ class categoryAdmincp {
             iMap::diff($pid,$_pid,$cid);
             $msg = $this->category_name."编辑完成!请记得更新缓存!";
         }
-        $this->cahce_item($cid);
+        $this->cache_item($cid);
 
         // $this->config();
         iPHP::callback(array("spider","callback"),array($this,$cid));
@@ -239,7 +239,7 @@ class categoryAdmincp {
     	foreach((array)$_POST['name'] as $cid=>$name){
     		$name	= iSecurity::escapeStr($name);
 			iDB::query("UPDATE `#iCMS@__category` SET `name` = '$name',`sortnum` = '".(int)$_POST['sortnum'][$cid]."' WHERE `cid` ='".(int)$cid."' LIMIT 1");
-	    	//$this->cahce_item($cid);
+	    	//$this->cache_item($cid);
     	}
     	iUI::success('更新完成');
     }
@@ -333,7 +333,7 @@ class categoryAdmincp {
                 foreach($idArray AS $cid){
                     category::check_priv($cid,'d','alert');
                     $this->do_del($cid,false);
-                    //$this->cahce_item($cid);
+                    //$this->cache_item($cid);
                 }
                 iUI::$break    = true;
                 iUI::success('全部删除完成!','js:1');
@@ -350,7 +350,7 @@ class categoryAdmincp {
     public function do_updateorder(){
     	foreach((array)$_POST['sortnum'] as $sortnum=>$cid){
             iDB::query("UPDATE `#iCMS@__category` SET `sortnum` = '".intval($sortnum)."' WHERE `cid` ='".intval($cid)."' LIMIT 1");
-	    	//$this->cahce_item($cid);
+	    	//$this->cache_item($cid);
     	}
     }
     public function do_iCMS(){
@@ -439,7 +439,7 @@ class categoryAdmincp {
             iDB::query("DELETE FROM `#iCMS@__category` WHERE `cid` = '$cid'");
             iMap::del_data($cid,$this->appid,'category','node');
             iMap::del_data($cid,iCMS_APP_CATEGORY,'prop');
-            category::cahce_del($cid);
+            category::cache_del($cid);
             $msg = '删除成功!';
         }
         $this->do_cache(false);
@@ -471,83 +471,83 @@ class categoryAdmincp {
     }
     public function do_cache($dialog=true){
         @set_time_limit(0);
-
         categoryAdmincp::config();
-        $_count = category::cache(true,$this->appid);
-        // if($_count>1000){
-        //     $this->do_cacheall($_count);
-        // }else{
-        //     $this->cache_all(0,$_count);
-        // }
+        $total = category::total($this->appid);
+        if($total>500){
+            $_GET['total']  = $total;
+            $_GET['_appid'] = $this->appid;
+            $this->do_cache_burst();
+        }else{
+            category::cache($this->appid);
+        }
         $dialog && iUI::success('更新完成');
     }
     /**
-     * [更新缓存[NOPRIV]]
+     * [分批更新缓存[NOPRIV]]
      * @param  [type] $total [description]
      * @return [type]        [description]
      */
-    public function do_cacheall($total){
-        $page    = (int)$_GET['page'];
-        $alltime = (int)$_GET['alltime'];
+    public function do_cache_burst(){
+        @set_time_limit(0);
+        iDB::query("set interactive_timeout=24*3600");
 
-        if(isset($_GET['total'])){
-            $total = (int)$_GET['total'];
-        }
-        $maxperpage = 100;
-        $totalpage  = ceil($total/$maxperpage);
-        $offset     = $page*$maxperpage;
+        $num      = 100;
+        $appid    = (int)$_GET['_appid'];
+        $page     = (int)$_GET['page'];
+        $total    = (int)$_GET['total'];
+        $flag     = $_GET['flag'];
+        $offset   = $page*$num;
 
-        $this->cache_all($offset,$maxperpage);
+        empty($flag) && $flag = 'tmp';
 
-        $use_time         = iPHP::timer_stop();
-        $query['total']   = $total;
-        $query['page']    = $page+1;
-        $query['alltime'] = $alltime+$use_time;
-        $loopurl = $this->loopurl($totalpage,$query);
-        $memory = memory_get_usage();
-        $msg = "共<span class='label label-info'>{$total}</span>个栏目,".
-        "将分成<span class='label label-info'>{$totalpage}</span>次完成".
-        "<hr />开始执行第<span class='label label-info'>".$query['page']."</span>次缓存更新,".
-        "共<span class='label label-info'>{$maxperpage}</span>个栏目";
-        $msg.="<hr />用时<span class='label label-info'>{$use_time}</span>秒,";
-        $msg.="使用内存:".iFS::sizeUnit($memory);
-        if($loopurl){
-            $moreBtn = array(
-                array("id"=>"btn_stop","text"=>"停止","url"=>APP_URI),
-                array("id"=>"btn_next","text"=>"继续","src"=>$loopurl,"next"=>true)
+        $config = array();
+        if($flag === 'stop'){
+            //结束
+            $config['stop'] = array(
+                'msg'  =>'<div class="alert alert-info">'.$this->category_name.'缓存更新完成</div>',
+                'time' =>'5',
             );
-            $dtime    = 0.5;
-            $all_time = ($totalpage-$query['page'])*$use_time+1;
-            $msg.="<hr />预计全部缓存更新还需要<span class='label label-info'>{$all_time}</span>秒";
         }else{
-            $moreBtn = array(
-                array("id"=>"btn_next","text"=>"完成","url"=>APP_URI)
+            $callback = array(
+                array('category','cache_burst'),
+                array($appid,$offset,$num,$flag)
             );
-            $dtime = 5;
-            $msg.="<hr />已全部生成完成<hr />总共用时<span class='label label-info'>".$query["alltime"]."</span>秒";
+            $map = array(
+                'tmp'    => array('gold','生成'.$this->category_name.'临时缓存'),
+                'gold'   => array('delete','生成'.$this->category_name.'缓存'),
+                'delete' => array('common','清理'.$this->category_name.'临时缓存'),
+                'common' => array('stop','生成通用缓存'),
+            );
+
+            $next = $map[$flag][0];
+            //下一步
+            $config['step'] = array(
+                'title'    =>'<div class="alert">正在'.$map[$flag][1].'</div>',
+                'callback' =>$callback,
+                'url'      =>'do=cache_burst&_appid='.$appid.'&flag='.$flag,
+                'msg'      =>array($this->category_name,'个')
+            );
+            //下一批
+            $config['next'] = array(
+                'url'  =>'do=cache_burst&_appid='.$appid.'&flag='.$next.'&total='.$total,
+                'msg'  =>'<hr /><div class="alert alert-info">准备进行'.$map[$next][1].'</div>',
+                'time' =>'3',
+            );
+            if($flag === 'common'){
+                $total = $num = 1;
+                $config['step']['msg'] = array('操作','个');
+                $config['next']['msg'] = '';
+            }
         }
-        $updateMsg  = $page?'FRAME':false;
-        iUI::dialog($msg,$loopurl?"src:".$loopurl:'',$dtime,$moreBtn,$updateMsg);
+        iUI::loop($total,$num,$config);
     }
-    public function cahce_item($cid){
+    public function cache_item($cid){
         $C = iDB::row("SELECT * FROM `#iCMS@__category` WHERE `cid`='$cid' LIMIT 1;",ARRAY_A);
-        category::cahce_item($C);
+        category::cache_item($C);
 
         $C = category::data($C);
-        category::cahce_item($C,'C');
+        category::cache_item($C,'C');
         iCache::delete('category/'.$C['cid']);
-    }
-    public function loopurl($total,$_query){
-        if ($total>0 && $_GET['page']<$total){
-            $url  = $_SERVER["REQUEST_URI"];
-            $urlA = parse_url($url);
-
-            parse_str($urlA["query"], $query);
-            $query              = array_merge($query, (array)$_query);
-            $urlA["query"]      = http_build_query($query);
-            $url    = $urlA["path"].'?'.$urlA["query"];
-            return $url;
-        }
     }
 
     public static function tree_unset($C){

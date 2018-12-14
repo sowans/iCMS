@@ -51,25 +51,21 @@ class cacheAdmincp{
      * @return [type] [description]
      */
     public function do_category($dialog=true){
-        categoryAdmincp::config();
-    	category::cache();
-    	$dialog && iUI::success('更新完成');
+        iPHP::redirect(__ADMINCP__.'=category&do=cache');
     }
     /**
      * [更新文章分类缓存]
      * @return [type] [description]
      */
     public function do_article_category($dialog=true){
-        $categoryAdmincp = new article_categoryAdmincp();
-        $categoryAdmincp->do_cache($dialog);
+        iPHP::redirect(__ADMINCP__.'=article_category&do=cache');
     }
     /**
      * [更新标签分类缓存]
      * @return [type] [description]
      */
     public function do_tag_category($dialog=true){
-        $categoryAdmincp = new tag_categoryAdmincp();
-        $categoryAdmincp->do_cache($dialog);
+        iPHP::redirect(__ADMINCP__.'=tag_category&do=cache');
     }
     /**
      * [更新模板缓存]

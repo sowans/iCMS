@@ -500,3 +500,7 @@ function cnjson_encode($array){
     $json = unicode_encode($json);
     return $json;
 }
+function parse_url_qs($query){
+    parse_str($query, $output);
+    return $output;
+}

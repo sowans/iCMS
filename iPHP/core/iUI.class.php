@@ -369,4 +369,80 @@ class iUI extends iPagination{
 		flush();
 		ob_flush();
     }
+    public static function loop($total=null,$perpage=100,$config=array()){
+        $total===null && $total = (int)$_GET['total'];
+        $page      = (int)$_GET['page'];
+        $allTime   = (int)$_GET['allTime'];
+        $totalTime = (int)$_GET['totalTime'];
+        $maxpage   = ceil($total/$perpage);
+
+        $step = $config['step'];
+        $next = $config['next'];
+        $stop = $config['stop'];
+
+        if($step){
+            is_callable($step['callback'][0]) && $call = call_user_func_array($step['callback'][0], (array)$step['callback'][1]);
+            $use_time = iPHP::timer_stop();
+            $query  = array(
+                'total'   =>$total,
+                'page'    =>$page+1,
+                'allTime' =>$allTime+$use_time
+            );
+            $query = iURL::merge_query($query,$step['url']);
+            if ($maxpage>0 && $query['page']<$maxpage){
+                $url = iURL::URI($query);
+            }
+
+            $msg    = $step['title'];
+            $format ="共<span class='label label-info'>{$total}</span>%2\$s%1\$s,将分成<span class='label label-info'>{$maxpage}</span>次完成<hr />".
+            "开始执行第<span class='label label-info'>".$query['page']."</span>次,<span class='label label-info'>{$perpage}</span>%2\$s%1\$s<hr />";
+            array_unshift($step['msg'], $format);
+            $msg.= call_user_func_array('sprintf',$step['msg']);
+            $memory = memory_get_usage();
+            $msg.="用时<span class='label label-info'>{$use_time}</span>秒,";
+            $msg.="使用内存:".iFS::sizeUnit($memory).'<hr />';
+            $msg.= $call;
+        }
+
+        if($step && $url){
+            $moreBtn = array(
+                array("id"=>"btn_stop","text"=>"停止","url"=>APP_URI),
+                array("id"=>"btn_next","text"=>"继续","src"=>$url,"next"=>true)
+            );
+            $dtime    = 0.1;
+            isset($step['time']) && $dtime = $step['time'];
+            $ntime = ($maxpage-$query['page'])*$use_time+$dtime;
+            $msg.="预计全部完成还需要<span class='label label-info'>{$ntime}</span>秒<hr />";
+        }else{
+            $moreBtn = array(array("id"=>"btn_next","text"=>"完成","url"=>APP_URI));
+            $dtime   = 5;
+            $msg.="已全部完成!";
+            $query["allTime"] && $msg.="总共用时<span class='label label-info'>".$query["allTime"]."</span>秒";
+
+            if($next){
+                isset($next['time']) && $dtime = $next['time'];
+                $nquery = array(
+                    'page'      =>0,
+                    'allTime'   =>0,
+                    'totalTime' =>($totalTime+$query["allTime"])
+                );
+                $nquery = iURL::merge_query($nquery,$next['url']);
+                $url    = iURL::URI($nquery);
+                $msg.= $next['msg'];
+                $moreBtn = array(
+                    array("id"=>"btn_stop","text"=>"停止","url"=>APP_URI),
+                    array("id"=>"btn_next","text"=>"继续","src"=>$url,"next"=>true)
+                );
+            }
+            if($stop){
+                empty($stop['btn']) && $stop['btn'] ='完成';
+                isset($stop['time'])&& $dtime = $stop['time'];
+                isset($stop['url']) && $moreBtn = array(array("id"=>"btn_next","text"=>$stop['btn'],"url"=>$stop['url']));
+                $msg = $stop['msg'];
+                $totalTime && $msg.="总共用时<span class='label label-info'>{$totalTime}</span>秒";
+            }
+        }
+        $update = $page?'FRAME':false;
+        iUI::dialog($msg,($url?"src:".$url:''),$dtime,$moreBtn,$update);
+    }
 }

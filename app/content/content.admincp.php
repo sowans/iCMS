@@ -309,7 +309,7 @@ class contentAdmincp{
             $sql.= iSQL::in('-1','cid');
         }
         if($_GET['hidden']) {
-            $hidden = categoryApp::get_cahce('hidden');
+            $hidden = categoryApp::get_cache('hidden');
             $hidden && $sql.= iSQL::in($hidden, 'cid', 'not');
         }
         if($_GET['keywords']) {

@@ -361,10 +361,8 @@ class iURL {
         }
         $parse  = parse_url($url);
         parse_str($parse['query'], $query);
-
-        $output = (array)$QS;
-        is_array($QS) OR parse_str($QS, $output);
-        foreach ($output as $key => $value) {
+        is_array($QS) OR $QS = parse_url_qs($QS);
+        foreach ($QS as $key => $value) {
             //这个null是字符
             if($value==='null'||$value===null){
                 unset($output[$key]);
@@ -399,5 +397,17 @@ class iURL {
         $parsed['query']   && $uri.= '?'.$parsed['query'];
         $parsed['fragment']&& $uri.= '#'.$parsed['fragment'];
         return $uri;
+    }
+    public static function URI($qs=null,$url=null){
+        $url===null && $url = $_SERVER["REQUEST_URI"];
+        $arr = parse_url($url);
+        $arr["query"] = self::merge_query($arr["query"],$qs,true);
+        return self::glue($arr);
+    }
+    public static function merge_query($q1=null,$q2=null,$build=false){
+        is_string($q1) && $q1 = parse_url_qs($q1);
+        is_string($q2) && $q2 = parse_url_qs($q2);
+        $query = array_merge($q1,$q2);
+        return $build?http_build_query($query):$query;
     }
 }

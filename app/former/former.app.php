@@ -231,14 +231,14 @@ class formerApp{
                     continue;
                 }
                 $nkey      = $key.'_category';
-                $_category = categoryApp::get_cahce_cid($value);
+                $_category = categoryApp::get_cache_cid($value);
                 $ret    = categoryApp::get_lite($_category);
             break;
             case 'multi_category':
                 $nkey   = $key.'_category';
                 $valArray = explode(",", $value);
                 foreach ($valArray as $i => $val) {
-                    $_category  = categoryApp::get_cahce_cid($val);
+                    $_category  = categoryApp::get_cache_cid($val);
                     $ret[$i] = categoryApp::get_lite($_category);
                 }
             break;

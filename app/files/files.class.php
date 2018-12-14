@@ -193,11 +193,12 @@ class files {
         iWAF::check_data($data);
         iDB::update(self::$TABLE_DATA, $data, array('id' => $fid));
     }
-    public static function get($f, $v,$s='*') {
-        if (!self::$check_data||!self::$check_md5) {
-            return;
+    public static function get($f, $v,$c=true,$s='*') {
+        if($c){
+            if (!self::$check_data||!self::$check_md5) {
+                return;
+            }
         }
-
         $sql = self::$userid === false ? '' : " AND `userid`='" . self::$userid . "'";
         $rs = iDB::row("SELECT {$s} FROM " . self::$_DATA_TABLE. " WHERE `$f`='$v' {$sql} LIMIT 1");
 
@@ -219,23 +220,22 @@ class files {
             case 'path':
                 $filename = iFS::filename($value);
             case 'filename':
-                $info     = self::get('filename',$filename,'id');
+                $info     = self::get('filename',$filename,false,'id');
                 $fileid   = $info->id;
             break;
             case 'id':
                 $fileid   = $value;
             break;
         }
-
         if($fileid){
             $userid  = self::$userid;
             $addtime = time();
             $data    = compact('fileid','userid','appid','indexid','addtime');
-            self::idb_map($data);
+            self::add_map($data);
         }
     }
 
-    public static function idb_map($data,$where=null) {
+    public static function add_map($data,$where=null) {
         if($where){
             return iDB::update(self::$TABLE_MAP, $data,$where);
         }

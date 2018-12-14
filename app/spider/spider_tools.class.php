@@ -837,8 +837,7 @@ class spider_tools {
         iFS::mkdir(dirname($path));
         iHttp::$CURLOPT_COOKIEJAR = $path;
         if($data && is_string($data)){
-            parse_str($data, $output);
-            $data = $output;
+            $data = parse_url_qs($data);
         }
         $ret = iHttp::post($url,$data);
         $flag===true && self::$CURLOPT_COOKIEFILE = $path;

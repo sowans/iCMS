@@ -76,7 +76,7 @@ if(in_array($ext, $exts)){
     $ext = iCMS::$config['router']['ext'];
     $dir = iCMS::$config['router']['dir'];
     if(empty($REQUEST_URI)){
-        $rs    = categoryApp::get_cahce('rules');
+        $rs    = categoryApp::get_cache('rules');
         $rules = array();
         foreach((array)$rs AS $rule) {
            if($rule)foreach ($rule as $k => $v) {

@@ -240,7 +240,7 @@ class userApp {
 		$pubdate = time();
 		$postype = "0";
 
-		$category = categoryApp::get_cahce_cid($cid);
+		$category = categoryApp::get_cache_cid($cid);
 		$status = $category['config']['examine'] ? 3 : 1;
 
 		$fields = article::fields($aid);
@@ -313,7 +313,7 @@ class userApp {
 			if($act == "renew"){
 				$sql = "`status` ='1'";
 				$cid = article::value('cid',$id);
-				$C = categoryApp::get_cahce_cid($cid);
+				$C = categoryApp::get_cache_cid($cid);
 				$C['config']['examine'] && $sql = "`status` ='3'";
 			}
 			$act == "delete" && $sql = "`status` ='2',`postype`='3'";

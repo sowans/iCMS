@@ -38,7 +38,7 @@ class commentFunc{
 	private static function list_display($vars){
 		$vars['do']          = 'list';
 		$vars['page_ajax']   = 'comment_page_ajax';
-		$vars['total_cahce'] = 'G';
+		$vars['total_cache'] = 'G';
 		$tpl = 'list.default';
 		isset($vars['_display']) && $vars['display'] = $vars['_display'];
 		unset($vars['method'],$vars['_display']);
@@ -101,7 +101,7 @@ class commentFunc{
 		$md5	= md5($where_sql.$order_sql);
 		$offset = (int)$vars['offset'];
 		if($vars['page']){
-			isset($vars['total_cache']) && $_GET['total_cahce'] = true;
+			isset($vars['total_cache']) && $_GET['total_cache'] = true;
 			$total  = iPagination::totalCache("SELECT count(*) FROM `#iCMS@__comment` WHERE {$where_sql}",null,iCMS::$config['cache']['page_total']);
 			$pgconf = array(
 				'total'     => $total,

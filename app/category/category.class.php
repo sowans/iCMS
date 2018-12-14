@@ -12,12 +12,6 @@ class category {
     public static $priv = null;
     private static $instance = null;
 
-    // static public function getInstance() {
-    //
-    //
-          //     }
-    //     return self::$instance;
-    // }
     public static function appid($appid,$priv=null){
         $self = new self();
         $self::$appid = $appid;
@@ -44,7 +38,10 @@ class category {
 
         return $sql;
     }
-
+    public static function total($appid=null) {
+        $sql = self::init_sql($appid);
+        return iDB::value("SELECT count(cid) FROM `#iCMS@__category` WHERE {$sql}");
+    }
     public static function is_root($rootid="0"){
         $is = iDB::value("SELECT `cid` FROM `#iCMS@__category` where `rootid`='$rootid'");
         return $is?true:false;
@@ -151,7 +148,7 @@ class category {
     }
 
     public static function get_root($cid="0",$root=null) {
-        empty($root) && $root = categoryApp::get_cahce('rootid');
+        empty($root) && $root = categoryApp::get_cache('rootid');
         $ids = $root[$cid];
         if(is_array($ids)){
             $array = $ids;
@@ -163,7 +160,7 @@ class category {
     }
     public static function get_parent($cid="0",$parent=null) {
         if($cid){
-            empty($parent) && $parent = categoryApp::get_cahce('parent');
+            empty($parent) && $parent = categoryApp::get_cache('parent');
             $rootid = $parent[$cid];
             if($rootid){
                 return self::get_parent($rootid,$parent);
@@ -172,83 +169,159 @@ class category {
         return $cid;
     }
     public static function cache($appid=null) {
-        $sql = self::init_sql($appid);
-        $rs  = iDB::all("SELECT * FROM `#iCMS@__category` WHERE {$sql}");
-        foreach((array)$rs AS $C) {
-            self::cahce_item($C);//临时缓存
-        }
-
-        foreach((array)$rs AS $C) {
-            $C = self::data($C);
-            self::cahce_item($C,'C');
-        }
-
-        foreach((array)$rs AS $C) {
-            iCache::delete('category/'.$C['cid']);
-        }
-        unset($rs,$C);
+        $sql = 'WHERE '.self::init_sql($appid);
+        $all = iDB::all("SELECT * FROM `#iCMS@__category` {$sql} ORDER BY `sortnum`  ASC");
+        //生成临时缓存
+        self::cache_tmp($all);
+        //正式缓存
+        self::cache_gold($all);
+        //清除临时缓存
+        self::cache_tmp($all,'delete');
+        unset($all);
         self::cache_common();
         gc_collect_cycles();
     }
+    //正式缓存
+    public static function cache_gold($all=null) {
+        foreach((array)$all AS $C) {
+            $C = self::data($C);
+            self::cache_item($C,'C');
+        }
+    }
+    //临时缓存
+    public static function cache_tmp($all=null,$flag=false) {
+        // if(!is_array($all)){
+        //     $sql = 'WHERE '.self::init_sql($all);
+        //     $all = iDB::all("SELECT * FROM `#iCMS@__category` {$sql}");
+        // }
+        foreach((array)$all AS $C) {
+            if($flag==='delete'){
+               iCache::delete('category/'.$C['cid']);
+           }else{
+                self::cache_item($C);
+           }
+        }
+        gc_collect_cycles();
+    }
     public static function cache_common() {
-        $rs  = iDB::all("SELECT `cid`,`rootid`,`dir`,`status`,`domain`,`rule` FROM `#iCMS@__category` ORDER BY `sortnum`  ASC");
-        $hidden = array();
-        foreach((array)$rs AS $C) {
-            $C['status'] OR $hidden[]        = $C['cid'];
-            $dir2cid[$C['dir']]              = $C['cid'];
-            $parent[$C['cid']]               = $C['rootid'];
+        self::cache_common_hidden();
+        self::cache_common_array();
+        self::cache_common_rootid();
+        self::cache_common_domain();
+        self::cache_common_rule();
+    }
+    //缓存隐藏节点
+    public static function cache_common_hidden() {
+        $all = iDB::all("SELECT `cid` FROM `#iCMS@__category` WHERE `status`='0'");
+        $arr = array_column($all, 'cid');
+        iCache::set('category/hidden',$arr,0);
+        unset($all,$arr);
+        gc_collect_cycles();
+    }
+    //缓存节点目录对应CID,CID对应的rootid
+    public static function cache_common_array() {
+        $all  = iDB::all("SELECT `cid`,`dir`,`rootid`,`status` FROM `#iCMS@__category`");
+        $arr1 = array_column($all, 'cid','dir');
+        $arr2 = array_column($all, 'cid','rootid');
+        iCache::set('category/dir2cid',$arr1,0);
+        iCache::set('category/parent',$arr2,0);
+        unset($all,$arr1,$arr2);
+        gc_collect_cycles();
+    }
+
+    public static function cache_common_rootid() {
+        $all  = iDB::all("SELECT `cid`,`rootid` FROM `#iCMS@__category` ORDER BY `sortnum`  ASC");
+        foreach((array)$all AS $C) {
             $rootid[$C['rootid']][$C['cid']] = $C['cid'];
         }
-        iCache::set('category/dir2cid',$dir2cid,0);
-        iCache::set('category/hidden', $hidden,0);
         iCache::set('category/rootid',$rootid,0);
-        iCache::set('category/parent',$parent,0);
-
+        unset($rootid,$all);
+    }
+    /**
+     * [cache_domain 要在 cache_rootid 之后执行]
+     * [缓存节点绑定域名,用于iURL回调函数]
+     */
+    public static function cache_common_domain() {
+        $all    = iDB::all("SELECT `cid` FROM `#iCMS@__category` WHERE `domain`!=''");
+        $rootid = iCache::get('category/rootid');
         $domain_rootid = array();
-        foreach((array)$rs AS $C) {
-            if($C['domain']){
-                $root = self::get_root($C['cid'],$rootid);
-                $root && $domain_rootid+= array_fill_keys($root, $C['cid']);
-            }
-            if($C['rule']){
-                $rule = json_decode($C['rule'],true);
-                if($rule)foreach ($rule as $key => &$value) {
-                   if($key!='index' && $key!='list'){
-                        $value = str_replace('{CDIR}', $C['dir'], $value);
-                   }
-                }
-                $rule && $rules[$C['cid']] = $rule;
-            }
+        foreach((array)$all AS $C) {
+            $root = self::get_root($C['cid'],$rootid);
+            $root && $domain_rootid+= array_fill_keys($root, $C['cid']);
         }
         iCache::set('category/domain_rootid',$domain_rootid,0);
+        unset($all,$domain_rootid,$root);
+        gc_collect_cycles();
+    }
+    //缓存节点URL规则,用于rewrite
+    public static function cache_common_rule() {
+        $all   = iDB::all("SELECT `cid`,`dir`,`rule` FROM `#iCMS@__category` WHERE `rule`!=''");
+        $rules = array();
+        foreach((array)$all AS $C) {
+            $rule = json_decode($C['rule'],true);
+            if($rule)foreach ($rule as $key => &$value) {
+               if($key!='index' && $key!='list'){
+                    $value = str_replace('{CDIR}', $C['dir'], $value);
+               }
+            }
+            $rule && $rules[$C['cid']] = $rule;
+        }
         iCache::set('category/rules',$rules,0);
-        unset($rootid,$parent,$dir2cid,$hidden,$rs,$domain_rootid,$root);
+        unset($all,$domain_rootid,$root);
+        gc_collect_cycles();
     }
-    public static function cache_get($cid="0",$fix=null) {
-        return iCache::get('category/'.$fix.$cid);
-    }
-    public static function cahce_item($C=null,$fix=null){
-        is_array($C) OR $C = iDB::row("SELECT * FROM `#iCMS@__category` where `cid`='$C' LIMIT 1;",ARRAY_A);
-        iCache::set('category/'.$fix.$C['cid'],$C,0);
+    //分段生成缓存
+    public static function cache_burst($appid=null,$offset=0,$num=10,$flag=null) {
+        if($flag ==='common'){
+            return self::cache_common();
+        }
+
+        $sql = self::init_sql($appid);
+
+        $all   = iDB::all("
+            SELECT `cid` FROM `#iCMS@__category`
+            WHERE {$sql}
+            ORDER BY `sortnum`  ASC
+            LIMIT {$offset},{$num}
+        ");
+        $idA = array_column($all, 'cid');
+        $idA && $ids = "'".implode("','", $idA)."'";
+        if($ids){
+            $rs = iDB::all("SELECT * FROM `#iCMS@__category` WHERE `cid` IN({$ids}) ORDER BY FIELD(`cid`,{$ids});");
+            //生成临时缓存
+            $flag ==='tmp' && self::cache_tmp($rs);
+            //正式缓存
+            $flag ==='gold' && self::cache_gold($rs);
+            //清除临时缓存
+            $flag ==='delete' && self::cache_tmp($all,'delete');
+        }
     }
 
     public static function cache_all($offset,$maxperpage,$appid=null) {
         $sql = self::init_sql($appid);
         $ids_array  = iDB::all("
             SELECT `cid`
-            FROM `#iCMS@__category` {$sql} ORDER BY cid
+            FROM `#iCMS@__category` {$sql}
+            ORDER BY `sortnum`  ASC
             LIMIT {$offset},{$maxperpage};
         ");
         $ids   = iSQL::values($ids_array,'cid');
         $ids   = $ids?$ids:'0';
-        $rs  = iDB::all("SELECT * FROM `#iCMS@__category` WHERE `cid` IN({$ids});");
+        $rs  = iDB::all("SELECT * FROM `#iCMS@__category` WHERE `cid` IN({$ids}) ORDER BY FIELD(`cid`,{$ids});");
         foreach((array)$rs AS $C) {
             $C = self::data($C);
-            self::cahce_item($C,'C');
+            self::cache_item($C,'C');
         }
         unset($$rs,$C,$ids_array);
     }
-    public static function cahce_del($cid=null){
+    public static function cache_get($cid="0",$fix=null) {
+        return iCache::get('category/'.$fix.$cid);
+    }
+    public static function cache_item($C=null,$fix=null){
+        is_array($C) OR $C = iDB::row("SELECT * FROM `#iCMS@__category` where `cid`='$C' LIMIT 1;",ARRAY_A);
+        iCache::set('category/'.$fix.$C['cid'],$C,0);
+    }
+    public static function cache_del($cid=null){
         if(empty($cid)){
             return;
         }
@@ -377,20 +450,6 @@ class category {
     public static function select($scid="0",$cid="0",$level = 1,$url=false,$where=null) {
         $cc = iDB::value("SELECT count(*) FROM `#iCMS@__category`");
         return self::select_lite($scid,$cid,$level,$url,$where);
-
-        // if($cc<=1000){
-        // }else{
-        //     $array = iCache::get('category/cookie');
-        //     foreach((array)$array AS $root=>$_cid) {
-        //         $C = category::cache_get($_cid);
-        //         if($C['status']) {
-        //             $selected = ($scid==$_cid)?"selected":"";
-        //             $text     = $C['name']."[cid:{$_cid}][pid:{$C['pid']}]";
-        //             $option  .= "<option value='{$_cid}' $selected>{$text}</option>";
-        //         }
-        //     }
-        //     return $option;
-        // }
     }
     public static function priv($p) {
         $category = new category();

@@ -53,7 +53,7 @@ class categoryFunc{
 				$where_sql.= iSQL::in($cids,'cid');
 			break;
 			case "self":
-				$parentid = categoryApp::get_cahce('parent',$vars['cid']);
+				$parentid = categoryApp::get_cache('parent',$vars['cid']);
 				$where_sql.=" AND `rootid`='$parentid'";
 			break;
 		}
@@ -119,7 +119,7 @@ class categoryFunc{
 	            unset($cidArray);
 	        }
 			foreach ($resource as $key => $value) {
-				$cate = categoryApp::get_cahce_cid($value['cid']);
+				$cate = categoryApp::get_cache_cid($value['cid']);
 	            if($vars['meta'] && $meta_data){
 	                $cate+= (array)$meta_data[$value['cid']];
 	            }
@@ -135,10 +135,10 @@ class categoryFunc{
 		$cid   = (int)$vars['cid'];
 		$level = $vars['level'];
 		empty($level) && $level =1;
-		$rootid = categoryApp::get_cahce('rootid');
+		$rootid = categoryApp::get_cache('rootid');
 		$html = null;
 		foreach ((array) $rootid[$cid] AS $root => $_cid) {
-			$C = categoryApp::get_cahce_cid($_cid);
+			$C = categoryApp::get_cache_cid($_cid);
 			if(isset($vars['appid']) && $C['appid']!=$vars['appid']){
 				continue;
 			}

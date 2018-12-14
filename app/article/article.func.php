@@ -25,7 +25,7 @@ class articleFunc{
 		$where_sql = "WHERE `status`='{$status}'";
 		$vars['call'] == 'user' && $where_sql .= " AND `postype`='0'";
 		$vars['call'] == 'admin' && $where_sql .= " AND `postype`='1'";
-		$hidden = categoryApp::get_cahce('hidden');
+		$hidden = categoryApp::get_cache('hidden');
 		$hidden && $where_sql .= iSQL::in($hidden, 'cid', 'not');
 		$maxperpage = isset($vars['row']) ? (int) $vars['row'] : 10;
 		$cache_time = isset($vars['time']) ? (int) $vars['time'] : -1;
@@ -242,7 +242,7 @@ class articleFunc{
 		if(empty(iCMS::$config['sphinx']['host'])) return array();
 
 		$resource = array();
-		$hidden = categoryApp::get_cahce('hidden');
+		$hidden = categoryApp::get_cache('hidden');
 		$hidden && $where_sql .= iSQL::in($hidden, 'cid', 'not');
 		$SPH = iPHP::vendor('SphinxClient',iCMS::$config['sphinx']['host']);
 		$SPH->SetArrayResult(true);
@@ -382,7 +382,7 @@ class articleFunc{
 				SELECT * FROM `".self::$table."` WHERE `id` =(SELECT {$field} FROM `".self::$table."` WHERE `status`='1' {$sql})
 			");
 			if ($rs) {
-				$category = categoryApp::get_cahce_cid($rs->cid);
+				$category = categoryApp::get_cache_cid($rs->cid);
 				$array = array(
 					'id'    => $rs->id,
 					'title' => $rs->title,

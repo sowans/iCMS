@@ -200,7 +200,7 @@ class appsFunc{
         isset($this->vars['id!'])&& $this->add_sql_in($this->primary,$this->vars['id!'],'not');
     }
     public function process_sql_hidden(){
-        $hidden = categoryApp::get_cahce('hidden');
+        $hidden = categoryApp::get_cache('hidden');
         $hidden && $this->add_sql_in('cid',$hidden,'not');
     }
     public function process_sql_common(){
@@ -431,7 +431,7 @@ class appsFunc{
         list($vars,$appid,$name,$primary,$table) = $this->params;
 
         $resource = array();
-        $hidden = categoryApp::get_cahce('hidden');
+        $hidden = categoryApp::get_cache('hidden');
         $hidden && $where_sql .= iSQL::in($hidden, 'cid', 'not');
         $SPH = iPHP::vendor('SPHINX',iCMS::$config['sphinx']['host']);
         $SPH->init();
@@ -567,7 +567,7 @@ class appsFunc{
         if (empty($resource)) {
             $rs = iDB::row("SELECT * FROM `{$table}` WHERE `status`='1' {$sql}");
             if ($rs) {
-                $category = categoryApp::get_cahce_cid($rs->cid);
+                $category = categoryApp::get_cache_cid($rs->cid);
                 $resource = array(
                     'id'    => $rs->id,
                     'title' => $rs->title,

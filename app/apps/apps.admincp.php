@@ -108,8 +108,7 @@ class appsAdmincp{
         if(is_array($fieldata)){
           $field_array = array();
           foreach ($fieldata as $key => $value) {
-            $output = array();
-            parse_str($value,$output);
+            $output = parse_url_qs($value);
             if(isset($output['UI:BR'])){
               $field_array[$key] = 'UI:BR';
             }else{

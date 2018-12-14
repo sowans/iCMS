@@ -200,8 +200,7 @@ class spider_content {
             $content = rawurldecode($content);
         }
         if ($data['parse_str']) {
-            parse_str($content, $output);
-            $content = $output;
+            $content = parse_url_qs($content);
         }
         if ($data['http_build_query'] && is_array($content)) {
             $content = http_build_query($content);

@@ -18,7 +18,7 @@ class categoryApp{
         $cid = (int)$_GET['cid'];
         $dir = iSecurity::escapeStr($_GET['dir']);
 		if(empty($cid) && $dir){
-			$cid = categoryApp::get_cahce('dir2cid',$dir);
+			$cid = categoryApp::get_cache('dir2cid',$dir);
             $cid OR iPHP::error_404(array('category:not_found','dir',$dir), 20002);
 		}
     	return $this->category($cid,$tpl,$is_list);
@@ -41,7 +41,7 @@ class categoryApp{
      * 该方法超多次调用 禁止SQL查询
      */
     public static function category($cid,$tpl='index',$is_list=null) {
-        $category = categoryApp::get_cahce_cid($cid);
+        $category = categoryApp::get_cache_cid($cid);
         if(empty($category) && $tpl){
             iPHP::error_404(array('category:not_found','cid',$category['cid']),20001);
         }
@@ -114,7 +114,7 @@ class categoryApp{
         return $category;
     }
     public static function get_cids($cid = "0",$all=true,$root_array=null) {
-        $root_array OR $root_array = categoryApp::get_cahce("rootid");
+        $root_array OR $root_array = categoryApp::get_cache("rootid");
         $cids = array();
         is_array($cid) OR $cid = explode(',', $cid);
         foreach($cid AS $_id) {
@@ -130,15 +130,23 @@ class categoryApp{
 
         return $cids;
     }
-    public static function get_cahce_cid($cid="0") {
-        return iCache::get('category/C'.$cid);
-    }
-    public static function get_cahce($key=null,$value=null){
+    public static function get_cache($key=null,$value=null){
         if($value){
             return iCache::get('category/'.$key,$value);
         }
         return iCache::get('category/'.$key);
     }
+    public static function get_cache_cid($cid="0") {
+        return iCache::get('category/C'.$cid);
+    }
+    //----------------------------------------------拼写出错兼容
+    public static function get_cahce_cid($cid="0") {
+        return self::get_cache_cid($cid);
+    }
+    public static function get_cahce($key=null,$value=null){
+        return self::get_cache($key,$value);
+    }
+    //--------------------------------------------------
     //绑定域名 iURL 回调函数
     public static function domain($i,$cid,$base_url) {
         $domain_array = (array)iCMS::$config['category']['domain'];
@@ -146,7 +154,7 @@ class categoryApp{
             $domain_array = array_flip($domain_array);
             $domain = $domain_array[$cid];
             if(empty($domain)){
-                $rootid_array = categoryApp::get_cahce("domain_rootid");
+                $rootid_array = categoryApp::get_cache("domain_rootid");
                 if($rootid_array){
                     $rootid = $rootid_array[$cid];
                     $rootid && $domain = $domain_array[$rootid];
