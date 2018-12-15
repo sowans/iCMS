@@ -169,7 +169,7 @@ class spider_data {
             if (strpos($dname,'.')!== false){
                 $f_key = substr($dname,0,stripos($dname, "."));
                 $s_key = substr(strrchr($dname, "."), 1);
-                // $responses = self::create_multi_array($dname,$content);
+                // $responses = str_multi_array($dname,'.',$content);
                 if(isset($responses[$f_key][$s_key])){
                     if(is_array($responses[$f_key][$s_key])){
                         $responses[$f_key][$s_key] = array_merge((array)$responses[$f_key][$s_key],(array)$content);
@@ -273,18 +273,5 @@ class spider_data {
         if($rule['watermark_mode']=="2"){
             files::$watermark_enable = false;
         }
-    }
-    public static function create_multi_array($string,$value=null){
-        $a_array = explode('.', $string);
-        krsort ( $a_array );
-        $count = count($a_array);
-        $a = $value;
-        foreach ($a_array as $k => $v) {
-            $a = array($v=>$a);
-            if(count($a)>1){
-                array_shift($a);
-            }
-        }
-        return $a;
     }
 }

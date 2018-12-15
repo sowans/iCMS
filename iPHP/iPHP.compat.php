@@ -504,3 +504,14 @@ function parse_url_qs($query){
     parse_str($query, $output);
     return $output;
 }
+function str_multi_array($string,$s='.',$value=null){
+    $a_array = explode($s, $string);
+    krsort ( $a_array );
+    $a = $value;
+    foreach ($a_array as $k => $v) {
+        $s==='[' && $v = rtrim($v,']');
+        $a = array($v=>$a);
+        count($a)>1 && array_shift($a);
+    }
+    return $a;
+}

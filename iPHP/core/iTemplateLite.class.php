@@ -435,6 +435,7 @@ class iTemplateLite_Compiler extends iTemplateLite {
 		$this->_svar_regexp = '\%\w+\.\w+\%';
 
 		// matches $ vars (not objects):
+		// &$foo
 		// $foo
 		// $foo[0]
 		// $foo[$bar]
@@ -894,7 +895,7 @@ class iTemplateLite_Compiler extends iTemplateLite {
 			(substr($string, 0,2)=='[[' && substr($string, -2)==']]')
 		){
 			if(preg_match('/\$.+/', $string)){
-				preg_match_all('/(?:(' . $this->_var_regexp . '|' . $this->_svar_regexp . ')(' . $this->_mod_regexp . '*))(?:\s+(.*))?/xs', $string, $_variables);
+				preg_match_all('/(?:(' . $this->_var_regexp . '|' . $this->_svar_regexp . ')(' . $this->_mod_regexp . '*))(?:\s+(.*?))?/xs', $string, $_variables);
 				$_varname = $this->_parse_variables($_variables[1], $_variables[2],false);
 				$replace = array();
 				foreach ((array)$_varname as $key => $var) {
@@ -988,7 +989,7 @@ class iTemplateLite_Compiler extends iTemplateLite {
 							$value =  addslashes($value);
 						}
 
-						if(preg_match_all('/(?:(' . $this->_var_regexp . '|' . $this->_svar_regexp . ')(' . $this->_mod_regexp . '*))(?:\s+(.*))?/xs', $value, $_variables)){
+						if(preg_match_all('/(?:(' . $this->_var_regexp . '|' . $this->_svar_regexp . ')(' . $this->_mod_regexp . '*))(?:\s+(.*?))?/xs', $value, $_variables)){
 							// a="aa$cc" b="$aa$cc" c="$aa'cc'"
 							$_varname = $this->_parse_variables($_variables[1], $_variables[2],false);
 							$value = stripslashes($value);

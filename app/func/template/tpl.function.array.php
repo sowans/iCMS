@@ -9,6 +9,10 @@
  * e1.{array key="value" key1="value1"}
  * e2.{array as="ar" flag="col" a[]="1" b[]="2"}
  * e3.{array as[]="ar" a="1" b="2"}
+ * {array as="ar" {json}}
+ * {array as="ar" []={json}}
+ * {array as="ar" [a]='aa'}
+ * {array as="ar" a[b][c]='aa'}
  */
 function tpl_function_array($params, &$tpl){
     $key = $params['assign']?:'array';
@@ -17,9 +21,18 @@ function tpl_function_array($params, &$tpl){
         $mas = $key = $params['as[]'];
         $array = $tpl->_vars[$key];
     }
-    unset($params['assign'],$params['as'],$params['as[]']);
+    $merge = $params['merge']?true:false;
+    unset($params['assign'],$params['merge'],$params['as'],$params['as[]']);
     // Examples:e1
-    $value = $params;
+    $merge && $params = array_merge((array)$tpl->_vars[$key],(array)$params);
+    foreach ((array)$params as $pk => $pv) {
+            $pk = trim($pk);
+            if(strpos($pk, '[')!==false && substr($pk, -1)==']'){
+                $pa = str_multi_array($pk,'[',$pv);
+                unset($params[$pk]);
+                $params = array_merge((array)$params,(array)$pa);
+            }
+    }
     // Examples:e2
     if($params['flag']=='col'){
         unset($params['flag']);
@@ -40,12 +53,13 @@ function tpl_function_array($params, &$tpl){
     // Examples:e3
     if($mas){
         if($array){
-            array_push($array,$value);
-            $value = $array;
+            array_push($array,$params);
+            $params = $array;
         }else{
-            $value = array($value);
+            $params = array($params);
         }
     }
+
     // var_dump($value);
-    $tpl->assign($key,$value);
+    $tpl->assign($key,$params);
 }
