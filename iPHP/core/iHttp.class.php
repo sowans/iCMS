@@ -272,7 +272,10 @@ class iHttp{
             self::$CURL_ERRNO && self::$CURL_ERROR = curl_error(self::$handle);
 
             if (self::$CURL_HTTP_CODE !== null) {
-                if (self::$CURL_HTTP_CODE == $info['http_code']) {
+                $code_array = self::$CURL_HTTP_CODE;
+                is_array($code_array) OR $code_array = explode(',', $code_array);
+
+                if (in_array($info['http_code'], $code_array)) {
                     return $responses;
                 }
             }

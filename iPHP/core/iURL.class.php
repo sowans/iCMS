@@ -365,11 +365,11 @@ class iURL {
         foreach ($QS as $key => $value) {
             //这个null是字符
             if($value==='null'||$value===null){
-                unset($output[$key]);
+                unset($QS[$key]);
                 unset($query[$key]);
             }
         }
-        $query = array_merge((array)$query,(array)$output);
+        $query = array_merge((array)$query,(array)$QS);
         $parse['query'] = http_build_query($query);
 
         $PAGE_SIGN = urlencode(self::PAGE_SIGN);
