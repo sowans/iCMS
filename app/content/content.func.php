@@ -262,7 +262,7 @@ class contentFunc {
 				$_sql && $sql = $_sql;
 			}
 			$ids_array = iDB::all($sql);
-echo iDB::$last_query;
+// echo iDB::$last_query;
 			if($vars['cache'] && $page_cache_name){
 				iCache::set($page_cache_name, $ids_array, $cache_time);
 			}
