@@ -15,7 +15,8 @@ class appsApp {
     public $methods  = array('iCMS','clink','search','hits','vote','comment');
 
     public static $s_app  = null;
-    public static $config  = null;
+    public static $config = null;
+    public static $DATA   = null;
 
     public function __construct($app=null,$primary='id',$table=null) {
         empty($app) && trigger_error('$app is empty',E_USER_ERROR);
@@ -152,12 +153,11 @@ class appsApp {
         $this->methods = array_merge($mArray,$this->methods);
     }
 //--------------------------------------------------------------------
-    public static function render($data,$tpl,$name=null,$p=null) {
+    public static function render($data,$tpl,$name=null,$app=null) {
         if ($tpl===false) return $data;
 
-        $tpl  ===null && $_data = $data;//不解析模板返回原数据
         $name ===null && $name = self::$s_app;
-        $p    ===null && $p = $name;
+        $app  ===null && $app  = $name;
         $view_tpl = $data['tpl'];
         $view_tpl OR $view_tpl = $data['category']['template'][$name];
         strstr($tpl, '.htm') && $view_tpl = $tpl;
@@ -166,7 +166,6 @@ class appsApp {
             if(!isset(iView::$handle->_vars['APP'])){
                 iView::assign('APP', $data['category']['app']); //绑定的应用信息
             }
-            //不解析模板时不清空
             unset($data['category']['app']);
             iView::assign('category', $data['category']);
             unset($data['category']);
@@ -174,9 +173,9 @@ class appsApp {
         $data['sapp'] && iView::assign('SAPP', apps::get_app_lite($data['sapp']));//自身应用信息
         iView::assign($name, $data);
 
-        if($tpl===null) return $_data;//不解析模板返回原数据
+        if($tpl===null) return $data;//不解析模板返回原数据
 
-        $view = iView::render($view_tpl,$p);
+        $view = iView::render($view_tpl,$app);
         if($view) return array($view,$data);
     }
 
@@ -286,5 +285,14 @@ class appsApp {
             self::redirect_html($iurl);
         }
     }
-
+    public static function setData($key,$value) {
+        self::$DATA[$key] = $value;
+    }
+    public static function unData($key=null) {
+        if($key){
+            self::$DATA[$key] = null;
+        }else{
+            self::$DATA = null;
+        }
+    }
 }

@@ -13,14 +13,11 @@ class iMap {
 	public static $field    = null;
 	public static $appid    = '1';
 	public static $where    = array();
-	public static $stack    = array();
-	public static $distinct = false;
 
 	public static function init($table = 'prop',$appid='1',$field = null){
 		self::$table = iPHP_DB_PREFIX_TAG.$table.'_map';
 		self::$field = $field;
 		self::$appid = $appid;
-		++self::$stack[$table];
 		return new self();
 	}
 	public static function del($nodes,$iid="0") {
@@ -136,25 +133,10 @@ class iMap {
 		$sql = self::sql($nodes)." AND iid =".$iid;
 		return ' AND exists ('.$sql.')';
 	}
-	public static function distinct($table,$f='id'){
-		if(self::$distinct){
-			return self::distinct_sql($table,$f);
-		}
-		if(is_array(self::$stack))foreach (self::$stack as $key => $value) {
-			if($value>1){
-				return self::distinct_sql($table,$f);
-			}
-		}
-		return null;
-	}
-	public static function distinct_sql($table,$f='id'){
-		self::reset();
-		return ' DISTINCT `'.$table.'`.`'.$f.'` AS _'.$f.', ';
-	}
+
+
 	public static function reset(){
-		self::$where    = array();
-		self::$stack    = array();
-		self::$distinct = false;
+		self::$where = array();
 	}
 	public static function multi($nodes=0,$iid=''){
 

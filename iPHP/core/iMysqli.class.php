@@ -252,6 +252,16 @@ class iDB {
         }
         return self::query("UPDATE ".iPHP_DB_PREFIX_TAG."{$table} SET " . implode( ', ', $bits ) . ' WHERE ' . implode( ' AND ', $wheres ) . ' LIMIT 1;' );
     }
+    public static function delete($table, $where) {
+        $wheres = array();
+        if ( is_array( $where ) ){
+            foreach ( $where as $c => $v )
+                $wheres[] = "$c = '" . addslashes( $v ) . "'";
+        }else{
+            return false;
+        }
+        return self::query("DELETE FROM ".iPHP_DB_PREFIX_TAG."{$table} WHERE " . implode( ' AND ', $wheres ));
+    }
     /**
      * Get one variable from the database
      * @param string $query (can be null as well, for caching, see codex)

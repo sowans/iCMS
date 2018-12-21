@@ -197,7 +197,7 @@ class iURL {
                 $array    = (array)$a[0];
                 $category = (array)$a[1];
                 $i->href  = $array['url'];
-                $url      = self::rule_data($category,$app);
+                $url      = self::rule_data($category,$route);
             break;
             case '3'://标签
                 $array     = (array)$a[0];
@@ -205,7 +205,6 @@ class iURL {
                 $_category = (array)$a[2];
                 $i->href   = $array['url'];
                 $category && $url = self::rule_data($category,$app);
-
                 if($_category['rule'][$app]){
                     $url = self::rule_data($_category,$app);
                 }
@@ -226,8 +225,6 @@ class iURL {
             $url = $array['rule'];
         }
 
-        $do && $href.='&do='.$do;
-
         $default  = self::$config[$app];
         if($default){
             $router_dir = $default['dir'];
@@ -247,13 +244,12 @@ class iURL {
         if($url=='{PHP}'){
             $primary = $app_conf['primary'];
             empty($href) && $href = $app.'.php';
-            if($primary){
-                $href.= (strpos($href,'?')===false)?'?':'&';
-                $href.= $primary.'='.$array[$primary];
-            }
+            $query = array();
+            $do && $query['do']= $do;
+            $primary && $query[$primary]= $array[$primary];
+            $href = self::make($query,$href);
             if($app_conf['page']){
-                $i->pageurl = $href.((strpos($href,'?')===false)?'?':'&');
-                $i->pageurl.= $app_conf['page'].'='.self::PAGE_SIGN;
+                $i->pageurl = self::make(array($app_conf['page']=>self::PAGE_SIGN),$href);;
                 iFS::checkHttp($i->pageurl) OR $i->pageurl = rtrim($router_url,'/').'/'.$i->pageurl;
             }
             iFS::checkHttp($href) OR $href = rtrim($router_url,'/').'/'.$href;

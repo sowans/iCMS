@@ -91,19 +91,19 @@ class appsAdmincp{
           $table  = addslashes(cnjson_encode($table_array));
         }
 
-        $config_array = iSecurity::escapeStr($_POST['config']);
-        if($config_array['template']){
-          $config_array['template'] = explode("\n", $config_array['template']);
-          $config_array['template'] = array_map('trim', $config_array['template']);
+        $config = $_POST['config'];
+        if($config['template']){
+          $config['template'] = explode("\n", $config['template']);
+          $config['template'] = array_map('trim', $config['template']);
         }
-        if($config_array['iurl']){
-          $config_array['iurl'] = json_decode(stripcslashes($config_array['iurl']),true);
+        if($config['iurl']){
+          $config['iurl'] = json_decode(stripcslashes($config['iurl']),true);
         }
 
-        $config_array = array_filter($config_array);
-        $config = addslashes(cnjson_encode($config_array));
+        $config = array_filter($config);
+        $config = addslashes(cnjson_encode($config));
 
-        $fields = '';
+        $fields   = '';
         $fieldata = $_POST['fields'];
         if(is_array($fieldata)){
           $field_array = array();

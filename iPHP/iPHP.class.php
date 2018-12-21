@@ -213,6 +213,8 @@ class iPHP {
 				$class_methods  = get_class_methods(self::$app);
 				if(in_array(self::$app_method, $class_methods)){
 					return $class_name;
+				}else{
+					if(!$prefix)return false;
 				}
 			}
 		}

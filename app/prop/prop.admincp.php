@@ -33,6 +33,7 @@ class propAdmincp{
         $appid   = iSecurity::escapeStr($_POST['appid']);
         $app     = iSecurity::escapeStr($_POST['app']);
         $val     = iSecurity::escapeStr($_POST['val']);
+        $info     = iSecurity::escapeStr($_POST['info']);
         $sortnum = (int)$_POST['sortnum'];
         $name    = iSecurity::escapeStr($_POST['name']);
 
@@ -40,7 +41,7 @@ class propAdmincp{
         $name OR iUI::alert('属性名称不能为空!');
         // $app OR iUI::alert('所属应用不能为空!');
 
-        $fields = array('rootid','cid','field','app','appid','sortnum', 'name', 'val');
+        $fields = array('rootid','cid','field','app','appid','sortnum', 'name', 'val', 'info');
         $data   = compact ($fields);
 
 		if($pid){

@@ -237,6 +237,8 @@ class spider_tools {
               $content = explode($delimiter, $content);
             }else if(strpos($rule, '<%SELF%>')!==false){
               $content = str_replace('<%SELF%>',$content, $rule);
+            }else if(strpos($rule, '<%nbsp%>')!==false){
+              $content = str_replace('&nbsp;','', $content);
             }else if(strpos($rule, 'HTML::')!==false){
                 $tag = str_replace('HTML::','', $rule);
                 if($tag=='ALL'){
@@ -272,7 +274,10 @@ class spider_tools {
                 }
                 $doc = phpQuery::newDocumentHTML($content,'UTF-8');
                 //DOM::div.class::attr::ooxx
-                list($pq_dom, $pq_fun,$pq_attr) = explode("::", $rule);
+                //DOM::div.class#fun#attr
+                //DOM::div.title#attr#data-title
+                $rule = str_replace('::', '#', $rule);//兼容
+                list($pq_dom, $pq_fun,$pq_attr) = explode("#", $rule);
                 $pq_array = phpQuery::pq($pq_dom);
                 foreach ($pq_array as $pq_key => $pq_val) {
                     if($pq_fun){

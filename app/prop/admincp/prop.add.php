@@ -88,6 +88,10 @@ $(function(){
           </div>
           <?php }?>
           <div class="clearfloat mb10"></div>
+          <div class="input-prepend"> <span class="add-on">属性说明</span>
+            <input type="text" name="info" class="span6" id="info" value="<?php echo $rs['info'];?>"/>
+          </div>
+          <div class="clearfloat mb10"></div>
           <div class="alert alert-block">
             <h4>注意事项</h4>
             添加属性时,请综合考虑下前台的调用还有数据的保存问题!<br />
