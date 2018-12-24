@@ -62,7 +62,9 @@ class iPages {
 		//设置链接地址
 		$this->_set_url($url,$conf['total_type']);
 		// $this->nowindex = min($this->totalpage,$this->nowindex);
-		$this->offset   = (int)($this->nowindex-1<0?0:$this->nowindex-1)*$this->perpage;
+		$this->offset   = (int)($this->nowindex-1<=0?0:$this->nowindex)*$this->perpage;
+		$this->offset<0 && $this->offset = 0;
+		$this->offset>$this->total && $this->offset = $this->total;
 		//打开AJAX模式
 		$conf['ajax'] && $this->ajax($conf['ajax']);
 	}

@@ -51,21 +51,24 @@ class cacheAdmincp{
      * @return [type] [description]
      */
     public function do_category($dialog=true){
-        iPHP::redirect(__ADMINCP__.'=category&do=cache');
+        echo '<iframe src="'.__ADMINCP__.'=category&do=cache"></iframe>';
+        // iPHP::redirect(__ADMINCP__.'=category&do=cache');
     }
     /**
      * [更新文章分类缓存]
      * @return [type] [description]
      */
     public function do_article_category($dialog=true){
-        iPHP::redirect(__ADMINCP__.'=article_category&do=cache');
+        echo '<iframe src="'.__ADMINCP__.'=article_category&do=cache"></iframe>';
+        // iPHP::redirect(__ADMINCP__.'=article_category&do=cache');
     }
     /**
      * [更新标签分类缓存]
      * @return [type] [description]
      */
     public function do_tag_category($dialog=true){
-        iPHP::redirect(__ADMINCP__.'=tag_category&do=cache');
+        echo '<iframe src="'.__ADMINCP__.'=tag_category&do=cache"></iframe>';
+        // iPHP::redirect(__ADMINCP__.'=tag_category&do=cache');
     }
     /**
      * [更新模板缓存]
