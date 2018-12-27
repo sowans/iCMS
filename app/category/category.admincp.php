@@ -480,6 +480,7 @@ class categoryAdmincp {
         }else{
             category::cache($this->appid);
         }
+        isset($_GET['dialog']) && $dialog = $_GET['dialog'];
         $dialog && iUI::success('更新完成');
     }
     /**

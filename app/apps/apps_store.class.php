@@ -339,7 +339,13 @@ class apps_store {
         iFS::del($file);
         return $msg;
     }
-    public static function setup_func($func) {
+    public static function setup_func($func,$run=false) {
+        if($run){
+            $output = $func();
+            $output = str_replace('<iCMS>','<br />',$output);
+            $output = iSecurity::filter_path($output);
+            echo $output;
+        }
         return $func;
     }
     public static function rootpath($d='APP'){

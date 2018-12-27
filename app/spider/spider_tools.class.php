@@ -318,6 +318,9 @@ class spider_tools {
                 $replacement[$key] = $_replacement;
                 $pattern[$key] = '|' . self::pregTag($_pattern) . '|is';
                 $content = preg_replace($pattern, $replacement, $content);
+            }else if(strpos($rule, 'KEY::')!==false){
+                $rule = str_replace('KEY::','', $rule);
+                $content = $content[$rule];
             }else if(strpos($rule, 'FUNC::')!==false){
               preg_match('/FUNC::(\w+)\(/is', $rule,$func_match);
               $func = $func_match[1];

@@ -988,6 +988,9 @@ class iTemplateLite_Compiler extends iTemplateLite {
 						if(strpos($value,'"') !==false||strpos($value,"'") !==false){
 							$value =  addslashes($value);
 						}
+						if($quote!="'" && $quote!='"'){
+							$quote = '';
+						}
 
 						if(preg_match_all('/(?:(' . $this->_var_regexp . '|' . $this->_svar_regexp . ')(' . $this->_mod_regexp . '*))(?:\s+(.*?))?/xs', $value, $_variables)){
 							// a="aa$cc" b="$aa$cc" c="$aa'cc'"
@@ -995,9 +998,18 @@ class iTemplateLite_Compiler extends iTemplateLite {
 							$value = stripslashes($value);
 							$replace = array();
 							foreach ((array)$_varname as $_vkey => $_vvvv) {
-								$replace[]="{$quote}.{$_vvvv}.{$quote}";
+								if(strpos($_vvvv, '_run_modifier')!==false){
+									$modifier[]="{$quote}.{$_vvvv}.{$quote}";
+								}else{
+									$replace[]="{$quote}.{$_vvvv}.{$quote}";
+								}
 							}
-							$value = $quote.str_replace ($_variables[1],$replace,$value).$quote;
+							if($modifier){
+								$value = $quote.str_replace ($_variables[0],$modifier,$value).$quote;
+							}else{
+								$value = $quote.str_replace ($_variables[1],$replace,$value).$quote;
+							}
+
 							$_result[$key] = str_replace(array("{$quote}{$quote}.",".{$quote}{$quote}",), '', $value);
 						}else{
 							if(strpos($value,'\"') !==false||strpos($value,"\'") !==false){
