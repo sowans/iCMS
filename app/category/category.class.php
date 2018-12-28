@@ -222,7 +222,7 @@ class category {
     public static function cache_common_array() {
         $all  = iDB::all("SELECT `cid`,`dir`,`rootid`,`status` FROM `#iCMS@__category`");
         $arr1 = array_column($all, 'cid','dir');
-        $arr2 = array_column($all, 'cid','rootid');
+        $arr2 = array_column($all, 'rootid','cid');
         iCache::set('category/dir2cid',$arr1,0);
         iCache::set('category/parent',$arr2,0);
         unset($all,$arr1,$arr2);
@@ -236,6 +236,7 @@ class category {
         }
         iCache::set('category/rootid',$rootid,0);
         unset($rootid,$all);
+        gc_collect_cycles();
     }
     /**
      * [cache_domain 要在 cache_rootid 之后执行]
