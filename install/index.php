@@ -455,6 +455,16 @@ $lock_file = iPATH.'cache/install.lock';
 							<span class="help-block">默认utf8,如果有emoji表情的话请选择utf8mb4。<span class="label label-important">MySQL 5.5.3及以上版本才支持utf8mb4</span></span>
 						</div>
 					</div>
+					<div class="control-group">
+						<label class="control-label" for="DB_ENGINE">数据库引擎</label>
+						<div class="controls">
+							<select id="DB_ENGINE" name="DB_ENGINE" class="form-control">
+							  <option value="MyISAM" selected="selected">MyISAM</option>
+							  <option value="InnoDB">InnoDB</option>
+							</select>
+							<span class="help-block">默认MyISAM,如果将来数据量请求量大的请选InnoDB。</span>
+						</div>
+					</div>
 					<h2>设置超级管理员</h2>
 					<div class="control-group">
 						<label class="control-label" for="ADMIN_NAME">账号</label>
@@ -495,7 +505,7 @@ $lock_file = iPATH.'cache/install.lock';
 		<iframe class="hide" id="iCMS_FRAME" name="iCMS_FRAME"></iframe>
 		<footer class="footer">
 			<div class="container">
-				<p>iCMS(<a href="https://www.icmsdev.com" target="_blank">iCMSdev.com</a>) 版权所有  &copy; 2007-2017</p>
+				<p>iCMS(<a href="https://www.icmsdev.com" target="_blank">iCMSdev.com</a>) 版权所有  &copy; 2007-2019</p>
 				<p>iCMS 源码受 <a href="https://www.icmsdev.com/LICENSE.html" target="_blank">LGPL</a> 开源协议保护</p>
 				<ul class="footer-links">
 					<li><a href="https://www.icmsdev.com" target="_blank">iCMS</a></li>

@@ -118,11 +118,14 @@ CREATE TABLE `icms_article` (
   `status` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '[[0:草稿],[1:正常],[2:回收],[3:审核],[4:不合格]]',
   PRIMARY KEY (`id`),
   KEY `id` (`status`,`id`),
-  KEY `hits` (`status`,`hits`),
+  KEY `cid` (`status`,`cid`),
   KEY `pubdate` (`status`,`pubdate`),
+  KEY `hits` (`status`,`hits`),
   KEY `hits_week` (`status`,`hits_week`),
   KEY `hits_month` (`status`,`hits_month`),
-  KEY `cid_hits` (`status`,`cid`,`hits`)
+  KEY `cid_id` (`status`,`cid`,`id`),
+  KEY `cid_hits` (`status`,`cid`,`hits`),
+  KEY `cid_week` (`status`,`cid`,`hits_week`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_article_data` */
@@ -176,9 +179,8 @@ CREATE TABLE `icms_category` (
   `addtime` int(10) DEFAULT '0',
   `status` tinyint(1) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`cid`),
-  KEY `dir` (`dir`),
-  KEY `s_o_cid` (`status`,`sortnum`,`cid`),
-  KEY `t_o_cid` (`appid`,`sortnum`,`cid`)
+  KEY `rootid` (`status`,`rootid`,`sortnum`),
+  KEY `sortnum` (`status`,`sortnum`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_category_map` */
@@ -421,6 +423,7 @@ CREATE TABLE `icms_prop` (
   `sortnum` int(10) unsigned NOT NULL DEFAULT '0',
   `name` varchar(255) NOT NULL DEFAULT '',
   `val` varchar(255) NOT NULL DEFAULT '',
+  `info` varchar(512) NOT NULL DEFAULT '',
   PRIMARY KEY (`pid`),
   KEY `field` (`field`),
   KEY `cid` (`cid`),
@@ -650,7 +653,7 @@ CREATE TABLE `icms_user` (
   PRIMARY KEY (`uid`),
   KEY `nickname` (`nickname`),
   KEY `username` (`username`)
-) ENGINE=MyISAM AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4;
 
 /*Table structure for table `icms_user_category` */
 

@@ -24,6 +24,7 @@ if($_POST['action']=='install'){
     $db_prefix   = trim($_POST['DB_PREFIX']);
     $db_port     = trim($_POST['DB_PORT']);
     $db_charset  = trim($_POST['DB_CHARSET']);
+    $db_engine   = trim($_POST['DB_ENGINE']);
 
 	define('iPHP_DB_HOST',$db_host);	// 服务器名或服务器ip,一般为localhost
     define('iPHP_DB_PORT', $db_port);   //数据库端口
@@ -32,6 +33,7 @@ if($_POST['action']=='install'){
 	define('iPHP_DB_NAME',$db_name);		// 数据库名
     define('iPHP_DB_PREFIX',$db_prefix);    // 表名前缀, 同一数据库安装多个请修改此处
     define('iPHP_DB_CHARSET',$db_charset);    // MYSQL编码设置
+    define('iPHP_DB_ENGINE',$db_engine);      // MYSQL引擎
     define('iPHP_DB_PREFIX_TAG','#iCMS@__');
 
     require_once iPATH.'iPHP/iPHP.php';
@@ -105,6 +107,7 @@ if($_POST['action']=='install'){
 //开始安装 数据库 结构
     $sql = iFS::read($sql_file);
     iPHP_DB_CHARSET=="utf8mb4" && utf8mb4_sql($sql);
+    iPHP_DB_ENGINE=="InnoDB" && InnoDB_sql($sql);
 
 	run_query($sql);
 //导入默认数据
@@ -205,21 +208,24 @@ function real_path($p = '') {
 
     return ($p[0] == '/' ? '/' : '') . implode('/', $o) . ($end == '/' ? '/' : '');
 }
+function InnoDB_sql(&$sql){
+    $sql = str_replace('ENGINE=MyISAM', 'ENGINE='.iPHP_DB_ENGINE, $sql);
+}
 function utf8mb4_sql(&$sql){
     $sql = str_replace('SET NAMES utf8', 'SET NAMES '.iPHP_DB_CHARSET, $sql);
-    $sql = str_replace('CHARSET=utf8', 'CHARSET='.iPHP_DB_CHARSET, $sql);
-    utf8mb4_replace_varchar($sql,'config','name');
+    $sql = str_replace('CHARSET=utf8;', 'CHARSET='.iPHP_DB_CHARSET.';', $sql);
+    $varchar = iPHP_DB_ENGINE=="InnoDB"?128:240;
+    utf8mb4_replace_varchar($sql,'config','name',$varchar);
     utf8mb4_replace_varchar($sql,'files','path');
     utf8mb4_replace_varchar($sql,'files','ofilename');
     utf8mb4_replace_varchar($sql,'files','filename');
-    utf8mb4_replace_varchar($sql,'keywords','keyword');
-    utf8mb4_replace_varchar($sql,'prop_map','node',200);
+    utf8mb4_replace_varchar($sql,'keywords','keyword',$varchar);
+    utf8mb4_replace_varchar($sql,'prop_map','node',240);
     utf8mb4_replace_varchar($sql,'tag','pid');
-    utf8mb4_replace_varchar($sql,'tag','name');
+    utf8mb4_replace_varchar($sql,'tag','name',240);
     utf8mb4_replace_varchar($sql,'tag','tkey');
-    utf8mb4_replace_varchar($sql,'tag_map','field',200);
-    utf8mb4_replace_varchar($sql,'user','username');
-    utf8mb4_replace_varchar($sql,'user','nickname');
+    utf8mb4_replace_varchar($sql,'tag_map','field');
+    utf8mb4_replace_varchar($sql,'user','username',$varchar);
 }
 //Specified key was too long; max key length is 1000 bytes
 function utf8mb4_replace_varchar(&$sql,$table,$field,$_varchar=240,$varchar=255){
