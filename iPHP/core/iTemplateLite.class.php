@@ -945,7 +945,7 @@ class iTemplateLite_Compiler extends iTemplateLite {
 						$key===null?$key=0:(is_numeric($key)?$key++:$key=0);
 						$_result[$key] = $ret;
 						$state = 0;
-						continue;
+						break;
 					}
 					// valid attribute name
 					if (is_string($value)){

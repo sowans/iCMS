@@ -228,7 +228,7 @@ class formerApp{
             break;
             case 'category':
                 if($key=='cid'){
-                    continue;
+                    break;
                 }
                 $nkey      = $key.'_category';
                 $_category = categoryApp::get_cache_cid($value);
@@ -257,7 +257,7 @@ class formerApp{
             case 'multi_prop':
             case 'prop':
                 if($key=='pid'){
-                    continue;
+                    break;
                 }
                 $nkey   = $key.'_prop';
                 $propArray = propApp::field($key,$app);

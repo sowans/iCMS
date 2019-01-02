@@ -303,6 +303,8 @@ class iFS {
 				$o[] = $a[$i];
 			}
 		}
+
+		$o[0] == 'https:' && $o[0] = 'https:/';
 		$o[0] == 'http:' && $o[0] = 'http:/';
 
 		return ($p[0] == '/' ? '/' : '') . implode('/', $o) . ($end == '/' ? '/' : '');

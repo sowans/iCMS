@@ -35,17 +35,11 @@ class iPages {
 		$this->total     = (int)$conf['total'];
 		$this->perpage   = $conf['perpage']?(int)$conf['perpage']:10;
 		$this->totalpage = ceil($this->total/$this->perpage);
-		$conf['lang'] && $this->lang = $conf['lang'];
 
-		if($this->totalpage<1){
-			return false;
-		}
+		if($this->totalpage<1) return false;
 
-		if(isset($conf['url'])){
-			$url = $conf['url'];
-		}else{
-			$url = $GLOBALS['iPage']['url']?$GLOBALS['iPage']['url']:$_SERVER['REQUEST_URI'];
-		}
+		$url = $GLOBALS['iPage']['url']?$GLOBALS['iPage']['url']:$_SERVER['REQUEST_URI'];
+		isset($conf['url']) && $url = $conf['url'];
 
 		$GLOBALS['iPage']['total'] = (int)$this->totalpage;
 		$this->config = $GLOBALS['iPage']['config'];
@@ -54,6 +48,7 @@ class iPages {
 		$conf['page_name']&& $this->page_name = $conf['page_name'];
 		$conf['target']   && $this->target = $conf['target'];
 		$conf['titles']   && $this->titles = $conf['titles'];
+		$conf['lang']     && $this->lang = $conf['lang'];
 
 		$this->unit = $conf['unit']?$conf['unit']:$this->lang['sql'];
 		//设置当前页
@@ -62,30 +57,10 @@ class iPages {
 		//设置链接地址
 		$this->_set_url($url,$conf['total_type']);
 		// $this->nowindex = min($this->totalpage,$this->nowindex);
-		$this->offset   = (int)($this->nowindex-1<=0?0:$this->nowindex)*$this->perpage;
-		$this->offset<0 && $this->offset = 0;
-		$this->offset>$this->total && $this->offset = $this->total;
+		$this->offset = (int)($this->nowindex-1<0?0:$this->nowindex-1)*$this->perpage;
+
 		//打开AJAX模式
 		$conf['ajax'] && $this->ajax($conf['ajax']);
-	}
-
-	/**
-	* 设定类中指定变量名的值，如果改变量不属于这个类，将throw一个exception
-	*
-	* @param string $var
-	* @param string $value
-	*/
-	public function set($var,$value){
-		if(in_array($var,get_object_vars($this)))
-	 		$this->$var=$value;
-		else
-			$this->error("does not belong to PB_Page!",1002);
-	}
-	public function get($var){
-		if(in_array($var,get_object_vars($this)))
-	 		return $this->$var;
-		else
-			$this->error("does not belong to PB_Page!",1003);
 	}
 
 	/**
@@ -122,9 +97,7 @@ class iPages {
 	*/
 	public function prev_page($style='prev_page'){
 		$p = $this->nowindex-1;
-		if($p<2){
-			$p = 1;
-		}
+		$p<2 && $p = 1;
 		$pnt = $this->get_title($p,$this->lang['prev']);
 		return $this->_get_link($p,$pnt,$style,($this->nowindex>1));
 	}
@@ -164,22 +137,26 @@ class iPages {
 //		return '<span class="'.$style.'">'.$this->lang['other'].$this->total.$this->unit.'，'.$this->perpage.$this->unit.'/'.$this->lang['unit'].' '.$this->lang['other'].$this->totalpage.$this->lang['unit'].'</span>';
 	}
 	public function nowbar($style='',$nowindex_style='page_nowindex'){
-		$plus=ceil($this->pagebarnum/2);
-		if($this->pagebarnum-$plus+$this->nowindex>$this->totalpage)
-			$plus=($this->pagebarnum-$this->totalpage+$this->nowindex);
-		$begin  = $this->nowindex-$plus+1;
-		$begin  = ($begin>=1)?$begin:1;
-		$pieces = array();
-		for($i=$begin;$i<$begin+$this->pagebarnum;$i++){
-			if($i<=$this->totalpage){
-				$pnt = $this->get_title($i);
-				if($i!=$this->nowindex){
-		    		$pieces[] = $this->_get_link($i,$pnt,$style,($i!=$this->nowindex));
-				}else{
-		    		$pieces[] =$this->_get_text('<span class="'.$nowindex_style.'">'.$pnt.'</span>');
-		    	}
+		$plus   = ceil($this->pagebarnum/2);
+		$before = $this->nowindex-$plus;
+		$after  = $this->nowindex+$plus-1;
+		if($before<1){
+			$after  = $this->pagebarnum;
+			$before = 1;
+		}
+		if($after>$this->totalpage){
+			$after = $this->totalpage;
+			$before = $this->totalpage-$this->pagebarnum;
+			$before<1 && $before = 1;
+		}
+
+		for ($i=$before; $i <=$after; $i++) {
+			$pnt = $this->get_title($i);
+			$now = ($i!=$this->nowindex);
+			if($now){
+				$pieces[] = $this->_get_link($i,$pnt,$style,$now);
 			}else{
-				break;
+				$pieces[] =$this->_get_text('<span class="'.$nowindex_style.'">'.$pnt.'</span>');
 			}
 		}
 		return implode('', $pieces);
@@ -295,16 +272,17 @@ class iPages {
 	* 设置当前页面
 	*
 	*/
-	public function _set_nowindex($nowindex){
-		if(empty($nowindex)){
-			//系统获取
+	public function _set_nowindex($pn){
+		if(empty($pn)){ //系统获取
 			if(isset($_GET[$this->page_name])){
-				$this->nowindex=intval($_GET[$this->page_name]);
+				$pn = $_GET[$this->page_name];
 			}
-		}else{
-	  		//手动设置
-			$this->nowindex=intval($nowindex);
 		}
+		$this->nowindex=intval($pn);
+		if($this->nowindex>$this->totalpage){
+			$this->nowindex = $this->totalpage;
+		}
+        $this->nowindex<1 && $this->nowindex =1;
 	}
     public function get_title($pn=0,$text=null){
         $title = $pn;

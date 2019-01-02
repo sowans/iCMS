@@ -804,6 +804,13 @@ class former {
                 }
             }
         }
+        //默认值
+        foreach ($field_array as $key => $fields) {
+            $value = self::field_input(null,$fields);
+            if($value && !isset($field_post[$key])){
+                $field_post[$key] = $value;
+            }
+        }
 
         $tb = reset($app['table']);
         $tables = array($tb['name']);
