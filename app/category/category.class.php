@@ -442,14 +442,14 @@ class category {
                 $selected = ($scid==$_cid)?"selected":"";
                 $text     = str_repeat("│　", $level-1).$tag.$C['name']."[cid:{$_cid}]".($C['url']?"[∞]":"");
                 ($C['url'] && !$url) && $selected ='disabled';
-                $option.="<option value='{$_cid}' $selected>{$text}</option>";
+                $option.="<option name='".$C['name']."' value='{$_cid}' $selected>{$text}</option>";
             }
             $root_array[$_cid] && $option.= self::select_lite($scid,$C['cid'],$level+1,$url);
         }
         return $option;
     }
     public static function select($scid="0",$cid="0",$level = 1,$url=false,$where=null) {
-        $cc = iDB::value("SELECT count(*) FROM `#iCMS@__category`");
+        // $cc = iDB::value("SELECT count(*) FROM `#iCMS@__category`");
         return self::select_lite($scid,$cid,$level,$url,$where);
     }
     public static function priv($p) {
