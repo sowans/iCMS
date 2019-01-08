@@ -92,7 +92,7 @@ admincp::head();
           <td>WEB服务器版本</td>
           <td><?php echo $_SERVER['SERVER_SOFTWARE'] ; ?></td>
           <td>服务器IP</td>
-          <td><?php echo getenv('SERVER_ADDR').":".getenv('SERVER_PORT') ; ?></td>
+          <td><?php echo $_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']; ?></td>
         </tr>
         <tr>
           <td>服务器总空间</td>

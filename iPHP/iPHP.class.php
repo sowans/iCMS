@@ -318,30 +318,21 @@ class iPHP {
 
 	// 获取客户端IP
 	public static function get_ip($format = 0) {
-		if (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
-			$onlineip = getenv('HTTP_CLIENT_IP');
-		} elseif (getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
-			$onlineip = getenv('HTTP_X_FORWARDED_FOR');
-			$ipArray  = explode(',', $onlineip);
-			$key = array_search('unknown', $ipArray);
-			if($key!==false) unset($ipArray[$key]);
-			$onlineip = end($ipArray);
-		} elseif (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
-			$onlineip = getenv('REMOTE_ADDR');
+		if (isset($_SERVER['HTTP_CLIENT_IP']) && $_SERVER['HTTP_CLIENT_IP'] && strcasecmp($_SERVER['HTTP_CLIENT_IP'], 'unknown')) {
+			$ip = $_SERVER['HTTP_CLIENT_IP'];
+		} elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] &&  strcasecmp($_SERVER['HTTP_X_FORWARDED_FOR'], 'unknown')) {
+			$ip  = $_SERVER['HTTP_X_FORWARDED_FOR'];
+			$ips = explode(',', $ip);
+			$key = array_search('unknown', $ips);
+			if($key!==false) unset($ips[$key]);
+			$ip = trim($ips[0]);
 		} elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
-			$onlineip = $_SERVER['REMOTE_ADDR'];
+			$ip = $_SERVER['REMOTE_ADDR'];
 		}
-		preg_match("/[\d\.]{7,15}/", $onlineip, $onlineipmatches);
-		$ip = $onlineipmatches[0] ? $onlineipmatches[0] : 'unknown';
-		if ($format) {
-			$ips = explode('.', $ip);
-			for ($i = 0; $i < 3; $i++) {
-				$ips[$i] = intval($ips[$i]);
-			}
-			return sprintf('%03d%03d%03d', $ips[0], $ips[1], $ips[2]);
-		} else {
-			return iSecurity::escapeStr($ip);
-		}
+		// IP地址合法验证
+		$long = sprintf("%u", ip2long($ip));
+		$ip   = $long ? array($ip, $long) : array('0.0.0.0', 0);
+		return $ip[$format];
 	}
 	//设置COOKIE
 	public static function set_cookie($name, $value = "", $life = 0, $httponly = false) {
