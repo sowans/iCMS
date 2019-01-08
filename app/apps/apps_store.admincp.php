@@ -171,6 +171,28 @@ class apps_storeAdmincp extends appsAdmincp {
     public function do_pay_notify(){
       apps_store::pay_notify();
     }
+    public static function check_update() {
+        include admincp::view("check_update","apps");
+    }
+    public static function do_check_update() {
+      $storeArray = apps_store::get_array(array('status'=>'1'));
+      $dataArray  = apps_store::remote_all('all');
+      $count = 0;
+      foreach ((array)$dataArray as $key => $value) {
+        $is_update = false;
+        $sid       = $value['id'];
+        $appconf   = $storeArray[$sid];
+        if($appconf){
+          version_compare($value['version'],$appconf['version'],'>')        && $is_update = true;
+          ($appconf['git_time'] && $value['git_time']>$appconf['git_time']) && $is_update = true;
+          ($appconf['git_sha'] && $value['git_sha']!=$appconf['git_sha'])   && $is_update = true;
+        }
+        if($is_update){
+            $count++;
+        }
+      }
+      echo '{"code":"1","count":"'.$count.'个更新"}';
+    }
     public function store_view($type=0,$app=null,$title=null){
       $storeArray = apps_store::get_array(array('type'=>$type));
       $dataArray  = apps_store::remote_all($app);

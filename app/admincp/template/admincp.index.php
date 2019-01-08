@@ -11,6 +11,7 @@ defined('iPHP') OR exit('What are you doing?');
 admincp::head();
 ?>
 <div class="iCMS-container">
+  <div class="notes"></div>
   <div class="row-fluid">
     <div class="span12 center" style="text-align: center;">
       <ul class="quick-actions">
@@ -37,7 +38,7 @@ admincp::head();
           <ul class="site-stats">
             <li><a href="<?php echo __ADMINCP__;?>=article_category"><i class="fa fa-sitemap"></i> <strong id="counts_acc">0</strong> <small>文章栏目</small></a></li>
             <li><a href="<?php echo __ADMINCP__;?>=tag_category"><i class="fa fa-sitemap"></i> <strong id="counts_tcc">0</strong> <small>标签分类</small></a></li>
-            <li><a href="<?php echo __ADMINCP__;?>=apps"><i class="fa fa-sitemap"></i> <strong id="counts_apc">0</strong> <small>应用</small></a></li>
+            <li><a href="<?php echo __ADMINCP__;?>=apps"><i class="fa fa-sitemap"></i> <strong id="counts_apc">0</strong> <small>应用</small> <span id="store_update" class="hide badge badge-success">0</span></a></li>
             <li class="divider"></li>
             <li><a href="<?php echo __ADMINCP__;?>=user"><i class="fa fa-user"></i> <strong id="counts_uc">0</strong> <small>用户</small></a></li>
           </ul>
@@ -265,6 +266,7 @@ window.setTimeout(function(){
   );
 },1000);
 </script>
+<?php iPHP::callback(array('apps_storeAdmincp','check_update'));?>
 <?php iPHP::callback(array('patchAdmincp','check_version'));?>
 <?php iPHP::callback(array('patchAdmincp','check_update'));?>
 <?php iPHP::callback(array('cacheAdmincp','clean_cache'));?>

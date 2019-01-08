@@ -105,6 +105,14 @@ class admincpApp{
     }
     public function do_count(){
         $counts = array();
+        if($_GET['a']=='article'||$_GET['a']=='all'){
+            $_GET['a']=='all' OR $counts = array();
+            $counts['ac']  = iPHP::callback(array("articleAdmincp",   "_count"));
+            $counts['ac0'] = iPHP::callback(array("articleAdmincp",   "_count"),array(array('status'=>'0')));
+            $counts['ac2'] = iPHP::callback(array("articleAdmincp",   "_count"),array(array('status'=>'2')));
+            echo json_encode($counts);
+            exit;
+        }
         $counts['acc'] = iPHP::callback(array("categoryAdmincp",  "_count"),array(array('appid'=>iCMS_APP_ARTICLE)));
         $counts['tcc'] = iPHP::callback(array("categoryAdmincp",  "_count"),array(array('appid'=>iCMS_APP_TAG)));
         $counts['apc'] = iPHP::callback(array("appsAdmincp",      "_count"));
@@ -118,12 +126,7 @@ class admincpApp{
         $counts['pc']  = iPHP::callback(array("propAdmincp",      "_count"));
 
         $counts['fc']  = iPHP::callback(array("filesAdmincp",     "_count"));
-        if($_GET['a']=='article'||$_GET['a']=='all'){
-            $_GET['a']=='all' OR $counts = array();
-            $counts['ac']  = iPHP::callback(array("articleAdmincp",   "_count"));
-            $counts['ac0'] = iPHP::callback(array("articleAdmincp",   "_count"),array(array('status'=>'0')));
-            $counts['ac2'] = iPHP::callback(array("articleAdmincp",   "_count"),array(array('status'=>'2')));
-        }
+
         echo json_encode($counts);
     }
     public function do_version(){
