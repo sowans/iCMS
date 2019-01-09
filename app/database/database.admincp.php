@@ -138,6 +138,8 @@ class databaseAdmincp {
 		$this->bakdir OR iUI::alert('请选择要删除的备份卷');
 		$backupdir = iPHP_APP_CACHE . '/backup/' . $this->bakdir;
 		if (iFS::rmdir($backupdir)) {
+			$zip = $backupdir.'.zip';
+			file_exists($zip) && iFS::del($zip);
 			iUI::success('备份文件已删除!', 'js:parent.$("#' . md5($this->bakdir) . '").remove();');
 		}
 	}

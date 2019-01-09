@@ -69,9 +69,8 @@ class iFS {
 	}
 
 	public static function check($fn,$throw=false) {
-		$tmpname = strtolower($fileName);
-		$tmparray = array('://',"\0");
-		$ifCheck && $tmparray[] = '..';
+		$tmpname = strtolower($fn);
+		$tmparray = array('://',"\0","%00",'..');
 		if (str_replace($tmparray, '', $tmpname) != $tmpname) {
 			if($throw){
 				trigger_error('What are you doing?',E_USER_ERROR);
