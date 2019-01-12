@@ -9,10 +9,13 @@
  * @version 2.1.0
  */
 class iHttp{
-    public static $callback  = array();
-    public static $handle    = null;
-    public static $debug     = true;
-    public static $PROXY_URL = null;
+    public static $callback   = array();
+    public static $handle     = null;
+    public static $debug      = true;
+    public static $PROXY_URL  = null;
+    public static $SAFE_PORT  = array('80','443');//检测url端口
+    public static $SAFE_URL   = false; //是否检测url安全性 影响性能
+    public static $SAFE_CHECK = false; //是否检测url安全性
 
     public static $CURL_MULTI             = false;
     public static $CURL_COUNT             = 3;
@@ -57,7 +60,38 @@ class iHttp{
             $_GET['format']=='json'||$_POST['format']=='json'
         );
     }
+    public static function is_safe($url) {
+        $parsed = parse_url($url);
+        $validate_ip = true;
 
+        if($parsed['port'] && is_array(self::$SAFE_PORT) && !in_array($parsed['port'],self::$SAFE_PORT)){
+            iPHP_SHELL && print 'iHttp::safe_url Request error! only allow access to port 80,443'.PHP_EOL;
+            return false;
+        }else{
+            preg_match('/^\d+$/', $parsed['host']) && $parsed['host'] = long2ip($parsed['host']);
+            $long = ip2long($parsed['host']);
+            if($long===false){
+                $ip = null;
+                if(self::$SAFE_URL){//影响性能
+                    @putenv('RES_OPTIONS=retrans:1 retry:1 timeout:1 attempts:1');
+                    $ip   = gethostbyname($parsed['host']);
+                    $long = ip2long($ip);
+                    $long===false && $ip = null;
+                    @putenv('RES_OPTIONS');
+                }
+            }else{
+                $ip = $parsed['host'];
+            }
+            $ip && $validate_ip = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+        }
+
+        if(!in_array($parsed['scheme'],array('http','https')) || !$validate_ip){
+            iPHP_SHELL && print 'iHttp::safe_url only allow access to scheme http,https OR Public IP address'.PHP_EOL;
+            return false;
+        }else{
+            return $url;
+        }
+    }
     public static function proxy_test($options=null,$_count=0) {
         if (self::$callback['proxy_test'] && is_callable(self::$callback['proxy_test'])) {
             $test = call_user_func_array(self::$callback['proxy_test'],array($options));
@@ -167,16 +201,15 @@ class iHttp{
     //获取远程页面的内容
     public static function remote($url, $postdata = null,$files = array()) {
         $url = str_replace(array(' ','&amp;'), array('%20','&'), $url);
-
         (iPHP_SHELL && self::$debug) && print date("Y-m-d H:i:s ")."\033[36miHttp::remote\033[0m [".(self::$_count+1)."] => ".$url.PHP_EOL;
 
         if (empty($url)) {
             echo "url:empty\n";
             return false;
         }
+        self::$SAFE_CHECK && $url = self::is_safe($url);
 
         if (function_exists('curl_init')) {
-
             if (self::$CURLOPT_REFERER === null) {
                 $uri = parse_url($url);
                 self::$CURLOPT_REFERER = $uri['scheme'] . '://' . $uri['host'];

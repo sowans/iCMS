@@ -753,7 +753,8 @@ class userApp {
 		$openid && user_openid::save($uid,$openid,$type,$appid);
 
 		if ($avatar) {
-			$avatarData = iHttp::remote($avatar);
+			$avatar = iHttp::is_safe($avatar);
+			$avatar && $avatarData = iHttp::remote($avatar);
 			if ($avatarData) {
 				$avatarpath = iFS::fp(get_user_pic($uid), '+iPATH');
 				iFS::mkdir(dirname($avatarpath));

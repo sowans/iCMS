@@ -768,6 +768,9 @@ class articleAdmincp{
             if($this->callback['return']){
                 return $this->callback['return'];
             }
+            if($this->callback['save:return']){
+                return $this->callback['save:return'];
+            }
             if($_GET['callback']=='json'){
                 echo json_encode(array(
                     "code"    => '1001',
@@ -815,6 +818,10 @@ class articleAdmincp{
 
             if($this->callback['return']){
                 return $this->callback['return'];
+            }
+
+            if($this->callback['save:return']){
+                return $this->callback['save:return'];
             }
             if(isset($_GET['keyCode'])){
                 iUI::success('文章保存成功');
@@ -917,6 +924,7 @@ class articleAdmincp{
             if(is_array($_data_id)){
                 $diff = array_diff_values($adidArray,$_data_id);
                 if($diff['-'])foreach ($diff['-'] as $_i => $_id) {
+                    $_id = (int)$_id;
                     article::del_data($_id,'id');
                 }
             }
@@ -933,6 +941,7 @@ class articleAdmincp{
                     unset($_data_id[$dkey]);
                     //删除章节
                     if($_data_id)foreach ($_data_id as $_id) {
+                        $_id = (int)$_id;
                         $_id && article::del_data($_id,'id');
                     }
                 }
