@@ -20,7 +20,7 @@ class indexApp {
     public function API_iCMS(){
         return $this->do_iCMS();
     }
-    private function index($a = null){
+    public function index($a = null){
         $index_name = $a[1]?:iCMS::$config['template']['index']['name'];
         $index_name OR $index_name = 'index';
         $index_tpl  = $a[0]?:iView::$config['template']['index'];
