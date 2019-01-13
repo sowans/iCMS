@@ -63,7 +63,12 @@ class iURL {
         }
         return $url;
     }
-
+    public static function Hashids($salt,$len=16) {
+        empty($len) && $len = 16;
+        self::$config['hash']['len'] && $len = self::$config['hash']['len'];
+        self::$config['hash']['salt']&& $salt = self::$config['hash']['salt'];
+        return iPHP::vendor('Hashids',array("salt"=>$salt,"len"=>$len));
+    }
     public static function rule($matches) {
     	$rule = $matches[1];
         $_time = 0;
@@ -100,24 +105,24 @@ class iURL {
                 };
             }
         }
-
+        if(strpos($rule,'Hash@')!==false){
+            list($si,$rule,$len,$salt) = explode('@', $rule);
+            $Hashids = self::Hashids($salt,$len);
+            $rule =="ID"    && $id = $a['id'];
+            $rule =="0xID"  && $id = sprintf("%08s",$a['id']);
+            $rule =="CID"   && $id = $a['cid'];
+            $rule =="0xCID" && $id = sprintf("%08s",$c['cid']);
+            return $e = $Hashids->encode($id);
+        }
 
         switch($rule) {
             case 'ID':      $e = $a['id'];break;
-            case 'Hash@ID':
-                $vendor = iPHP::vendor('Hashids');
-                $e = $vendor->encode(array($a['id']));
-            break;
             case '0xID':	$e = sprintf("%08s",$a['id']);break;
             case 'AUTHID':  $e = rawurlencode(auth_encode($a['id'],$_time));break;
             case 'MD5':     $e = substr(md5($a['id']),8,16);break;
             case 'TMD5':    $e = substr(md5(time().uniqid()),8,16);break;
 
             case 'CID':     $e = $c['cid'];break;
-            case 'Hash@CID':
-                $vendor = iPHP::vendor('Hashids');
-                $e = $vendor->encode(array($a['id']));
-            break;
             case 'CMD5':    $e = substr(md5($c['cid']),8,16);break;
             case '0xCID':   $e = sprintf("%08s",$c['cid']);break;
             case 'AUTHCID': $e = rawurlencode(auth_encode($a['cid'],$_time));break;

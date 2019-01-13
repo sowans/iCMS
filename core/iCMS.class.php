@@ -48,6 +48,7 @@ class iCMS {
         iURL::init($config['router'],array(
             'user_url' => $config['router']['user'],
             'api_url'  => $config['router']['public'],
+            'hash'     => $config['router']['hash'],
             'tag'      => $config['tag'],//标签配置
             'iurl'     => $config['iurl'],//应用路由定义
             'callback'=> array(

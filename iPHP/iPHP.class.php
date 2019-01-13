@@ -46,6 +46,7 @@ class iPHP {
 		date_default_timezone_set(iPHP_TIME_ZONE);
 		set_error_handler(self::$handler['error'],E_ALL & ~E_NOTICE);
 		spl_autoload_register(self::$handler['autoload'], true, true);
+		// self::composer();
 		//waf
 		iWAF::filter();
 		//security
@@ -199,6 +200,13 @@ class iPHP {
 			iPHP::error_404('Unable to find method <b>' . $class_name . '::'.self::$app_method.'</b>', '0005');
 		}
 	}
+	public static function composer() {
+		$dir = iPATH .'vendor/composer';
+		if(file_exists($dir)){
+			$path = iPATH .'vendor/autoload.php';
+			require_once $path;
+		}
+	}
 	public static function app_startup($app,$prefix=null) {
 		$prefix = strtoupper($prefix);
 		$path   = self::$app_path . '/'.$prefix.$app.'.app.php';
@@ -281,10 +289,9 @@ class iPHP {
 			$path = iPHP_APP_DIR . '/' . $name . '/' . $file . '.php';
 		}else if(strpos($name,'\\') !== false) {
 			//namespace aaa\bbb
-			$path = str_replace('\\', DIRECTORY_SEPARATOR, $name);
-			$path = iPATH . $path . '.php';
+			$space = str_replace('\\', DIRECTORY_SEPARATOR, $name);
+			$path = iPATH . $space . '.php';
 		}
-
 		if (file_exists($path)) {
 			require_once $path;
 			return true;
@@ -475,37 +482,9 @@ class iPHP {
 	    }
 	    return false;
 	}
-	public static function vendor($name, $args = null,$self=false) {
-		$vendor = '/vendor/Vendor.' . $name . '.php';
-		$path = iPHP_APP_LIB.$vendor;
-		is_file($path) OR $path = iPHP_LIB.$vendor;
 
-		iPHP::import($path);
-		if (function_exists($name)) {
-			if($args === null){
-				return $name();
-			}
-			return call_user_func_array($name, (array)$args);
-		} else {
-			$class_name = 'Vendor_'.$name;
-			$flag = class_exists($class_name,false);
-			if(!$flag && $self){
-				$class_name = $name;
-				$flag = class_exists($class_name,false);
-			}
-			if($flag) {
-				if($args === null){
-					return new $class_name;
-				}
-				if (method_exists($class_name, '__initialize')){
-					return call_user_func_array(array($class_name,'__initialize'), (array)$args);
-				}else{
-					return new $class_name($args);
-				}
-			}else{
-				return false;
-			}
-		}
+	public static function vendor($name, $args = null,$self=false) {
+		return iVendor::run($name,$args,$self);
 	}
     //------------------------------------
     public static function timer_task(){

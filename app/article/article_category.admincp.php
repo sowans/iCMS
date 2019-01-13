@@ -29,8 +29,8 @@ class article_categoryAdmincp extends categoryAdmincp {
          *  URL规则
          */
         $this->category_rule+= array(
-            'article' => array('文章','/{CDIR}/{YYYY}/{MM}{DD}/{ID}{EXT}','{ID},{0xID},{LINK}'),
-            'tag'     => array('标签','/{CDIR}/t-{TKEY}{EXT}','{ID},{0xID},{TKEY},{NAME},{ZH_CN}')
+            'article' => array('文章','/{CDIR}/{YYYY}/{MM}{DD}/{ID}{EXT}','{ID},{0xID},{LINK},Hash@ID,Hash@0xID'),
+            'tag'     => array('标签','/{CDIR}/t-{TKEY}{EXT}','{ID},{0xID},{TKEY},{NAME},{ZH_CN},Hash@ID,Hash@0xID')
         );
         /**
          *  URL规则选项

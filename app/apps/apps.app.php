@@ -37,9 +37,18 @@ class appsApp {
             $f = 'clink';
         }
         if(isset($_GET['AUTHID'])){
-            $AUTHID = iSecurity::escapeStr($_GET['AUTHID']);
-            $v      = auth_decode($AUTHID);
-            $v OR iPHP::error_404('AUTHID not found', 10001);
+            $authID = iSecurity::escapeStr($_GET['AUTHID']);
+            $v      = auth_decode($authID);
+            $v OR iPHP::error_404('AUTHID decode error', 10001);
+        }
+        if(isset($_GET['HASHID'])){
+            $hashID  = iSecurity::escapeStr($_GET['HASHID']);
+            $salt    = iSecurity::escapeStr($_GET['salt']);
+            $len     = strlen($hashID);
+            $Hashids = iURL::Hashids($salt,$len);
+            $result  = $Hashids->decode($hashID);
+            $v       = $result[0];
+            $v OR iPHP::error_404('HASHID decode error', 10002);
         }
         return array($v,$p,$f);
     }
