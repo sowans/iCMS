@@ -84,7 +84,7 @@ admincp::head();
           <td>iCMS <?php echo iCMS_VERSION ; ?>[git:<?php echo date("Y-m-d H:i",GIT_TIME) ; ?>]</td>
           <td><a href="<?php echo __ADMINCP__;?>=patch&do=check&force=1&frame=iPHP" target="iPHP_FRAME" id="home_patch">最新版本</a></td>
           <td><span id="iCMS_RELEASE"><img src="./app/admincp/ui/img/ajax_loader.gif" width="16" height="16" align="absmiddle"></span></td>
-          <td><a href="<?php echo __ADMINCP__;?>=patch&do=git_check&git=true" data-toggle="modal" data-target="#iCMS-MODAL" data-meta="{&quot;width&quot;:&quot;85%&quot;,&quot;height&quot;:&quot;640px&quot;}" title="开发版信息">开发版信息</a></td>
+          <td><a href="<?php echo __ADMINCP__;?>=patch&do=git_check&git=true" data-toggle="modal" data-target="#iCMS-MODAL" data-meta="{&quot;width&quot;:&quot;85%&quot;,&quot;height&quot;:&quot;640px&quot;}" title="开发版信息">开发版信息<span id="iCMS_GIT_UPDATE" class="hide badge badge-success">0</span></a></td>
           <td><span id="iCMS_GIT"><img src="./app/admincp/ui/img/ajax_loader.gif" width="16" height="16" align="absmiddle"></span></td>
         </tr>
         <tr>

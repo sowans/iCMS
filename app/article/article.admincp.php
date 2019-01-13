@@ -769,6 +769,7 @@ class articleAdmincp{
                 return $this->callback['return'];
             }
             if($this->callback['save:return']){
+                $this->callback['indexid'] = $aid;
                 return $this->callback['save:return'];
             }
             if($_GET['callback']=='json'){
@@ -821,6 +822,7 @@ class articleAdmincp{
             }
 
             if($this->callback['save:return']){
+                $this->callback['indexid'] = $aid;
                 return $this->callback['save:return'];
             }
             if(isset($_GET['keyCode'])){

@@ -312,6 +312,10 @@ class tagAdmincp{
             return $this->callback['return'];
         }
 
+        if($this->callback['save:return']){
+            $this->callback['indexid'] = $id;
+            return $this->callback['save:return'];
+        }
         iUI::success($msg,"url:".APP_URI);
     }
     public function check_tkey(&$tkey,$id=0){

@@ -179,8 +179,8 @@ class userAdmincp{
             break;
     		case 'dels':
                 iUI::$break = false;
-	    		foreach($idA AS $id){
-	    			$this->do_del($id,false);
+	    		foreach($idArray AS $id){
+	    			$this->do_del((int)$id,false);
 	    		}
                 iUI::$break = true;
 				iUI::success('用户全部删除完成!','js:1');

@@ -44,6 +44,10 @@ class formsAdmincp{
       if($this->callback['return']){
           return $this->callback['return'];
       }
+      if($this->callback['save:return']){
+          $this->callback['indexid'] = formerApp::$primary_id;
+          return $this->callback['save:return'];
+      }
       $REFERER_URL = $_POST['REFERER'];
       if(empty($REFERER_URL)||strstr($REFERER_URL, '=form_save')){
           $REFERER_URL= APP_URI.'&do=form_manage&fid='.$this->fid;

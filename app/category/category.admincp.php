@@ -243,6 +243,7 @@ class categoryAdmincp {
             return $this->callback['return'];
         }
         if($this->callback['save:return']){
+            $this->callback['indexid'] = $cid;
             return $this->callback['save:return'];
         }
 

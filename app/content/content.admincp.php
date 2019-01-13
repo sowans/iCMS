@@ -401,6 +401,7 @@ class contentAdmincp{
         iPHP::callback(array("spider","callback"),array($this,formerApp::$primary_id));
 
         if($this->callback['save:return']){
+            $this->callback['indexid'] =formerApp::$primary_id;
             return $this->callback['save:return'];
         }
 
