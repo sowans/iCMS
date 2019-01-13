@@ -72,14 +72,8 @@ class appsApp {
 
         $id===null && $id = (int)$_GET['id'];
         if($id){
-            $sql = iSQL::update_hits();
-            $table===null && $table='`#iCMS@__'.$name.'`';
-
-            iDB::query("
-                UPDATE {$table}
-                SET {$sql}
-                WHERE `{$primary}` ='$id'
-            ");
+            $table===null && $table='#iCMS@__'.$name;
+            self::update_hits($table,$id,$primary);
         }
     }
     public function API_comment() {
@@ -294,5 +288,38 @@ class appsApp {
         }else{
             self::$DATA = null;
         }
+    }
+    public static function update_hits_sql($all=true,$hit=1){
+        $timer_task = iPHP::timer_task();
+        if($all===false){
+            $time  = time();
+            $utime = iCache::get('update_hits_all');
+            if($time-$utime<86400){
+                return false;
+            }
+            iCache::set('update_hits_all',$time,0);
+        }
+
+        $pieces = array();
+        $all && $pieces[] = '`hits` = hits+'.$hit;
+        foreach ($timer_task as $key => $bool) {
+            $field = "hits_{$key}";
+            if($key=='yday'){
+                if($bool==1){
+                    $pieces[]="`hits_yday` = hits_today";
+                }elseif ($bool>1) {
+                    $pieces[]="`hits_yday` = 0";
+                }
+                continue;
+            }
+            $pieces[]="`{$field}` = ".($bool?"{$field}+{$hit}":$hit);
+        }
+        return implode(',', $pieces);
+    }
+    public static function update_hits($table,$id=1,$primary='id'){
+        $sql = self::update_hits_sql(false,0);
+        $sql && iDB::query("UPDATE `{$table}` SET {$sql} WHERE `{$primary}` ='$id'");
+        $sql = self::update_hits_sql();
+        $sql && iDB::query("UPDATE `{$table}` SET {$sql} WHERE `{$primary}` ='$id'");
     }
 }

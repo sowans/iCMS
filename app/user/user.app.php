@@ -852,10 +852,7 @@ class userApp {
 
 	public function API_hits($uid = null) {
 		$uid === null && $uid = (int) $_GET['uid'];
-		if ($uid) {
-			$sql = iSQL::update_hits();
-			iDB::query("UPDATE `#iCMS@__user` SET {$sql} WHERE `uid` ='$uid'");
-		}
+		$uid && appsApp::update_hits('#iCMS@__user',$uid,'uid');
 	}
 	public function API_check() {
 		$name  = iSecurity::escapeStr($_GET['name']);

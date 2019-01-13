@@ -22,13 +22,9 @@ class publicApp {
 		iView::display('/tools/sitemap.baidu.htm');
 	}
 	public function API_crontab() {
-		$sql = iSQL::update_hits(false,0);
-		if ($sql) {
-			//点击初始化
-			iDB::query("UPDATE `#iCMS@__article` SET {$sql}");
-			iDB::query("UPDATE `#iCMS@__user` SET {$sql}");
-		}
+		exit();
 	}
+
 	public function API_seccode() {
 		$_GET['pre'] && $pre = iSecurity::escapeStr($_GET['pre']);
 		iSeccode::run($pre);

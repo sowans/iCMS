@@ -250,7 +250,7 @@ class iView {
         strpos($tpl,'./') !==false && $tpl = str_replace('./',dirname($obj->_file).'/',$tpl);
 
         $rtpl = self::tpl_exists($tpl,$_tpl);
-        $rtpl === false && iPHP::error_404('Unable to find the template file <b>iPHP:://template/' . $_tpl . '</b>', '002', 'TPL');
+        $rtpl === false && iPHP::error_404('Unable to find the template file <b>'.self::$handle->template_dir.'/' . $_tpl . '</b>', '002', 'TPL');
         return $rtpl;
     }
     public static function tpl_exists($tpl,&$_tpl=null) {
@@ -301,7 +301,7 @@ class iView {
 
         $_tpl = str_replace('{DEVICE}', self::$config['template']['device'], $_tpl);
 
-        if (is_file(iPHP_TPL_DIR . "/" . $_tpl)) {
+        if (is_file(self::$handle->template_dir . "/" . $_tpl)) {
             return $_tpl;
         } else {
             return false;
@@ -310,13 +310,13 @@ class iView {
     public static function check_tpl($tpl, $dir=null,$flag=null) {
         $flag===null && $flag = iPHP_APP.':/';
         $dir && $tpl = str_replace($flag, $dir, $tpl);
-        if (is_file(iPHP_TPL_DIR . "/" . $tpl)) {
+        if (is_file(self::$handle->template_dir . "/" . $tpl)) {
             return $tpl;
         }
         return false;
     }
     public static function check_dir($name) {
-        $dir = iPHP_TPL_DIR . "/" . $name;
+        $dir = self::$handle->template_dir . "/" . $name;
         if (is_dir($dir)) {
             return $dir;
         }
@@ -388,7 +388,7 @@ class iView {
             $tpl.= '.htm';
             $tpl = iFS::escape_dir(ltrim($tpl,'/'));
             if(iFS::check($tpl)){
-                $tplpath = iPHP_TPL_DIR . '/' .self::$config['template']['dir'].'/'.$tpl;
+                $tplpath = self::$handle->template_dir . '/' .self::$config['template']['dir'].'/'.$tpl;
                 if (is_file($tplpath)) {
                     $iTPL = '{iTPL}/'.$tpl;
                 }

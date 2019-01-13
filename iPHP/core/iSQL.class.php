@@ -35,9 +35,18 @@ class iSQL {
         // }
         return $randIdsArray;
     }
+    //向前兼容,将在下个版本移除
     public static function update_hits($all=true,$hit=1){
         $timer_task = iPHP::timer_task();
-        // var_dump($timer_task);
+        if($all===false){
+            $time  = time();
+            $utime = iCache::get('update_hits_all');
+            if($time-$utime<86400){
+                return false;
+            }
+            iCache::set('update_hits_all',$time,0);
+        }
+
         $pieces = array();
         $all && $pieces[] = '`hits` = hits+'.$hit;
         foreach ($timer_task as $key => $bool) {
