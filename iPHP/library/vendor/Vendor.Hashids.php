@@ -19,7 +19,7 @@ class Vendor_Hashids {
 	public $instance;
 	public function __construct($param=array()){
         empty($param['salt'])&& $param['salt'] = iPHP_KEY;
-        empty($param['len']) && $param['len'] = 16;
+        empty($param['len']) && $param['len'] = 8;
     	$this->instance = new Hashids($param['salt'],$param['len']);
 	}
     public function encode($id) {

@@ -25,13 +25,23 @@ class categoryAdmincp {
      *  URL规则
      */
     protected $category_rule = array(
-        'index'   => array('首页','/{CDIR}/','{CID},{0xCID},{CDIR}'),
-        'list'    => array('列表','/{CDIR}/index_{P}{EXT}','{CID},{0xCID},{CDIR}'),
+        'index'   => array('首页','/{CDIR}/','{CID},{0xCID},{CDIR},{Hash@CID},{Hash@0xCID}'),
+        'list'    => array('列表','/{CDIR}/index_{P}{EXT}','{CID},{0xCID},{CDIR},{Hash@CID},{Hash@0xCID}'),
     );
     /**
      *  URL规则选项
      */
-    protected $category_rule_list = array();
+    protected $category_rule_list = array(
+        'tag' => array(
+            array('----'),
+            array('{TKEY}','标签标识'),
+            array('{ZH_CN}','标签名(中文)'),
+            array('{NAME}','标签名'),
+            array('----'),
+            array('{TCID}','分类ID',false),
+            array('{TCDIR}','分类目录',false),
+        ),
+    );
 
     protected $_app         = 'content';
     protected $_app_name    = '内容';
@@ -144,12 +154,13 @@ class categoryAdmincp {
                 $CRKW = explode(',', $CR[2]);
                 $cr_check = true;
                 foreach ($CRKW as $i => $crk) {
+                    $crk = str_replace(array('{','}'), '', $crk);
                     if(strpos($value,$crk) !== FALSE){
                         $cr_check = false;
                     }
                 }
                 if($cr_check && empty($domain) && $key!='tag'){
-                    return iUI::alert('伪静态模式'.$CR[0].'规则必需要有'.$CR[2].'其中之一');
+                    return iUI::alert('伪静态模式'.$CR[0].'规则必需含有'.$CR[2].'其中之一,否则将无法解析');
                 }
             }
         }
@@ -230,6 +241,9 @@ class categoryAdmincp {
         iPHP::callback(array("spider","callback"),array($this,$cid));
         if($this->callback['return']){
             return $this->callback['return'];
+        }
+        if($this->callback['save:return']){
+            return $this->callback['save:return'];
         }
 
         iUI::success($msg,'url:'.$this->category_uri);

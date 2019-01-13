@@ -28,24 +28,12 @@ class tag_categoryAdmincp extends categoryAdmincp {
          *  URL规则
          */
         $this->category_rule+= array(
-            'tag'     => array('标签','/tag/{TKEY}{EXT}','{ID},{0xID},{TKEY},{NAME},{ZH_CN}')
+            'tag'     => array('标签','/tag/{TKEY}{EXT}','{ID},{0xID},{TKEY},{NAME},{ZH_CN},{Hash@ID},{Hash@0xID}')
         );
         /**
          *  URL规则选项
          */
-        $this->category_rule_list+= array(
-            'tag' => array(
-                array('----'),
-                array('{ID}','标签ID'),
-                array('{0xID}','8位ID'),
-                array('{TKEY}','标签标识'),
-                array('{ZH_CN}','标签名(中文)'),
-                array('{NAME}','标签名'),
-                array('----'),
-                array('{TCID}','分类ID',false),
-                array('{TCDIR}','分类目录',false),
-            ),
-        );
+        $this->category_rule_list+= array();
     }
     public function do_add($default=null){
         parent::do_add(array('status'=> '2'));

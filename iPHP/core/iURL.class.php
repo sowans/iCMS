@@ -63,8 +63,8 @@ class iURL {
         }
         return $url;
     }
-    public static function Hashids($salt,$len=16) {
-        empty($len) && $len = 16;
+    public static function Hashids($salt,$len=8) {
+        empty($len) && $len = 8;
         self::$config['hash']['len'] && $len = self::$config['hash']['len'];
         self::$config['hash']['salt']&& $salt = self::$config['hash']['salt'];
         return iPHP::vendor('Hashids',array("salt"=>$salt,"len"=>$len));
@@ -85,8 +85,8 @@ class iURL {
             self::$data[$app] && $a = self::$data[$app];
         }
         //兼容
-        $rule =='0x3ID'   && $rule = '0xID,0,4';
-        $rule =='0x3,2ID' && $rule = '0xID,4,2';
+        $rule =='0x3ID'   && $rule = '0xID,0,3';
+        $rule =='0x3,2ID' && $rule = '0xID,3,2';
         $is_substr = false;
         if(strpos($rule,',')!==false){
             //{@random,8}
