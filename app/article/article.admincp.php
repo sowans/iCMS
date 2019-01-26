@@ -841,8 +841,29 @@ class articleAdmincp{
             iUI::dialog($msg,'js:1');
         }
     }
-    public function do_purge(){
-        iUI::success('请自行编写清理代码');
+    public function do_purge($id=null,$return=false){
+        $id===null && $id=$_GET['id'];
+        $article = article::row($id);
+        $category = categoryApp::category($article['cid'], false);
+        $iurl = (array)iURL::get('article',array($article,$category));
+
+        foreach ($iurl as $key => $value) {
+            if(is_array($value) && isset($value['url'])){
+                $url  = $value['url'];
+                $p    = parse_url($value['url']);
+                $url  = str_replace($p['host'],$p['host'].'/~cc', $value['url']);
+                $purl = str_replace($p['host'],$p['host'].'/~cc', $value['pageurl']);
+                $msg.= $this->fopen_url($url);
+                $msg.= $this->fopen_url($url,true);
+                for($i=2;$i<100;$i++){
+                    $purl  = str_replace('{P}', $i, $purl);
+                    $msg.= $this->fopen_url($purl);
+                    $msg.= $this->fopen_url($purl,true);
+                }
+            }
+        }
+        if($dialog) return $msg;
+        echo $msg;
     }
 
     public static function del_msg($str){
@@ -1102,14 +1123,20 @@ class articleAdmincp{
         curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT,2);
         curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER,1);
         curl_setopt($curl_handle, CURLOPT_FAILONERROR,1);
+        curl_setopt($curl_handle, CURLOPT_SSL_VERIFYPEER,0);
+        curl_setopt($curl_handle, CURLOPT_SSL_VERIFYHOST,0);
         curl_setopt($curl_handle, CURLOPT_REFERER,$uri['scheme'].'://'.$uri['host']);
         if($mo){
-        curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19');
+            curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19');
         }else{
-        curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/532.0 (KHTML, like Gecko) Chrome/3.0.195.38 Safari/532.0');
+            curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/532.0 (KHTML, like Gecko) Chrome/3.0.195.38 Safari/532.0');
         }
         $file_content = curl_exec($curl_handle);
+        $info  = curl_getinfo($curl_handle);
         curl_close($curl_handle);
-        return $file_content;
+        if($info['http_code']=="200" && strpos($file_content, 'Successful purge')!==false){
+            return $file_content;
+        }
+        return false;
     }
 }

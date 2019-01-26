@@ -409,21 +409,21 @@ class iFS {
 	}
 
 	public static function save_ufile($tn, $fp) {
-		if (function_exists('move_uploaded_file') && @move_uploaded_file($tn, $fp)) {
-			@chmod($fp, 0644);
-		} elseif (@copy($tn, $fp)) {
-			@chmod($fp, 0644);
+		if (function_exists('move_uploaded_file') && move_uploaded_file($tn, $fp)) {
+			chmod($fp, 0644);
+		} elseif (copy($tn, $fp)) {
+			chmod($fp, 0644);
 		} elseif (is_readable($tn) && is_writable($fp)) {
-			if ($fp = @fopen($tn, 'rb')) {
-				@flock($fp, 2);
+			if ($fp = fopen($tn, 'rb')) {
+				flock($fp, 2);
 				$filedata = @fread($fp, @filesize($tn));
-				@fclose($fp);
+				fclose($fp);
 			}
-			if ($fp = @fopen($fp, 'wb')) {
-				@flock($fp, 2);
-				@fwrite($fp, $filedata);
-				@fclose($fp);
-				@chmod($fp, 0644);
+			if ($fp = fopen($fp, 'wb')) {
+				flock($fp, 2);
+				fwrite($fp, $filedata);
+				fclose($fp);
+				chmod($fp, 0644);
 			}
 		} else {
 			return self::_error(array('code' => 0, 'state' => 'Error'));

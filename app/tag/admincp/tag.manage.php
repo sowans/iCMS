@@ -229,7 +229,8 @@ $(function(){
                     <li><a data-toggle="batch" data-action="move"><i class="fa fa-fighter-jet"></i> 移动栏目</a></li>
                     <li><a data-toggle="batch" data-action="mvtcid"><i class="fa fa-fighter-jet"></i> 移动分类</a></li>
                     <li><a data-toggle="batch" data-action="prop"><i class="fa fa-puzzle-piece"></i> 设置属性</a></li>
-                    <li><a data-toggle="batch" data-action="top"><i class="fa fa-cog"></i> 设置权重</a></li>
+                    <li><a data-toggle="batch" data-action="weight"><i class="fa fa-cog"></i> 设置权重</a></li>
+                    <li><a data-toggle="batch" data-action="rootid"><i class="fa fa-cog"></i> 设置父标签ID</a></li>
                     <li><a data-toggle="batch" data-action="keyword"><i class="fa fa-star"></i> 设置关键字</a></li>
                     <li><a data-toggle="batch" data-action="tag"><i class="fa fa-tags"></i> 设置相关标签</a></li>
                     <li><a data-toggle="batch" data-action="tpl"><i class="fa fa-tags"></i> 设置模板</a></li>
@@ -252,6 +253,11 @@ $(function(){
     <div class="input-prepend input-append"> <span class="add-on">标签模板</span>
       <input type="text" name="mtpl" class="span2" id="mtpl" value=""/>
       <?php echo filesAdmincp::modal_btn('模板','mtpl');?>
+    </div>
+  </div>
+  <div id="rootidBatch">
+    <div class="input-prepend"><span class="add-on">父标签ID</span>
+      <input type="text" class="span4" name="mrootid"/>
     </div>
   </div>
 </div>

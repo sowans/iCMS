@@ -653,7 +653,7 @@ CREATE TABLE `icms_user` (
   PRIMARY KEY (`uid`),
   KEY `nickname` (`nickname`),
   KEY `username` (`username`)
-) ENGINE=MyISAM AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4;
+) ENGINE=MyISAM AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_user_category` */
 

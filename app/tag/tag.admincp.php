@@ -408,10 +408,14 @@ class tagAdmincp{
                 }
                 iUI::success('属性设置完成!','js:1');
     		break;
-    		case 'weight':
-		        $weight	=(int)$_POST['mweight'];
-		        $sql	="`weight` = '$weight'";
-    		break;
+            case 'weight':
+                $weight =(int)$_POST['mweight'];
+                $sql    ="`weight` = '$weight'";
+            break;
+            case 'rootid':
+                $rootid =(int)$_POST['mrootid'];
+                $sql    ="`rootid` = '$rootid'";
+            break;
             case 'tpl':
                 $tpl = iSecurity::escapeStr($_POST['mtpl']);
                 $sql = "`tpl` = '$tpl'";

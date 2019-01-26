@@ -55,7 +55,7 @@ class iSeccode {
         $pre && $name = $pre.'_captcha';
 
         self::$code OR self::$code = self::mkcode();
-        self::cookie($name, auth_encode(self::$code));
+        self::cookie($name, auth_encode(self::$code,180));
 
         if(function_exists('imagecreate') &&
           function_exists('imagecolorset') &&
