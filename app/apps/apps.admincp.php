@@ -82,6 +82,7 @@ class appsAdmincp{
           $router = addslashes(json_encode($router));
         }
         $name OR iUI::alert('应用名称不能为空!');
+        strpos($app, '..') !== false && iUI::alert('非法应用标识!');
         empty($app) && $app = iPinyin::get($name);
         empty($title) && $title = $name;
 
@@ -355,6 +356,7 @@ class appsAdmincp{
      */
     public function do_pack(){
       $rs = iDB::row("SELECT * FROM `#iCMS@__apps` where `id`='".$this->id."'",ARRAY_A);
+      iFS::check($rs['app'],true);
       $appdir = iPHP_APP_DIR.'/'.$rs['app'];
       unset($rs['id']);
       $data     = base64_encode(serialize($rs));

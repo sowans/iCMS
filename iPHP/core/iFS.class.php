@@ -91,7 +91,7 @@ class iFS {
 		return self::rm($fn, $check);
 	}
     public static function rm($fn, $check = 1) {
-		$check && self::check($fn);
+		$check && self::check($fn,true);
 		@chmod($fn, 0777);
 		$del = @unlink($fn);
 		self::hook('delete',array($fn));
@@ -99,7 +99,7 @@ class iFS {
 	}
 
 	public static function read($fn, $check = 1, $method = "rb") {
-		$check && self::check($fn);
+		$check && self::check($fn,true);
 		if (function_exists('file_get_contents') && $method != "rb") {
 			$filedata = file_get_contents($fn);
 		} else {
@@ -113,7 +113,7 @@ class iFS {
 	}
 
 	public static function write($fn, $data, $check = 1, $method = "wb+", $iflock = 1, $chmod = 0) {
-		$check && self::check($fn);
+		$check && self::check($fn,true);
 		@touch($fn);
 		$handle = fopen($fn, $method);
 		$iflock && flock($handle, LOCK_EX);
@@ -126,7 +126,7 @@ class iFS {
 	public static function backup($path, $target) {
 		if (self::ex($path)) {
 			self::mkdir(dirname($target));
-			return @rename($path, $target);
+			return rename($path, $target);
 		}
 		return false;
 	}
@@ -181,7 +181,7 @@ class iFS {
 	public static function rmdir($dir, $df = true, $ex = NULL) {
 		$exclude = array('.', '..');
 		$ex && $exclude = array_merge($exclude, (array) $ex);
-		if ($dh = @opendir($dir)) {
+		if ($dh = opendir($dir)) {
 			while (($file = readdir($dh)) !== false) {
 				if (!in_array($file, $exclude)) {
 					$path = $dir . '/' . $file;
@@ -190,12 +190,13 @@ class iFS {
 			}
 			closedir($dh);
 		}
-		return @rmdir($dir);
+		return rmdir($dir);
 	}
 	//获取文件夹下所有文件/文件夹列表
     public static function fileList($dir,$pattern='*'){
 		$lists = array();
 		$dir   = rtrim($dir, '/');
+		self::check($dir,true);
 		foreach(glob($dir.'/'.$pattern) as $value){
 			$lists[] = $value;
 			if(is_dir($value)){
@@ -208,21 +209,15 @@ class iFS {
 	//获取文件夹列表
 	public static function folder($dir = '', $type = NULL) {
 		$dir = trim($dir, '/');
-		$_GET['dir'] && $gDir = trim($_GET['dir'], '/');
+		self::check($dir,true);
 
-		// print_r('$dir='.$dir.'<br />');
-		// print_r('$gDir='.$gDir.'<br />');
-
-		//$gDir && $dir = $gDir;
-
-		//strstr($dir,'.')!==false  && self::alert('What are you doing?','',1000000);
-		//strstr($dir,'..')!==false && self::alert('What are you doing?','',1000000);
+		if($_GET['dir']){
+			$gDir = trim($_GET['dir'], '/');
+			self::check($gDir,true);
+		}
 
 		$sDir_PATH = self::path_join(iPATH, $dir);
 		$iDir_PATH = self::path_join($sDir_PATH, $gDir);
-
-		// print_r('$sDir_PATH='.$sDir_PATH."\n");
-		// print_r('$iDir_PATH='.$iDir_PATH."\n");
 
 		strpos($iDir_PATH, $sDir_PATH) === false && self::_error(array('code' => 0, 'state' => 'DIR_Error'));
 
@@ -397,8 +392,10 @@ class iFS {
         }else{
 			$FileDir = get_date(0, $format);
         }
-
-        $udir && $FileDir = $udir;
+        if($udir){
+        	self::check($udir,true);
+        	$FileDir = $udir;
+        }
 
 		$FileDir  = rtrim($FileDir, '/') . '/';
 		$FileDir  = ltrim($FileDir, './');
@@ -455,6 +452,7 @@ class iFS {
 		if (empty($filedata)) {
 			return false;
 		}
+		$FileName && self::check($FileName,true);
 
 		$fileMd5 = md5($filedata);
 		$FileName OR $FileName = $fileMd5;
@@ -531,6 +529,7 @@ class iFS {
 				}
 				$FileSize = @filesize($tmp_file);
 			}
+			$FileName && self::check($FileName,true);
 			$FileName OR $FileName = $fileMd5;
 			$FilePath = $FileDir . $FileName . "." . $FileExt;
 			$FileRootPath = self::fp($FilePath, "+iPATH");

@@ -46,6 +46,8 @@ class apps {
         self::drop_table($app['table']);
         //删除数据
         self::del_data($app['id']);
+
+        iFS::check($app['app'],true);
         //查找app目录
         $appdir = iPHP_APP_DIR . '/' . $app['app'];
         // 删除应用

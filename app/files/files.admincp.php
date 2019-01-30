@@ -129,6 +129,8 @@ class filesAdmincp{
         $udir      = iSecurity::escapeStr($_GET['udir']);
         $name      = iSecurity::escapeStr($_GET['name']);
         $ext       = iSecurity::escapeStr($_GET['ext']);
+        strpos($udir, '..') !== false && iUI::json(array('code'=>0,'msg'=>'非法目录名'));
+        strpos($name, '..') !== false && iUI::json(array('code'=>0,'msg'=>'非法文件名'));
         iFS::check_ext($ext,0) OR iUI::json(array('state'=>'ERROR','msg'=>'不允许的文件类型'));
         iFS::$ERROR_TYPE = true;
         $F = iFS::IO($name,$udir,$ext);
