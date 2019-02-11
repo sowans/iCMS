@@ -10,27 +10,44 @@
  */
 function_exists('date_default_timezone_set') && date_default_timezone_set('Asia/Shanghai');
 class TBAPI {
-    public $_method_name = '';
-    public $_api_params  = array();
+    public $params  = array();
     public $_app_key     = null;
     public $_app_Secret  = null;
     public $_app_set     = false;
     public $_app_keys    = array();
     public $_err_code    = 0;
-    function appkey(){
+
+    function reset_key(){
     	if($this->_err_code==0) return;
 
-    	if($this->_app_set) return;
+        unset($this->_app_keys[$this->_app_key]);
 
-		$rand_key			= array_rand($this->_app_keys, 1);
-		$this->_app_key 	= $this->_app_keys[$rand_key][0];
-		$this->_app_Secret	= $this->_app_keys[$rand_key][1];
+    	// if($this->_app_set) return;
+
+		$this->random();
+    }
+    function random(){
+        $key = array_rand($this->_app_keys, 1);
+        $this->_app_key     = $this->_app_keys[$key][0];
+        $this->_app_Secret  = $this->_app_keys[$key][1];
+    }
+    function set_keys($keys = array()){
+        foreach ($keys as $key => $value) {
+            if($this->_app_set===false && $key==0){
+                $this->set_key($value[0],$value[1]);
+            }
+            $this->_app_keys[$value[0]] = $value;
+        }
+    }
+    function set_key($_key,$_secret){
+        $this->_app_key     = $_key;
+        $this->_app_Secret  = $_secret;
+        $this->_app_set     = true;
     }
     function setapp($_key,$_secret){
-		$this->_app_key 	= $_key;
-		$this->_app_Secret	= $_secret;
-		$this->_app_set		= true;
+        $this->set_key($_key,$_secret);
     }
+
 	function sign($params) {
 	    $items = array();
 	    foreach($params as $key => $value) $items[$key] = $value;
@@ -46,14 +63,14 @@ class TBAPI {
         $this->method_name = $method_name;
     }
     function set_param($param_name, $param_vaule) {
-        $this->_api_params[$param_name] = $param_vaule;
+        $this->params[$param_name] = $param_vaule;
     }
     function clean_param($param_name=array()){
     	if(empty($param_name)){
-    		$this->_api_params	= array();
+    		$this->params	= array();
     	}else{
 	    	foreach($param_name as $p => $v) {
-	    		unset($this->_api_params[$v]);
+	    		unset($this->params[$v]);
 	    	}
     	}
     }
@@ -71,7 +88,7 @@ class TBAPI {
         if($session != '') {
             $sys_params['session'] = $session;
         }
-        $sys_params['sign'] = $this->sign(array_merge($sys_params, $this->_api_params));
+        $sys_params['sign'] = $this->sign(array_merge($sys_params, $this->params));
         $param_string = '';
         foreach($sys_params as $p => $v) {
             $param_string .= "$p=" . urlencode($v) . "&";
@@ -81,7 +98,7 @@ class TBAPI {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_api_params);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->params);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $postResult = curl_exec($ch);
         if (curl_errno($ch)){
@@ -97,17 +114,16 @@ class TBAPI {
 
         if($res['error_response']['code']==7){
         	$this->_err_code = $res['error_response']['code'];
-        	unset($this->_app_keys[$this->_app_key]);
-        	$this->appkey();
+        	$this->reset_key();
         	return $this->getres($session);
         }
         return $res;
     }
     function execute($session = '') {
     	if(strstr($this->method_name, '.widget.')){
-    		$res	= $this->widget($session);
+    		$res = $this->widget($session);
     	}else{
-			$res	= $this->getres($session);
+			$res = $this->getres($session);
     	}
 		$this->clean_param();
         return $res;
@@ -126,7 +142,7 @@ class TBAPI {
                 'method'  => $this->method_name
 		);
 //		print_r($sys_params);
-		$sys_params	= array_merge($sys_params, $this->_api_params);
+		$sys_params	= array_merge($sys_params, $this->params);
         $param_string = '';
         foreach($sys_params as $p => $v) {
             $param_string .= "$p=" . urlencode($v) . "&";
@@ -168,8 +184,7 @@ class TBAPI {
         $res = json_decode($postResult,true);
         if($res['error_response']['code']==7){
             $this->_err_code = $res['error_response']['code'];
-        	unset($this->_app_keys[$this->_app_key]);
-        	$this->appkey();
+        	$this->reset_key();
         	return $this->widget($session);
         }
         return $res;

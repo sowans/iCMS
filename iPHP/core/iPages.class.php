@@ -318,7 +318,7 @@ class iPages {
 	* @return string $url
 	*/
 	public function _get_text($str){
-		return $this->lang['format_left'].$str.$this->lang['format_right'];
+		return $this->lang['item']?sprintf($this->lang['item'], $str):$str;
 	}
 
 

@@ -400,6 +400,10 @@ class contentAdmincp{
         iPHP::callback(array("apps_meta","save"),array($this->appid,formerApp::$primary_id));
         iPHP::callback(array("spider","callback"),array($this,formerApp::$primary_id));
 
+        if($this->callback['return']){
+            $this->callback['indexid'] =formerApp::$primary_id;
+            return $this->callback['return'];
+        }
         if($this->callback['save:return']){
             $this->callback['indexid'] =formerApp::$primary_id;
             return $this->callback['save:return'];

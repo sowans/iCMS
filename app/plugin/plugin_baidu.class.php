@@ -8,6 +8,7 @@
 * @licence https://www.icmsdev.com/LICENSE.html
 */
 class plugin_baidu{
+    public static $out = null;
     /**
      * [百度站长平台 主动推送(实时)]
      */
@@ -29,11 +30,11 @@ class plugin_baidu{
         );
         curl_setopt_array($ch, $options);
         $result = curl_exec($ch);
-        $json   = json_decode($result);
-        if($json->success){
+        self::$out = json_decode($result);
+        if(self::$out->success){
             return true;
         }
-        return $json;
+        return false;
     }
 
     public static function xzh($urls,$type='realtime',&$out=null) {

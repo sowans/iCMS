@@ -143,6 +143,12 @@ $(function(){
 <span class="help-inline">开启台 后台输入的文章相关字段都将经过关键字过滤</span>
 <div class="clearfloat mb10"></div>
 <div class="input-prepend">
+  <span class="add-on">列表优化</span>
+  <input type="text" name="config[total_num]" class="span3" id="article_total_num" value="<?php echo $config['total_num'] ; ?>"/>
+</div>
+<span class="help-inline">固定总条数,将大大提高后台性能,但无法正确统计条数</span>
+<div class="clearfloat mb10"></div>
+<div class="input-prepend">
   <span class="add-on">字符分隔符</span>
   <input type="text" name="config[clink]" class="span3" id="article_clink" value="<?php echo $config['clink'] ; ?>"/>
 </div>

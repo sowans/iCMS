@@ -63,7 +63,7 @@ class iURL {
         }
         return $url;
     }
-    public static function Hashids($salt,$len=8) {
+    public static function Hashids($salt='',$len=8) {
         empty($len) && $len = 8;
         self::$config['hash']['len'] && $len = self::$config['hash']['len'];
         self::$config['hash']['salt']&& $salt = self::$config['hash']['salt'];

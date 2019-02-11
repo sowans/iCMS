@@ -8,7 +8,10 @@
 * @licence https://www.icmsdev.com/LICENSE.html
 */
 class searchApp {
-	public $methods	= array('iCMS');
+    public $methods = array('iCMS');
+    public static $router   = null;
+    public static $data     = array();
+    public static $callback = array();
 	public function do_iCMS(){
         return $this->search();
 	}
@@ -23,19 +26,22 @@ class searchApp {
         $fwd = iPHP::callback(array("filterApp","run"),array(&$q),false);
         $fwd && iPHP::error_404('非法搜索词!', 60002);
 
-        $search['keyword'] = $q;
-        $search['title']   = stripslashes($q);
-        $search['iurl']    = (array)self::iurl($q);
+        self::$data['keyword'] = $q;
+        self::$data['title']   = stripslashes($q);
+        self::$data['iurl']    = (array)self::iurl($q);
         $q && $this->search_log($q);
         $tpl===false && $tpl = '{iTPL}/search.htm';
-        return appsApp::render($search,$tpl,'search');
+        return appsApp::render(self::$data,$tpl,'search');
     }
     public static function iurl($q,$query=null,$page=true) {
         $query===null && $query = array('app'=>'search','q'=>$q);
         $iURL           =  new stdClass();
-        $iURL->url      = iURL::make($query,'router::api');
+        $iURL->url      = iURL::make($query,self::$router?:'router::api');
         $iURL->pageurl  = iURL::make('page={P}',$iURL->url);
         $iURL->href     = $iURL->url;
+        if (self::$callback['iurl'] && is_callable(self::$callback['iurl'])) {
+            $iURL = call_user_func_array(self::$callback['iurl'],array($iURL,$query));
+        }
         $page && iURL::page_url($iURL);
         return $iURL;
     }

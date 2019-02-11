@@ -13,12 +13,26 @@ class apps_common {
     public static $data    = array();
     public static $vars    = array();
     public static $name    = null;
+    public static $router_key  = 'api';
 
     public static function init(&$data,$name,$vars,$primary='id') {
         self::$data    = &$data;
         self::$name    = $name;
         self::$vars    = $vars;
         self::$primary = $primary;
+    }
+    public static function all() {
+        self::link();
+        self::text2link();
+        self::user();
+        self::comment();
+        self::pic();
+        self::hits();
+        self::param();
+        self::fields();
+    }
+    public static function set_router($key=null) {
+        self::$router_key = $key;
     }
     public static function link($title=null) {
         $title===null && $title = self::$data['title'];
@@ -31,7 +45,7 @@ class apps_common {
 
     public static function comment() {
         self::$data['comment'] = array(
-            'url' => iURL::router('api')."?app=".self::$name."&do=comment&appid=".self::$data['appid']."&iid=".self::$data[self::$primary]."&cid=".self::$data['cid'],
+            'url' => iURL::router(self::$router_key)."?app=".self::$name."&do=comment&appid=".self::$data['appid']."&iid=".self::$data[self::$primary]."&cid=".self::$data['cid'],
             'count' => self::$data['comments'],
         );
     }
@@ -71,7 +85,7 @@ class apps_common {
     }
     public static function hits() {
         self::$data['hits']   = array(
-            'script' => iURL::router('api').'?app='.self::$name.'&do=hits&cid=' . self::$data['cid'] . '&id=' . self::$data[self::$primary],
+            'script' => iURL::router(self::$router_key).'?app='.self::$name.'&do=hits&cid=' . self::$data['cid'] . '&id=' . self::$data[self::$primary],
             'count'  => self::$data['hits'],
             'today'  => self::$data['hits_today'],
             'yday'   => self::$data['hits_yday'],

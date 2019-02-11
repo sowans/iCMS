@@ -116,6 +116,22 @@ class articleAdmincp{
                 }
                 iUI::success('添加完成!','js:1');
             break;
+            case 'purge':
+                @set_time_limit(0);
+                @header('Cache-Control: no-cache');
+                iUI::flush_start();
+                iUI::$break = false;
+                $_count = count($_POST['id']);
+                foreach((array)$_POST['id'] as $i => $id) {
+                    $this->do_purge($id,false);
+                    $updateMsg = $i ? true : false;
+                    $timeout = ($i++) == $_count ? '3' : false;
+                    iUI::dialog($id.'清除完成!', 'js:void(0)', $timeout, 0, $updateMsg);
+                    iUI::flush();
+                }
+                iUI::dialog('success:#:check:#:清除完成!', 0, 3, 0, true);
+                // iUI::success('清除完成!','js:1');
+            break;
             case 'baiduping':
                 foreach((array)$_POST['id'] AS $id) {
                     $msg.= $this->do_baiduping($id,false);
@@ -574,8 +590,12 @@ class articleAdmincp{
             $map_sql = iSQL::select_map($map_where);
             $sql     = ",({$map_sql}) map {$sql} AND `id` = map.`iid`";
         }
+        if(self::$config['total_num']){
+            $total = (int)self::$config['total_num'];
+        }else{
+            $total = iPagination::totalCache(article::count_sql($sql),"G");
+        }
 
-        $total = iPagination::totalCache(article::count_sql($sql),"G");
         iUI::pagenav($total,$maxperpage,"篇文章");
 
         $limit = 'LIMIT '.iPagination::$offset.','.$maxperpage;

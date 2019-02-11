@@ -33,8 +33,7 @@ return array(
 		'sql'          =>'条记录',
 		'tag'          =>'个标签',
 		'comment'      =>'条评论',
-		'format_left'  =>'',
-		'format_right' =>'',
+		'item'  	   =>'',
 		'di'           =>'第',
 	),
 	'report'=>array(

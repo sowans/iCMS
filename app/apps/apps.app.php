@@ -250,6 +250,10 @@ class appsApp {
 
         self::__redirect($tpl,$category['mode'],$data['iurl']);
 
+        if($category['app']['type']=="2"){ //自定义应用模板信息
+            iPHP::callback(array("contentFunc","interfaced"),array($category['app']));
+        }
+
         $data['category'] = categoryApp::get_lite($category);
         $tpl===null && $data['category'] = $category;
 

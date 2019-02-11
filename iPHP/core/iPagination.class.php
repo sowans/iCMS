@@ -12,6 +12,7 @@ class iPagination {
     public static $config   = array();
     public static $callback = array();
 
+    public static $iPAGES  = NULL;
     public static $pagenav = NULL;
     public static $offset  = NULL;
 
@@ -54,8 +55,7 @@ class iPagination {
             'total_type' => 'G',
             'lang'       => iUI::lang(iPHP_APP . ':page'),
         );
-        $pageconf['lang']['format_left'] = '<li>';
-        $pageconf['lang']['format_right'] = '</li>';
+        $pageconf['lang']['item'] = '<li>%s</li>';
 
         $iPages = new iPages($pageconf);
         self::$offset = $iPages->offset;
