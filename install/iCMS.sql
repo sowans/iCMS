@@ -539,6 +539,16 @@ CREATE TABLE `icms_spider_url` (
   KEY `url` (`url`(255))
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+/*Table structure for table `icms_spider_url_data` */
+
+CREATE TABLE `icms_spider_url_data` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `url` varchar(200) NOT NULL DEFAULT '',
+  `data` mediumtext NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `url` (`url`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 /*Table structure for table `icms_tag` */
 
 CREATE TABLE `icms_tag` (
