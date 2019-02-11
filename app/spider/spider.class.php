@@ -18,6 +18,7 @@ class spider{
     public static $work     = false;
     public static $urlslast = null;
     public static $allHtml  = array();
+    public static $indexid  = null;
 
     public static $dataTest  = false;
     public static $ruleTest  = false;
@@ -36,54 +37,35 @@ class spider{
     public static $callback    = array();
 
     public static $spider_url_ids   = array();
-    public static $spider_url_appid = 0;
 
     public static function rule($id) {
-        $rs = iDB::row("SELECT * FROM `#iCMS@__spider_rule` WHERE `id`='$id' LIMIT 1;", ARRAY_A);
-        $rs['rule'] && $rs['rule'] = stripslashes_deep(unserialize($rs['rule']));
-        $rs['rule']['user_agent'] OR $rs['rule']['user_agent'] = "Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)";
-        spider::$useragent = $rs['rule']['user_agent'];
-        spider::$encoding  = $rs['rule']['curl']['encoding'];
-        spider::$referer   = $rs['rule']['curl']['referer'];
-        spider::$cookie    = $rs['rule']['curl']['cookie'];
-        spider::$charset   = $rs['rule']['charset'];
-        return $rs;
+        return spider_rule::get($id);
     }
-
     public static function project($id) {
-        return iDB::row("SELECT * FROM `#iCMS@__spider_project` WHERE `id`='$id' LIMIT 1;", ARRAY_A);
+        return spider_project::get($id);
     }
     public static function postArgs($id) {
-        $postRs = iDB::row("SELECT * FROM `#iCMS@__spider_post` WHERE `id`='$id' LIMIT 1;");
-        if ($postRs->post) {
-            $postArray = explode("\n", $postRs->post);
-            $postArray = array_filter($postArray);
-            foreach ($postArray AS $key => $pstr) {
-                list($pkey, $pval) = explode("=", $pstr);
-                if(strpos($pkey, '[')!==false && strpos($pkey, ']')!==false){
-                    preg_match('/(.+)\[(.+)\]/', $pkey,$match);
-                    $_POST[$match[1]][$match[2]] = trim($pval);
-                }else{
-                    $_POST[$pkey] = trim($pval);
-                }
-            }
-            return $postRs;
-        }
+        return spider_post::get($id);
     }
 
     public static function checker($work = null,$pid=null,$url=null,$title=null){
         $pid   ===null && $pid = spider::$pid;
         $url   ===null && $url = spider::$url;
         $title ===null && $title = spider::$title;
-        $project = spider::project($pid);
+        $project = spider_project::get($pid);
         $hash    = md5($url);
         if(($project['checker'] && empty($_GET['indexid'])) || $work=="DATA@RULE"){
             $title = addslashes($title);
             $url   = addslashes($url);
-            $project_checker = $project['checker'];
-            $work=="DATA@RULE" && $project_checker = '1';
-            switch ($project_checker) {
+            $mode = $project['checker'];
+            $work=="DATA@RULE" && $mode = '1';
+            spider::$callback['checker:mode'] && $mode  = spider::$callback['checker:mode'];
+            spider::$callback['checker:url']  && $url   = spider::$callback['checker:url'];
+            spider::$callback['checker:title']&& $title = spider::$callback['checker:title'];
+
+            switch ($mode) {
                 case '1'://按网址检查
+                case '4'://按网址检查更新
                     $scheme = parse_url($url, PHP_URL_SCHEME);
                     if($scheme){
                         $_url  = str_replace($scheme.'://', '', $url);
@@ -96,11 +78,13 @@ class spider{
                     $msg   = $label.'该网址的文章已经发布过!请检查是否重复';
                 break;
                 case '2'://按标题检查
+                case '5'://按标题检查更新
                     $sql   = "`title` = '$title'";
                     $label = $title.PHP_EOL;
                     $msg   = $label.'该标题的文章已经发布过!请检查是否重复';
                 break;
                 case '3'://网址和标题
+                case '6'://网址和标题更新
                     $sql   = "`url` = '$url' AND `title` = '$title'";
                     $label = $title.PHP_EOL.$url;
                     $msg   = $label.'该网址和标题的文章已经发布过!请检查是否重复';
@@ -114,18 +98,28 @@ class spider{
                     $sql.=" AND `rid`='".spider::$rid."'";
                 break;
             }
+            $ret = array();
+            $sql && $ret = iDB::row("SELECT `id`,`publish`,`indexid` FROM `#iCMS@__spider_url` where {$sql} ",ARRAY_A);
 
-            $checker = iDB::value("SELECT `id` FROM `#iCMS@__spider_url` where $sql AND `publish` in(1,2)");
-            if($checker){
-                $work===NULL && iUI::alert($msg, 'js:parent.$("#' . $hash . '").remove();');
-                if($work=='shell'){
-                    echo date("Y-m-d H:i:s ")."\n\033[35m".$msg."\033[0m\n\n";
-                    return false;
+            spider::$callback['url:id']      = $ret['id'];
+            spider::$callback['url:indexid'] = $ret['indexid'];
+
+            if($ret){
+                if(in_array($mode, array("1","2","3"))) {
+                    if(in_array($ret['publish'], array("1","2"))) {
+                        $work===NULL && iUI::alert($msg, 'js:parent.$("#' . $hash . '").remove();');
+                        if($work=='shell'){
+                            echo date("Y-m-d H:i:s ")."\n\033[35m".$msg."\033[0m\n\n";
+                            return false;
+                        }
+                        if($work=="WEB@AUTO"){
+                            return '-1';
+                        }
+                        return false;
+                    }
+                }else{
+                    // spider::$surlData = $ret;
                 }
-                if($work=="WEB@AUTO"){
-                    return '-1';
-                }
-                return false;
             }else{
                 return true;
             }
@@ -164,32 +158,30 @@ class spider{
                     'pubdate' => time()
                 );
             }
-            spider::$spider_url_appid && $data['appid'] = spider::$spider_url_appid;
             iDB::update('spider_url',$data,array('id'=>$suid));
         }
     }
-    public static function errorlog($msg,$url=null,$type=0,$a=null) {
-        $data = array(
-            'work'    => spider::$work,
-            'rid'     => (int)spider::$rid,
-            'sid'     => (int)spider::$sid,
-            'pid'     => (int)spider::$pid,
-            'url'     => ($url?$url:spider::$url),
-            'msg'     => addslashes($msg),
-            'date'    => date("Y-m-d H:i:s"),
+    public static function insert_spider_url($appid=0,$post=null) {
+        $post===null && $post=$_POST;
+
+        return iDB::insert('spider_url',array(
+            'appid'   => $appid,
+            'cid'     => $_POST['cid'],
+            'rid'     => spider::$rid,'pid'=> spider::$pid,
+            'title'   => addslashes($_POST['title']),
+            'url'     => addslashes($_POST['reurl']),
+            'hash'    => md5($_POST['reurl']),
+            'status'  => '1',
             'addtime' => time(),
-            'type'    => $type
-        );
-        $a && $data = array_merge($data,(array)$a);
-        iDB::insert('spider_error',$data);
-        if(iPHP_SHELL){
-            echo $data['date']." \033[31m".$msg."\033[0m".PHP_EOL;
-        }else{
-            echo '<b>'.$msg.'</b><hr />';
-        }
+            'publish' => '0',
+            'indexid' => '0',
+            'pubdate' => ''
+        ));
     }
+
     public static function publish($work = null,$check=false) {
         @set_time_limit(0);
+        spider::$callback['STATUS'] = 'publish';
 
         if($check){
             $checker = spider::checker($work,spider::$pid,spider::$url,spider::$title);
@@ -197,148 +189,106 @@ class spider{
                 return $checker;
             }
         }
-
-        $_POST = spider_data::crawl();
+        $_POST = spider::$callback['_POST'];
+        empty($_POST) && $_POST = spider_data::crawl();
 
         if($_POST===false) return false;
 
-        spider_tools::listItemCache($_POST['reurl'],'delete');
-
         foreach ((array)$_POST as $key => $value) {
             if($value===null && $key!='__title__'){
-                spider::errorlog("publish:$key:null",$_POST['reurl'],"publish:$key:null");
+                spider_error::log("publish:$key:null",$_POST['reurl'],"publish:$key:null");
                 return null;
             }
         }
 
         if(spider::$work && $work===null) $work = spider::$work;
 
-        // if($work=='shell'){
-        //    if(empty($_POST['title'])){
-        //         spider::errorlog("标题不能为空",$_POST['reurl'],'publish.title');
-        //         return false;
-        //    }
-        //    if(empty($_POST['body'])){
-        //         spider::errorlog("内容不能为空",$_POST['reurl'],'publish.body');
-        //         return false;
-        //    }
-        // }
         $checker = spider::checker($work,spider::$pid,$_POST['reurl'],$_POST['title']);
+
         if($checker!==true){
             return $checker;
         }
 
-        $project = spider::project(spider::$pid);
+        $project = spider_project::get(spider::$pid);
+        isset($_POST['cid']) OR $_POST['cid'] = $project['cid'];
+        $poid  = spider::$poid?:$project['poid'];
+        $spost = spider_post::get($poid);
+        $appid = $_POST['appid']?:$spost->app;
+        $app   = apps::get_app($appid);
 
-        if(!isset($_POST['cid'])){
-            $_POST['cid'] = $project['cid'];
+        $indexid = spider::$indexid?:(int)$_GET['indexid'];
+        if(spider::$callback['url:indexid']){
+            $indexid = spider::$callback['url:indexid'];
         }
-
-        $poid = $project['poid'];
-        spider::$poid && $poid = spider::$poid;
-        $postArgs = spider::postArgs($poid);
-        $appid = $_POST['appid']?:$postArgs->app;
-        $app = apps::get_app($appid);
-
-        $_GET['indexid'] && self::get_data_id((int)$_GET['indexid'],$app);
-
-        $title = addslashes($_POST['title']);
-        $url   = addslashes($_POST['reurl']);
-        $hash  = md5($url);
-        if(empty(spider::$sid)){
-            $scheme = parse_url($url, PHP_URL_SCHEME);
-            $surl   = str_replace($scheme.'://', '', $url);
-            $urls   = array($surl,'http://'.$surl,'https://'.$surl);
-            $sql    = "`url` IN ('".implode("','", $urls)."')";
-
-            $spider_url = iDB::row("SELECT `id`,`publish`,`indexid` FROM `#iCMS@__spider_url` WHERE {$sql}",ARRAY_A);
-            if(empty($spider_url)){
-                $spider_url_data = array(
-                    'appid'   => $app['id'],
-                    'cid'     => $project['cid'],
-                    'rid'     => spider::$rid,
-                    'pid'     => spider::$pid,
-                    'title'   => $title,
-                    'url'     => $url,
-                    'hash'    => $hash,
-                    'status'  => '1',
-                    'addtime' => time(),
-                    'publish' => '0',
-                    'indexid' => '0',
-                    'pubdate' => ''
-                );
-                $suid = iDB::insert('spider_url',$spider_url_data);
-            }else{
-                $spider_url['indexid'] && self::get_data_id($spider_url['indexid'],$app);
-                $suid = $spider_url['id'];
-            }
-        }else{
-            $suid = spider::$sid;
-        }
-        spider::$spider_url_appid = $app['id'];
+        $indexid && self::get_app_pdata($indexid,$app);
 
         if (spider::$callback['post'] && is_callable(spider::$callback['post'])) {
-            $_POST = call_user_func_array(spider::$callback['post'],array($_POST,spider::$callback['post:data'],$suid));
+            $_POST = call_user_func_array(spider::$callback['post'],array($_POST,spider::$callback['post:data'],spider::$sid));
             if($_POST['callback']){
                 return $_POST;
             }
         }
+
         if($_POST===false) return false;
 
-        iSecurity::slashes($_POST);
-        $fun    = $postArgs->fun;
-        $return = "1001";
-        if(iFS::checkHttp($fun)){
-            $json = self::postUrl($fun,$_POST);
-            $callback = json_decode ($json,true);
-            if($callback['code']==$return){
-                $indexid = $callback['indexid'];
-                self::update_spider_url_indexid($suid,$indexid);
-                self::update_spider_url_publish($suid);
-            }
-        }else{
-            $obj = $postArgs->app."Admincp";
-            $acp = new $obj;
-            $acp->callback['code'] = $return;
-            /**
-             * 主表 回调 更新关联ID
-             */
-            $acp->callback['primary'] = array(
-                array('spider','update_spider_url_indexid'),
-                array('suid'=>$suid)
-            );
-            /**
-             * 数据表 回调 成功发布
-             */
-            $acp->callback['data'] = array(
-                array('spider','update_spider_url_publish'),
-                array('suid'=>$suid)
-            );
+        $sid = spider::$callback['url:id'];
+        empty($sid) && $sid = spider::insert_spider_url($app['id']);
 
-            $callback = $acp->$fun();
-            if(!$callback){
-                spider::errorlog("发布失败",$_POST['reurl'],'publish.fail');
-                return false;
+        $rcode  = '1001';
+        $result = spider_post::commit($rcode,$sid,$spost);
+
+        if($_POST['commit:callData']){
+            var_dump($result,$_POST['commit:callData']);
+            $callData = $_POST['commit:callData'];
+            list($_s,$poid) = explode('@', $callData['POST']);
+            foreach ($callData as $key => $value) {
+                $value['URLS'] && $subData[] = self::sub_crawl($value,$rule);
             }
         }
-        if ($callback['code'] == $return && $work===NULL) {
-            if (spider::$sid) {
-                iUI::success("发布成功!",'js:1');
-            } else {
-                iUI::success("发布成功!", 'js:parent.$("#' . $hash . '").remove();');
-            }
-        }
-        if (spider::$callback['save'] && is_callable(spider::$callback['save'])) {
-            $ret = call_user_func_array(spider::$callback['save'],array($callback,$_POST));
-            if($ret['callback']){
+            // if(spider::$callback['STATUS']==='publish'){
+            //     if($res['POST'] && strpos($res['POST'], 'poid@')!==false){
+            //         list($_s,$poid) = explode('@', $res['POST']);
+            //         unset($res['POST']);
+            //         spider::$callback['_POST'] = $res;
+            //         var_dump(spider::$callback['_POST']);
+            //         exit;
+            //         spider::$poid = $poid;
+            //         $result = spider::publish();
+            //         var_dump($result);
+            //         spider::$poid = null;
+            //     }
+            //     exit;
+            // }
+        spider::$callback['save'] && spider::$callback['commit'] = spider::$callback['save'];
+        if (spider::$callback['commit'] && is_callable(spider::$callback['commit'])) {
+            $ret = call_user_func_array(spider::$callback['commit'],array($result,$_POST));
+            if($ret['callback']||$ret['return']){
                 return $ret;
             }
         }
+        spider::$callback['STATUS'] = null;
+
+        // if (spider::$callback['save'] && is_callable(spider::$callback['save'])) {
+        //     $ret = call_user_func_array(spider::$callback['save'],array($result,$_POST));
+        //     if($ret['callback']){
+        //         return $ret;
+        //     }
+        // }
+
+        if ($result['code'] == $rcode && $work===NULL) {
+            $msg = ($indexid?'更新':'发布').'成功!';
+            if (spider::$sid) {
+                iUI::success($msg,'js:1');
+            } else {
+                iUI::success($msg, 'js:parent.$("#' . md5($_POST['reurl']) . '").remove();');
+            }
+        }
         if($work=="shell"||$work=="WEB@AUTO"){
-            $callback['work']=$work;
-            return $callback;
+            $result && $result['work']=$work;
+            return $result;
         }
     }
+
     public static function callback($obj,$indexid,$type = null) {
         if ($type === null || $type == 'primary') {
             if ($obj->callback['primary']) {
@@ -347,7 +297,8 @@ class spider{
                 $params = (array) $PCB[1];
                 $indexid && $params+= array('indexid' => $indexid);
 
-                $obj->callback['return'] = array(
+                $obj->callback['return'] =
+                $obj->callback['save:return'] = array(
                     "code" => $obj->callback['code']
                 )+$params;
                 if (is_callable($handler)) {
@@ -366,59 +317,24 @@ class spider{
             }
         }
     }
-    public static function get_data_id($indexid,$app) {
-        $data_table = apps_mod::get_data_table($app['table']);
-        if($data_table){
-            $data_id_key = $data_table['primary'];
-            $union_key   = $data_table['union'];
-            $table_name  = $data_table['name'];
-            if($indexid){
+    public static function get_app_pdata($indexid,$app) {
+        if(empty($indexid)) return;
+
+        if($app['app']=='article'){
+            $_POST['article_id']  = $indexid;
+            $_POST['data_id'] = iDB::value("SELECT `id` FROM `#iCMS@__article_data` WHERE aid='".$indexid."'");
+        }else{
+            $table           = apps::get_table($app);
+            $primary         = $table['primary'];
+            $_POST[$primary] = $indexid;
+            $data_table      = apps_mod::get_data_table($app['table']);
+            if($data_table){
+                $data_id_key = $data_table['primary'];
+                $union_key   = $data_table['union'];
+                $table_name  = $data_table['name'];
                 $_POST[$union_key]   = $indexid;
                 $_POST[$data_id_key] = iDB::value("SELECT `{$data_id_key}` FROM `#iCMS@__{$table_name}` WHERE `{$union_key}`='{$indexid}'");
             }
-        }else{
-            if($app['app']=='article' && $indexid){
-                $_POST['article_id']  = $indexid;
-                $_POST['data_id'] = iDB::value("SELECT `id` FROM `#iCMS@__article_data` WHERE aid='".$indexid."'");
-            }
         }
-    }
-    public static function postUrl($url, $data) {
-        if(!iHttp::is_url($url,true)){
-            if (spider::$dataTest || spider::$ruleTest) {
-                echo "<b>{$url} 请求错误:非正常URL格式,因安全问题只允许提交到 http:// 或 https:// 开头的链接</b>";
-            }
-            return false;
-        }
-        is_array($data) && $data = http_build_query($data);
-        $options = array(
-            CURLOPT_URL                  => $url,
-            CURLOPT_REFERER              => $_SERVER['HTTP_REFERER'],
-            CURLOPT_USERAGENT            => $_SERVER['HTTP_USER_AGENT'],
-            CURLOPT_POSTFIELDS           => $data,
-            // CURLOPT_HTTPHEADER           => array(
-            //     'Content-Type:application/x-www-form-urlencoded',
-            //     'Content-Length:'.strlen($data),
-            //     'Host: www.icmsdev.com'
-            // ),
-            CURLOPT_POST                 => 1,
-            CURLOPT_TIMEOUT              => 10,
-            CURLOPT_CONNECTTIMEOUT       => 10,
-            CURLOPT_RETURNTRANSFER       => 1,
-            CURLOPT_FAILONERROR          => 1,
-            CURLOPT_HEADER               => false,
-            CURLOPT_NOBODY               => false,
-            CURLOPT_NOSIGNAL             => true,
-            // CURLOPT_DNS_USE_GLOBAL_CACHE => true,
-            // CURLOPT_DNS_CACHE_TIMEOUT    => 86400,
-            CURLOPT_SSL_VERIFYPEER       => false,
-            CURLOPT_SSL_VERIFYHOST       => false
-        );
-
-        $ch = curl_init();
-        curl_setopt_array($ch,$options);
-        $responses = curl_exec($ch);
-        curl_close ($ch);
-        return $responses;
     }
 }

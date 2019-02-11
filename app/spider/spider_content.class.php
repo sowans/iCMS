@@ -138,7 +138,15 @@ class spider_content {
         if (spider::$dataTest && $data['helper']) {
             echo "<b>2.方法处理:</b>".htmlspecialchars(implode(',', $data['helper'])).'<br />';
         }
+        //特殊处理方法
+        //@方法
+        //@check_urls
+        $sfuncArray = array();
         foreach ((array)$data['helper'] as $key => $value) {
+            if(substr($value, 0,1)=='@'){
+                $sfuncArray[] = array(substr($value,1)=>true);
+                continue;
+            }
             $func = array($value=>true);
             if(is_array($content)){
                 foreach ($content as $ckey => $cvalue) {
@@ -164,14 +172,16 @@ class spider_content {
                 echo "<b>3.发布前处理</b>".htmlspecialchars($data['cleanafter']).'<br />';
             }
         }
+        if($sfuncArray)foreach ($sfuncArray as $key => $func) {
+            $content = self::helper($content,$func,$rule);
+        }
+
         if (spider::$callback['content'] && is_callable(spider::$callback['content'])) {
             $content = call_user_func_array(spider::$callback['content'],array($content,$data));
         }
         if (spider::$dataTest) {
             echo "<hr/>";
         }
-        // is_array($content) OR $content = preg_replace('/&(\w{2,6});/is', '&amp;$1;', $content);
-        // $content = str_replace('&nbsp;','&amp;nbsp;',$content);
         return $content;
     }
     public static function helper($content,$data,$rule){
@@ -241,18 +251,12 @@ class spider_content {
             $content = spider_tools::url_complement($rule['__url__'],$content);
         }
         if ($data['img_absolute'] && $content) {
-            preg_match_all("/<img.*?src\s*=[\"|'](.*?)[\"|']/is", $content, $img_match);
-            if($img_match[1]){
-                $_img_array = array_unique($img_match[1]);
-                $_img_urls  = array();
-                foreach ((array)$_img_array as $_img_key => $_img_src) {
-                    $_img_urls[$_img_key] = spider_tools::url_complement($rule['__url__'],$_img_src);
-                }
-               $content = str_replace($_img_array, $_img_urls, $content);
-            }
-            unset($img_match,$_img_array,$_img_urls,$_img_src);
+            $content = spider_tools::img_url_complement($content,$rule['__url__']);
         }
-
+        //@check_urls
+        if ($data['check_urls']) {
+            $content && $content = spider_tools::check_urls($content);
+        }
         if ($data['capture']) {
             $content && $content = spider_tools::remote($content);
         }
@@ -541,7 +545,7 @@ class spider_content {
                     $match_hash[$cmd5] = true;
                 }
                 if (spider::$dataTest) {
-                    echo "<b>多条匹配结果:</b><pre>";
+                    echo "<b>多条匹配结果:</b><pre style='max-height:120px;overflow-y: scroll;'>";
                     print_r(array_map('htmlspecialchars', $conArray));
                     echo "</pre>";
                 }
@@ -554,7 +558,7 @@ class spider_content {
                     $content = $doc[$content_dom]->$content_fun();
                 }
                 if (spider::$dataTest) {
-                    echo "<b>[".$data['name']."]匹配结果:</b><pre>";
+                    echo "<b>[".$data['name']."]匹配结果:</b><pre style='max-height:120px;overflow-y: scroll;'>";
                     print_r(htmlspecialchars($content));
                     echo "</pre>";
                 }
@@ -653,7 +657,7 @@ class spider_content {
             exit('<h1>'.$msg.'</h1>');
         }
         if(spider::$work){
-            spider::errorlog($msg,$rule['__url__'],$type);
+            spider_error::log($msg,$rule['__url__'],$type);
             return null;
         }else{
             iUI::alert($msg);

@@ -36,11 +36,11 @@ class spider_data {
         }
 
         if($pid){
-            $project        = spider::project($pid);
+            $project        = spider_project::get($pid);
             $prule_list_url = $project['list_url'];
         }
 
-        $ruleA           = spider::rule($rid);
+        $ruleA           = spider_rule::get($rid);
         $rule            = $ruleA['rule'];
         $dataArray       = $rule['data'];
 
@@ -66,7 +66,7 @@ class spider_data {
             $msg.= var_export(spider_tools::$curl_info,true);
             if(spider::$work=='shell'){
                 echo PHP_EOL;
-                spider::errorlog($msg,$url,'data.empty',array('pid'=>$pid,'sid'=>$sid,'rid'=>$rid));
+                spider_error::log($msg,$url,'data.empty',array('pid'=>$pid,'sid'=>$sid,'rid'=>$rid));
                 return false;
             }else{
                 iUI::alert($msg);
@@ -81,15 +81,37 @@ class spider_data {
         self::set_http_config($rule);
         self::set_watermark_config($rule);
 
+        $subArray = array();
+
         foreach ((array)$dataArray AS $key => $data) {
-            $content_html = $html;
             $dname = $data['name'];
-            if($data['data@source']){
-                $content_html = spider_tools::getDATA($responses,$data['data@source']);
-            }
             if(empty($dname)){
                 continue;
             }
+
+            //子采集
+            //ooxx@字段,ooxx@URLS
+            //@URLS 必需设置
+            //chapter@URLS
+            //chapter@title
+            if(strpos($dname, '@')!==false){
+                list($sn,$sf) = explode('@', $dname);
+                if($sf==='POST'){
+                    $subArray[$sn]['POST'] = $data['rule'];
+                    continue;
+                }
+                if($sf!=='URLS'){
+                    $subArray[$sn]['RULES'][$sf] = $data;
+                    continue;
+                }
+            }
+
+            $content_html = $html;
+            //设置数据源
+            if($data['data@source']){
+                $content_html = spider_tools::getDATA($responses,$data['data@source']);
+            }
+
             /**
              * [UNSET:name]
              * 注销[name]
@@ -113,10 +135,9 @@ class spider_data {
                 unset($responses[$dname]);
             }
             /**
-             * [PRE:name]
+             * [PRE:name] 前置采集
              * 把PRE:name采集到的数据 当做原始数据
-             * 一般用于下载内容
-             * @var string
+             * 一般用于抓取内容
              */
             $pre_dname = 'PRE:'.$dname;
             if(isset($responses[$pre_dname])){
@@ -127,7 +148,6 @@ class spider_data {
             /**
              * [EMPTY:name]
              * 如果[name]之前抓取结果数据为空使用这个数据项替换
-             * @var string
              */
             if (strpos($dname,'EMPTY:')!== false){
                 $_dname = str_replace('EMPTY:', '', $dname);
@@ -144,9 +164,15 @@ class spider_data {
                 $responses[$dname] = null;
                 continue;
             }
+            //子采集
+            //ooxx@URLS 获取主采集,抓取的链接
+            if(strpos($dname, '@URLS')!==false){
+                $subArray[$sn][$sf] = $content;
+                continue;
+            }
 
             unset($content_html);
-
+            //转换二维组
             if (strpos($dname,'ARRAY:')!== false){
                 $dname = str_replace('ARRAY:', '', $dname);
                 $cArray = array();
@@ -232,10 +258,28 @@ class spider_data {
 
         gc_collect_cycles();
 
+        //子采集 可独立发布
+        if($subArray){
+            if(spider::$dataTest){
+                $subData = array();
+                foreach ($subArray as $key => $value) {
+                    $value['URLS'] && $subData[] = self::sub_crawl($value,$rule);
+                }
+            }else{
+                $responses['commit:callData'] = $subArray;
+            }
+        }
+
         if (spider::$dataTest) {
             echo "<b>最终采集结果:</b>";
             echo "<pre style='width:99%;word-wrap: break-word;white-space: pre-wrap;'>";
             print_r(iSecurity::escapeStr($responses));
+            if($subArray){
+                echo '<br /><div style="padding: 20px;background-color: #ebebeb;">';
+                echo "<b>子采集结果(只测试第一条):</b><br />";
+                print_r(iSecurity::escapeStr($subData));
+                echo "</div>";
+            }
             echo '<hr />';
             echo '使用内存:'.iFS::sizeUnit(memory_get_usage()).' 执行时间:'.iPHP::timer_stop().'s';
             echo "</pre>";
@@ -247,6 +291,43 @@ class spider_data {
 
         return $responses;
     }
+    public static function sub_crawl($sub,$rule){
+        $urls  = $sub['URLS'];
+        $RULES = $sub['RULES'];
+        if(!is_array($urls) && $urls){
+            $urls = explode(",", $urls);
+        }
+        if(empty($urls)) return;
+
+        if (spider::$dataTest) {
+            echo '<div style="padding: 20px;background-color: #ebebeb;">';
+            echo "<h3>执行子采集:</h3>";
+            echo "<hr />";
+        }
+
+        $responses = array();
+        foreach ($urls as $key => $url) {
+            $responses[$key] = self::sub_crawl_data($url,$RULES,$rule);
+            if (spider::$dataTest) {
+                break;
+            }
+        }
+        if (spider::$dataTest) {
+            echo "</div>";
+        }
+        return $responses;
+    }
+    public static function sub_crawl_data($url,$RULES,$rule){
+        $responses = array();
+        $responses['reurl'] = $url;
+        $html = spider_tools::remote($url);
+        foreach ($RULES as $dname => $dvar) {
+            $content = spider_content::crawl($html,$dvar,$rule,$responses);
+            $responses[$dname] = $content;
+        }
+        return $responses;
+    }
+
     public static function set_http_config($rule){
         iHttp::$CURLOPT_ENCODING       = '';
         iHttp::$CURLOPT_REFERER        = '';

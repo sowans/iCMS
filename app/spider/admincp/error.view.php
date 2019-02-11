@@ -28,9 +28,9 @@ admincp::head(false);
         <td>
           <?php echo $value['url'];?>(<?php echo $value['ct'];?>)
           <br />
-          <a class="btn btn-small" href="<?php echo __ADMINCP__; ?>=spider&do=testdata&url=<?php echo urlencode($value['url']);?>&rid=<?php echo $value['rid'];?>&pid=<?php echo $value['pid'];?>" target="_blank">测试网址</a>
-          <a href="<?php echo __ADMINCP__; ?>=spider&do=testrule&rid=<?php echo $value['rid']; ?>" class="btn btn-small" data-toggle="modal" title="测试规则"><i class="fa fa-keyboard-o"></i> 测试规则</a>
-          <a href="<?php echo __ADMINCP__; ?>=spider&do=addrule&rid=<?php echo $value['rid']; ?>" class="btn btn-small" target="_blank"><i class="fa fa-edit"></i> 编辑规则</a>
+          <a href="<?php echo __ADMINCP__; ?>=spider_project&do=test&url=<?php echo urlencode($value['url']);?>&rid=<?php echo $value['rid'];?>&pid=<?php echo $value['pid'];?>" class="btn btn-small" target="_blank">测试网址</a>
+          <a href="<?php echo __ADMINCP__; ?>=spider_rule&do=test&rid=<?php echo $value['rid']; ?>" class="btn btn-small" data-toggle="modal" title="测试规则"><i class="fa fa-keyboard-o"></i> 测试规则</a>
+          <a href="<?php echo __ADMINCP__; ?>=spider_rule&do=add&rid=<?php echo $value['rid']; ?>" class="btn btn-small" target="_blank"><i class="fa fa-edit"></i> 编辑规则</a>
         </td>
         <td><?php echo str_replace(',', '<br />', $value['msg']);?></td>
         <td><?php echo str_replace(',', '<br />', $value['type']);?></td>

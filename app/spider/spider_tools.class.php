@@ -40,7 +40,7 @@ class spider_tools {
         preg_match_all('#\[DATA@(.*?)\]#is', $content,$data_match);
         $_data_replace = array();
         if(strpos($content, 'DATA@list:')!==false){
-            $listData = self::listItemCache($responses['reurl']);
+            $listData = self::listData($responses['reurl']);
         }
         foreach ((array)$data_match[1] as $_key => $_name) {
             $_nameKeys = explode('.', $_name);
@@ -80,19 +80,21 @@ class spider_tools {
             return $DOM[$selector]->$fun();
         }
     }
-    public static function listItemCache($url,$data=null){
-        $ckey = 'list/'.substr(md5($url), 8,16);
-        if($data=='delete'){
-            return iCache::delete('spider/'.$ckey);
-        }
-        if($data){
-            iCache::delete('spider/'.$ckey);
-            iCache::set('spider/'.$ckey,$data,86400);
+    public static function listData($url,$data=null){
+        $url = self::URN($url);
+        if($data===null){
+            $json = iDB::value("SELECT `data` FROM `#iCMS@__spider_url_data` where `url`='$url'");
+            var_dump(iDB::$last_query);
+            return json_decode($json,true);
         }else{
-            return iCache::get('spider/'.$ckey);
+            iDB::insert("spider_url_data",array(
+                'url'  =>$url,
+                'data' =>addslashes(json_encode($data))
+                ),true
+            );
         }
     }
-    public static function listItemData($data,$rule,$baseUrl=null){
+    public static function listItem($data,$rule,$baseUrl=null){
         $responses = array();
 
         if(strpos($rule['list_url_rule'], '<%url%>')!==false){
@@ -568,22 +570,41 @@ class spider_tools {
         }
         return $urls;
     }
-
+    public static function check_urls($content) {
+        if(is_array($content)){
+            $content = array_filter($content);
+            $content = array_unique($content);
+        }
+        // foreach ($content as $key => $value) {
+        //     $value && iDB::insert("spider_url_list",array(
+        //         'url'  =>$value
+        //         ),true
+        //     );
+        // }
+        // return;
+        $sql = iSQL::in($content,'url',false,true);
+        $sql && $all = iDB::all("SELECT `id`,`url` FROM `#iCMS@__spider_url_list` WHERE $sql ");
+        if($all){
+            $urls   = array_column($all, 'url','id');
+            $content = array_diff($content, $urls);
+        }
+        return $content;
+    }
     public static function url_complement($baseUrl,$href){
         $href = trim($href);
         if (iFS::checkHttp($href)){
             return $href;
         }else{
-            if ($href[0]=='/'){
+            if (substr($href, 0,1)=='/'){
                 $base_uri  = parse_url($baseUrl);
                 if($href[1]=='/'){
                     $base_host = $base_uri['scheme'].':/';
                 }else{
                     $base_host = $base_uri['scheme'].'://'.$base_uri['host'];
                 }
-
                 return $base_host.'/'.ltrim($href,'/');
             }else{
+
                 if(substr($baseUrl, -1)!='/'){
                     $info = pathinfo($baseUrl);
                     $info['extension'] && $baseUrl = $info['dirname'];
@@ -592,6 +613,19 @@ class spider_tools {
                 return iFS::path($baseUrl.'/'.ltrim($href,'/'));
             }
         }
+    }
+    public static function img_url_complement($content,$baseurl){
+        preg_match_all("/<img.*?src\s*=[\"|'](.*?)[\"|']/is", $content, $img_match);
+        if($img_match[1]){
+            $_img_array = array_unique($img_match[1]);
+            $_img_urls  = array();
+            foreach ((array)$_img_array as $_img_key => $_img_src) {
+                $_img_urls[$_img_key] = spider_tools::url_complement($baseurl,$_img_src);
+            }
+           $content = str_replace($_img_array, $_img_urls, $content);
+        }
+        unset($img_match,$_img_array,$_img_urls,$_img_src);
+        return $content;
     }
     public static function checkpage(&$newbody, $bodyA, $_count = 1, $nbody = "", $i = 0, $k = 0) {
         $ac = count($bodyA);
@@ -667,6 +701,11 @@ class spider_tools {
         }
         return implode($pageBreak, (array)$resource);
     }
+    public static function URN($url) {
+        $scheme = parse_url($url, PHP_URL_SCHEME);
+        $scheme && $url  = str_replace($scheme.'://', '', $url);
+        return $url;
+    }
     public static function safe_url($url) {
         $parsed = parse_url($url);
         $validate_ip = true;
@@ -703,10 +742,16 @@ class spider_tools {
             return $url;
         }
     }
+    public static function datetime() {
+        $mtimestamp   = sprintf("%.3f", microtime(true)); // 带毫秒的时间戳
+        $timestamp    = floor($mtimestamp); // 时间戳
+        $milliseconds = round(($mtimestamp - $timestamp) * 1000); // 毫秒
+        return date("Y-m-d H:i:s", $timestamp) . '.' . $milliseconds.' ';
+    }
     public static function remote($url, $_count = 0) {
         if(self::safe_url($url)===false) return false;
 
-        (iPHP_SHELL && self::$debug) && print date("Y-m-d H:i:s ")."\033[36mspider_tools::remote\033[0m [".($_count+1)."] => ".$url.PHP_EOL;
+        (iPHP_SHELL && self::$debug) && print self::datetime()."\033[36mspider_tools::remote\033[0m [".($_count+1)."] => ".$url.PHP_EOL;
 
         $parsed = parse_url($url);
         $url = str_replace('&amp;', '&', $url);
@@ -835,6 +880,9 @@ class spider_tools {
             echo '</pre><hr />';
         }
         spider::$url = $url;
+
+        // (iPHP_SHELL && self::$debug) && print self::datetime()."\033[36mspider_tools::remote\033[0m OK ".PHP_EOL;
+
         return $responses;
     }
     public static function get_cookie($url,$data=null,$flag=false){

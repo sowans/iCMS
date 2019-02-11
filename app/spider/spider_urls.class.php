@@ -22,7 +22,7 @@ class spider_urls {
         $pid === NULL && $pid = spider::$pid;
 
         if ($pid) {
-            $project = spider::project($pid);
+            $project = spider_project::get($pid);
             $cid = $project['cid'];
             $rid = $project['rid'];
             $prule_list_url = $project['list_url'];
@@ -50,18 +50,20 @@ class spider_urls {
             }
         }
 
-        $ruleA = spider::rule($rid);
-        $rule = $ruleA['rule'];
-        $urls = $rule['list_urls'];
-        $project['urls'] && $urls = $project['urls'];
-        self::$urls && $urls = spider_urls::$urls;
-        $_urls && $urls = $_urls;
+        $srule = spider_rule::get($rid);
+        $rule  = $srule['rule'];
+        $urls  = $rule['list_urls'];
+
+        $project['urls']&& $urls = $project['urls'];
+        self::$urls     && $urls = spider_urls::$urls;
+        $_urls          && $urls = $_urls;
+
         self::$ids = array('pid'=>$pid,'sid'=>$sid,'rid'=>$rid);
 
         $urlsArray = self::make_list_urls($urls,$work);
         if(empty($urlsArray)){
             if($work=='shell'){
-                spider::errorlog("采集列表为空!请填写!",$url,'urls.empty',self::$ids);
+                spider_error::log("采集列表为空!请填写!",$url,'urls.empty',self::$ids);
                 echo PHP_EOL;
                 return false;
             }
@@ -130,7 +132,7 @@ class spider_urls {
             if(empty($html)){
                 $msg = "采集列表内容为空!";
                 $msg.= var_export(spider_tools::$curl_info,true);
-                spider::errorlog($msg,$url,'url.empty',self::$ids);
+                spider_error::log($msg,$url,'url.empty',self::$ids);
                 echo PHP_EOL;
                 continue;
             }
@@ -250,7 +252,7 @@ class spider_urls {
             $urlsDataCount = count($urlsData);
 
             if(empty($urlsDataCount)){
-                spider::errorlog("采集列表记录为0!",$url,'url.zero',self::$ids);
+                spider_error::log("采集列表记录为0!",$url,'url.zero',self::$ids);
                 continue;
             }
 
@@ -340,7 +342,7 @@ class spider_urls {
                     $hash  = md5(spider::$url);
                     if (spider::$ruleTest) {
                         echo '<b>列表抓取结果:</b>'.$lkey.'<br />';
-                        echo spider::$title . ' (<a href="' . APP_URI . '&do=testdata'.
+                        echo spider::$title . ' (<a href="' . __ADMINCP__ . '=spider_project&do=test'.
                             '&url=' . urlencode(spider::$url) .
                             '&rid=' . $rid .
                             '&pid=' . $pid .
@@ -520,17 +522,17 @@ class spider_urls {
         }
         $array = array();
         if($lists)foreach ($lists AS $lkey => $row) {
-            $cache = array();
-            $data = spider_tools::listItemData($row,$rule,$url);
+            $LD = array();
+            $data = spider_tools::listItem($row,$rule,$url);
             if($data)foreach ($data as $key => $value) {
                 if(is_numeric($key)|| strpos($key, 'var_')!==false){
                     unset($data[$key]);
                 }
                 if(strpos($key, 'var_')===false && $key!='title' && $key!='url'){
-                    $cache[$key] = $value;
+                    $LD[$key] = $value;
                 }
             }
-            $data['url'] && $cache && spider_tools::listItemCache($data['url'],$cache);
+            $data['url'] && $LD && spider_tools::listData($data['url'],$LD);
             $data && $array[$lkey] = $data;
         }
         return $array;

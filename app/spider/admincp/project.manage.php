@@ -139,31 +139,31 @@ $(function(){
               <td><input type="checkbox" name="id[]" value="<?php echo $rs[$i]['id']; ?>" /></td>
               <td><?php echo $rs[$i]['id']; ?></td>
               <td>
-                <a href="<?php echo APP_URI; ?>&do=inbox&pid=<?php echo $rs[$i]['id']; ?>"><?php echo $rs[$i]['name']; ?></a> <br /><?php echo $rs[$i]['lastupdate']?get_date($rs[$i]['lastupdate'],'Y-m-d H:i:s'):'' ; ?>
+                <a href="<?php echo __ADMINCP__; ?>=spider&do=manage&pid=<?php echo $rs[$i]['id']; ?>"><?php echo $rs[$i]['name']; ?></a> <br /><?php echo $rs[$i]['lastupdate']?get_date($rs[$i]['lastupdate'],'Y-m-d H:i:s'):'' ; ?>
                 <div class="action mb10">
-                  <a href="<?php echo APP_FURI; ?>&do=copyproject&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10" target="iPHP_FRAME"><i class="fa fa-copy"></i> 复制</a>
-                  <a href="<?php echo APP_URI; ?>&do=testrule&rid=<?php echo $rs[$i]['rid']; ?>" class="btn mt10" data-toggle="modal" title="测试规则"><i class="fa fa-keyboard-o"></i> 测试规则</a>
-                  <a href="<?php echo APP_URI; ?>&do=testrule&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10" data-toggle="modal" title="测试规则"><i class="fa fa-keyboard-o"></i> 测试方案</a>
-                  <a href="<?php echo APP_URI; ?>&do=listpub&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10 btn-primary" data-toggle="modal" title="采集列表,手动发布"><i class="fa fa-hand-o-up"></i> 手动采集</a>
-                  <a href="<?php echo APP_FURI; ?>&do=start&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10 btn-success tip" target="iPHP_FRAME" title="自动采集列表,并发布"><i class="fa fa-play"></i> 采集</a>
-                  <a href="<?php echo APP_URI; ?>&do=addproject&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10"><i class="fa fa-edit"></i> 编辑</a>
-                  <a href="<?php echo APP_FURI; ?>&do=manage&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10" target="_blank"><i class="fa fa-list-alt"></i> 数据</a>
+                  <a href="<?php echo APP_URI; ?>&do=copy&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10" target="iPHP_FRAME"><i class="fa fa-copy"></i> 复制</a>
+                  <a href="<?php echo APP_URI; ?>&do=add&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10"><i class="fa fa-edit"></i> 编辑</a>
+                  <a href="<?php echo __ADMINCP__; ?>=spider_rule&do=test&rid=<?php echo $rs[$i]['rid']; ?>" class="btn mt10" data-toggle="modal" title="测试规则"><i class="fa fa-keyboard-o"></i> 测试规则</a>
+                  <a href="<?php echo __ADMINCP__; ?>=spider_rule&do=test&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10" data-toggle="modal" title="测试规则"><i class="fa fa-keyboard-o"></i> 测试方案</a>
+                  <a href="<?php echo __ADMINCP__; ?>=spider&do=listpub&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10 btn-primary" data-toggle="modal" title="采集列表,手动发布"><i class="fa fa-hand-o-up"></i> 手动采集</a>
+                  <a href="<?php echo __ADMINCP__; ?>=spider&do=start&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10 btn-success tip" target="iPHP_FRAME" title="自动采集列表,并发布"><i class="fa fa-play"></i> 采集</a>
+                  <a href="<?php echo __ADMINCP__; ?>=spider&do=manage&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10" target="_blank"><i class="fa fa-list-alt"></i> 数据</a>
                 </div>
               </td>
               <td>
-                <a href="<?php echo APP_URI; ?>&do=project&rid=<?php echo $rs[$i]['rid']; ?>&<?php echo $uri; ?>"><?php echo $ruleArray[$rs[$i]['rid']]; ?></a>
-                <a href="<?php echo APP_URI; ?>&do=addrule&rid=<?php echo $rs[$i]['rid']; ?>" target="_blank"><i class="fa fa-edit"></i></a>
+                <a href="<?php echo APP_URI; ?>&do=manage&rid=<?php echo $rs[$i]['rid']; ?>&<?php echo $uri; ?>"><?php echo $ruleArray[$rs[$i]['rid']]; ?></a>
+                <a href="<?php echo __ADMINCP__; ?>=spider_rule&do=add&rid=<?php echo $rs[$i]['rid']; ?>" target="_blank"><i class="fa fa-edit"></i></a>
               </td>
-              <td><a href="<?php echo APP_URI; ?>&do=project&cid=<?php echo $rs[$i]['cid']; ?>&<?php echo $uri; ?>"><?php echo $C['name']; ?></a><?php echo $rs[$i]['auto']?'<i class="fa fa-rocket"></i>':''; ?></td>
+              <td><a href="<?php echo APP_URI; ?>&do=manage&cid=<?php echo $rs[$i]['cid']; ?>&<?php echo $uri; ?>"><?php echo $C['name']; ?></a><?php echo $rs[$i]['auto']?'<i class="fa fa-rocket"></i>':''; ?></td>
               <td>
-                <a href="<?php echo APP_URI; ?>&do=project&poid=<?php echo $rs[$i]['poid']; ?>&<?php echo $uri; ?>"><?php echo $postArray[$rs[$i]['poid']]; ?></a>
-                <a href="<?php echo APP_URI; ?>&do=addpost&poid=<?php echo $rs[$i]['poid']; ?>" target="_blank"><i class="fa fa-edit"></i></a>
+                <a href="<?php echo APP_URI; ?>&do=manage&poid=<?php echo $rs[$i]['poid']; ?>&<?php echo $uri; ?>"><?php echo $postArray[$rs[$i]['poid']]; ?></a>
+                <a href="<?php echo __ADMINCP__; ?>=spider_post&do=add&poid=<?php echo $rs[$i]['poid']; ?>" target="_blank"><i class="fa fa-edit"></i></a>
               </td>
               <td style="text-align: right;">
-                <a href="<?php echo APP_FURI; ?>&do=dropurl&pid=<?php echo $rs[$i]['id']; ?>&type=all" class="btn mt10 btn-warning" target="iPHP_FRAME"  onclick="return confirm('确定要清空数据?');"><i class="fa fa-trash-o"></i> 清空数据</a>
-                <a href="<?php echo APP_FURI; ?>&do=dropurl&pid=<?php echo $rs[$i]['id']; ?>&type=0" class="btn mt10 btn-warning" target="iPHP_FRAME"  onclick="return confirm('确定要清除未发布数据?');"><i class="fa fa-inbox"></i> 清除未发</a>
-                <a href="<?php echo APP_FURI; ?>&do=dropdata&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10 btn-danger" target="iPHP_FRAME"  onclick="return confirm('确定要删除采集数据，此操作会删除本方案的采集数据，并删除内容?');"><i class="fa fa-trash"></i> 删除所有采集数据&内容</a>
-                <a href="<?php echo APP_FURI; ?>&do=delproject&pid=<?php echo $rs[$i]['id']; ?>" target="iPHP_FRAME" class="del btn mt10 btn-danger" title='删除本方案'  onclick="return confirm('确定要删除方案?');"/><i class="fa fa-trash"></i> 删除方案</a>
+                <a href="<?php echo __ADMINCP__; ?>=spider&do=dropurl&pid=<?php echo $rs[$i]['id']; ?>&type=all" class="btn mt10 btn-warning" target="iPHP_FRAME"  onclick="return confirm('确定要清空数据?');"><i class="fa fa-trash-o"></i> 清空数据</a>
+                <a href="<?php echo __ADMINCP__; ?>=spider&do=dropurl&pid=<?php echo $rs[$i]['id']; ?>&type=0" class="btn mt10 btn-warning" target="iPHP_FRAME"  onclick="return confirm('确定要清除未发布数据?');"><i class="fa fa-inbox"></i> 清除未发</a>
+                <a href="<?php echo __ADMINCP__; ?>=spider&do=dropdata&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10 btn-danger" target="iPHP_FRAME"  onclick="return confirm('确定要删除采集数据，此操作会删除本方案的采集数据，并删除内容?');"><i class="fa fa-trash"></i> 删除所有采集数据&内容</a>
+                <a href="<?php echo APP_FURI; ?>&do=del&pid=<?php echo $rs[$i]['id']; ?>" target="iPHP_FRAME" class="del btn mt10 btn-danger" title='删除本方案'  onclick="return confirm('确定要删除方案?');"/><i class="fa fa-trash"></i> 删除方案</a>
 		          </td>
 	          </tr>
             <?php } ?>
@@ -176,10 +176,10 @@ $(function(){
                   </span>
                   <div class="btn-group dropup" id="iCMS-batch"> <a class="btn dropdown-toggle" data-toggle="dropdown" tabindex="-1"><i class="fa fa-wrench"></i> 批 量 操 作 </a><a class="btn dropdown-toggle" data-toggle="dropdown" tabindex="-1"> <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                      <li><a data-toggle="batch" data-action="project#auto:1"><i class="fa fa-check-square"></i> 标识自动采集</a></li>
-                      <li><a data-toggle="batch" data-action="project#auto:0"><i class="fa fa-circle-o"></i> 取消自动采集</a></li>
+                      <li><a data-toggle="batch" data-action="auto:1"><i class="fa fa-check-square"></i> 标识自动采集</a></li>
+                      <li><a data-toggle="batch" data-action="auto:0"><i class="fa fa-circle-o"></i> 取消自动采集</a></li>
                       <li class="divider"></li>
-                      <li><a data-toggle="batch" data-action="project#lastupdate:0"><i class="fa fa-calendar"></i> 重置最后采集时间</a></li>
+                      <li><a data-toggle="batch" data-action="lastupdate:0"><i class="fa fa-calendar"></i> 重置最后采集时间</a></li>
                       <li class="divider"></li>
                       <li><a data-toggle="batch" data-action="move"><i class="fa fa-fighter-jet"></i> 设置发布栏目</a></li>
                       <li class="divider"></li>
@@ -187,7 +187,7 @@ $(function(){
                       <li class="divider"></li>
                       <li><a data-toggle="batch" data-action="rid"><i class="fa fa-magnet"></i> 设置采集规则</a></li>
                       <li class="divider"></li>
-                      <li><a data-toggle="batch" data-action="delproject"><i class="fa fa-trash-o"></i> 删除</a></li>
+                      <li><a data-toggle="batch" data-action="del"><i class="fa fa-trash-o"></i> 删除</a></li>
                     </ul>
                   </div>
                 </div></td>
@@ -223,7 +223,7 @@ $(function(){
   </div>
 </div>
 <div id="import_project_wrap" style="display:none;">
-  <form action="<?php echo APP_FURI; ?>&do=import_project" method="post" enctype="multipart/form-data" target="iPHP_FRAME">
+  <form action="<?php echo APP_FURI; ?>&do=import" method="post" enctype="multipart/form-data" target="iPHP_FRAME">
     <div class="alert alert-info">
       只允许导入TXT文件
     </div>

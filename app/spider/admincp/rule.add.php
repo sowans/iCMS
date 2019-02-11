@@ -11,7 +11,7 @@ defined('iPHP') OR exit('What are you doing?');
 admincp::head();
 ?>
 <style>
-.rule_data_name { width:90px; }
+.rule_data_name { width:100%; }
 .delprop { width:45px; }
 .chosen-container-multi .chosen-choices li.search-choice span{font-size: 14px;}
 </style>
@@ -154,7 +154,7 @@ function select_sort_value(a, e, p) {
       </ul>
     </div>
     <div class="widget-content nopadding">
-      <form action="<?php echo APP_FURI; ?>&do=saverule" method="post" class="form-inline" id="iCMS-spider" target="iPHP_FRAME">
+      <form action="<?php echo APP_FURI; ?>&do=save" method="post" class="form-inline" id="iCMS-spider" target="iPHP_FRAME">
         <input name="id" type="hidden" value="<?php echo $this->rid ; ?>" />
         <div id="spider" class="tab-content">
           <div id="spider-base" class="tab-pane active">
@@ -329,7 +329,7 @@ function rule_data_rule_td($dkey,$data = array()){
       </div>
       <div class="clearfloat mb10"></div>
     </div>
-    <textarea name="<?php echo $DR_name;?>[rule]" class="span6" id="<?php echo $DR_target;?>"><?php echo $data['rule'];?></textarea>
+    <textarea name="<?php echo $DR_name;?>[rule]" class="span6" id="<?php echo $DR_target;?>"><?php echo htmlspecialchars($data['rule']);?></textarea>
     <div class="preg_rule">
       <a class="btn" href="<%content%>" data-toggle="insertContent" data-target="#<?php echo $DR_target;?>">插入内容标识</a>
       <a class="btn" href="<%var%>" data-toggle="insertContent" data-target="#<?php echo $DR_target;?>">插入变量标识</a>
@@ -364,7 +364,7 @@ function rule_data_rule_td($dkey,$data = array()){
   <td>
     <div class="input-prepend">
       <span class="add-on s4">1.规则后</span>
-      <textarea name="<?php echo $DR_name;?>[cleanbefor]" class="span6 <?php echo $tip_class;?>"title="规则采集后数据整理"><?php echo $data['cleanbefor'];?></textarea>
+      <textarea name="<?php echo $DR_name;?>[cleanbefor]" class="span6 <?php echo $tip_class;?>"title="规则采集后数据整理"><?php echo htmlspecialchars($data['cleanbefor']);?></textarea>
     </div>
     <div class="clearfloat mb10"></div>
     <div class="input-prepend helper-wrap">
@@ -375,18 +375,18 @@ function rule_data_rule_td($dkey,$data = array()){
           <option value='format'>HTML格式化</option>
           <option value='cleanhtml'>移除HTML标识</option>
           <option value='img_absolute'>图片地址补全</option>
-          <option value='url_absolute'>URL补全</option>
-          <option value='stripslashes'>去除转义反斜线</option>
-          <option value='addslashes'>使用反斜线引用字符串</option>
           <option value='array'>返回数组</option>
-          <option value='capture'>抓取结果</option>
-          <option value='download'>下载文件</option>
-          <option value='xml2array'>xml转Array</option>
-          <option value='filter'>启用屏蔽词过滤</option>
+          <option value='url_absolute'>URL补全</option>
+          <option value='capture' title="抓取并直接返回结果">抓取结果</option>
+          <option value='download' title="下载并保存成文件">下载</option>
+          <option value='filter' title="启用屏蔽词过滤">屏蔽词过滤</option>
         </optgroup>
-        <optgroup label="HTML转义">
-          <option value='htmlspecialchars_decode'>将特殊的 HTML 实体转换回普通字符</option>
-          <option value='htmlspecialchars'>将特殊字符转换为 HTML 实体</option>
+        <optgroup label="转义">
+          <option value='stripslashes' title="返回去除转义反斜线后的字符串">去除反斜线</option>
+          <option value='addslashes' title="返回加上了反斜线的字符串">加上反斜线</option>
+          <option value='htmlspecialchars_decode' title="将特殊的 HTML 实体转换回普通字符">反转义HTML字符</option>
+          <option value='htmlspecialchars' title="将特殊字符转换为 HTML 实体">转义HTML字符</option>
+          <option value='xml2array'>xml转Array</option>
         </optgroup>
         <optgroup label="分页">
           <option value='mergepage'>合并分页</option>
@@ -398,17 +398,21 @@ function rule_data_rule_td($dkey,$data = array()){
           <option value='parse_str'>URL字符串解析(parse_str)</option>
           <option value='json_decode'>JSON解码(json_decode) </option>
           <option value='base64_decode'>base64 解码(base64_decode) </option>
+          <option value='auth_decode'>解密(auth_decode) </option>
         </optgroup>
         <optgroup label="生成/编码">
           <option value='urlencode'>编码 URL 字符串(urlencode)</option>
           <option value='rawurlencode'>编码 URL 字符串(rawurlencode)</option>
           <option value='http_build_query'>Array转URL字符串(http_build_query)</option>
           <option value='json_encode'>JSON编码(json_encode) </option>
-          <option value='base64_encode'>base64编码(base64_encode) </option>
+          <option value='auth_encode'>加密(auth_encode) </option>
         </optgroup>
         <optgroup label="字符串">
           <option value='explode'>使用,将字符串组成的数组</option>
           <option value='implode'>将数组的值转化为字符串</option>
+        </optgroup>
+        <optgroup label="特殊处理">
+          <option value='@check_urls' title="独立检查,链接保存在新表">链接检查</option>
         </optgroup>
       </select>
       <select multiple="multiple" class="hide" name="<?php echo $DR_name;?>[helper][]" id="sort_<?php echo $DR_id;?>_helper"></select>
@@ -440,7 +444,7 @@ function rule_data_rule_td($dkey,$data = array()){
     <div class="clearfloat mb10"></div>
     <div class="input-prepend">
       <span class="add-on s4">3.发布前</span>
-      <textarea name="<?php echo $DR_name;?>[cleanafter]" class="span6 <?php echo $tip_class;?>" title="发布前数据整理"><?php echo $data['cleanafter'];?></textarea>
+      <textarea name="<?php echo $DR_name;?>[cleanafter]" class="span6 <?php echo $tip_class;?>" title="发布前数据整理"><?php echo htmlspecialchars($data['cleanafter']);?></textarea>
     </div>
   </td>
 <?php }?>
@@ -596,9 +600,9 @@ function rule_data_rule_td($dkey,$data = array()){
         </div>
         <div class="form-actions">
           <button class="btn btn-primary" type="submit"><i class="fa fa-check"></i> 提交</button>
-          <a id="test" href="<?php echo APP_URI; ?>&do=testrule&rid=<?php echo $this->rid ; ?>" class="btn btn-inverse" data-toggle="modal" title="测试规则"><i class="fa fa-keyboard-o"></i> 测试</a>
+          <a id="test" href="<?php echo APP_URI; ?>&do=test&rid=<?php echo $this->rid ; ?>" class="btn btn-inverse" data-toggle="modal" title="测试规则"><i class="fa fa-keyboard-o"></i> 测试</a>
           <a href="<?php echo APP_URI; ?>&do=manage&rid=<?php echo $this->rid ; ?>" class="btn btn-success" target="_blank"><i class="fa fa-list-alt"></i> 已采集</a>
-          <a href="<?php echo APP_URI; ?>&do=project&rid=<?php echo $this->rid ; ?>" class="btn btn-info" target="_blank"><i class="fa fa-magnet"></i> 方案</a>
+          <a href="<?php echo __ADMINCP__; ?>=spider_project&do=manage&rid=<?php echo $this->rid ; ?>" class="btn btn-info" target="_blank"><i class="fa fa-magnet"></i> 方案</a>
         </div>
       </form>
     </div>

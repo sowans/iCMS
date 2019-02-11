@@ -33,13 +33,15 @@ $(function(){
       <h5><?php echo empty($this->poid)?'添加':'修改' ; ?>发布模块</h5>
     </div>
     <div class="widget-content nopadding">
-      <form action="<?php echo APP_FURI; ?>&do=savepost" method="post" class="form-inline" id="iCMS-spider-post" target="iPHP_FRAME">
+      <form action="<?php echo APP_FURI; ?>&do=save" method="post" class="form-inline" id="iCMS-spider-post" target="iPHP_FRAME">
         <input name="id" type="hidden" value="<?php echo $this->poid ; ?>" />
         <div id="addpost" class="tab-content">
           <div class="input-prepend"><span class="add-on">应用</span>
             <select name="app" id="app" class="chosen-select span3">
               <option value="0"></option>
               <option value="article" fun="do_save"> 文章 </option>
+              <option value="book" fun="do_save"> 阅读 </option>
+              <option value="video" fun="do_save"> 视频 </option>
               <option value="tag" fun="do_save"> 标签 </option>
               <option value="article_category" fun="do_save"> 文章栏目 </option>
               <option value="tag_category" fun="do_save"> 标签分类 </option>
