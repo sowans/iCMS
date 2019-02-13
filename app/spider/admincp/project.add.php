@@ -252,7 +252,10 @@ $(function(){
         </div>
         <div class="form-actions">
           <button class="btn btn-primary" type="submit"><i class="fa fa-check"></i> 提交</button>
-        <a class="btn"><i class="fa fa-keyboard-o"></i> 测试</a> </div>
+          <?php if($this->pid){?>
+          <a href="<?php echo __ADMINCP__; ?>=spider_rule&do=test&pid=<?php echo $this->pid; ?>" class="btn" data-toggle="modal" title="测试方案"><i class="fa fa-keyboard-o"></i> 测试</a>
+          <?php }?>
+        </div>
       </form>
     </div>
   </div>

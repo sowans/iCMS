@@ -144,7 +144,7 @@ $(function(){
                   <a href="<?php echo APP_URI; ?>&do=copy&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10" target="iPHP_FRAME"><i class="fa fa-copy"></i> 复制</a>
                   <a href="<?php echo APP_URI; ?>&do=add&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10"><i class="fa fa-edit"></i> 编辑</a>
                   <a href="<?php echo __ADMINCP__; ?>=spider_rule&do=test&rid=<?php echo $rs[$i]['rid']; ?>" class="btn mt10" data-toggle="modal" title="测试规则"><i class="fa fa-keyboard-o"></i> 测试规则</a>
-                  <a href="<?php echo __ADMINCP__; ?>=spider_rule&do=test&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10" data-toggle="modal" title="测试规则"><i class="fa fa-keyboard-o"></i> 测试方案</a>
+                  <a href="<?php echo __ADMINCP__; ?>=spider_rule&do=test&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10" data-toggle="modal" title="测试方案"><i class="fa fa-keyboard-o"></i> 测试方案</a>
                   <a href="<?php echo __ADMINCP__; ?>=spider&do=listpub&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10 btn-primary" data-toggle="modal" title="采集列表,手动发布"><i class="fa fa-hand-o-up"></i> 手动采集</a>
                   <a href="<?php echo __ADMINCP__; ?>=spider&do=start&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10 btn-success tip" target="iPHP_FRAME" title="自动采集列表,并发布"><i class="fa fa-play"></i> 采集</a>
                   <a href="<?php echo __ADMINCP__; ?>=spider&do=manage&pid=<?php echo $rs[$i]['id']; ?>" class="btn mt10" target="_blank"><i class="fa fa-list-alt"></i> 数据</a>

@@ -56,7 +56,10 @@ class spider_ruleAdmincp {
 	 * @return [type] [description]
 	 */
 	public function do_copy() {
-		iDB::query("insert into `#iCMS@__spider_rule` (`name`, `rule`) select `name`, `rule` from `#iCMS@__spider_rule` where id = '$this->rid'");
+		iDB::query("
+			INSERT INTO `#iCMS@__spider_rule` (`name`, `rule`)
+			SELECT `name`, `rule` FROM `#iCMS@__spider_rule` WHERE id = '$this->rid'
+		");
 		$rid = iDB::$insert_id;
 		iUI::success('复制完成,编辑此规则', 'url:' . APP_URI . '&do=add&rid=' . $rid);
 	}

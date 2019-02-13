@@ -159,7 +159,7 @@ class spider_tools {
         }
         $title = trim($responses['title']);
         $url   = trim($responses['url']);
-        $url   = str_replace('<%url%>',$url, $rule['list_url']);
+        $url   = str_replace('<%url%>',$url, htmlspecialchars_decode($rule['list_url']));
 
         preg_match_all('#<%(\w{3,20})%>#is',$url,$f_match);
         foreach ((array)$f_match[1] as $_key => $_name) {

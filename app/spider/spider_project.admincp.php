@@ -28,7 +28,14 @@ class spider_projectAdmincp {
 	 * @return [type] [description]
 	 */
 	public function do_copy() {
-		iDB::query("INSERT INTO `#iCMS@__spider_project` (`name`, `urls`, `cid`, `rid`, `poid`, `sleep`,`checker`,`self`,`auto`, `psleep`) select `name`, `urls`, `cid`, `rid`, `poid`, `sleep`,`checker`,`self`,`auto`,`psleep` from `#iCMS@__spider_project` where id = '$this->pid'");
+		$fields    = apps_db::fields('#iCMS@__spider_project');
+		$fields    = array_column($fields, 'field');
+		$key       = array_search('id',$fields);unset($fields[$key]);
+		$field_SQL = implode('`,`', $fields);
+		iDB::query("
+			INSERT INTO `#iCMS@__spider_project` (`".$field_SQL."`)
+			SELECT `".$field_SQL."` FROM `#iCMS@__spider_project` WHERE id = '$this->pid'
+		");
 		$pid = iDB::$insert_id;
 		iUI::success('复制完成,编辑此方案', 'url:' . APP_URI . '&do=add&pid=' . $pid . '&copy=1');
 	}

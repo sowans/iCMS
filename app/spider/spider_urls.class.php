@@ -229,7 +229,11 @@ class spider_urls {
                 echo "<hr />";
                 echo '<b>列表链接规则:</b>'.iSecurity::escapeStr($rule['list_url_rule']);
                 echo "<hr />";
-                echo '<b>网址合成规则:</b>'.iSecurity::escapeStr($rule['list_url']);
+                if($prule_list_url){
+                    echo '<b>方案网址合成规则:</b>'.iSecurity::escapeStr($prule_list_url);
+                }else{
+                    echo '<b>规则网址合成规则:</b>'.iSecurity::escapeStr($rule['list_url']);
+                }
                 echo "<hr />";
             }
             $list_area = null;
@@ -252,7 +256,7 @@ class spider_urls {
             $urlsDataCount = count($urlsData);
 
             if(empty($urlsDataCount)){
-                spider_error::log("采集列表记录为0!",$url,'url.zero',self::$ids);
+                spider_error::log("采集列表记录为0!",$url,'url.zero',self::$ids,false);
                 continue;
             }
 
@@ -278,16 +282,17 @@ class spider_urls {
                 $pubCount[$key]['count'] = $urlsDataCount;
                 $pubAllCount['count']+=$pubCount[$key]['count'];
                 echo date("Y-m-d H:i:s ")."\033[32m开始采集 列表 ".$url." (".$pubCount[$key]['count'].")条记录\033[0m\n\n";
-
+                $_index = 1;
                 foreach ($urlsData AS $lkey => $value) {
                     if($value['url']===false) continue;
 
                     spider::$title = $value['title'];
                     spider::$url   = $value['url'];
 
-                    echo date("Y-m-d H:i:s ")."\033[32m开始采集...(".$lkey."/".$urlsDataCount.")\033[0m\n";
+                    echo date("Y-m-d H:i:s ")."\033[32m开始采集...(".$_index."/".$urlsDataCount.")\033[0m\n";
                     echo date("Y-m-d H:i:s ")."\033[36mtitle:\033[0m".spider::$title."\n";
                     echo date("Y-m-d H:i:s ")."\033[36murl:\033[0m".spider::$url."\n";
+                    $_index++;
 
                     spider::$rid = $rid;
                     $hash        = md5(spider::$url);

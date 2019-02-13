@@ -11,7 +11,7 @@
 defined('iPHP') OR exit('What are you doing?');
 
 class spider_error {
-    public static function log($msg,$url=null,$type=0,$a=null) {
+    public static function log($msg,$url=null,$type=0,$a=null,$flag=true) {
         $data = array(
             'work'    => spider::$work,
             'rid'     => (int)spider::$rid,
@@ -28,7 +28,7 @@ class spider_error {
         if(iPHP_SHELL){
             echo $data['date']." \033[31m".$msg."\033[0m".PHP_EOL;
         }else{
-            echo '<b>'.$msg.'</b><hr />';
+            $flag && print '<b>'.$msg.'</b><hr />';
         }
     }
 }
