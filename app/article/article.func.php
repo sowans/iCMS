@@ -303,6 +303,7 @@ class articleFunc{
 		$SPH->setSortMode(SPH_SORT_EXTENDED, $orderby);
 
 		$query = str_replace(',', '|', $vars['q']);
+		$query = str_replace('/', '|', $query);
 		$vars['acc'] && $query = '"' . $vars['q'] . '"';
 		$vars['@'] && $query = '@(' . $vars['@'] . ') ' . $query;
 

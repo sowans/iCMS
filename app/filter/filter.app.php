@@ -8,6 +8,9 @@
 * @licence https://www.icmsdev.com/LICENSE.html
 */
 class filterApp{
+    public static $disable = array();
+    public static $filter  = array();
+
     public function __construct() {
         $this->appid = iCMS_APP_FILTER;
     }
@@ -17,7 +20,7 @@ class filterApp{
      * @return [string]         [返回禁用词]
      */
     public static function HOOK_disable_FALSE($content){
-        $disable = iCache::get('filter/disable');  //disable禁止
+        $disable = self::$disable?:iCache::get('filter/disable');  //disable禁止
         //禁止关键词
         $subject = implode('', (array)$content);
         $pattern = '/(~|`|!|@|\#|\$|%|\^|&|\*|\(|\)|\-|=|_|\+|\{|\}|\[|\]|;|:|"|\'|<|>|\?|\/|,|\.|\s|\n|。|，|、|；|：|？|！|…|-|·|ˉ|ˇ|¨|‘|“|”|々|～|‖|∶|＂|＇|｀|｜|〃|〔|〕|〈|〉|《|》|「|」|『|』|．|〖|〗|【|】|（|）|［|］|｛|｝|°|′|″|＄|￡|￥|‰|％|℃|¤|￠|○|§|№|☆|★|○|●|◎|◇|◆|□|■|△|▲|※|→|←|↑|↓|〓|＃|＆|＠|＾|＿|＼|№|)*/i';
@@ -45,7 +48,7 @@ class filterApp{
      * @return [string]        [返回替换过的内容]
      */
     public static function HOOK_filter($content){
-        $filter  = iCache::get('filter/array');    //filter过滤
+        $filter  = self::$filter?:iCache::get('filter/array');    //filter过滤
         if($filter){
             //过滤关键词
             foreach ((array)$filter AS $k =>$val) {

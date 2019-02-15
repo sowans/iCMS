@@ -75,7 +75,7 @@ $(function(){
               <td><?php echo $rs[$i]['id'] ; ?></td>
               <td><?php echo $rs[$i]['name'] ; ?></td>
               <td>
-                <a href="<?php echo APP_URI; ?>&do=manage&rid=<?php echo $rs[$i]['id'] ; ?>" class="btn btn-small btn-success" target="_blank"><i class="fa fa-list-alt"></i> 已采集</a>
+                <a href="<?php echo __ADMINCP__; ?>=spider&do=manage&rid=<?php echo $rs[$i]['id'] ; ?>" class="btn btn-small btn-success" target="_blank"><i class="fa fa-list-alt"></i> 已采集</a>
                 <a href="<?php echo __ADMINCP__; ?>=spider_project&do=manage&rid=<?php echo $rs[$i]['id'] ; ?>" class="btn btn-small btn-info" target="_blank"><i class="fa fa-magnet"></i> 方案</a>
                 <a href="<?php echo APP_URI; ?>&do=error&rid=<?php echo $rs[$i]['id'] ; ?>" class="btn btn-small btn-danger" target="_blank"><i class="fa fa-info-circle"></i> 错误信息</a>
                 <a href="<?php echo APP_FURI; ?>&do=export&rid=<?php echo $rs[$i]['id'] ; ?>" class="btn btn-small" target="iPHP_FRAME"><i class="fa fa-download"></i> 导出</a>

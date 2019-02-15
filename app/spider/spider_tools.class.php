@@ -84,7 +84,6 @@ class spider_tools {
         $url = self::URN($url);
         if($data===null){
             $json = iDB::value("SELECT `data` FROM `#iCMS@__spider_url_data` where `url`='$url'");
-            var_dump(iDB::$last_query);
             return json_decode($json,true);
         }else{
             iDB::insert("spider_url_data",array(
@@ -196,19 +195,18 @@ class spider_tools {
         preg_match_all("/<%(.+)%>/i", $rule, $matches);
         $pregArray = array_unique($matches[0]);
         $pregflip = array_flip($pregArray);
-
         foreach ((array)$pregflip AS $kpreg => $vkey) {
-            $pregA[$vkey] = "###iCMS_PREG_" . rand(1, 1000) . '_' . $vkey . '###';
+            $pregA[$vkey] = "@@@@iCMS_PREG_" . rand(1, 1000) . '_' . $vkey . '@@@@';
         }
         $rule = str_replace($pregArray, $pregA, $rule);
-        $rule = preg_quote($rule, '|');
+        $rule = preg_quote($rule, '~');
         $rule = str_replace($pregA, $pregArray, $rule);
         $rule = str_replace("%>\n", "%>", $rule);
-        $rule = preg_replace('|<%(\w{3,20})%>|i', '(?<\\1>.*?)', $rule);
+        $rule = preg_replace('~<%(\w{3,20})%>~i', '(?<\\1>.*?)', $rule);
         $rule = str_replace(array('<%', '%>'), '', $rule);
         unset($pregArray,$pregflip,$matches);
         gc_collect_cycles();
-        // var_dump(htmlspecialchars($rule));
+        var_dump(htmlspecialchars($rule));
         return $rule;
     }
     public static function dataClean($rules, $content) {

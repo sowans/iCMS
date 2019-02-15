@@ -180,7 +180,8 @@ CREATE TABLE `icms_category` (
   `status` tinyint(1) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`cid`),
   KEY `rootid` (`status`,`rootid`,`sortnum`),
-  KEY `sortnum` (`status`,`sortnum`)
+  KEY `sortnum` (`status`,`sortnum`),
+  KEY `appid` (`appid`,`sortnum`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_category_map` */
@@ -495,16 +496,12 @@ CREATE TABLE `icms_spider_project` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `urls` text NOT NULL,
-  `list_url` varchar(255) NOT NULL,
   `cid` int(10) unsigned NOT NULL,
   `rid` int(10) unsigned NOT NULL,
   `poid` int(10) unsigned NOT NULL,
-  `sleep` int(10) unsigned NOT NULL,
-  `checker` tinyint(1) unsigned NOT NULL,
-  `self` tinyint(1) unsigned NOT NULL,
   `auto` tinyint(1) unsigned NOT NULL,
   `lastupdate` int(10) unsigned NOT NULL,
-  `psleep` int(10) unsigned NOT NULL,
+  `config` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -548,6 +545,17 @@ CREATE TABLE `icms_spider_url_data` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `url` (`url`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+/*Table structure for table `icms_spider_url_list` */
+
+CREATE TABLE `icms_spider_url_list` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `iid` varchar(200) NOT NULL DEFAULT '',
+  `url` varchar(200) NOT NULL DEFAULT '',
+  `source` varchar(200) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `url` (`url`) USING HASH
+) ENGINE=MyISAM DEFAULT CHARSET=utf8
 
 /*Table structure for table `icms_tag` */
 
