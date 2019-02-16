@@ -63,7 +63,7 @@ class filesApp {
         $f = iSecurity::escapeStr($_GET['file']);
         $filename = pathinfo($f,PATHINFO_FILENAME);
         files::config();
-        $data = files::get('filename',$filename);
+        $data = files::get('filename',$filename,false);
         $url  = iFS::fp($data->filepath, '+http');
         $path = iFS::fp($data->filepath, '+iPATH');
         if(!is_file($path)){
