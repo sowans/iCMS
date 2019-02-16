@@ -555,7 +555,7 @@ CREATE TABLE `icms_spider_url_list` (
   `source` varchar(200) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `url` (`url`) USING HASH
-) ENGINE=MyISAM DEFAULT CHARSET=utf8
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_tag` */
 
