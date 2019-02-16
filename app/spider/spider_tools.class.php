@@ -206,7 +206,7 @@ class spider_tools {
         $rule = str_replace(array('<%', '%>'), '', $rule);
         unset($pregArray,$pregflip,$matches);
         gc_collect_cycles();
-        var_dump(htmlspecialchars($rule));
+        //var_dump(htmlspecialchars($rule));
         return $rule;
     }
     public static function dataClean($rules, $content) {

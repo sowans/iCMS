@@ -53,16 +53,16 @@ class spider{
         $url   ===null && $url = spider::$url;
         $title ===null && $title = spider::$title;
         $project = spider_project::get($pid);
-        $hash    = md5($url);
-        if(($project['checker'] && empty($_GET['indexid'])) || $work=="DATA@RULE"){
+        $indexid = self::get_indexid();
+        if(($project['checker'] && empty($indexid)) || $work=="DATA@RULE"){
             $title = addslashes($title);
             $url   = addslashes($url);
-            $mode = $project['checker'];
+            $mode  = $project['checker'];
             $work=="DATA@RULE" && $mode = '1';
             spider::$callback['checker:mode'] && $mode  = spider::$callback['checker:mode'];
             spider::$callback['checker:url']  && $url   = spider::$callback['checker:url'];
             spider::$callback['checker:title']&& $title = spider::$callback['checker:title'];
-
+            $hash = md5($url);
             switch ($mode) {
                 case '1'://按网址检查
                 case '4'://按网址检查更新
@@ -161,16 +161,31 @@ class spider{
             iDB::update('spider_url',$data,array('id'=>$suid));
         }
     }
-    public static function insert_spider_url($appid=0,$post=null) {
+    public static function spider_url($app,$post=null) {
         $post===null && $post=$_POST;
+        $appid  = $app['id'];
+        $url    = $post['reurl'];
+        $scheme = parse_url($url, PHP_URL_SCHEME);
+        $surl   = str_replace($scheme.'://', '', $url);
+        $urls   = array($surl,'http://'.$surl,'https://'.$surl);
+        $sql    = "`url` IN ('".implode("','", $urls)."')";
+        $row    = iDB::row("
+            SELECT `id`,`publish`,`indexid`
+            FROM `#iCMS@__spider_url`
+            WHERE {$sql}
+        ",ARRAY_A);
 
+        if($row){
+            $row['indexid'] && self::get_app_pdata($row['indexid'],$app);
+            return $row['id'];
+        }
         return iDB::insert('spider_url',array(
             'appid'   => $appid,
-            'cid'     => $_POST['cid'],
+            'cid'     => $post['cid'],
             'rid'     => spider::$rid,'pid'=> spider::$pid,
-            'title'   => addslashes($_POST['title']),
-            'url'     => addslashes($_POST['reurl']),
-            'hash'    => md5($_POST['reurl']),
+            'title'   => addslashes($post['title']),
+            'url'     => addslashes($post['reurl']),
+            'hash'    => md5($post['reurl']),
             'status'  => '1',
             'addtime' => time(),
             'publish' => '0',
@@ -216,10 +231,7 @@ class spider{
         $appid = $_POST['appid']?:$spost->app;
         $app   = apps::get_app($appid);
 
-        $indexid = spider::$indexid?:(int)$_GET['indexid'];
-        if(spider::$callback['url:indexid']){
-            $indexid = spider::$callback['url:indexid'];
-        }
+        $indexid = self::get_indexid();
         $indexid && self::get_app_pdata($indexid,$app);
 
         if (spider::$callback['post'] && is_callable(spider::$callback['post'])) {
@@ -231,8 +243,9 @@ class spider{
 
         if($_POST===false) return false;
 
-        $sid = spider::$callback['url:id'];
-        empty($sid) && $sid = spider::insert_spider_url($app['id']);
+        $sid = spider::$sid;
+        spider::$callback['url:id'] && $sid = spider::$callback['url:id'];
+        empty($sid) && $sid = spider::spider_url($app);
 
         $rcode  = '1001';
         $result = spider_post::commit($rcode,$sid,$spost);
@@ -316,6 +329,13 @@ class spider{
                 }
             }
         }
+    }
+    public static function get_indexid() {
+        $indexid = spider::$indexid?:(int)$_GET['indexid'];
+        if(spider::$callback['url:indexid']){
+            $indexid = spider::$callback['url:indexid'];
+        }
+        return (int)$indexid;
     }
     public static function get_app_pdata($indexid,$app) {
         if(empty($indexid)) return;
