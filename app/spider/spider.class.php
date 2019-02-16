@@ -332,9 +332,9 @@ class spider{
     }
     public static function get_indexid() {
         $indexid = spider::$indexid?:(int)$_GET['indexid'];
-        if(spider::$callback['url:indexid']){
-            $indexid = spider::$callback['url:indexid'];
-        }
+        // if(spider::$callback['url:indexid']){
+        //     $indexid = spider::$callback['url:indexid'];
+        // }
         return (int)$indexid;
     }
     public static function get_app_pdata($indexid,$app) {
