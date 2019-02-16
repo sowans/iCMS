@@ -26,16 +26,15 @@ class iDB {
     public static $backtrace;
     public static $func_call;
     public static $last_result;
+    public static $last_error ;
     public static $num_rows;
     public static $insert_id;
     public static $link;
     public static $config = null;
     public static $dbFlag = 'iPHP_DB';
 
-    private static $collate;
-    private static $time_start;
-    private static $last_error ;
-    private static $result;
+    public static $time_start;
+    public static $result;
 
     public static function config($config=null) {
         empty(self::$config) && self::$config = array(
@@ -57,11 +56,11 @@ class iDB {
         if(isset($GLOBALS[self::$dbFlag])){
             self::$link = $GLOBALS[self::$dbFlag];
             if(self::$link){
-                if(self::$link->ping())
+                if(self::ping())
                     return self::$link;
             }
         }
-        self::$link = new mysqli(self::$config['HOST'], self::$config['USER'], self::$config['PASSWORD'],null,self::$config['PORT']);
+        self::$link = @new mysqli(self::$config['HOST'], self::$config['USER'], self::$config['PASSWORD'],null,self::$config['PORT']);
 
         if($flag==='link'){
             return self::$link;
@@ -71,18 +70,19 @@ class iDB {
 
         $GLOBALS[self::$dbFlag] = self::$link;
         self::pre_set();
-        if($flag===null){
-            self::select_db();
-        }
+        $flag===null && self::select_db();
+    }
+    public static function ping() {
+        return self::$link->ping();
     }
     public static function pre_set() {
         self::$link->set_charset(self::$config['CHARSET']);
         self::$link->query("SET @@sql_mode =''");
     }
-    public static function select_db($var=false) {
+    public static function select_db($flag=false) {
         $sel = self::$link->select_db(self::$config['DB']);
-        if($var) return $sel;
-        $sel OR self::print_error('Connect Error ('.self::$link->errno.') '.self::$link->error);
+        if($flag) return $sel;
+        $sel OR self::print_error('Select Db Error ('.self::$link->errno.') '.self::$link->error);
     }
     // ==================================================================
     /** Quote string to use in SQL
@@ -402,7 +402,7 @@ class iDB {
     public static function version() {
         self::$link OR self::connect();
         // Make sure the server has MySQL 4.0
-        $mysql_version = preg_replace('|[^0-9\.]|', '', self::$link->server_info);
+        $mysql_version = preg_replace('|[^0-9\.]|', '', self::server_info());
 
         if ( version_compare($mysql_version, '4.0.0', '<') ){
             self::print_error('mysql version error,iPHP requires MySQL 4.0.0 or higher');
@@ -457,20 +457,23 @@ class iDB {
             echo "-->\n";
         }
     }
+    public static function server_info() {
+        return self::$link->server_info;
+    }
+
+    //  Get SQL/DB error.
+    public static function get_error() {
+        self::$last_error = self::$link->error;
+        return self::$last_error;
+    }
 
     //  Print SQL/DB error.
-
     public static function print_error($error = '') {
         if(!self::$show_errors) return;
 
-        self::$last_error = self::$link->error;
-        $error OR $error  = self::$last_error;
-
-        $error = htmlspecialchars($error, ENT_QUOTES);
-        $query = htmlspecialchars(self::$last_query, ENT_QUOTES);
-        // Is error output turned on or not..
+        $error OR $error  = self::get_error();
         if ($error) {
-            $message = "<strong>iDB error:</strong> [$error]<br /><code>$query</code>";
+            $message = "<strong>iDB error:</strong> [$error]<br /><code>".self::$last_query."</code>";
             trigger_error($message,E_USER_ERROR);
         } else {
             return false;

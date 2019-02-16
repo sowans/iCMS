@@ -40,10 +40,7 @@ if($_POST['action']=='install'){
     require_once iPHP_CORE.'/iUI.class.php';
     require_once iPHP_APP_CORE.'/iCMS.class.php';
 
-    iDB::$show_errors     = true;
-    iDB::$show_trace      = false;
-    iDB::$show_explain    = false;
-
+    iPHP::$callback['error'] = 'error_msg';
     iPHP::define_apps(array(
         'admincp' => '10','config'  => '11','files'   => '12',
         'menu'    => '13','group'   => '14','members' => '15',
@@ -71,26 +68,23 @@ if($_POST['action']=='install'){
     //检测数据库文件
     $sql_file      = dirname(strtr(__FILE__,'\\','/')).'/iCMS.sql';
     $data_sql_file = dirname(strtr(__FILE__,'\\','/')).'/iCMS-data.sql';
-    is_readable($sql_file) OR iUI::alert('数据库文件[iCMS.sql]不存在或者读取失败','js:top.callback();');
-    is_readable($data_sql_file) OR iUI::alert('数据库文件[iCMS-data.sql]不存在或者读取失败','js:top.callback();');
+    is_readable($sql_file) OR iUI::alert('数据库文件[iCMS.sql]不存在或者读取失败','js:top.callback();',10);
+    is_readable($data_sql_file) OR iUI::alert('数据库文件[iCMS-data.sql]不存在或者读取失败','js:top.callback();',10);
 
-    $mysql_link = iDB::connect('link');
-	// $mysql_link = @mysql_connect($db_host,$db_user,$db_password);
-	$mysql_link OR iUI::alert("数据库连接出错",'js:top.callback();');
-    //(MYSQL ERROR:".iDB::$last_error.")
-	// mysql_query("SET NAMES '".iPHP_DB_CHARSET."'");
-	// @mysql_select_db($db_name,$mysql_link) OR iUI::alert("数据库{$db_name}不存在",'js:top.callback("#DB_NAME");');
+    iDB::connect('link');
+	iDB::get_error() && iUI::alert("数据库连接出错[".iDB::$last_error."]",'js:top.callback();',10);
+
     if(isset($_POST['CREATE_DATABASE'])){
         iDB::connect('!select_db');
         // iDB::query("DROP DATABASE `".iPHP_DB_NAME."`; ");
         iDB::query("CREATE DATABASE `".iPHP_DB_NAME."`CHARACTER SET ".iPHP_DB_CHARSET." COLLATE ".iPHP_DB_CHARSET."_general_ci",'get')
         OR
-        iUI::alert('数据库创建失败,请确认数据库是否已存在或该用户是否有权限创建数据库','js:top.callback();');
+        iUI::alert('数据库创建失败,请确认数据库是否已存在或该用户是否有权限创建数据库','js:top.callback();',10);
     }else{
         iDB::connect();
     }
     iDB::pre_set();
-    iDB::select_db(true) OR iUI::alert("不能链接到数据库".iPHP_DB_NAME,'js:top.callback("#DB_NAME");');
+    iDB::select_db(true) OR iUI::alert("不能链接到数据库".iPHP_DB_NAME,'js:top.callback("#DB_NAME");',10);
 
 	$config_file  = iPATH.'config.php';
 	$content = iFS::read($config_file,false);
@@ -108,6 +102,8 @@ if($_POST['action']=='install'){
     $sql = iFS::read($sql_file);
     iPHP_DB_CHARSET=="utf8mb4" && utf8mb4_sql($sql);
     iPHP_DB_ENGINE=="InnoDB" && InnoDB_sql($sql);
+
+    iDB::$show_errors = true;
 
 	run_query($sql);
 //导入默认数据
@@ -233,4 +229,23 @@ function utf8mb4_replace_varchar(&$sql,$table,$field,$_varchar=240,$varchar=255)
         "/CREATE TABLE `icms_".$table."`(.*?)`".$field."` varchar\(".$varchar."\)/is",
         "CREATE TABLE `icms_".$table."`$1`".$field."` varchar(".$_varchar.")",
     $sql);
+}
+function error_msg($msg='',$type=''){
+    iUI::$dialog['modal'] = true;
+    //HY000/2002
+    //HY000/1045 Access denied for user
+    if(strpos($msg, 'mysqli::__construct')!==false){
+        $msg = '数据库连接出错<hr />'.$msg;
+    }elseif(strpos($msg, 'Couldn\'t fetch mysqli')!==false){
+        $msg = '数据库连接出错<hr />'.$msg;
+    }elseif(strpos($msg, 'Access denied for user')!==false){
+        $msg = '数据库账号或者密码错误<hr />'.$msg;
+    }elseif(strpos($msg, 'database exists')!==false){
+       $msg = '数据库已存在<hr />'.$msg;
+    }elseif(strpos($msg, 'You have an error in your SQL syntax')!==false){
+        $msg = '数据库安装出错<hr />'.$msg;
+    }
+    $value = str_replace("\n", '<br />', $msg);
+    iUI::dialog("warning:#:warning:#:{$value}",'js:1',30000000);
+    exit;
 }
