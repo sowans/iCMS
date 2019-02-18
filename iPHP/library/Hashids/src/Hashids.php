@@ -149,10 +149,11 @@ class Hashids implements HashidsInterface
      *
      * @return string
      */
-    public function encode(...$numbers)
+    // public function encode(...$numbers)
+    public function encode()
     {
         $ret = '';
-
+        $numbers = func_get_args();//fixed 5.
         if (1 === count($numbers) && is_array($numbers[0])) {
             $numbers = $numbers[0];
         }
