@@ -343,8 +343,7 @@ class iFS {
 	// 获得文件扩展名
 	public static function get_ext($fn) {
 		if(self::is_url($fn)){
-			$parse = parse_url($fn);
-			$fn = $parse['path'];
+			$fn = parse_url($fn,PHP_URL_PATH);
 		}
 		return pathinfo($fn, PATHINFO_EXTENSION);
 	}
@@ -669,8 +668,8 @@ class iFS {
 		$path = trim($path);
 		if(self::checkHttp($path)){
 			$url = self::url();
-			$uri = parse_url($url);
-			if (stripos($path,$uri['host']) !== false){
+			$host = parse_url($url,PHP_URL_HOST);
+			if (stripos($path,$host) !== false){
 				$path = self::fp($path,'-http');
 			}else{
 				return false;

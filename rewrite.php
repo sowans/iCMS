@@ -51,8 +51,7 @@ if(in_array($ext, $exts)){
             $uri = $value[0];
             if (stripos($key, 'uid:') === 0) {
                 $url = rtrim(iURL::$config['user_url'], '/') . $value[0];
-                $uREQ = parse_url($url);
-                $uri = $uREQ['path'];
+                $uri = parse_url($url,PHP_URL_PATH);
             }
             $replacement = '(?<\\1>\d+)';
             if (strpos($value[0], 'id}') === false) {
@@ -126,8 +125,7 @@ if(in_array($ext, $exts)){
         }
     }
     if($REQUEST_URI){
-        $parse = parse_url($REQUEST_URI);
-        $name  = basename($parse['path'],'.php');
+        $name  = basename(parse_url($REQUEST_URI,PHP_URL_PATH),'.php');
         // $parts = pathinfo($parse['path']);
         // $name = $parts['filename'];
         _GET($REQUEST_URI,$REQ);
@@ -144,8 +142,8 @@ if(in_array($ext, $exts)){
 }
 
 function _GET($REQUEST_URI,$REQ){
-    $parse = parse_url($REQUEST_URI);
-    parse_str($parse['query'], $request);
+    $rq = parse_url($REQUEST_URI,PHP_URL_QUERY);
+    parse_str($rq, $request);
     parse_str($REQ['query'], $query);
     $_GET = array_merge($request,$query);
     iSecurity::slashes($_GET);

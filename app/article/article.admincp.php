@@ -415,12 +415,11 @@ class articleAdmincp{
         if($content){
             $content = stripslashes($content);
             $array   = files::preg_img($content);
-            $uri     = parse_url(iCMS_FS_URL);
             $fArray  = array();
             foreach ($array as $key => $value) {
                 $value = trim($value);
                 // echo $value.PHP_EOL;
-                if (stripos($value,$uri['host']) !== false){
+                if (stripos($value,iCMS_FS_HOST) !== false){
                     $filepath = iFS::fp($value,'-http');
                     $rpath    = iFS::fp($value,'http2iPATH');
                    if($filepath){
@@ -1083,8 +1082,7 @@ class articleAdmincp{
             }
             return;
         }
-        $uri = parse_url(iCMS_FS_URL);
-        if (stripos($picurl,$uri['host']) !== false){
+        if (stripos($picurl,iCMS_FS_HOST) !== false){
             $field = 'pic';
             if($key=='b'){
                 $haspic = 1;

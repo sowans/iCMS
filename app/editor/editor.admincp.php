@@ -140,9 +140,8 @@ class editorAdmincp{
     	$url_array = (array)$_POST['source'];
 		/* 抓取远程图片 */
         $list = array();
-        $uri  = parse_url(iCMS_FS_URL);
 		foreach ($url_array as $_k => $imgurl) {
-            if (stripos($imgurl,$uri['host']) !== false){
+            if (stripos($imgurl,iCMS_FS_HOST) !== false){
 				unset($_array[$_k]);
 			}
 

@@ -1106,8 +1106,8 @@ class userApp {
 				$this->forward OR $this->forward = iCMS_URL;
 			}
 			if(strpos($this->forward, 'forward=') !== false){
-		        $parse  = parse_url($this->forward);
-		        parse_str($parse['query'], $qs);
+		        $query = parse_url($this->forward,PHP_URL_QUERY);
+		        parse_str($query, $qs);
 		        $qs['forward'] && $this->forward = $qs['forward'];
 			}
 			$flag==='c' && iPHP::set_cookie('forward', $this->forward);

@@ -282,8 +282,7 @@ class files {
                 return $sfp;
             }
         }
-        $uri = parse_url(iCMS_FS_URL);
-        if(stripos($sfp,$uri['host']) === false){
+        if(stripos($sfp,iCMS_FS_HOST) === false){
             return $sfp;
         }
         $size = $w.'x'.$h;

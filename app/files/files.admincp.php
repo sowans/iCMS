@@ -438,12 +438,11 @@ class filesAdmincp{
         iFS::$force_ext = "jpg";
         $content = stripslashes($content);
         $array   = files::preg_img($content,$match);
-        $uri     = parse_url(iCMS_FS_URL);
         $fArray  = array();
         $autopic = array();
         foreach ($array as $key => $value) {
             $value = trim($value);
-            if (stripos($value,$uri['host']) === false){
+            if (stripos($value,iCMS_FS_HOST) === false){
                 $filepath = iFS::http($value);
                 $rootfilpath = iFS::fp($filepath, '+iPATH');
                 list($owidth, $oheight, $otype) = @getimagesize($rootfilpath);

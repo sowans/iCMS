@@ -19,9 +19,9 @@ class plugin_taoke{
         if ($taoke_array[1]) {
             $tk_array = array_unique($taoke_array[1]);
             foreach ($tk_array as $tkid => $tk_url) {
-                $tk_url = htmlspecialchars_decode($tk_url);
-                $tk_parse = parse_url($tk_url);
-                parse_str($tk_parse['query'], $tk_item_array);
+                $tk_url   = htmlspecialchars_decode($tk_url);
+                $tk_query = parse_url($tk_url,PHP_URL_QUERY);
+                parse_str($tk_query, $tk_item_array);
                 $itemid = $tk_item_array['id'];
                 $tk_data[$tkid] = self::taoke_tpl($itemid, $tk_url);
             }

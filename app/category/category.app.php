@@ -162,9 +162,8 @@ class categoryApp{
             }
         }
         if($domain){
-            $urls = parse_url($base_url);
-            $urls['scheme'].='://';
-            iFS::checkHttp($domain) OR $domain = $urls['scheme'].$domain;
+            $scheme = parse_url($base_url,PHP_URL_SCHEME).'://';
+            iFS::checkHttp($domain) OR $domain = $scheme.$domain;
 
             $i->href    = str_replace($base_url, $domain, $i->href);
             $i->hdir    = str_replace($base_url, $domain, $i->hdir);
