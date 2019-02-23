@@ -540,10 +540,10 @@ CREATE TABLE `icms_spider_url` (
 
 CREATE TABLE `icms_spider_url_data` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `url` varchar(200) NOT NULL DEFAULT '',
+  `url` varchar(190) NOT NULL DEFAULT '',
   `data` mediumtext NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `url` (`url`)
+  UNIQUE KEY `url` (`url`) USING HASH
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_spider_url_list` */
@@ -551,7 +551,7 @@ CREATE TABLE `icms_spider_url_data` (
 CREATE TABLE `icms_spider_url_list` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `iid` varchar(200) NOT NULL DEFAULT '',
-  `url` varchar(200) NOT NULL DEFAULT '',
+  `url` varchar(190) NOT NULL DEFAULT '',
   `source` varchar(200) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `url` (`url`) USING HASH

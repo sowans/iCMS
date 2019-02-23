@@ -274,10 +274,15 @@ class spider_tools {
                 }
                 $doc = phpQuery::newDocumentHTML($content,'UTF-8');
                 //DOM::div.class::attr::ooxx
-                //DOM::div.class#fun#attr
-                //DOM::div.title#attr#data-title
-                $rule = str_replace('::', '#', $rule);//兼容
-                list($pq_dom, $pq_fun,$pq_attr) = explode("#", $rule);
+                //DOM::div.class[fun][attr]
+                //DOM::div.title[attr][data-title]
+                if(strpos($rule, '::')){//兼容
+                    list($pq_dom, $pq_fun,$pq_attr) = explode("::", $rule);
+                }else{
+                    list($pq_dom, $pq_fun,$pq_attr) = explode("[", $rule);
+                    $pq_fun  = rtrim($pq_fun,']');
+                    $pq_attr = rtrim($pq_attr,']');
+                }
                 $pq_array = phpQuery::pq($pq_dom);
                 foreach ($pq_array as $pq_key => $pq_val) {
                     if($pq_fun){

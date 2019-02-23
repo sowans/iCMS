@@ -86,18 +86,18 @@ $(function(){
               <a href="<?php echo __ADMINCP__; ?>=spider_project&do=add&pid=<?php echo $value['pid']; ?>" class="btn btn-small" target="_blank"><i class="fa fa-edit"></i>编辑方案</a>
             </td>
             <td>
-              <a href="<?php echo __ADMINCP__; ?>=spider&do=error&rid=<?php echo $value['rid']; ?>" class="btn btn-small"><i class="fa fa-eye"></i> <?php echo $ruleArray[$value['rid']]; ?>[<?php echo $value['rid'] ; ?>]</a>
+              <a href="<?php echo __ADMINCP__; ?>=spider_error&do=manage&rid=<?php echo $value['rid']; ?>" class="btn btn-small"><i class="fa fa-eye"></i> <?php echo $ruleArray[$value['rid']]; ?>[<?php echo $value['rid'] ; ?>]</a>
               <a href="<?php echo __ADMINCP__; ?>=spider_rule&do=test&rid=<?php echo $value['rid']; ?>" class="btn btn-small" data-toggle="modal" title="测试<?php echo $ruleArray[$value['rid']]; ?>规则"><i class="fa fa-keyboard-o"></i> 测试</a>
               <a href="<?php echo __ADMINCP__; ?>=spider_rule&do=add&rid=<?php echo $value['rid']; ?>" class="btn btn-small" target="_blank"><i class="fa fa-edit"></i> 编辑</a>
               <a href="<?php echo __ADMINCP__; ?>=spider_project&do=manage&rid=<?php echo $value['rid']; ?>" class="btn btn-small" target="_blank"><i class="fa fa-list"></i> 所有方案</a>
             </td>
             <td>
               <?php echo $value['ct'] ; ?>
-              <a href="<?php echo __ADMINCP__; ?>=spider&do=view_error&pid=<?php echo $value['pid']; ?>" class="btn btn-small" data-toggle="modal" title="查看错误信息"><i class="fa fa-eye"></i> 查看错误信息</a>
+              <a href="<?php echo __ADMINCP__; ?>=spider_error&do=view&pid=<?php echo $value['pid']; ?>" class="btn btn-small" data-toggle="modal" title="查看错误信息"><i class="fa fa-eye"></i> 查看错误信息</a>
             </td>
             <td><?php echo $value['date'] ; ?></td>
             <td>
-              <a href="<?php echo __ADMINCP__; ?>=spider&do=del_error&pid=<?php echo $value['pid']; ?>" class="btn btn-small" target="iPHP_FRAME"><i class="fa fa-close"></i> 删除</a>
+              <a href="<?php echo __ADMINCP__; ?>=spider_error&do=del&pid=<?php echo $value['pid']; ?>" class="btn btn-small" target="iPHP_FRAME"><i class="fa fa-close"></i> 删除</a>
             </td>
           </tr>
           <?php } ?>

@@ -406,20 +406,20 @@ class iFS {
 
 	public static function save_ufile($tn, $fp) {
 		if (function_exists('move_uploaded_file') && move_uploaded_file($tn, $fp)) {
-			chmod($fp, 0644);
+			@chmod($fp, 0644);
 		} elseif (copy($tn, $fp)) {
-			chmod($fp, 0644);
+			@chmod($fp, 0644);
 		} elseif (is_readable($tn) && is_writable($fp)) {
-			if ($fp = fopen($tn, 'rb')) {
-				flock($fp, 2);
+			if ($fp = @fopen($tn, 'rb')) {
+				@flock($fp, 2);
 				$filedata = @fread($fp, @filesize($tn));
-				fclose($fp);
+				@fclose($fp);
 			}
 			if ($fp = fopen($fp, 'wb')) {
-				flock($fp, 2);
-				fwrite($fp, $filedata);
-				fclose($fp);
-				chmod($fp, 0644);
+				@flock($fp, 2);
+				@fwrite($fp, $filedata);
+				@fclose($fp);
+				@chmod($fp, 0644);
 			}
 		} else {
 			return self::_error(array('code' => 0, 'state' => 'Error'));
@@ -781,11 +781,11 @@ class iFS {
 			"SIZE" => "文件大小超出网站限制",
 			"TYPE" => "不允许的文件类型",
 			"DIR" => "目录创建失败",
-			"IO" => "输入输出错误",
+			"IO" => "IO错误",
 			"UNKNOWN" => "未知错误",
-			"Error" => "Upload Unknown Error",
+			"Error" => "上传文件出错",
 			"MOVE" => "文件保存时出错",
-			"DIR_Error" => "您访问的目录有问题",
+			"DIR_Error" => "访问目录出错",
 		);
 		$msg = $e['file'].$stateMap[$e['state']];
 		if (self::$ERROR_TYPE) {

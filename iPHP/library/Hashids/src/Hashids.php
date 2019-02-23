@@ -289,7 +289,7 @@ class Hashids implements HashidsInterface
             $numbers[$i] = hexdec('1'.$number);
         }
 
-        return call_user_func_array([$this, 'encode'], $numbers);
+        return call_user_func_array(array($this, 'encode'), $numbers);
     }
 
     /**

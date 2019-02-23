@@ -266,7 +266,13 @@ class categoryAdmincp {
                 foreach($idArray as $k=>$cid){
                     $tocid!=$cid && iDB::query("UPDATE `#iCMS@__category` SET `rootid` ='$tocid' WHERE `cid` ='$cid'");
                 }
-                // $this->cache(true,$this->appid);
+                iUI::success('更新完成!','js:1');
+            break;
+           case 'appid':
+                $toappid = (int)$_POST['toappid'];
+                foreach($idArray as $k=>$cid){
+                    iDB::query("UPDATE `#iCMS@__category` SET `appid` ='$toappid' WHERE `cid` ='$cid'");
+                }
                 iUI::success('更新完成!','js:1');
             break;
             case 'merge':

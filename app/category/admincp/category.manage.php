@@ -259,6 +259,9 @@ iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
                     <ul class="dropdown-menu">
                       <li><a data-toggle="batch" data-action="merge"><i class="fa fa-random"></i> 合并<?php echo $this->category_name;?></a></li>
                       <li><a data-toggle="batch" data-action="move"><i class="fa fa-fighter-jet"></i> 移动<?php echo $this->category_name;?></a></li>
+                      <?php if(admincp::$APP_NAME=='category'){?>
+                      <li><a data-toggle="batch" data-action="appid"><i class="fa fa-gavel"></i> 更改应用</a></li>
+                      <?php } ?>
                       <li><a data-toggle="batch" data-action="recount"><i class="fa fa-refresh"></i> 更新记录数</a></li>
                       <li><a data-toggle="batch" data-action="mkdir"><i class="fa fa-gavel"></i> 重建目录</a></li>
                       <li><a data-toggle="batch" data-action="dir"><i class="fa fa-gavel"></i> 更改目录</a></li>
@@ -304,6 +307,16 @@ iCMS.select('rootid',"<?php echo $_GET['rootid'] ; ?>");
             <select name="tocid" class="span3">
               <option value="0">===顶级<?php echo $this->category_name;?>===</option>
               <?php echo $category_select;?>
+            </select>
+          </div>
+        </div>
+        <div id="appidBatch">
+          <div class="input-prepend"> <span class="add-on">请选择所属应用</span>
+            <select name="toappid" class="span3">
+              <option value="0">无应用[appid='0']</option>
+              <?php foreach (apps::get_array(array("!table"=>0)) as $key => $value) {?>
+              <option value="<?php echo $value['id'];?>"><?php echo $value['app'];?>:<?php echo $value['name'];?> [appid=<?php echo $value['id'];?>]</option>
+              <?php }?>
             </select>
           </div>
         </div>
