@@ -71,7 +71,16 @@ class spider_content {
             return random($length, empty($numeric)?0:1);
         }
         if(is_array($html)){
-            $content = $html;
+            if($data['rule']==='<%content%>'){
+                $content = $html;
+            }else{
+                $contentArray      = array();
+                foreach ($html as $hkey => $_html) {
+                    $contentArray[] = spider_content::match($_html,$data,$rule);
+                }
+                $content = implode('#--iCMS.PageBreak--#', $contentArray);
+                unset($contentArray,$_html);
+            }
         }else{
             $contentArray      = array();
             self::$hash        = array();
@@ -173,7 +182,7 @@ class spider_content {
             }
         }
         if($sfuncArray)foreach ($sfuncArray as $key => $func) {
-            $content = self::helper($content,$func,$rule);
+            $content = self::helper_sfunc($content,$func,$rule);
         }
 
         if (spider::$callback['content'] && is_callable(spider::$callback['content'])) {
@@ -310,6 +319,13 @@ class spider_content {
         }
         return $content;
     }
+    public static function helper_sfunc($content,$data,$rule){
+        //@check_urls
+        if ($data['check_urls']) {
+            $content && $content = spider_tools::check_urls($content);
+        }
+        return $content;
+    }
     public static function page_data($html,$data,$rule,&$contentArray){
         if(empty($rule['page_url'])){
             $rule['page_url'] = $rule['list_url'];
@@ -323,6 +339,7 @@ class spider_content {
                         echo "<b>分页规则:</b>phpQuery<br />";
                     }
                     iPHP::vendor('phpQuery');
+                    $responses= str_replace('&nbsp;', '', $responses);
                     $doc      = phpQuery::newDocumentHTML($html,'UTF-8');
                     $pq_dom   = str_replace('DOM::','', $page_area_rule);
                     $pq_array = phpQuery::pq($pq_dom);
@@ -405,7 +422,7 @@ class spider_content {
             }
 
             if (spider::$dataTest) {
-                echo "<b>分页规则:</b>逻辑方式<br />";
+                // echo "<b>分页规则:</b>逻辑方式<br />";
                 echo "<b>内容页网址:</b>".$rule['__url__'] . "<br />";
                 echo "<b>分页网址提取规则:</b>".iSecurity::escapeStr($page_url_rule). "<br />";
                 echo "<b>分页合成:</b>".$rule['page_url'] . "<br />";

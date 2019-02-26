@@ -126,7 +126,7 @@ class iFS {
 	public static function backup($path, $target) {
 		if (self::ex($path)) {
 			self::mkdir(dirname($target));
-			return rename($path, $target);
+			return @rename($path, $target);
 		}
 		return false;
 	}
@@ -181,7 +181,7 @@ class iFS {
 	public static function rmdir($dir, $df = true, $ex = NULL) {
 		$exclude = array('.', '..');
 		$ex && $exclude = array_merge($exclude, (array) $ex);
-		if ($dh = opendir($dir)) {
+		if ($dh = @opendir($dir)) {
 			while (($file = readdir($dh)) !== false) {
 				if (!in_array($file, $exclude)) {
 					$path = $dir . '/' . $file;
@@ -190,7 +190,7 @@ class iFS {
 			}
 			closedir($dh);
 		}
-		return rmdir($dir);
+		return @rmdir($dir);
 	}
 	//获取文件夹下所有文件/文件夹列表
     public static function fileList($dir,$pattern='*'){
