@@ -22,8 +22,9 @@ class Vendor_Hashids {
         empty($param['len']) && $param['len'] = 8;
     	$this->instance = new Hashids($param['salt'],$param['len']);
 	}
-    public function encode($id) {
-    	return $this->instance->encode(array($id));
+    public function encode() {
+        $numbers = func_get_args();
+        return call_user_func_array(array($this->instance, 'encode'),$numbers);
     }
     public function decode($hash) {
     	return $this->instance->decode($hash);

@@ -153,7 +153,8 @@ class Hashids implements HashidsInterface
     public function encode()
     {
         $ret = '';
-        $numbers = func_get_args();//fixed 5.
+        $numbers = func_get_args();//fixed 5.3
+
         if (1 === count($numbers) && is_array($numbers[0])) {
             $numbers = $numbers[0];
         }
