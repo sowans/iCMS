@@ -259,6 +259,9 @@ class iSQL {
         }
     }
     public static function optimize_in($sql,$limit=true){
+        if(strtolower(iPHP_DB_TYPE)!=="mysql"){
+            return $sql;
+        }
         // print($sql);
         preg_match_all("@SELECT\s*`.+`\.`(\w+)`\s*FROM(.+)\s*(`(\w+)`\s*IN\s*\((.+)\))(.*?)\s*(ORDER\s*BY\s*`(.+)`\s*\w+)\s*(LIMIT\s*\d+,\d+)@is", $sql, $matches);
         // var_dump($matches);
