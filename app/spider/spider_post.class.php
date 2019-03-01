@@ -18,6 +18,10 @@ class spider_post {
             $postArray = explode("\n", $spost->post);
             $postArray = array_filter($postArray);
             foreach ($postArray AS $key => $pstr) {
+                if($pstr[0]==='@'){
+                    $spost->primary = substr(trim($pstr), 1);
+                    continue;
+                }
                 list($pkey, $pval) = explode("=", $pstr);
                 if(strpos($pkey, '[')!==false && strpos($pkey, ']')!==false){
                     preg_match('/(.+)\[(.+)\]/', $pkey,$match);
@@ -49,34 +53,58 @@ class spider_post {
             $result = json_decode ($json,true);
             if($result['code']==$code){
                 $indexid = $result['indexid'];
-                self::update_spider_url_indexid($suid,$indexid);
-                self::update_spider_url_publish($suid);
+                if($suid===false){
+                    //子采集发布不回调
+                }else{
+                    spider::update_spider_url_indexid($suid,$indexid);
+                    spider::update_spider_url_publish($suid);
+                }
             }
         }else{
+            $agrs = spider_post::$callback['agrs'];
             if(strpos($fun, '::')===false){
                 $obj = $spo->app."Admincp";
             }else{
                 list($obj,$fun) = explode('::', $fun);
+                if(strpos($fun, '(')!==false){
+                    list($fun,$agrs) = explode('(', $fun);
+                    $agrs = explode(',', trim($agrs,')'));
+                    foreach ($agrs as $key => &$value) {
+                        $v = strtolower($value);
+                        $v =="null" && $value=null;
+                        $v =="true" && $value=true;
+                        $v =="false" && $value=false;
+                    }
+                }
             }
 
             $acp = new $obj;
             $acp->callback['code'] = $code;
-            /**
-             * 主表 回调 更新关联ID
-             */
-            $acp->callback['primary'] = array(
-                array('spider','update_spider_url_indexid'),
-                array('suid'=>$suid)
-            );
-            /**
-             * 数据表 回调 成功发布
-             */
-            $acp->callback['data'] = array(
-                array('spider','update_spider_url_publish'),
-                array('suid'=>$suid)
-            );
 
-            $result = $acp->$fun();
+            if($suid===false){
+                //子采集发布不回调
+            }else{
+                /**
+                 * 主表 回调 更新关联ID
+                 */
+                $acp->callback['primary'] = array(
+                    array('spider','update_spider_url_indexid'),
+                    array('suid'=>$suid)
+                );
+                /**
+                 * 数据表 回调 成功发布
+                 */
+                $acp->callback['data'] = array(
+                    array('spider','update_spider_url_publish'),
+                    array('suid'=>$suid)
+                );
+            }
+            if($agrs){
+                $result = call_user_func_array(array($acp,$fun),(array)$agrs);
+            }else{
+                $result = $acp->$fun();
+            }
+
             if($result) return $result;
 
             spider_error::log("发布失败",$_POST['reurl'],'spider_post::commit.fail');

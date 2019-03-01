@@ -40,8 +40,8 @@ class spider_data {
             $prule_list_url = $project['list_url'];
         }
 
-        $ruleA           = spider_rule::get($rid);
-        $rule            = $ruleA['rule'];
+        $srule           = spider_rule::get($rid);
+        $rule            = $srule['rule'];
         $dataArray       = $rule['data'];
 
         if($prule_list_url){
@@ -50,7 +50,7 @@ class spider_data {
 
         if (spider::$dataTest) {
             echo "<b>抓取规则信息</b><pre style='max-height:300px;overflow-y: scroll;'>";
-            print_r(iSecurity::escapeStr($ruleA));
+            print_r(iSecurity::escapeStr($srule));
             print_r(iSecurity::escapeStr($project));
             echo "</pre><hr />";
         }
@@ -59,7 +59,7 @@ class spider_data {
         $rule['data_charset'] && spider::$charset = $rule['data_charset'];
 
         $responses = array();
-        $html      = spider_tools::remote($url);
+        $html      = spider_tools::remote($url,'spider_data::crawl');
         if(empty($html)){
             $msg = "采集错误 " . $url . ' 内容为空'.PHP_EOL;
             $msg.= '请检查请求是否正常'.PHP_EOL;
@@ -291,7 +291,14 @@ class spider_data {
 
         return $responses;
     }
-    public static function sub_crawl($sub,$rule){
+    /**
+     * [sub_crawl 执行子采集]
+     * @param  [type] $sub  [子采集配置]
+     * @param  [type] $rule [主采集规则]
+     * @return [type]       [description]
+     */
+    public static function sub_crawl($sub,$rule,$result){
+        $sPOST = $sub['POST'];
         $urls  = $sub['URLS'];
         $RULES = $sub['RULES'];
         if(!is_array($urls) && $urls){
@@ -303,24 +310,51 @@ class spider_data {
             echo '<div style="padding: 20px;background-color: #ebebeb;">';
             echo "<h3>执行子采集:</h3>";
             echo "<hr />";
+        }else{
+            $_POST = array();
+            if($sPOST && strpos($sPOST, 'poid@')!==false){
+                list($_s,$poid) = explode('@', $sPOST);
+                $spost  = spider_post::get($poid);
+                // $appid   = $spost->app;
+                $spost->primary && $_POST[$spost->primary] = $result['indexid'];
+                $rcode = '1002';
+            }
+            if(spider::$work=='shell'){
+                echo date("Y-m-d H:i:s ")."\033[32m执行子采集[".$poid."] \033[0m\n";
+            }
         }
 
         $responses = array();
         foreach ($urls as $key => $url) {
-            $responses[$key] = self::sub_crawl_data($url,$RULES,$rule);
+            $data = self::sub_crawl_data($url,$RULES,$rule);
             if (spider::$dataTest) {
+                $responses[$key] = $data;
                 break;
             }
+            if($spost){
+                $_POST = array_merge($_POST,$data);
+                $id = spider_post::commit($rcode,false,$spost);
+                $id && iDB::insert("spider_url_list",array(
+                    'iid'    =>$id,
+                    'url'    =>$_POST['reurl'],
+                    'source' =>$spost->app
+                ));
+                if(spider::$work=='shell'){
+                    echo date("Y-m-d H:i:s ")."\033[36mid:\033[0m".$responses[$key]."\n";
+                }
+                $responses[$key] = $id;
+            }
         }
-        if (spider::$dataTest) {
-            echo "</div>";
-        }
+
+        spider::$dataTest && print "</div>";
+
         return $responses;
     }
+    //子采集数据
     public static function sub_crawl_data($url,$RULES,$rule){
         $responses = array();
         $responses['reurl'] = $url;
-        $html = spider_tools::remote($url);
+        $html = spider_tools::remote($url,'spider_data::sub_crawl_data');
         foreach ($RULES as $dname => $dvar) {
             $content = spider_content::crawl($html,$dvar,$rule,$responses);
             $responses[$dname] = $content;

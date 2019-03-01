@@ -578,18 +578,14 @@ class spider_tools {
             $content = array_filter($content);
             $content = array_unique($content);
         }
-        // foreach ($content as $key => $value) {
-        //     $value && iDB::insert("spider_url_list",array(
-        //         'url'  =>$value
-        //         ),true
-        //     );
-        // }
-        // return;
         $sql = iSQL::in($content,'url',false,true);
         $sql && $all = iDB::all("SELECT `id`,`url` FROM `#iCMS@__spider_url_list` WHERE $sql ");
         if($all){
             $urls   = array_column($all, 'url','id');
             $content = array_diff($content, $urls);
+            if(spider::$work=='shell'){
+                echo date("Y-m-d H:i:s ")."\033[36mcheck_urls=>已采[".count($urls)."]条,还剩[".count($content)."]条\033[0m\n";
+            }
         }
         return $content;
     }
@@ -751,7 +747,7 @@ class spider_tools {
         $milliseconds = round(($mtimestamp - $timestamp) * 1000); // 毫秒
         return date("Y-m-d H:i:s", $timestamp) . '.' . $milliseconds.' ';
     }
-    public static function remote($url, $_count = 0) {
+    public static function remote($url,$ref=null,$_count = 0) {
         if(self::safe_url($url)===false) return false;
 
         (iPHP_SHELL && self::$debug) && print self::datetime()."\033[36mspider_tools::remote\033[0m [".($_count+1)."] => ".$url.PHP_EOL;
@@ -817,7 +813,7 @@ class spider_tools {
             $options[CURLOPT_HEADERFUNCTION] = self::$callback['header'];
         }
         if (self::$callback['options'] && is_callable(self::$callback['options'])) {
-            call_user_func_array(self::$callback['options'],array(&$options));
+            call_user_func_array(self::$callback['options'],array(&$options,$ref,&$_count));
         }
 
         self::$handle = curl_init();
@@ -854,7 +850,7 @@ class spider_tools {
 	        $newurl	= trim($newurl);
 			curl_close(self::$handle);
 			unset($responses,$info);
-            return self::remote($newurl, $_count);
+            return self::remote($newurl,$ref,$_count);
         }
         if (in_array($info['http_code'],array(404,500))) {
 			curl_close(self::$handle);
@@ -870,7 +866,7 @@ class spider_tools {
             }
 			curl_close(self::$handle);
 			unset($responses,$info);
-            return self::remote($url, $_count);
+            return self::remote($url,$ref,$_count);
         }
         $pos = stripos($info['content_type'], 'charset=');
         $pos!==false && $content_charset = trim(substr($info['content_type'], $pos+8));

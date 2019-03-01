@@ -54,6 +54,8 @@ class spider{
         $title ===null && $title = spider::$title;
         $project = spider_project::get($pid);
         $indexid = self::get_indexid();
+        spider::$callback['url:id']      = 0;
+        spider::$callback['url:indexid'] = 0;
         if(($project['checker'] && empty($indexid)) || $work=="DATA@RULE"){
             $title = addslashes($title);
             $url   = addslashes($url);
@@ -101,9 +103,6 @@ class spider{
             $ret = array();
             $sql && $ret = iDB::row("SELECT `id`,`publish`,`indexid` FROM `#iCMS@__spider_url` where {$sql} ",ARRAY_A);
 
-            spider::$callback['url:id']      = $ret['id'];
-            spider::$callback['url:indexid'] = $ret['indexid'];
-
             if($ret){
                 if(in_array($mode, array("1","2","3"))) {
                     if(in_array($ret['publish'], array("1","2"))) {
@@ -118,7 +117,9 @@ class spider{
                         return false;
                     }
                 }else{
-                    // spider::$surlData = $ret;
+                    spider::$callback['url:id'] = $ret['id'];
+                    spider::$callback['url:indexid'] = $ret['indexid'];
+                    return true;
                 }
             }else{
                 return true;
@@ -200,9 +201,7 @@ class spider{
 
         if($check){
             $checker = spider::checker($work,spider::$pid,spider::$url,spider::$title);
-            if($checker!==true){
-                return $checker;
-            }
+            if($checker!==true) return $checker;
         }
         $_POST = spider::$callback['_POST'];
         empty($_POST) && $_POST = spider_data::crawl();
@@ -219,10 +218,7 @@ class spider{
         if(spider::$work && $work===null) $work = spider::$work;
 
         $checker = spider::checker($work,spider::$pid,$_POST['reurl'],$_POST['title']);
-
-        if($checker!==true){
-            return $checker;
-        }
+        if($checker!==true) return $checker;
 
         $project = spider_project::get(spider::$pid);
         isset($_POST['cid']) OR $_POST['cid'] = $project['cid'];
@@ -232,6 +228,7 @@ class spider{
         $app   = apps::get_app($appid);
 
         $indexid = self::get_indexid();
+        spider::$callback['url:indexid'] && $indexid = spider::$callback['url:indexid'];
         $indexid && self::get_app_pdata($indexid,$app);
 
         if (spider::$callback['post'] && is_callable(spider::$callback['post'])) {
@@ -251,27 +248,11 @@ class spider{
         $result = spider_post::commit($rcode,$sid,$spost);
 
         if($_POST['commit:callData']){
-            var_dump($result,$_POST['commit:callData']);
-            $callData = $_POST['commit:callData'];
-            list($_s,$poid) = explode('@', $callData['POST']);
-            foreach ($callData as $key => $value) {
-                $value['URLS'] && $subData[] = self::sub_crawl($value,$rule);
+            foreach ($_POST['commit:callData'] as $key => $value) {
+                $value['URLS'] && $result[$key.'_data'] = spider_data::sub_crawl($value,$rule,$result);
             }
         }
-            // if(spider::$callback['STATUS']==='publish'){
-            //     if($res['POST'] && strpos($res['POST'], 'poid@')!==false){
-            //         list($_s,$poid) = explode('@', $res['POST']);
-            //         unset($res['POST']);
-            //         spider::$callback['_POST'] = $res;
-            //         var_dump(spider::$callback['_POST']);
-            //         exit;
-            //         spider::$poid = $poid;
-            //         $result = spider::publish();
-            //         var_dump($result);
-            //         spider::$poid = null;
-            //     }
-            //     exit;
-            // }
+
         spider::$callback['save'] && spider::$callback['commit'] = spider::$callback['save'];
         if (spider::$callback['commit'] && is_callable(spider::$callback['commit'])) {
             $ret = call_user_func_array(spider::$callback['commit'],array($result,$_POST));
@@ -280,13 +261,6 @@ class spider{
             }
         }
         spider::$callback['STATUS'] = null;
-
-        // if (spider::$callback['save'] && is_callable(spider::$callback['save'])) {
-        //     $ret = call_user_func_array(spider::$callback['save'],array($result,$_POST));
-        //     if($ret['callback']){
-        //         return $ret;
-        //     }
-        // }
 
         if ($result['code'] == $rcode && $work===NULL) {
             $msg = ($indexid?'更新':'发布').'成功!';

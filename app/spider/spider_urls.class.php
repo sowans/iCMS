@@ -128,7 +128,7 @@ class spider_urls {
             if (spider::$ruleTest) {
                 echo '<b>抓取列表:</b>'.$url . "<br />";
             }
-            $html = spider_tools::remote($url);
+            $html = spider_tools::remote($url,'spider_urls::crawl');
             if(empty($html)){
                 $msg = "采集列表内容为空!";
                 $msg.= var_export(spider_tools::$curl_info,true);
