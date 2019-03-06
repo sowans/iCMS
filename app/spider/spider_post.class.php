@@ -13,25 +13,32 @@ defined('iPHP') OR exit('What are you doing?');
 class spider_post {
     public static $callback = array();
     public static function get($id) {
-        $spost = iDB::row("SELECT * FROM `#iCMS@__spider_post` WHERE `id`='$id' LIMIT 1;");
-        if ($spost->post) {
-            $postArray = explode("\n", $spost->post);
-            $postArray = array_filter($postArray);
-            foreach ($postArray AS $key => $pstr) {
-                if($pstr[0]==='@'){
-                    $spost->primary = substr(trim($pstr), 1);
-                    continue;
-                }
-                list($pkey, $pval) = explode("=", $pstr);
-                if(strpos($pkey, '[')!==false && strpos($pkey, ']')!==false){
-                    preg_match('/(.+)\[(.+)\]/', $pkey,$match);
-                    $_POST[$match[1]][$match[2]] = trim($pval);
-                }else{
-                    $_POST[$pkey] = trim($pval);
-                }
+        $key = 'spider:post:'.$id;
+        $rs = $GLOBALS[$key];
+        if(!isset($GLOBALS[$key])){
+            $rs = iDB::row("SELECT * FROM `#iCMS@__spider_post` WHERE `id`='$id' LIMIT 1;");
+            $GLOBALS[$key] = $rs;
+        }
+        $rs->post && self::data($rs);
+        return $rs;
+    }
+    public static function data(&$arr) {
+        $postArray = explode("\n", $arr->post);
+        $postArray = array_filter($postArray);
+        foreach ($postArray AS $key => $pstr) {
+            if($pstr[0]==='@'){
+                $arr->primary = substr(trim($pstr), 1);
+                continue;
+            }
+            list($pkey, $pval) = explode("=", $pstr);
+            if(strpos($pkey, '[')!==false && strpos($pkey, ']')!==false){
+                preg_match('/(.+)\[(.+)\]/', $pkey,$match);
+                $_POST[$match[1]][$match[2]] = trim($pval);
+            }else{
+                $_POST[$pkey] = trim($pval);
             }
         }
-        return $spost;
+        return $arr;
     }
 	public static function option($id = 0, $output = null) {
 		$rs = iDB::all("SELECT * FROM `#iCMS@__spider_post`");

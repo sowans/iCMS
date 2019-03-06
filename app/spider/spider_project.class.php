@@ -12,11 +12,16 @@ defined('iPHP') OR exit('What are you doing?');
 
 class spider_project {
     public static function get($id) {
-        $project = iDB::row("SELECT * FROM `#iCMS@__spider_project` WHERE `id`='$id' LIMIT 1;", ARRAY_A);
-        if($project['config']){
-			$project['config']  = (array)json_decode($project['config'],true);
-			$project+= $project['config'];
-        }
+    	$key = 'spider:project:'.$id;
+    	$project = $GLOBALS[$key];
+    	if(!isset($GLOBALS[$key])){
+	        $project = iDB::row("SELECT * FROM `#iCMS@__spider_project` WHERE `id`='$id' LIMIT 1;", ARRAY_A);
+	        if($project['config']){
+				$project['config']  = (array)json_decode($project['config'],true);
+				$project+= $project['config'];
+	        }
+    		$GLOBALS[$key] = $project;
+    	}
         return $project;
     }
 }

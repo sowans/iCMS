@@ -238,7 +238,10 @@ class spider_tools {
             }else if(strpos($rule, '<%SELF%>')!==false){
               $content = str_replace('<%SELF%>',$content, $rule);
             }else if(strpos($rule, '<%nbsp%>')!==false){
-              $content = str_replace('&nbsp;','', $content);
+                $content  = str_replace(array('&nbsp;','&#12288;'),'', $content);
+                $_content = htmlentities($content);
+                $content  = str_replace(array('&nbsp;','&#12288;','&amp;nbsp;','&amp;#12288;'),'', $_content);
+                unset($_content);
             }else if(strpos($rule, 'HTML::')!==false){
                 $tag = str_replace('HTML::','', $rule);
                 if($tag=='ALL'){
@@ -502,9 +505,9 @@ class spider_tools {
     public static function check_content_code($content,$type=null) {
         if (spider::$content_right_code && $type=='right') {
             $right_code = self::check_content($content,spider::$content_right_code);
-	        if ($right_code===false) {
-	            return false;
-	        }
+            if ($right_code===false) {
+                return false;
+            }
         }
         if (spider::$content_error_code && $type=='error') {
             $error_code = self::check_content($content,spider::$content_error_code);
@@ -584,7 +587,7 @@ class spider_tools {
             $urls   = array_column($all, 'url','id');
             $content = array_diff($content, $urls);
             if(spider::$work=='shell'){
-                echo date("Y-m-d H:i:s ")."\033[36mcheck_urls=>已采[".count($urls)."]条,还剩[".count($content)."]条\033[0m\n";
+                print self::datetime()."\033[36mspider_tools::check_urls\033[0m => 已采[".count($urls)."]条,还剩[".count($content)."]条".PHP_EOL;
             }
         }
         return $content;
@@ -631,11 +634,11 @@ class spider_tools {
         $nbody.= $bodyA[$i];
         $pics    = filesApp::get_content_pics($nbody);
         $_pcount = count($pics);
-        //	print_r($_pcount);
-        //	echo "\n";
-        //	print_r('_count:'.$_count);
-        //	echo "\n";
-        //	var_dump($_pcount>$_count);
+        //  print_r($_pcount);
+        //  echo "\n";
+        //  print_r('_count:'.$_count);
+        //  echo "\n";
+        //  var_dump($_pcount>$_count);
         if ($_pcount >= $_count) {
             $newbody[$k] = $nbody;
             $k++;
@@ -745,6 +748,7 @@ class spider_tools {
         $mtimestamp   = sprintf("%.3f", microtime(true)); // 带毫秒的时间戳
         $timestamp    = floor($mtimestamp); // 时间戳
         $milliseconds = round(($mtimestamp - $timestamp) * 1000); // 毫秒
+        $milliseconds = sprintf ("%-'03s", $milliseconds);
         return date("Y-m-d H:i:s", $timestamp) . '.' . $milliseconds.' ';
     }
     public static function remote($url,$ref=null,$_count = 0) {

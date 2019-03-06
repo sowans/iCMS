@@ -12,9 +12,14 @@ defined('iPHP') OR exit('What are you doing?');
 
 class spider_rule {
     public static function get($id) {
-        $rs = iDB::row("SELECT * FROM `#iCMS@__spider_rule` WHERE `id`='$id' LIMIT 1;", ARRAY_A);
-        $rs['rule'] && $rs['rule'] = stripslashes_deep(unserialize($rs['rule']));
-        $rs['rule']['user_agent'] OR $rs['rule']['user_agent'] = "Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)";
+    	$key = 'spider:rule:'.$id;
+    	$rs = $GLOBALS[$key];
+    	if(!isset($GLOBALS[$key])){
+	        $rs = iDB::row("SELECT * FROM `#iCMS@__spider_rule` WHERE `id`='$id' LIMIT 1;", ARRAY_A);
+	        $rs['rule'] && $rs['rule'] = stripslashes_deep(unserialize($rs['rule']));
+	        $rs['rule']['user_agent'] OR $rs['rule']['user_agent'] = "Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)";
+        	$GLOBALS[$key] = $rs;
+        }
         spider::$useragent = $rs['rule']['user_agent'];
         spider::$encoding  = $rs['rule']['curl']['encoding'];
         spider::$referer   = $rs['rule']['curl']['referer'];

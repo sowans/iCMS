@@ -208,12 +208,13 @@ $(function(){
           <div class="input-prepend"> <span class="add-on">检查模式</span>
             <select name="config[checker]" id="checker" class="chosen-select span3">
               <option value="0">不检查重复</option>
-              <option value="1">按网址检查</option>
-              <option value="2">按标题检查</option>
-              <option value="3">网址和标题</option>
-              <option value="4">按网址检查更新</option>
-              <option value="5">按标题检查更新</option>
-              <option value="6">网址和标题更新</option>
+              <option value="1">按[网址]检查</option>
+              <option value="2">按[标题]检查</option>
+              <option value="3">按[网址]和[标题]检查</option>
+              <option value="4">按[网址]检查更新</option>
+              <option value="5">按[标题]检查更新</option>
+              <option value="6">按[网址]和[标题]检查更新</option>
+              <option value="7">按[网址]检查,只更新[子采集]</option>
             </select>
           </div>
           <div class="clearfloat mb10"></div>

@@ -295,9 +295,10 @@ class spider_data {
      * [sub_crawl 执行子采集]
      * @param  [type] $sub  [子采集配置]
      * @param  [type] $rule [主采集规则]
+     * @param  [type] $indexid [indexid]
      * @return [type]       [description]
      */
-    public static function sub_crawl($sub,$rule,$result){
+    public static function sub_crawl($sub,$rule,$indexid=0){
         $sPOST = $sub['POST'];
         $urls  = $sub['URLS'];
         $RULES = $sub['RULES'];
@@ -305,6 +306,8 @@ class spider_data {
             $urls = explode(",", $urls);
         }
         if(empty($urls)) return;
+
+        $count = count($urls);
 
         if (spider::$dataTest) {
             echo '<div style="padding: 20px;background-color: #ebebeb;">';
@@ -316,15 +319,16 @@ class spider_data {
                 list($_s,$poid) = explode('@', $sPOST);
                 $spost  = spider_post::get($poid);
                 // $appid   = $spost->app;
-                $spost->primary && $_POST[$spost->primary] = $result['indexid'];
+                $spost->primary && $_POST[$spost->primary] = $indexid;
                 $rcode = '1002';
             }
             if(spider::$work=='shell'){
-                echo date("Y-m-d H:i:s ")."\033[32m执行子采集[".$poid."] \033[0m\n";
+                echo date("Y-m-d H:i:s ")."\033[32m执行子采集[".$poid."] 共".$count."条 \033[0m\n";
             }
         }
 
         $responses = array();
+        $index = 1;
         foreach ($urls as $key => $url) {
             $data = self::sub_crawl_data($url,$RULES,$rule);
             if (spider::$dataTest) {
@@ -334,13 +338,18 @@ class spider_data {
             if($spost){
                 $_POST = array_merge($_POST,$data);
                 $id = spider_post::commit($rcode,false,$spost);
-                $id && iDB::insert("spider_url_list",array(
-                    'iid'    =>$id,
-                    'url'    =>$_POST['reurl'],
-                    'source' =>$spost->app
-                ));
-                if(spider::$work=='shell'){
-                    echo date("Y-m-d H:i:s ")."\033[36mid:\033[0m".$responses[$key]."\n";
+                if($id){
+                    iDB::insert("spider_url_list",array(
+                        'iid'    =>$id,
+                        'url'    =>$_POST['reurl'],
+                        'source' =>$spost->app
+                    ));
+                    if(spider::$work=='shell'){
+                        echo date("Y-m-d H:i:s ")."(".$index."/".$count.")  \033[36mId:\033[0m".$id."\n";
+                        $index++;
+                    }
+                }else{
+                    spider_error::log('子采集发布错误',$url,'sub_crawl.empty',array('pid'=>spider::$pid,'sid'=>spider::$sid,'rid'=>spider::$rid));
                 }
                 $responses[$key] = $id;
             }

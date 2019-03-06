@@ -46,7 +46,7 @@ class spider_postAdmincp {
 	 * [复制发布模块]
 	 * @return [type] [description]
 	 */
-	public function do_copypost() {
+	public function do_copy() {
 		iDB::query("INSERT INTO `#iCMS@__spider_post` (`name`, `app`, `post`, `fun`)
  SELECT `name`, `app`, `post`, `fun` FROM `#iCMS@__spider_post` WHERE id = '$this->poid'");
 		$poid = iDB::$insert_id;
@@ -56,7 +56,7 @@ class spider_postAdmincp {
 	 * [删除发布模块]
 	 * @return [type] [description]
 	 */
-	public function do_delpost() {
+	public function do_del() {
 		$this->poid OR iUI::alert("请选择要删除的项目");
 		iDB::query("delete from `#iCMS@__spider_post` where `id` = '$this->poid';");
 		iUI::success('删除完成', 'js:1');

@@ -169,9 +169,9 @@ class appsApp {
             if(!isset(iView::$handle->_vars['APP'])){
                 iView::assign('APP', $data['category']['app']); //绑定的应用信息
             }
-            unset($data['category']['app']);
+            if($tpl!==null) unset($data['category']['app']);
             iView::assign('category', $data['category']);
-            unset($data['category']);
+            if($tpl!==null) unset($data['category']);
         }
         $data['sapp'] && iView::assign('SAPP', apps::get_app_lite($data['sapp']));//自身应用信息
         iView::assign($name, $data);

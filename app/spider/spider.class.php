@@ -68,6 +68,7 @@ class spider{
             switch ($mode) {
                 case '1'://按网址检查
                 case '4'://按网址检查更新
+                case '7'://按[网址]检查,只更新[子采集]
                     $scheme = parse_url($url, PHP_URL_SCHEME);
                     if($scheme){
                         $_url  = str_replace($scheme.'://', '', $url);
@@ -243,13 +244,19 @@ class spider{
         $sid = spider::$sid;
         spider::$callback['url:id'] && $sid = spider::$callback['url:id'];
         empty($sid) && $sid = spider::spider_url($app);
-
-        $rcode  = '1001';
-        $result = spider_post::commit($rcode,$sid,$spost);
+        //todo list
+        //支持 update:xxx 字段更新
+        //if($project['checker']=="7"||spider::$callback['UPDATE_SUB_CRAWL']){
+	if(spider::$callback['UPDATE_SUB_CRAWL']){
+            $result = array('indexid'=>$indexid);
+        }else{
+            $rcode  = '1001';
+            $result = spider_post::commit($rcode,$sid,$spost);
+        }
 
         if($_POST['commit:callData']){
             foreach ($_POST['commit:callData'] as $key => $value) {
-                $value['URLS'] && $result[$key.'_data'] = spider_data::sub_crawl($value,$rule,$result);
+                $value['URLS'] && $result[$key.'_data'] = spider_data::sub_crawl($value,$rule,$result['indexid']);
             }
         }
 

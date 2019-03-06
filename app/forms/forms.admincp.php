@@ -8,6 +8,7 @@
 * @licence https://www.icmsdev.com/LICENSE.html
 */
 defined('iPHP') OR exit('What are you doing?');
+defined('APP_URI') OR define('APP_URI','admincp.php?app=forms');
 
 class formsAdmincp{
     public function __construct($fid=null) {
