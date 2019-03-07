@@ -8,23 +8,29 @@
  * @license http://www.iiiphp.com/license
  * @version 2.1.0
  */
-//$GLOBALS['iPage']['url']="/index_";
-//$GLOBALS['iPage']['config']['enable']=true;
+//iPages::$setting['url']="/index_";
+//iPages::$setting['enable']=true;
 class iPages {
 	public $page_sign  = '{P}';
 	public $page_name  = "page";//page标签，用来控制url页。比如说xxx.php?page=2中的page
+	public $page_nav   = "NAV";
+	public $page_style = 0;
 	public $is_ajax    = false;//是否支持AJAX分页模式
 	public $ajax_fun   = null;   //AJAX动作名
 	public $titles     = array();
 	public $target     = '_self';
-	public $config     = array();
 
-	public $pagebarnum = 8;//控制记录条的个数。
-	public $totalpage  = 0;//总页数
-	public $nowindex   = 1;//当前页
-	public $url        = null;//url地址头
-	public $offset     = 0;
-	public $lang       = array('index'=>'INDEX','prev'=>'PREV','next'=>'NEXT','last'=>'LAST','other'=>'Total','unit'=>'Page','list'=>'Articles','sql'=>'Records','tag'=>'Tags','comment'=>'Comments','message'=>'Messages');
+	public $barnum    = 8;//控制记录条的个数。
+	public $totalpage = 0;//总页数
+	public $nowindex  = 1;//当前页
+	public $url       = null;//url地址头
+	public $offset    = 0;
+	public $lang      = array('index'=>'INDEX','prev'=>'PREV','next'=>'NEXT','last'=>'LAST','other'=>'Total','unit'=>'Page','list'=>'Articles','sql'=>'Records','tag'=>'Tags','comment'=>'Comments','message'=>'Messages');
+
+	public static $config = array();
+	public static $setting = array();
+	public static $instance;
+
 	/**
 	* constructor构造函数
 	*
@@ -32,23 +38,24 @@ class iPages {
 	*/
 	public function __construct($conf){
  		array_key_exists('total',$conf) OR $this->error('need a param of total',1001);
+ 		self::$config 	 = $conf;
 		$this->total     = (int)$conf['total'];
 		$this->perpage   = $conf['perpage']?(int)$conf['perpage']:10;
 		$this->totalpage = ceil($this->total/$this->perpage);
 
 		if($this->totalpage<1) return false;
 
-		$url = $GLOBALS['iPage']['url']?$GLOBALS['iPage']['url']:$_SERVER['REQUEST_URI'];
+		$url = self::$setting['url']?self::$setting['url']:$_SERVER['REQUEST_URI'];
 		isset($conf['url']) && $url = $conf['url'];
-
-		$GLOBALS['iPage']['total'] = (int)$this->totalpage;
-		$this->config = $GLOBALS['iPage']['config'];
+		self::$config['url'] = $url;
 
 		//设置pagename
-		$conf['page_name']&& $this->page_name = $conf['page_name'];
-		$conf['target']   && $this->target = $conf['target'];
-		$conf['titles']   && $this->titles = $conf['titles'];
-		$conf['lang']     && $this->lang = $conf['lang'];
+		$conf['pnstyle']  && $this->page_style = $conf['pnstyle'];
+		$conf['pagenav']  && $this->page_nav   = strtoupper($conf['pagenav']);
+		$conf['page_name']&& $this->page_name  = $conf['page_name'];
+		$conf['target']   && $this->target     = $conf['target'];
+		$conf['titles']   && $this->titles     = $conf['titles'];
+		$conf['lang']     && $this->lang       = $conf['lang'];
 
 		$this->unit = $conf['unit']?$conf['unit']:$this->lang['sql'];
 		//设置当前页
@@ -73,6 +80,18 @@ class iPages {
 		$this->ajax_fun = $action;
 	}
 
+	public function vars(){
+		return array(
+	        $this->page_nav  => ($this->totalpage > 1)?$this->show($this->page_style):'',
+	        'COUNT'   => $this->total,
+	        'TOTAL'   => $this->totalpage,
+	        'CURRENT' => $this->nowindex,
+	        'PN'      => $this->nowindex,
+	        'PREV'    => $this->prev_page('array'),
+	        'NEXT'    => $this->next_page('array'),
+	        'LAST'    => ($this->nowindex>=$this->totalpage),
+        );
+	}
 
 	/**
 	* 获取显示"下一页"的代码
@@ -137,16 +156,16 @@ class iPages {
 //		return '<span class="'.$style.'">'.$this->lang['other'].$this->total.$this->unit.'，'.$this->perpage.$this->unit.'/'.$this->lang['unit'].' '.$this->lang['other'].$this->totalpage.$this->lang['unit'].'</span>';
 	}
 	public function nowbar($style='',$nowindex_style='page_nowindex'){
-		$plus   = ceil($this->pagebarnum/2);
+		$plus   = ceil($this->barnum/2);
 		$before = $this->nowindex-$plus;
 		$after  = $this->nowindex+$plus-1;
 		if($before<1){
-			$after  = $this->pagebarnum;
+			$after  = $this->barnum;
 			$before = 1;
 		}
 		if($after>$this->totalpage){
 			$after = $this->totalpage;
-			$before = $this->totalpage-$this->pagebarnum;
+			$before = $this->totalpage-$this->barnum;
 			$before<1 && $before = 1;
 		}
 
@@ -257,7 +276,7 @@ class iPages {
 	* @return boolean
 	*/
 	public function _set_url($url="",$total_type=null){
-		if($this->config['enable']){
+		if(self::$setting['enable']){
 			$this->url	= $url;
 		}else{
 			$query = array();
@@ -300,11 +319,11 @@ class iPages {
 	public function get_url($pageno=1){
 		if($this->is_ajax) return (int)$pageno;
 		if($pageno<2){
-			if($this->config['index']){
-				return $this->config['index'];
+			if(self::$setting['index']){
+				return self::$setting['index'];
 			}
 			$url = $this->url;
-			$this->config['enable'] OR $url = str_replace(array('?'.$this->page_name.'='.$this->page_sign,'&'.$this->page_name.'='.$this->page_sign),'',$this->url);
+			self::$setting['enable'] OR $url = str_replace(array('?'.$this->page_name.'='.$this->page_sign,'&'.$this->page_name.'='.$this->page_sign),'',$this->url);
 			$url = preg_replace('@&total_num=\d+@is', '', $url);
 			return str_replace(array('_'.$this->page_sign,$this->page_sign),array('',1),$url);
 		}

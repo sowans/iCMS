@@ -35,8 +35,6 @@ class admincp {
 	public static function init() {
 		($_GET['do'] == 'seccode') && admincpApp::get_seccode();
 
-		iWAF::CSRF_token();
-
 		iUI::$dialog['title'] = iPHP_APP;
 		iDB::$show_errors     = true;
 		iDB::$show_trace      = false;
@@ -46,6 +44,8 @@ class admincp {
 		members::$GATEWAY     = iSecurity::request('gateway');
 		members::check_login(array("admincpApp","check_seccode")); //用户登陆验证
 		members::check_priv('ADMINCP','page');//检查是否有后台权限
+
+		iWAF::CSRF_token(members::$userid);
 
 		files::init(array('userid'=> members::$userid));
 		//菜单
@@ -134,7 +134,7 @@ class admincp {
 		in_array(self::$APP_METHOD, $app_methods) OR iPHP::error_throw('Call to undefined method <b>' . $obj_name . '::' . self::$APP_METHOD . '</b>', 1003);
 
 		//检验CSRF check
-		iWAF::CSRF_check();
+		iWAF::CSRF_check(members::$userid);
 		//访问记录
 		iPHP::callback(self::$callback['history'],APP_DOURI);
 		//检查URL权限

@@ -444,8 +444,11 @@ class spider_content {
                 echo iSecurity::escapeStr(spider::$content_error_code);
                 echo "<br />";
             }
-            $rule['proxy'] && spider::$curl_proxy = $rule['proxy'];
-            $rule['data_charset'] && spider::$charset = $rule['data_charset'];
+
+            $rule['proxy']          && spider::$curl_proxy = $rule['proxy'];
+            $rule['data_charset']   && spider::$charset = $rule['data_charset'];
+            $rule['data_user_agent']&& spider::$useragent = $rule['data_user_agent'];
+
             $pageurl = array();
 
             foreach ($page_url_array AS $pukey => $purl) {

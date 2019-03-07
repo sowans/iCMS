@@ -103,15 +103,15 @@ class iMap {
 		if(!is_array($nodes) && strstr($nodes, ',')){
 			$nodes = explode(',', $nodes);
 		}
-		self::$where[self::$table]['field'][] = self::$field;
+		self::$field && self::$where[self::$table]['field'][] = self::$field;
 		self::$where[self::$table]['node'][]  = $nodes;
 
-		$field = array_unique(self::$where[self::$table]['field']);
+		self::$field && $field = array_unique(self::$where[self::$table]['field']);
 		$nodes = array_unique(self::$where[self::$table]['node']);
 
 		$where_sql = iSQL::in(self::$appid,'appid',false,true,self::$table);
 		$where_sql.= iSQL::in($nodes,'node',false,false,self::$table);
-		$where_sql.= iSQL::in($field,'field',false,false,self::$table);
+		$field && $where_sql.= iSQL::in($field,'field',false,false,self::$table);
 		return array(self::$table=>$where_sql);
 	}
 

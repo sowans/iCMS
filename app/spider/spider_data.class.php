@@ -55,8 +55,9 @@ class spider_data {
             echo "</pre><hr />";
         }
 
-        $rule['proxy'] && spider::$curl_proxy = $rule['proxy'];
-        $rule['data_charset'] && spider::$charset = $rule['data_charset'];
+        $rule['proxy']          && spider::$curl_proxy = $rule['proxy'];
+        $rule['data_charset']   && spider::$charset = $rule['data_charset'];
+        $rule['data_user_agent']&& spider::$useragent = $rule['data_user_agent'];
 
         $responses = array();
         $html      = spider_tools::remote($url,'spider_data::crawl');

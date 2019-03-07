@@ -69,6 +69,9 @@ class iURL {
         self::$config['hash']['salt']&& $salt = self::$config['hash']['salt'];
         return iPHP::vendor('Hashids',array("salt"=>$salt,"len"=>$len));
     }
+    public static function set_app_data($app,$data) {
+        self::$data[$app] = $data;
+    }
     public static function rule($matches) {
     	$rule = $matches[1];
         $_time = 0;

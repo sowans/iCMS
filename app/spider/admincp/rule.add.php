@@ -271,6 +271,17 @@ function select_sort_value(a, e, p) {
             <div class="clearfloat mb10"></div>
           </div>
           <div id="spider-data" class="tab-pane">
+            <div class="input-prepend input-append"><span class="add-on">内容页UserAgent</span>
+              <input type="text" name="rule[data_user_agent]" class="span6" id="data_user_agent" value="<?php echo $rule['data_user_agent'] ; ?>"/>
+              <div class="btn-group">
+                <a class="btn" href="Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)" data-toggle="insertContent" data-target="#data_user_agent" data-mode="replace">百度蜘蛛</a>
+                <a class="btn" href="Mozilla/5.0 (Linux;u;Android 4.2.2;zh-cn;) AppleWebKit/534.46 (KHTML,like Gecko) Version/5.1 Mobile Safari/10600.6.3 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html）" data-toggle="insertContent" data-target="#data_user_agent" data-mode="replace">百度移动蜘蛛</a>
+                <a class="btn" href="Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727)" data-toggle="insertContent" data-target="#data_user_agent" data-mode="replace">普通浏览器</a>
+                <a class="btn" href="Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4" data-toggle="insertContent" data-target="#data_user_agent" data-mode="replace">iPhone 6</a>
+                <a class="btn" href="Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19" data-toggle="insertContent" data-target="#data_user_agent" data-mode="replace">Nexus 5</a>
+              </div>
+            </div>
+            <div class="clearfloat mb10"></div>
             <div class="input-prepend input-append"> <span class="add-on">内容页编码</span><span class="add-on">
               <label class="radio">
                 <input type="radio" name="rule[data_charset]" value="utf-8"<?php if($rule['data_charset']=="utf-8"){ echo ' checked="true"';};?>>

@@ -52,7 +52,7 @@ class htmlAdmincp{
 
 		$htm	= iCMS::run('index','iCMS',array(array($indexTPL,$indexName)));
 		$fpath	= iURL::page_num($htm[1]['pagepath']);
-		$total	= $GLOBALS['iPage']['total'];
+		$total	= iPages::$config['total'];
 		iFS::check_ext($fpath) OR iUI::alert("文件类型不合法,禁止生成!<hr />请更改系统设置->网站URL->文件后缀");
 		iFS::mkdir($htm[1]['dir']);
 		iFS::write($fpath,$htm[0]);
@@ -123,7 +123,7 @@ class htmlAdmincp{
 		$htm = iCMS::run('category','category',$cid,null);
 		$htm OR iUI::alert("栏目[cid:$cid] URL规则设置问题! 此栏目不能生成静态");
 		$fpath = iURL::page_num($htm[1]['iurl']['pagepath']);
-		$total = $GLOBALS['iPage']['total'];
+		$total = iPages::$config['total'];
 		iFS::check_ext($fpath) OR iUI::alert("文件类型不合法,禁止生成!<hr />请更改栏目->URL规则设置->栏目规则");
 		iFS::mkdir($htm[1]['iurl']['dir']);
 		iFS::write($fpath,$htm[0]);

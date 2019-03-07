@@ -47,7 +47,7 @@ class iPagination {
     }
     //动态翻页函数
     public static function pagenav($total, $perpage = 20, $unit = "条记录", $url = '', $target = '') {
-        $pageconf = array(
+        $conf = array(
             'url'        => $url,
             'target'     => $target,
             'total'      => $total,
@@ -55,9 +55,9 @@ class iPagination {
             'total_type' => 'G',
             'lang'       => iUI::lang(iPHP_APP . ':page'),
         );
-        $pageconf['lang']['item'] = '<li>%s</li>';
+        $conf['lang']['item'] = '<li>%s</li>';
 
-        $iPages = new iPages($pageconf);
+        $iPages = new iPages($conf);
         self::$offset = $iPages->offset;
         self::$pagenav = '<ul>' .
         self::$pagenav.= $iPages->show(3);
@@ -74,35 +74,24 @@ class iPagination {
     public static function make($conf) {
         empty($conf['lang']) && $conf['lang'] = iUI::lang(iPHP_APP . ':page');
         empty($conf['unit']) && $conf['unit'] = iUI::lang(iPHP_APP . ':page:list');
-
-        $iPages = new iPages($conf);
-        // if ($iPages->totalpage > 1) {
-            $pagenav = $conf['pagenav'] ? strtoupper($conf['pagenav']) : 'NAV';
-            $pnstyle = $conf['pnstyle'] ? $conf['pnstyle'] : 0;
-            iView::set_iVARS(array(
-                'PAGES' => $iPages,
-                'PAGE'  => array(
-                    $pagenav  => ($iPages->totalpage > 1)?$iPages->show($pnstyle):'',
-                    'COUNT'   => $conf['total'],
-                    'TOTAL'   => $iPages->totalpage,
-                    'CURRENT' => $iPages->nowindex,
-                    'PN'      => $iPages->nowindex,
-                    'PREV'    => $iPages->prev_page('array'),
-                    'NEXT'    => $iPages->next_page('array'),
-                    'LAST'    => ($iPages->nowindex>=$iPages->totalpage),
-                )
-            ));
-        // }
-        return $iPages;
+        return self::assign($conf);
+    }
+    public static function assign($conf){
+        $obj = new iPages($conf);
+        iView::set_iVARS(array(
+            'PAGES' => $obj,
+            'PAGE'  => $obj->vars()
+        ));
+        return $obj;
     }
     //模板静态分页配置
     public static function url($iurl){
-        if(isset($GLOBALS['iPage'])) return;
+        if(!empty(iPages::$setting)) return;
 
         $iurl = (array)$iurl;
-        $GLOBALS['iPage']['url']  = $iurl['pageurl'];
-        $GLOBALS['iPage']['config'] = array(
+        iPages::$setting = array(
             'enable' =>true,
+            'url'    =>$iurl['pageurl'],
             'index'  =>$iurl['href'],
             'ext'    =>$iurl['ext']
         );
@@ -112,9 +101,10 @@ class iPagination {
         $pageArray = array();
         $pageurl = $content['iurl']['pageurl'];
         if ($total > 1) {
-            $_GLOBALS_iPage = $GLOBALS['iPage'];
+            $old_page_setting = iPages::$setting;
+
             $mode && self::url($content['iurl']);
-            $pageconf = array(
+            $conf = array(
                 'page_name' => 'p',
                 'url'       => $pageurl,
                 'total'     => $total,
@@ -124,14 +114,10 @@ class iPagination {
             );
             if ($content['chapter']) {
                 foreach ((array) $chapterArray as $key => $value) {
-                    $pageconf['titles'][$key + 1] = $value['subtitle'];
+                    $conf['titles'][$key + 1] = $value['subtitle'];
                 }
             }
-            $iPages = new iPages($pageconf);
-            unset($GLOBALS['iPage']);
-            $GLOBALS['iPage'] = $_GLOBALS_iPage;
-            unset($_GLOBALS_iPage);
-
+            $iPages = new iPages($conf);
             $pageArray['list']  = $iPages->list_page();
             $pageArray['index'] = $iPages->first_page('array');
             $pageArray['prev']  = $iPages->prev_page('array');
@@ -139,6 +125,9 @@ class iPagination {
             $pageArray['endof'] = $iPages->last_page('array');
             $pagenav = $iPages->show(0);
             $pagetext = $iPages->show(10);
+
+            iPages::$setting = $old_page_setting;
+            unset($old_page_setting);
         }
         $content_page = array(
             'pn'      => $page,

@@ -55,13 +55,15 @@ class iWAF {
 			}
 		}
 	}
-	public static function CSRF_token($key=null){
-		$key===null &&$key = iPHP_KEY;
-		$token = sha1(md5(iPHP_KEY));
+	public static function CSRF_token($id=0,$key=null){
+		$hashids = iPHP::vendor('Hashids',array("len"=>'16'));
+		$hash    = $hashids->encode($id, time());
+		$token   = md5(sha1(md5(iPHP_KEY).$key).$key).'_'.$hash;
+		$token   = urlencode($token);
 		define('iPHP_WAF_CSRF_TOKEN',$token);
 		return $token;
 	}
-	public static function CSRF_check(){
+	public static function CSRF_check($id=0,$key=null){
 		$token = $_POST['CSRF_TOKEN']?$_POST['CSRF_TOKEN']:$_GET['CSRF_TOKEN'];
 
 		if(defined('iPHP_WAF_CSRF')){
@@ -72,7 +74,15 @@ class iWAF {
 		if(stripos($_SERVER['HTTP_REFERER'],iPHP_SELF) && empty($_POST)){
 			return true;
 		}
-		if($_POST && $token!==iPHP_WAF_CSRF_TOKEN){
+		if($_POST){
+			$hashids = iPHP::vendor('Hashids',array("len"=>'16'));
+			$md5     = md5(sha1(md5(iPHP_KEY).$key).$key);
+			$time 	 = time();
+			list($_md5,$_hash) = explode('_', $token);
+			list($_id,$_time)  = $hashids->decode($_hash);
+			if($md5==$_md5 && $id==$_id && $time-$_time<iPHP_COOKIE_TIME){
+				return true;
+			}
 			trigger_error("TOKEN error",E_USER_ERROR);
 		}
 	}

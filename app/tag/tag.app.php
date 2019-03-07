@@ -101,7 +101,7 @@ class tagApp extends appsApp {
             $vars['field'] && $fkey = $vars['field'];
             $nurl = iURL::make(array($fkey=>$tag['id']),null);
             $tag['iurl']['href'] = $nurl;
-            $tag['iurl']['url'] = $nurl;
+            $tag['iurl']['url']  = $nurl;
             foreach ($tag['iurl'] as $key => $value) {
                 is_array($value) && $tag['iurl'][$key]['url'] = $nurl;
             }

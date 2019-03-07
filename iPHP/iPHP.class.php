@@ -19,6 +19,7 @@ class iPHP {
 	public static $app_file   = null;
 	public static $app_args   = null;
 	public static $app_vars   = null;
+	public static $class_name = null;
 
 	public static $mobile     = false;
 	public static $time_start = false;
@@ -139,6 +140,7 @@ class iPHP {
 			$fi = iFS::name(iPHP_SELF);
 			$app = $fi['name'];
 		}
+		empty($app) && $app = 'index';
 
 		self::$apps OR iPHP::error_404('Please update the application cache');
 
@@ -156,7 +158,7 @@ class iPHP {
 		is_file(self::$app_file) OR self::callback(array('contentApp','run'),array($app));
 		is_file(self::$app_file) OR iPHP::error_404('Unable to find application <b>' . $file . '</b>', '0002');
 
-		$class_name = $app.'App';
+		self::$class_name = $app.'App';
 
 		if ($do === NULL) {
 			$do = iPHP_APP;
@@ -172,32 +174,38 @@ class iPHP {
         self::define_device();
 		self::callback(self::$callback['run']['begin']);
 		if(self::$app===null){
-			$class_name = self::app_startup($app,$prefix);
-			// require_once self::$app_file;
-			// self::$app = new $class_name();
+			$flag = self::app_startup($app,$prefix);
 			self::callback(self::$callback['run']['init'],array(self::$app));
 		}
 
 		if (self::$app_do && self::$app->methods) {
+			$method = self::$app_method;
 			if(!in_array(self::$app_do, self::$app->methods)){
-				iPHP::error_404('Call to undefined method <b>' . $class_name . '::'.self::$app_method.'</b>', '0003');
+				iPHP::error_404('Call to undefined method <b>' . self::$class_name . '::'.$method.'</b>', '0003');
 			}
 			$args === null && $args = self::$app_args;
-			self::callback(self::$callback['run']['call'],array(self::$app, self::$app_method,$args));
+			self::callback(self::$callback['run']['call'],array(self::$app,$method,$args));
+
+			$init_method   = '__init__';
+			$before_method = 'before_'.$method;
+			$after_method  = 'after_'.$method;
+
 			if ($args) {
-				if ($args === 'object') {
-					return self::$app;
-				}
-				return call_user_func_array(array(self::$app, self::$app_method), (array) $args);
+				if ($args === 'object') return self::$app;
+
+				method_exists(self::$app, $init_method)  && call_user_func_array(array(self::$app, $init_method), (array) $args);
+				method_exists(self::$app, $before_method)&& call_user_func_array(array(self::$app, $before_method), (array) $args);
+				return call_user_func_array(array(self::$app, $method), (array) $args);
 			} else {
-				if(!method_exists(self::$app, self::$app_method)){
-					iPHP::error_404('Call to undefined method <b>' . $class_name . '::'.self::$app_method.'</b>', '0004');
+				if(!method_exists(self::$app, $method)){
+					iPHP::error_404('Call to undefined method <b>' . self::$class_name . '::'.$method.'</b>', '0004');
 				}
-				$method = self::$app_method;
+				method_exists(self::$app, $init_method)  && self::$app->$init_method();
+				method_exists(self::$app, $before_method)&& self::$app->$before_method();
 				return self::$app->$method();
 			}
 		} else {
-			iPHP::error_404('Unable to find method <b>' . $class_name . '::'.self::$app_method.'</b>', '0005');
+			iPHP::error_404('Unable to find method <b>' . self::$class_name . '::'.$method.'</b>', '0005');
 		}
 	}
 	public static function composer() {
@@ -205,6 +213,15 @@ class iPHP {
 		if(file_exists($dir)){
 			$path = iPATH .'vendor/autoload.php';
 			require_once $path;
+		}
+	}
+	public static function app_destruct() {
+		$method = 'after_'.iPHP::$app_method;
+		$key    = 'is_'.$method;
+		$isrun  = iPHP::$callback[$key];
+		if(method_exists(self::$app, $method) && !$isrun){
+			iPHP::$callback[$key] = true;
+			self::$app->$method();
 		}
 	}
 	public static function app_startup($app,$prefix=null) {
@@ -216,17 +233,24 @@ class iPHP {
 			require_once $path;
 			$class_name = $prefix.$app.'App';
 			if(class_exists($class_name,false)){
-				self::$app_file = $path;
-				self::$app      = new $class_name();
-				$class_methods  = get_class_methods(self::$app);
+				self::$class_name = $class_name;
+				self::$app_file   = $path;
+				self::$app        = new $class_name();
+				$class_methods    = get_class_methods(self::$app);
 				if(in_array(self::$app_method, $class_methods)){
-					return $class_name;
+					return true;
 				}else{
-					if(!$prefix)return false;
+					if(!$prefix) return false;
 				}
 			}
 		}
-		return self::app_startup($app);
+		// a/MY_a.app.php
+		if(iPHP_APP_DEFINE){
+			if($prefix===iPHP_APP_DEFINE) return self::app_startup($app);
+			return self::app_startup($app,iPHP_APP_DEFINE);
+		}else{
+			return self::app_startup($app);
+		}
 	}
 	public static function auto_require($name) {
 		$o_name = $name;
@@ -249,6 +273,7 @@ class iPHP {
 				$pieces = explode('_', $app);
 				if(in_array($pieces[0], self::$reserved)){
 					//DO_app.app.php
+					//MY_app.app.php
 					list($flag,$app) = $pieces;
 				}else{
 					//app_ooxx.app.php
@@ -257,6 +282,7 @@ class iPHP {
 			}
 			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
 		}else if(substr($name,-4,4) == 'Func') {
+			//app.func.php:
 			$app  = substr($name,0,-4);
 			$file = $app.'.func';
 			if(strpos($app,'_') !== false) {
@@ -264,6 +290,7 @@ class iPHP {
 			}
 			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
 		}else if(substr($name,-4,4) == 'Tmpl') {
+			//app.tmpl.php:
 			$app  = substr($name,0,-4);
 			$file = $app.'.tmpl';
 			if(strpos($app,'_') !== false) {
@@ -367,7 +394,7 @@ class iPHP {
 	}
 
 	public static function import($path, $dump = false) {
-		$key = str_replace(iPATH, '/', $path);
+		$key = iSecurity::filter_path($path);
 		// $key =substr(md5($path), 8,16) ;
 		if ($dump) {
 			if (!isset($GLOBALS['iPHP_REQ'][$key])) {

@@ -60,6 +60,7 @@ define('iPHP_TPL_CACHE',  iPATH."cache/template");
 //---------------系统设置------------------------
 defined('iPHP_APP') OR define('iPHP_APP',"iPHP");//应用名
 defined('iPHP_APP_INIT') OR define('iPHP_APP_INIT',true);//运行初始化
+defined('iPHP_APP_DEFINE') OR define('iPHP_APP_DEFINE',null);//自定义运行应用 null/MY_
 defined('iPHP_APP_MAIL') OR define('iPHP_APP_MAIL',"master@iiiphp.com");
 defined('iPHP_MEMORY_LIMIT') OR define('iPHP_MEMORY_LIMIT', '128M');
 //-----------------模板-----------------------
@@ -72,7 +73,7 @@ defined('iPHP_CORE_CLASS') OR define('iPHP_CORE_CLASS',
     'iCache,iFileCache,'.
     'iDevice,iURL,'.
     'iFS,iHttp,iPicture,iThumb,Gmagick,'.
-    'iDB,iMysql,iMysqli,iSQL,iMap,iUtils,iDefine,iVendor,'.
+    'iDB,iSQL,iMap,iUtils,iDefine,iVendor,'.
     'iUI,iPages,iPagination,iView,iTemplateLite,iQuery,'.
     'iSecurity,iWAF,'.
     'iPinyin,iSeccode'

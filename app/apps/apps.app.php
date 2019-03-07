@@ -17,6 +17,7 @@ class appsApp {
     public static $s_app  = null;
     public static $config = null;
     public static $DATA   = null;
+    public static $category = array();
 
     public function __construct($app=null,$primary='id',$table=null) {
         empty($app) && trigger_error('$app is empty',E_USER_ERROR);
@@ -27,6 +28,9 @@ class appsApp {
         self::$s_app    = $app;
         self::$config   = iCMS::$config[$app];
         $this->add_method($app);
+    }
+    public function __destruct() {
+        iPHP::app_destruct();
     }
     public function gets() {
         $v = (int) $_GET[$this->_primary];
