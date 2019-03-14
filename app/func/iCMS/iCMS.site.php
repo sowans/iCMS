@@ -13,6 +13,7 @@ function iCMS_site($vars=array()){
     $site['title'] = $site['name'];
     $site['404']   = iPHP_URL_404;
     $site['url']   = iCMS_URL;
+    $site['host']  = iCMS_URL_HOST;
     $site['tpl']   = iView::$config['template']['dir'];
     $site['page']  = isset($_GET['p'])?(int)$_GET['p']:(int)$_GET['page'];
     $template_url  = iCMS_URL.'/'.($dir?$dir.'/':'').'template';

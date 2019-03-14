@@ -278,6 +278,7 @@ class iTemplateLite {
 			$compiler->_iVARS                    = &$this->_iVARS;
 			$compiler->default_modifiers         = &$this->default_modifiers;
 			$compile_code = $compiler->_compile_file($template_file);
+			$compile_code = preg_replace(array('/\s+<\?php/is','/\?>\s+/is'), array('<?php','?>'), $compile_code);
 			if($ret==='code') return $compile_code;
 			file_put_contents($compile_file,$compile_code);
 		}
@@ -287,6 +288,7 @@ class iTemplateLite {
 		ob_start();
 		include $compile_file;
 		$output = ob_get_contents();
+		$output = preg_replace(array('/\s+<\?php/is','/\?>\s+/is'), array('<?php','?>'), $output);
 		ob_end_clean();
 
 		$this->_plugins['output'] && $this->_run_output($output,$compile_file);

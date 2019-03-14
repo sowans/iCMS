@@ -256,6 +256,9 @@ class spider_content {
         if ($data['format'] && $content) {
             $content = autoformat($content);
         }
+        if ($data['nl2br'] && $content) {
+            $content = nl2br($content);
+        }
         if ($data['url_absolute'] && $content) {
             $content = spider_tools::url_complement($rule['__url__'],$content);
         }
@@ -310,6 +313,9 @@ class spider_content {
                 $content = explode('#--iCMS.PageBreak--#', $content);
             }
             return (array)$content;
+        }
+        if($data['array_filter_empty'] && is_array($content)){
+            $content = array_filter($entry);
         }
         if($data['implode'] && is_array($content)){
             $content = implode('', $content);

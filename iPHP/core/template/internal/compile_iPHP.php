@@ -13,7 +13,7 @@ function compile_iPHP($arguments, &$object){
 	$hash    = substr(md5(uniqid(true).mt_rand(1,1000)), -4);
 	$props   = "\$_i{$hash}";
 	$props_a = "\$_i{$hash}_a";
-	$output  = "\n<?php $props = array();\n";
+	$output  = "<?php $props = array();\n";
 	foreach ($attrs as $attr_name => $attr_value){
 		switch ($attr_name){
 			case 'app':

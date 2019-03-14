@@ -368,7 +368,7 @@ class iURL {
         is_array($QS) OR $QS = parse_url_qs($QS);
         foreach ($QS as $key => $value) {
             //这个null是字符
-            if($value==='null'||$value===null){
+            if(strtolower($value)==='null'||$value===null){
                 unset($QS[$key]);
                 unset($query[$key]);
             }
