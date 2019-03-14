@@ -101,7 +101,7 @@ if($_POST['action']=='install'){
 //开始安装 数据库 结构
     $sql = iFS::read($sql_file);
     iPHP_DB_CHARSET=="utf8mb4" && utf8mb4_sql($sql);
-    iPHP_DB_ENGINE=="InnoDB" && InnoDB_sql($sql);
+    iPHP_DB_ENGINE=="MyISAM" && MyISAM_sql($sql);
 
     iDB::$show_errors = true;
 
@@ -204,8 +204,8 @@ function real_path($p = '') {
 
     return ($p[0] == '/' ? '/' : '') . implode('/', $o) . ($end == '/' ? '/' : '');
 }
-function InnoDB_sql(&$sql){
-    $sql = str_replace('ENGINE=MyISAM', 'ENGINE='.iPHP_DB_ENGINE, $sql);
+function MyISAM_sql(&$sql){
+    $sql = str_replace('ENGINE=InnoDB', 'ENGINE='.iPHP_DB_ENGINE, $sql);
 }
 function utf8mb4_sql(&$sql){
     $sql = str_replace('SET NAMES utf8', 'SET NAMES '.iPHP_DB_CHARSET, $sql);

@@ -28,7 +28,7 @@ CREATE TABLE `icms_access_log` (
   KEY `uid` (`uid`),
   KEY `app` (`app`),
   KEY `ip` (`ip`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_apps` */
 
@@ -48,7 +48,7 @@ CREATE TABLE `icms_apps` (
   `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '应用状态',
   PRIMARY KEY (`id`),
   KEY `idx_name` (`app`)
-) ENGINE=MyISAM AUTO_INCREMENT=100 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_apps_store` */
 
@@ -69,7 +69,7 @@ CREATE TABLE `icms_apps_store` (
   `type` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'app:0 tpl:1',
   `status` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '状态',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_article` */
 
@@ -126,7 +126,7 @@ CREATE TABLE `icms_article` (
   KEY `cid_id` (`status`,`cid`,`id`),
   KEY `cid_hits` (`status`,`cid`,`hits`),
   KEY `cid_week` (`status`,`cid`,`hits_week`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_article_data` */
 
@@ -137,7 +137,7 @@ CREATE TABLE `icms_article_data` (
   `body` mediumtext NOT NULL,
   PRIMARY KEY (`id`),
   KEY `aid` (`aid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_article_meta` */
 
@@ -145,7 +145,7 @@ CREATE TABLE `icms_article_meta` (
   `id` int(10) unsigned NOT NULL,
   `data` mediumtext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_category` */
 
@@ -182,7 +182,7 @@ CREATE TABLE `icms_category` (
   KEY `rootid` (`status`,`rootid`,`sortnum`),
   KEY `sortnum` (`status`,`sortnum`),
   KEY `appid` (`appid`,`sortnum`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_category_map` */
 
@@ -194,7 +194,7 @@ CREATE TABLE `icms_category_map` (
   `appid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '应用ID',
   PRIMARY KEY (`id`),
   KEY `idx` (`appid`,`node`,`iid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_category_meta` */
 
@@ -202,7 +202,7 @@ CREATE TABLE `icms_category_meta` (
   `id` int(10) unsigned NOT NULL,
   `data` mediumtext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_comment` */
 
@@ -229,7 +229,7 @@ CREATE TABLE `icms_comment` (
   PRIMARY KEY (`id`),
   KEY `idx_iid` (`appid`,`status`,`iid`,`id`),
   KEY `idx_uid` (`status`,`userid`,`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_config` */
 
@@ -238,7 +238,7 @@ CREATE TABLE `icms_config` (
   `name` varchar(255) NOT NULL DEFAULT '',
   `value` mediumtext NOT NULL,
   PRIMARY KEY (`appid`,`name`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_favorite` */
 
@@ -253,7 +253,7 @@ CREATE TABLE `icms_favorite` (
   `mode` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '1 公开 0私密',
   PRIMARY KEY (`id`),
   KEY `uid` (`uid`,`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_favorite_data` */
 
@@ -268,7 +268,7 @@ CREATE TABLE `icms_favorite_data` (
   `addtime` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `idx` (`uid`,`fid`,`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_favorite_follow` */
 
@@ -278,7 +278,7 @@ CREATE TABLE `icms_favorite_follow` (
   `title` varchar(255) NOT NULL DEFAULT '' COMMENT '收藏夹标题',
   `uid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '关注者ID',
   KEY `uid` (`uid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_files` */
 
@@ -299,7 +299,7 @@ CREATE TABLE `icms_files` (
   KEY `path` (`path`),
   KEY `ofilename` (`ofilename`),
   KEY `fn_userid` (`filename`,`userid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_files_map` */
 
@@ -310,7 +310,7 @@ CREATE TABLE `icms_files_map` (
   `indexid` int(10) unsigned NOT NULL,
   `addtime` int(10) unsigned NOT NULL,
   PRIMARY KEY (`fileid`,`appid`,`indexid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_forms` */
 
@@ -330,7 +330,7 @@ CREATE TABLE `icms_forms` (
   `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '表单状态',
   PRIMARY KEY (`id`),
   KEY `idx_name` (`app`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_group` */
 
@@ -342,7 +342,7 @@ CREATE TABLE `icms_group` (
   `type` enum('1','0') NOT NULL DEFAULT '0',
   PRIMARY KEY (`gid`),
   KEY `type` (`type`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_keywords` */
 
@@ -352,7 +352,7 @@ CREATE TABLE `icms_keywords` (
   `replace` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`,`keyword`),
   UNIQUE KEY `keyword` (`keyword`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_links` */
 
@@ -367,7 +367,7 @@ CREATE TABLE `icms_links` (
   UNIQUE KEY `id` (`id`),
   KEY `s_o_id` (`cid`,`sortnum`,`id`),
   KEY `ordernum` (`sortnum`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_members` */
 
@@ -391,7 +391,7 @@ CREATE TABLE `icms_members` (
   PRIMARY KEY (`uid`),
   KEY `username` (`username`),
   KEY `groupid` (`gid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_message` */
 
@@ -410,7 +410,7 @@ CREATE TABLE `icms_message` (
   `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '信息状态 参考程序注释',
   PRIMARY KEY (`id`),
   KEY `idx` (`status`,`userid`,`friend`,`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_prop` */
 
@@ -429,7 +429,7 @@ CREATE TABLE `icms_prop` (
   KEY `field` (`field`),
   KEY `cid` (`cid`),
   KEY `type` (`app`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_prop_map` */
 
@@ -441,7 +441,7 @@ CREATE TABLE `icms_prop_map` (
   `appid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '应用ID',
   PRIMARY KEY (`id`),
   KEY `idx` (`appid`,`node`,`iid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_search_log` */
 
@@ -453,7 +453,7 @@ CREATE TABLE `icms_search_log` (
   PRIMARY KEY (`id`),
   KEY `search_times` (`search`,`times`),
   KEY `search_id` (`search`,`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_sph_counter` */
 
@@ -461,7 +461,7 @@ CREATE TABLE `icms_sph_counter` (
   `counter_id` int(11) NOT NULL,
   `max_doc_id` int(11) NOT NULL,
   PRIMARY KEY (`counter_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_spider_error` */
 
@@ -477,7 +477,7 @@ CREATE TABLE `icms_spider_error` (
   `addtime` int(10) unsigned NOT NULL DEFAULT '0',
   `type` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_spider_post` */
 
@@ -488,7 +488,7 @@ CREATE TABLE `icms_spider_post` (
   `post` text NOT NULL,
   `fun` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_spider_project` */
 
@@ -503,7 +503,7 @@ CREATE TABLE `icms_spider_project` (
   `lastupdate` int(10) unsigned NOT NULL,
   `config` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_spider_rule` */
 
@@ -512,7 +512,7 @@ CREATE TABLE `icms_spider_rule` (
   `name` varchar(255) NOT NULL,
   `rule` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_spider_url` */
 
@@ -534,7 +534,7 @@ CREATE TABLE `icms_spider_url` (
   KEY `hash` (`hash`),
   KEY `title` (`title`),
   KEY `url` (`url`(255))
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_spider_url_data` */
 
@@ -544,7 +544,7 @@ CREATE TABLE `icms_spider_url_data` (
   `data` mediumtext NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `url` (`url`) USING HASH
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_spider_url_list` */
 
@@ -555,7 +555,7 @@ CREATE TABLE `icms_spider_url_list` (
   `source` varchar(200) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `url` (`url`) USING HASH
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_tag` */
 
@@ -618,7 +618,7 @@ CREATE TABLE `icms_tag` (
   KEY `hits_week` (`status`,`hits_week`),
   KEY `id` (`status`,`id`),
   KEY `pubdate` (`status`,`pubdate`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_tag_map` */
 
@@ -630,7 +630,7 @@ CREATE TABLE `icms_tag_map` (
   `appid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '应用ID',
   PRIMARY KEY (`id`),
   KEY `tid_index` (`appid`,`node`,`field`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_tag_meta` */
 
@@ -638,7 +638,7 @@ CREATE TABLE `icms_tag_meta` (
   `id` int(10) unsigned NOT NULL,
   `data` mediumtext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_user` */
 
@@ -671,7 +671,7 @@ CREATE TABLE `icms_user` (
   PRIMARY KEY (`uid`),
   KEY `nickname` (`nickname`),
   KEY `username` (`username`)
-) ENGINE=MyISAM AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_user_category` */
 
@@ -685,7 +685,7 @@ CREATE TABLE `icms_user_category` (
   `appid` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`cid`),
   KEY `uid` (`uid`,`appid`,`cid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_user_data` */
 
@@ -706,7 +706,7 @@ CREATE TABLE `icms_user_data` (
   `unickEdit` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '昵称修改次数',
   `meta` text NOT NULL COMMENT '其它数据',
   PRIMARY KEY (`uid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_user_follow` */
 
@@ -716,7 +716,7 @@ CREATE TABLE `icms_user_follow` (
   `fuid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '被关注者ID',
   `fname` varchar(255) NOT NULL DEFAULT '' COMMENT '被关注者',
   KEY `uid` (`uid`,`fuid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_user_openid` */
 
@@ -728,7 +728,7 @@ CREATE TABLE `icms_user_openid` (
   `appid` varchar(64) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `idx_upa` (`uid`,`platform`,`appid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `icms_user_report` */
 
@@ -744,7 +744,7 @@ CREATE TABLE `icms_user_report` (
   `addtime` int(10) unsigned NOT NULL DEFAULT '0',
   `status` tinyint(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

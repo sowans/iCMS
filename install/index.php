@@ -459,10 +459,10 @@ $lock_file = iPATH.'cache/install.lock';
 						<label class="control-label" for="DB_ENGINE">数据库引擎</label>
 						<div class="controls">
 							<select id="DB_ENGINE" name="DB_ENGINE" class="form-control">
-							  <option value="MyISAM" selected="selected">MyISAM</option>
-							  <option value="InnoDB">InnoDB</option>
+							  <option value="InnoDB" selected="selected">InnoDB</option>
+							  <option value="MyISAM">MyISAM</option>
 							</select>
-							<span class="help-block">默认MyISAM,如果将来数据量请求量大的请选InnoDB。</span>
+							<span class="help-block">默认InnoDB,如果数据量请求量都不大可以选MyISAM。</span>
 						</div>
 					</div>
 					<h2>设置超级管理员</h2>
