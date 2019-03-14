@@ -278,7 +278,7 @@ class iTemplateLite {
 			$compiler->_iVARS                    = &$this->_iVARS;
 			$compiler->default_modifiers         = &$this->default_modifiers;
 			$compile_code = $compiler->_compile_file($template_file);
-			$compile_code = preg_replace(array('/\s+<\?php/is','/\?>\s+/is'), array('<?php','?>'), $compile_code);
+			$this->code_eol_replace($compile_code);
 			if($ret==='code') return $compile_code;
 			file_put_contents($compile_file,$compile_code);
 		}
@@ -288,7 +288,7 @@ class iTemplateLite {
 		ob_start();
 		include $compile_file;
 		$output = ob_get_contents();
-		$output = preg_replace(array('/\s+<\?php/is','/\?>\s+/is'), array('<?php','?>'), $output);
+		$this->code_eol_replace($output);
 		ob_end_clean();
 
 		$this->_plugins['output'] && $this->_run_output($output,$compile_file);
@@ -300,7 +300,13 @@ class iTemplateLite {
 		}
 
 	}
-
+	function code_eol_replace(&$output){
+		$output = preg_replace(array(
+			'/\n+<\?php/is','/\?>\n+/is',
+			'/\s{2,}<\?php/is','/\?>\s{2,}/is'
+		),
+		array('<?php','?>','<?php','?>'), $output);
+	}
 	function _run_output(&$content,$file){
 		if(!$this->_plugins['output']) return;
 
