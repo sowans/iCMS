@@ -58,9 +58,8 @@ class apps_store {
     public static function install_default($app=null) {
         self::$success = false;
 
-        $archive_files = self::setup_zip();
-
-        $setup_msg = self::setup_app_file($archive_files,$app);
+        $files = self::setup_zip($msg);
+        $files && $setup_msg = self::setup_app_file($files,$app);
         if(is_array($setup_msg)){
             $msg.= $setup_msg[0];
         }else{
@@ -81,10 +80,10 @@ class apps_store {
     }
     public static function install_template($dir=null) {
         self::$success = false;
-        $archive_files = self::setup_zip();
         $msg = null;
-        if ($archive_files) {
-            $setup_msg = self::setup_template_file($archive_files,$dir);
+        $files = self::setup_zip($msg);
+        if($files){
+            $setup_msg = self::setup_template_file($files,$dir);
             if(is_array($setup_msg)){
                 $msg.= $setup_msg[0];
             }else{
@@ -100,10 +99,10 @@ class apps_store {
     public static function install_app($app=null) {
         self::$success = false;
 
-        $archive_files = self::setup_zip();
         $msg = null;
+        $files = self::setup_zip($msg);
         //安装应用数据
-        $setup_msg = self::setup_app_data($archive_files,$app);
+        $files && $setup_msg = self::setup_app_data($files,$app);
 
         if($setup_msg===true){
             $msg.= self::msg('应用数据安装完成',true);
@@ -116,12 +115,12 @@ class apps_store {
             }
         }
         //创建应用表
-        if(self::setup_app_table($archive_files,$app)){
+        if(self::setup_app_table($files,$app)){
             $msg.= self::msg('应用表创建完成',true);
         }
 
-        if (count($archive_files)>0) {
-            $setup_msg = self::setup_app_file($archive_files,$app);
+        if (count($files)>0) {
+            $setup_msg = self::setup_app_file($files,$app);
             if(is_array($setup_msg)){
                 $msg.= $setup_msg[0];
             }else{
@@ -294,24 +293,24 @@ class apps_store {
         }
         return $msg;
     }
-    public static function setup_zip() {
+    public static function setup_zip(&$msg) {
         $zip_file = self::$zip_file;
-        if(!file_exists($zip_file)){
-            return self::msg("安装包不存在",false);
-        }
+        if(file_exists($zip_file)){
+            iPHP::vendor('PclZip');
+            $zip = new PclZip($zip_file);
+            if (false == ($archive_files = $zip->extract(PCLZIP_OPT_EXTRACT_AS_STRING))) {
+                iFS::rm($zip_file);
+                $msg = self::msg("ZIP包错误:".$zip->errorInfo(true),false);
+            }
 
-        iPHP::vendor('PclZip');
-        $zip = new PclZip($zip_file);
-        if (false == ($archive_files = $zip->extract(PCLZIP_OPT_EXTRACT_AS_STRING))) {
-            iFS::rm($zip_file);
-            return self::msg("ZIP包错误",false);
+            if (0 == count($archive_files)) {
+                iFS::rm($zip_file);
+                $msg = self::msg("空的ZIP文件",false);
+            }
+        }else{
+            $msg = self::msg("安装包不存在",false);
         }
-
-        if (0 == count($archive_files)) {
-            iFS::rm($zip_file);
-            return self::msg("空的ZIP文件",false);
-        }
-        return $archive_files;
+        return is_array($archive_files)?$archive_files:false;
     }
     public static function setup_install($app){
         $path = iPHP_APP_DIR.'/'.$app.'/iCMS.APP.INSTALL.php';
@@ -378,7 +377,7 @@ class apps_store {
     }
     public static function extract_test($archive_files,$ROOTPATH,&$msg){
         $continue = true;
-        if($archive_files)foreach ($archive_files as $file) {
+        if(is_array($archive_files)) foreach ($archive_files as $file) {
             $folder = $file['folder'] ? $file['filename'] : dirname($file['filename']);
             $dp = $ROOTPATH .'/'.trim($folder,'/').'/';
             if (!iFS::checkdir($dp) && iFS::ex($dp)) {
@@ -397,7 +396,7 @@ class apps_store {
         return array($msg,$continue);
     }
     public static function extract($archive_files,$ROOTPATH,$bakdir=null){
-        foreach ($archive_files as $file) {
+        if(is_array($archive_files)) foreach ($archive_files as $file) {
             $folder = $file['folder'] ? $file['filename'] : dirname($file['filename']);
             $dp = $ROOTPATH .'/'.trim($folder,'/').'/';
 

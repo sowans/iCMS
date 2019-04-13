@@ -197,7 +197,7 @@ function uninstall($msg,$a) {
   <form action="<?php echo APP_FURI; ?>&do=local_app" method="post" enctype="multipart/form-data" target="iPHP_FRAME">
     <div class="alert alert-info">
       由于安全限制<br />
-      请先把iCMS应用安装包文件(.zip)<br />
+      请先把iCMS应用安装包文件(.<?php echo apps::PKG_EXT; ?>)<br />
       上传到网站根目录下
     </div>
     <div class="clearfloat mb10"></div>
@@ -205,7 +205,7 @@ function uninstall($msg,$a) {
       <span class="add-on">可用安装包</span>
       <select name="zipfile" class="chosen-select span4" data-placeholder="请选择iCMS应用安装包文件(.zip)...">
         <?php
-          foreach(glob(iPATH."iCMS.APP.*-v*.*.*.zip") as $value){
+          foreach(glob(iPATH."iCMS.APP.*-v*.*.*.".apps::PKG_EXT) as $value){
             $name = str_replace(iPATH, '', $value);
         ?>
         <option value="<?php echo $name;?>"><?php echo $name;?></option>

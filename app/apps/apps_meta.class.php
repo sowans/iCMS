@@ -87,7 +87,7 @@ class apps_meta {
                   `id` int(10) unsigned NOT NULL,
                   `data` mediumtext NOT NULL,
                   PRIMARY KEY (`id`)
-                ) ENGINE=MyISAM DEFAULT CHARSET=".iPHP_DB_CHARSET
+                ) ENGINE=InnoDB DEFAULT CHARSET=".iPHP_DB_CHARSET
             );
             self::config($table);
         }

@@ -56,6 +56,7 @@ class spider{
         $indexid = self::get_indexid();
         spider::$callback['url:id']      = 0;
         spider::$callback['url:indexid'] = 0;
+        spider::$callback['url:data']    = array();
         if(($project['checker'] && empty($indexid)) || $work=="DATA@RULE"){
             $title = addslashes($title);
             $url   = addslashes($url);
@@ -102,9 +103,10 @@ class spider{
                 break;
             }
             $ret = array();
-            $sql && $ret = iDB::row("SELECT `id`,`publish`,`indexid` FROM `#iCMS@__spider_url` where {$sql} ",ARRAY_A);
+            $sql && $ret = iDB::row("SELECT `id`,`indexid`,`publish`,`status` FROM `#iCMS@__spider_url` where {$sql} ",ARRAY_A);
 
             if($ret){
+                spider::$callback['url:data'] = $ret;
                 if(in_array($mode, array("1","2","3"))) {
                     if(in_array($ret['publish'], array("1","2"))) {
                         $work===NULL && iUI::alert($msg, 'js:parent.$("#' . $hash . '").remove();');

@@ -193,7 +193,7 @@ class files {
         iWAF::check_data($data);
         iDB::update(self::$TABLE_DATA, $data, array('id' => $fid));
     }
-    public static function get($f, $v,$c=true,$s='*') {
+    public static function get($f,$v,$c=true,$s='*') {
         if($c){
             if (!self::$check_data||!self::$check_md5) {
                 return;
@@ -249,6 +249,9 @@ class files {
         $content = stripslashes($content);
         $array   = self::preg_img($content,$match);
         foreach ($array as $key => $value) {
+            if (stripos($value,iCMS_FS_HOST) === false){
+                continue;
+            }
             files::set_map($appid,$iid,$value,'path');
         }
     }

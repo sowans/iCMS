@@ -212,6 +212,7 @@ class tagAdmincp{
         $rootid      = (int)$_POST['rootid'];
         $name        = iSecurity::escapeStr($_POST['name']);
         $subtitle    = iSecurity::escapeStr($_POST['subtitle']);
+        $field       = iSecurity::escapeStr($_POST['field']);
         $tkey        = iSecurity::escapeStr($_POST['tkey']);
         $seotitle    = iSecurity::escapeStr($_POST['seotitle']);
         $related     = iSecurity::escapeStr($_POST['related']);

@@ -22,6 +22,8 @@ class apps {
         '0' => '系统组件',
     );
 
+    const PKG_EXT = 'package';
+
     public static function uninstall($app){
         is_array($app) OR $app = self::get($app);
         if($app){
@@ -434,10 +436,10 @@ class apps {
             return $rs['name'];
         }
 	}
-    public static function get_zip($name,$dir,$REMOVE_PATH=null) {
+    public static function get_package($name,$dir,$REMOVE_PATH=null) {
         iPHP::vendor('PclZip');
-        $zipFile = iPHP_APP_CACHE.'/'.$name.'.zip';
-        $zip = new PclZip($zipFile);
+        $package = iPHP_APP_CACHE.'/'.$name.'.'.apps::PKG_EXT;
+        $zip = new PclZip($package);
         $fileList = iFS::fileList($dir);
         foreach ($fileList as $key => $value) {
             if(strpos($value, '/.git/') === false){
@@ -451,7 +453,7 @@ class apps {
             $v_list = $zip->create($lists); //将文件进行压缩
         }
         $v_list == 0 && iPHP::error_throw($zip->errorInfo(true)); //如果有误，提示错误信息。
-        return $zipFile;
+        return $package;
     }
     public static function get_git_version($app){
         $verArray = array();

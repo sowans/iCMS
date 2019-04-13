@@ -141,6 +141,7 @@ class articleFunc{
 		isset($vars['startdate']) && $where_sql .= " AND `pubdate`>='" . strtotime($vars['startdate']) . "'";
 		isset($vars['enddate']) && $where_sql .= " AND `pubdate`<='" . strtotime($vars['enddate']) . "'";
 		isset($vars['where']) && $where_sql .= $vars['where'];
+		isset($vars['where[]']) && $where_sql .= iSQL::where($vars['where[]'],true);
 
         if($map_where){
 			$map_sql = iSQL::select_map($map_where, 'join');
@@ -331,7 +332,14 @@ class articleFunc{
 		$where_sql = " `id` in($ids)";
 		$offset = 0;
 		if ($vars['page']) {
-			$total = $res['total'];
+			$total = (int)$vars['total'];
+			if(isset($vars['pageNum'])){
+				$total = (int)$vars['pageNum']*$maxperpage;
+			}
+			if(!isset($vars['total']) && !isset($vars['pageNum'])){
+				$total = $res['total'];
+			}
+
 			iView::assign(self::$app."_search_total", $total);
 			$pagenav = isset($vars['pagenav']) ? $vars['pagenav'] : "pagenav";
 			$pnstyle = isset($vars['pnstyle']) ? $vars['pnstyle'] : 0;

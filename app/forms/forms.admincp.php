@@ -444,9 +444,9 @@ class formsAdmincp{
         );
       }
 
-      $zipfile = apps::get_zip($filename,$appdir,$remove_path);
-      filesApp::attachment($zipfile);
-      iFS::rm($zipfile);
+      $package = apps::get_package($filename,$appdir,$remove_path);
+      filesApp::attachment($package);
+      iFS::rm($package);
       iFS::rm($app_data_file);
       $app_table_file && iFS::rm($app_table_file);
       iFS::rmdir($remove_path);

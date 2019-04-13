@@ -766,8 +766,8 @@ class iFS {
 		}
 		return self::hook('update',array($data, $fid));
 	}
-	public static function get_filedata($f, $v,$s='*') {
-		return self::hook('get',array($f,$v,$s));
+	public static function get_filedata($f, $v,$c=true,$s='*') {
+		return self::hook('get',array($f,$v,$c,$s));
 	}
 //-------------
 	public static function _error($e, $break = false) {

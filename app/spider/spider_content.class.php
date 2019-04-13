@@ -157,7 +157,7 @@ class spider_content {
                 continue;
             }
             $func = array($value=>true);
-            if(is_array($content)){
+            if(is_array($content) && strpos($value, 'array_')===false){
                 foreach ($content as $ckey => $cvalue) {
                     $content[$ckey] = self::helper($cvalue,$func,$rule);
                 }
@@ -312,13 +312,38 @@ class spider_content {
             if(strpos($content, '#--iCMS.PageBreak--#')!==false){
                 $content = explode('#--iCMS.PageBreak--#', $content);
             }
+            if(empty($content)){
+                return null;
+            }
             return (array)$content;
         }
-        if($data['array_filter_empty'] && is_array($content)){
-            $content = array_filter($entry);
+        if($data['clean_cn_blank']){
+            $_content = htmlentities($content);
+            $content  = str_replace(array('&#12288;','&amp;#12288;'),'', $_content);
+            unset($_content);
         }
-        if($data['implode'] && is_array($content)){
-            $content = implode('', $content);
+        if($data['array_filter_empty']){
+            if(is_array($content)){
+                $content = array_filter($content);
+            }else{
+                if(strpos($content, '#--iCMS.PageBreak--#')!==false){
+                    $content = explode('#--iCMS.PageBreak--#', $content);
+                    $content = array_filter($content);
+                }
+            }
+        }
+        if($data['array_reverse']){
+            if(is_array($content)){
+                $content = array_reverse($content);
+            }else{
+                if(strpos($content, '#--iCMS.PageBreak--#')!==false){
+                    $content = explode('#--iCMS.PageBreak--#', $content);
+                    $content = array_reverse($content);
+                }
+            }
+        }
+        if(($data['implode']||$data['array_implode']) && is_array($content)){
+            $content = implode(',', $content);
         }
         if($data['explode'] && is_string($content)){
             $content = explode(',', $content);
@@ -570,12 +595,15 @@ class spider_content {
                     }
                     $match_hash[$cmd5] = true;
                 }
+                $content = implode('#--iCMS.PageBreak--#', $conArray);
                 if (spider::$dataTest) {
                     echo "<b>多条匹配结果:</b><pre style='max-height:120px;overflow-y: scroll;'>";
                     print_r(array_map('htmlspecialchars', $conArray));
                     echo "</pre>";
+                    echo "<b>返回结果:</b><pre style='max-height:120px;overflow-y: scroll;'>";
+                    print_r(htmlspecialchars($content));
+                    echo "</pre>";
                 }
-                $content = implode('#--iCMS.PageBreak--#', $conArray);
                 unset($conArray,$_content,$match_hash);
             }else{
                 if($content_attr){

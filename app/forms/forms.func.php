@@ -107,6 +107,7 @@ class formsFunc{
           }
         }
         isset($vars['where']) && $where_sql .= $vars['where'];
+        isset($vars['where[]']) && $where_sql .= iSQL::where($vars['where[]'],true);
 
         $vars['id'] && $where_sql .= iSQL::in($vars['id'], 'id');
         $vars['id!'] && $where_sql .= iSQL::in($vars['id!'], 'id', 'not');

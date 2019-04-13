@@ -97,6 +97,12 @@ $(function(){
             留空则系统按名称拼音生成</span>
             <div class="clearfloat mb10"></div>
             <div class="input-prepend">
+              <span class="add-on">字段</span>
+              <input type="text" name="field" class="span6" id="field" value="<?php echo $rs['field'] ; ?>"/>
+            </div>
+            <span class="help-inline">一般不用修改</span>
+            <div class="clearfloat mb10"></div>
+            <div class="input-prepend">
               <span class="add-on">SEO 标题</span>
               <input type="text" name="seotitle" class="span6" id="seotitle" value="<?php echo $rs['seotitle'] ; ?>" />
             </div>

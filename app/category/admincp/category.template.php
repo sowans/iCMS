@@ -21,5 +21,8 @@ if($this->category_template)foreach ($this->category_template as $key => $value)
 <?php }?>
 <div class="help-inline">
 <span class="label label-info">{iTPL}</span>为系统设置的模板,自动匹配<br />
-<span class="label label-info">{DEVICE}</span>为系统设置的设备,自动匹配,默认两个设备desktop,mobile,请分别制作两套模板
+<span class="label label-info">{DEVICE}</span>为系统设置的设备,自动匹配,默认两个设备desktop、mobile,请分别制作两套模板
+<hr />
+<span class="label label-info">栏目首页模板</span> 每个栏目的首页模板(可制作用于频道封面、单页等)<br />
+<span class="label label-info">栏目列表模板</span> 当栏目有分页且页号大于1时使用
 </div>

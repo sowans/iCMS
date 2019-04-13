@@ -114,6 +114,10 @@ class spider_post {
 
             if($result) return $result;
 
+            if (spider::$callback['commit:fail'] && is_callable(spider::$callback['commit:fail'])) {
+                call_user_func_array(spider::$callback['commit:fail'],array($result,$_POST));
+            }
+
             spider_error::log("发布失败",$_POST['reurl'],'spider_post::commit.fail');
             return false;
         }

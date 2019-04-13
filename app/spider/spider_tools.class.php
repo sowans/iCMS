@@ -241,6 +241,7 @@ class spider_tools {
                 $content  = str_replace(array('&nbsp;','&#12288;'),'', $content);
                 $_content = htmlentities($content);
                 $content  = str_replace(array('&nbsp;','&#12288;','&amp;nbsp;','&amp;#12288;'),'', $_content);
+                $content  = html_entity_decode($content);
                 unset($_content);
             }else if(strpos($rule, 'HTML::')!==false){
                 $tag = str_replace('HTML::','', $rule);

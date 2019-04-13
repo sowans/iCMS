@@ -161,7 +161,7 @@ $(function(){
                 <?php if(members::check_priv('files.editpic')){?>
                 <a class="btn btn-small" href="<?php echo __ADMINCP__;?>=files&frame=iPHP&do=editpic&from=modal&pic=<?php echo $filepath ; ?>" data-toggle="modal" title="编辑图片(<?php echo $rs[$i]['filename'].'.'.$rs[$i]['ext']; ?>)"><i class="fa fa-edit"></i> 编辑</a>
                 <?php }?>
-                <?php if(strstr($rs[$i]['ofilename'],'http://')){?>
+                <?php if(iHttp::is_url($rs[$i]['ofilename'])){?>
                 <a href="<?php echo __ADMINCP__; ?>=files&frame=iPHP&do=download&id=<?php echo $rs[$i]['id'] ; ?>" class="btn btn-small" title="正常重新下载" target="iPHP_FRAME"><i class="fa fa-download"></i> 下载</a>
                 <a href="<?php echo __ADMINCP__; ?>=files&frame=iPHP&do=download&id=<?php echo $rs[$i]['id'] ; ?>&unwatermark=0" class="btn btn-small" title="重新下载 不添加水印" target="iPHP_FRAME"><i class="fa fa-download"></i> 下载2</a>
                 <?php }?>

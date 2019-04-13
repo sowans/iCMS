@@ -341,7 +341,7 @@ class appsAdmincp{
      */
     public function do_local_app(){
       $zipfile = trim($_POST['zipfile']);
-      if(preg_match("/^iCMS\.APP\.(\w+)\-v\d+\.\d+\.\d+\.zip$/", $zipfile,$match)){
+      if(preg_match("/^iCMS\.APP\.(\w+)\-v\d+\.\d+\.\d+\.".apps::PKG_EXT."$/", $zipfile,$match)){
         apps_store::$zip_file = iPATH.$zipfile;
         apps_store::$msg_mode = 'alert';
         apps_store::install_app($match[1]);
@@ -383,9 +383,9 @@ class appsAdmincp{
         );
       }
 
-      $zipfile = apps::get_zip($filename,$appdir,$remove_path);
-      filesApp::attachment($zipfile);
-      iFS::rm($zipfile);
+      $package = apps::get_package($filename,$appdir,$remove_path);
+      filesApp::attachment($package);
+      iFS::rm($package);
       iFS::rm($app_data_file);
       $app_table_file && iFS::rm($app_table_file);
 

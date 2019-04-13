@@ -673,13 +673,21 @@ class articleAdmincp{
         $editor      = iSecurity::escapeStr($_POST['editor']);
         $description = iSecurity::escapeStr($_POST['description']);
         $keywords    = iSecurity::escapeStr($_POST['keywords']);
-        $tags        = str_replace('，', ',',iSecurity::escapeStr($_POST['tags']));
         $clink       = iSecurity::escapeStr($_POST['clink']);
         $url         = iSecurity::escapeStr($_POST['url']);
         $tpl         = iSecurity::escapeStr($_POST['tpl']);
         $body        = (array)$_POST['body'];
         $creative    = (int)$_POST['creative'];
         $markdown    = (int)$_POST['markdown'];
+
+        if(is_array($_POST['tags'])){
+            $_POST['tags'] = array_filter($_POST['tags']);
+            $_POST['tags'] = array_unique($_POST['tags']);
+            $_POST['tags'] = implode(',', $_POST['tags']);
+        }
+        $tags = str_replace('，', ',',iSecurity::escapeStr($_POST['tags']));
+
+        is_array($_POST['related']) && $related = json_encode($_POST['related']);
 
         if (empty($title)) {
             return iUI::alert('标题不能为空！');

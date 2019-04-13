@@ -217,10 +217,11 @@ class iTemplateLite {
 		$compile_file      = $this->compile_dir.$this->reserved_template_varname.'.'.$compile_file;
 		return $compile_file;
 	}
-	function internal($fn){
+	function internal($fn,$param=array()){
 		if(!function_exists($fn)){
 			require iTEMPLATE_DIR . "/internal/{$fn}.php";
 		}
+		return call_user_func_array($fn, $param);
 	}
 	function display($file){
 		$this->fetch($file,true);
@@ -242,8 +243,7 @@ class iTemplateLite {
 			$this->debugging && $this->_templatelite_debug_info[$included_tpls_idx]['exec_time'] = array_sum(explode(' ', microtime())) - $this->_templatelite_debug_info[$included_tpls_idx]['exec_time'];
 			if($this->debugging && !$this->_templatelite_debug_loop){
 				$this->debugging = false;
-				$this->internal('template_generate_debug_output');
-				template_generate_debug_output($this);
+				$this->internal('template_generate_debug_output',array(&$this));
 				$this->debugging = true;
 			}
 		}else{
@@ -251,9 +251,8 @@ class iTemplateLite {
 		}
 	}
 
-	function _fetch_compile_include($_templatelite_include_file, $_templatelite_include_vars){
-		$this->internal('template_fetch_compile_include');
-		return template_fetch_compile_include($_templatelite_include_file, $_templatelite_include_vars, $this);
+	function _fetch_compile_include($file, $vars){
+		return $this->internal('template_fetch_compile_include',array($file, $vars, &$this));
 	}
 
 	function _fetch_compile($file, $ret = false){
@@ -288,7 +287,6 @@ class iTemplateLite {
 		ob_start();
 		include $compile_file;
 		$output = ob_get_contents();
-		$this->code_eol_replace($output);
 		ob_end_clean();
 
 		$this->_plugins['output'] && $this->_run_output($output,$compile_file);
@@ -351,7 +349,7 @@ class iTemplateLite {
 		return iTEMPLATE_DIR.'/'.$this->plugins_dir.'/'.$name;
 	}
 
-	function _destroy_dir($file){
+	function _destroy_dir($file=null){
 		if ($file == null){
 			foreach ((array)glob($this->compile_dir.'/'.$this->reserved_template_varname.'.*.php') as $fpath) {
 				@chmod($fpath, 0777);
@@ -476,7 +474,9 @@ class iTemplateLite_Compiler extends iTemplateLite {
 	function _compile_file($tfile){
 		$tfile=='debug.tpl' && $tfile = iTEMPLATE_DIR . '/internal/debug.tpl';
 
-		$file_contents = file_get_contents($tfile);
+		$contents = file_get_contents($tfile);
+		$contents = $this->callback('compile',array($contents,$tfile,$this));
+
 		$ldq           = preg_quote($this->left_delimiter);
 		$rdq           = preg_quote($this->right_delimiter);
 		$_match        = array();		// a temp variable for the current regex match
@@ -488,50 +488,50 @@ class iTemplateLite_Compiler extends iTemplateLite {
 		$this->_require_stack = array();
 
 		// remove all comments
-		$file_contents = preg_replace ("!{$ldq}\*.*?\*{$rdq}!s","",$file_contents);
+		$contents = preg_replace ("!{$ldq}\*.*?\*{$rdq}!s","",$contents);
 
 		// replace all php start and end tags
-//		$file_contents = preg_replace('%(<\?(?!php|=|$))%i', '<?php echo \'\\1\'? >'."\n", $file_contents);
+//		$contents = preg_replace('%(<\?(?!php|=|$))%i', '<?php echo \'\\1\'? >'."\n", $contents);
 
         /* match anything resembling php tags */
-        if (preg_match_all('~(<\?(?:\w+|=)?|\?>|language\s*=\s*[\"\']?\s*php\s*[\"\']?)~is', $file_contents, $sp_match)) {
+        if (preg_match_all('~(<\?(?:\w+|=)?|\?>|language\s*=\s*[\"\']?\s*php\s*[\"\']?)~is', $contents, $sp_match)) {
              /* replace tags with placeholders to prevent recursive replacements */
              $sp_match[1] = array_unique($sp_match[1]);
              /* process each one */
              for ($curr_sp = 0, $for_max2 = count($sp_match[1]); $curr_sp < $for_max2; $curr_sp++) {
                 if ($this->php_handling == "PHP_PASSTHRU") {
                         /* echo php contents */
-                        $file_contents = str_replace($sp_match[1][$curr_sp], '<?php echo \''.str_replace("'", "\'", $sp_match[1][$curr_sp]).'\'; ?>', $file_contents);
+                        $contents = str_replace($sp_match[1][$curr_sp], '<?php echo \''.str_replace("'", "\'", $sp_match[1][$curr_sp]).'\'; ?>', $contents);
                 } else if ($this->php_handling == "PHP_QUOTE") {
                         /* quote php tags */
-                        $file_contents = str_replace($sp_match[1][$curr_sp], htmlspecialchars($sp_match[1][$curr_sp]), $file_contents);
+                        $contents = str_replace($sp_match[1][$curr_sp], htmlspecialchars($sp_match[1][$curr_sp]), $contents);
                 } else if ($this->php_handling == "PHP_REMOVE") {
                         /* remove php tags */
-                        $file_contents = str_replace($sp_match[1][$curr_sp], '', $file_contents);
+                        $contents = str_replace($sp_match[1][$curr_sp], '', $contents);
                 } else {
                         /* PHP_ALLOW, but echo non php starting tags */
                         $sp_match[1][$curr_sp] = preg_replace('~(<\?(?!php|=|$))~i', '<?php echo \'\\1\'?>', $sp_match[1][$curr_sp]);
-                        $file_contents = str_replace($sp_match[1][$curr_sp], $sp_match[1][$curr_sp], $file_contents);
+                        $contents = str_replace($sp_match[1][$curr_sp], $sp_match[1][$curr_sp], $contents);
                 }
             }
         }
 		// remove literal blocks
 
-		preg_match_all("!{$ldq}\s*literal\s*{$rdq}(.*?){$ldq}\s*/literal\s*{$rdq}!s", $file_contents, $_match);
+		preg_match_all("!{$ldq}\s*literal\s*{$rdq}(.*?){$ldq}\s*/literal\s*{$rdq}!s", $contents, $_match);
 		$this->_literal = $_match[1];
-		$file_contents = preg_replace("!{$ldq}\s*literal\s*{$rdq}(.*?){$ldq}\s*/literal\s*{$rdq}!s", stripslashes($ldq . "literal" . $rdq), $file_contents);
+		$contents = preg_replace("!{$ldq}\s*literal\s*{$rdq}(.*?){$ldq}\s*/literal\s*{$rdq}!s", stripslashes($ldq . "literal" . $rdq), $contents);
 
 		// remove php blocks
-		preg_match_all("!{$ldq}\s*php\s*{$rdq}(.*?){$ldq}\s*/php\s*{$rdq}!s", $file_contents, $_match);
+		preg_match_all("!{$ldq}\s*php\s*{$rdq}(.*?){$ldq}\s*/php\s*{$rdq}!s", $contents, $_match);
 		$this->_php_blocks = $_match[1];
-		$file_contents = preg_replace("!{$ldq}\s*php\s*{$rdq}(.*?){$ldq}\s*/php\s*{$rdq}!s", stripslashes($ldq . "php" . $rdq), $file_contents);
+		$contents = preg_replace("!{$ldq}\s*php\s*{$rdq}(.*?){$ldq}\s*/php\s*{$rdq}!s", stripslashes($ldq . "php" . $rdq), $contents);
 
 		// gather all template tags
-		preg_match_all("!{$ldq}\s*(.*?)\s*{$rdq}!s", $file_contents, $_match);
+		preg_match_all("!{$ldq}\s*(.*?)\s*{$rdq}!s", $contents, $_match);
 		$tags = $_match[1];
 
 		// put all of the non-template tag text blocks into an array, using the template tags as delimiters
-		$text = preg_split("!{$ldq}.*?{$rdq}!s", $file_contents);
+		$text = preg_split("!{$ldq}.*?{$rdq}!s", $contents);
 
 		// compile template tags
 		$count_tags = count($tags);
@@ -595,9 +595,10 @@ class iTemplateLite_Compiler extends iTemplateLite {
 		//var_dump($function,$app,$method);
 		switch ($function) {
 			case 'include':
-				$this->internal('compile_include');
-				return $include_file = str_replace($this->error_reporting_header, '', compile_include($arguments, $this));
-				break;
+				$include_file = $this->internal('compile_include',array($arguments, &$this));
+				$include_file = str_replace($this->error_reporting_header, '', $include_file);
+				return $include_file;
+			break;
 			case $this->reserved_template_varname:
 				$_args = $this->_parse_arguments($arguments);
 				if(isset($_args['app'])){
@@ -629,8 +630,7 @@ class iTemplateLite_Compiler extends iTemplateLite {
 					isset($_args['start'])	&& $arguments.=" start={$_args['start']} ";
 					isset($_args['step'])	&& $arguments.=" step={$_args['step']} ";
 					isset($_args['max'])	&& $arguments.=" max={$_args['max']} ";
-					$this->internal('compile_iPHP');
-					$compile_iPHP = compile_iPHP($arguments, $this);
+					$compile_iPHP = $this->internal('compile_iPHP',array($arguments, &$this));
 				}
 
 				if(isset($_args['if'])){
@@ -737,8 +737,7 @@ class iTemplateLite_Compiler extends iTemplateLite {
 				break;
 			case 'section':
 				array_push($this->_sectionelse_stack, false);
-				$this->internal('compile_section_start');
-				return compile_section_start($arguments, $this);
+				return $this->internal('compile_section_start',array($arguments, &$this));
 				break;
 			case 'sectionelse':
 				$this->_sectionelse_stack[count($this->_sectionelse_stack)-1] = true;
@@ -869,23 +868,19 @@ class iTemplateLite_Compiler extends iTemplateLite {
 	}
 
 	function _compile_custom_function($function, $modifiers, $arguments, &$_result){
-		$this->internal('compile_custom_function');
-		return compile_custom_function($function, $modifiers, $arguments, $_result, $this);
+		return $this->internal('compile_custom_function',array($function, $modifiers, $arguments, $_result, &$this));
 	}
 
 	function _compile_custom_block($function, $modifiers, $arguments, &$_result){
-		$this->internal('compile_custom_block');
-		return compile_custom_block($function, $modifiers, $arguments, $_result, $this);
+		return $this->internal('compile_custom_block',array($function, $modifiers, $arguments, $_result, &$this));
 	}
 
 	function _compile_if($arguments, $elseif = false, $while = false){
-		$this->internal('compile_if');
-		return compile_if($arguments, $elseif, $while, $this);
+		return $this->internal('compile_if',array($arguments, $elseif, $while, &$this));
 	}
 
 	function _parse_is_expr($is_arg, $_arg){
-		$this->internal('compile_parse_is_expr');
-		return compile_parse_is_expr($is_arg, $_arg, $this);
+		return $this->internal('compile_parse_is_expr',array($is_arg, $_arg, &$this));
 	}
 
 	function _dequote($string){
@@ -1051,24 +1046,28 @@ class iTemplateLite_Compiler extends iTemplateLite {
 	function _parse_variables($variables, $modifiers,$implode=true){
 		$_result = array();
 		foreach($variables as $key => $value){
-			$tag_variable = trim($variables[$key]);
+			$value = trim($value);
 			if(!empty($this->default_modifiers) && !preg_match('!(^|\|)templatelite:nodefaults($|\|)!',$modifiers[$key])){
 				$_default_mod_string = implode('|',(array)$this->default_modifiers);
 				$modifiers[$key] = empty($modifiers[$key]) ? $_default_mod_string : $_default_mod_string . '|' . $modifiers[$key];
 			}
 
 			if (empty($modifiers[$key])){
-				$_result[]= $this->_parse_variable($tag_variable);
+				$_result[]= $this->_parse_variable($value);
 			}else{
 				$reference = null;
-				if($tag_variable[0] == '&'){
-					$tag_variable = substr($tag_variable, 1);
-					if($tag_variable[0] == '$'){
-						$reference = $this->_compile_variable($tag_variable).' = ';
+				if($value[0] == '&'){
+					$value = substr($value, 1);
+					if($value[0] == '$'){
+						$reference = $this->_compile_variable($value).' = ';
 					}
 				}
-				$_result[]= $reference.$this->_parse_modifier($this->_parse_variable($tag_variable), $modifiers[$key]);
+				$_result[]= $reference.$this->_parse_modifier($this->_parse_variable($value), $modifiers[$key]);
 			}
+		}
+		//{$a?$b:$c} 支持模板中三元判断
+		if($_result[2]===':' && count($_result)==4){
+			return '('.$_result[0].'?'.$_result[1].':'.$_result[3].')';
 		}
 		return $implode?implode('.', $_result):$_result;
 	}

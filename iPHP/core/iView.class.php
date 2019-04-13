@@ -46,6 +46,7 @@ class iView {
         $tpl->register_modifier("thumb", array("files", "thumb"));
         $tpl->register_block("cache", array(__CLASS__, "block_cache"));
         $tpl->template_callback = array(
+            "compile"  => array(__CLASS__,"callback_compile"),
             "resource" => array(__CLASS__,"callback_resource"),
             "func"     => array(__CLASS__,"callback_func"),
             "plugin"   => array(__CLASS__,"callback_plugin"),
@@ -231,6 +232,10 @@ class iView {
             return false;
         }
         return true;
+    }
+    //防模板下载
+    public static function callback_compile($content,$file,$obj){
+        return str_replace("<?php defined('iPHP') OR exit('What are you doing?');?>", '', $content);
     }
     /**
      * 模板路径

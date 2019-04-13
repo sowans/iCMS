@@ -36,6 +36,7 @@ class iHttp{
     public static $CURLOPT_COOKIEFILE     = null;
     public static $CURLOPT_COOKIEJAR      = null;
     public static $CURLOPT_HTTPHEADER     = null;
+    public static $CURLOPT_OPTIONS        = array();
 
     protected static $_count  = 0;
 
@@ -289,6 +290,9 @@ class iHttp{
             if (self::$callback['header'] && is_callable(self::$callback['header'])) {
                 $options[CURLOPT_HEADERFUNCTION] = self::$callback['header'];
             }
+
+            self::$CURLOPT_OPTIONS && $options = array_merge($options, self::$CURLOPT_OPTIONS);
+
             if (self::$callback['options'] && is_callable(self::$callback['options'])) {
                 call_user_func_array(self::$callback['options'],array(&$options));
             }

@@ -47,7 +47,7 @@ class filesAdmincp{
      * @return [type] [description]
      */
 	public function do_add(){
-		$this->id && $rs = iFS::get_filedata('id',$this->id);
+		$this->id && $rs = files::get('id',$this->id,false);
         $href = '###';
         if($rs){
             $filepath = $rs->path.$rs->filename.'.'.$rs->ext;
@@ -153,7 +153,7 @@ class filesAdmincp{
         files::$watermark_enable = !isset($_POST['unwatermark']);
         iFS::$ERROR_TYPE = true;
     	if($this->id){
-            iFS::$data = files::get('id',$this->id);
+            iFS::$data = files::get('id',$this->id,false);
             $F = iFS::upload('upfile');
             if($F && $F['size']!=iFS::$data->size){
                 files::update_size($this->id,$F['size']);
@@ -182,8 +182,8 @@ class filesAdmincp{
      * @return [type] [description]
      */
     public function do_download(){
-        files::$userid   = false;
-        $rs            = iFS::get_filedata('id',$this->id);
+        files::$userid = false;
+        $rs = files::get('id',$this->id,false);
         $FileRootPath  = iFS::fp($rs->filepath,"+iPATH");
         iFS::check_ext($rs->filepath,true) OR iUI::alert('文件类型不合法!');
         files::$userid = members::$userid;
@@ -288,7 +288,7 @@ class filesAdmincp{
             $file_path = $fsInfo->dirname;
             $file_ext  = $fsInfo->extension;
             $file_id   = 0;
-            $rs        = iFS::get_filedata('filename',$file_name);
+            $rs        = files::get('filename',$file_name,false);
             if($rs){
                 $file_path = $rs->path;
                 $file_id   = $rs->id;

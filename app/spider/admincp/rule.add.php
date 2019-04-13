@@ -391,6 +391,9 @@ function rule_data_rule_td($dkey,$data = array()){
           <option value='capture' title="抓取并直接返回结果">抓取结果</option>
           <option value='download' title="下载并保存成文件">下载</option>
           <option value='filter' title="启用屏蔽词过滤">屏蔽词过滤</option>
+          <option value='array_filter_empty'>清除空值数组</option>
+          <option value='clean_cn_blank'>清除中文空格</option>
+          <option value='array_reverse'>相反数组</option>
         </optgroup>
         <optgroup label="转义">
           <option value='stripslashes' title="返回去除转义反斜线后的字符串">去除反斜线</option>
@@ -419,8 +422,8 @@ function rule_data_rule_td($dkey,$data = array()){
           <option value='auth_encode'>加密(auth_encode) </option>
         </optgroup>
         <optgroup label="字符串">
-          <option value='explode'>使用,将字符串组成的数组</option>
-          <option value='implode'>将数组的值转化为字符串</option>
+          <option value='array_explode'>字符串=>数组</option>
+          <option value='array_implode'>数组=>字符串</option>
         </optgroup>
         <optgroup label="特殊处理">
           <option value='@check_urls' title="独立检查,链接保存在新表">链接检查</option>

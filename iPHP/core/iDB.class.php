@@ -153,7 +153,7 @@ class iDataBase {
      */
     public static function insert($table, $data,$IGNORE=false) {
         $fields = array_keys($data);
-        static::query("INSERT ".($IGNORE?'IGNORE':'')." INTO ".iPHP_DB_PREFIX_TAG."{$table} (`" . implode('`,`',$fields) . "`) VALUES ('".implode("','",$data)."')");
+        static::query("INSERT ".($IGNORE?'IGNORE':'')." INTO ".static::table($table)." (`" . implode('`,`',$fields) . "`) VALUES ('".implode("','",$data)."')");
         return static::$insert_id;
     }
     public static function insert_multi($table,$data,$fields=null) {
@@ -163,7 +163,7 @@ class iDataBase {
             $datasql[]= "('".implode("','",$d)."')";
         }
         if($datasql){
-            return static::query("INSERT INTO ".iPHP_DB_PREFIX_TAG."{$table} (`" . implode('`,`',$fields) . "`) VALUES ".implode(',',$datasql));
+            return static::query("INSERT INTO ".static::table($table)." (`" . implode('`,`',$fields) . "`) VALUES ".implode(',',$datasql));
         }
     }
     /**
@@ -184,7 +184,7 @@ class iDataBase {
         }else{
             return false;
         }
-        return static::query("UPDATE ".iPHP_DB_PREFIX_TAG."{$table} SET " . implode( ', ', $bits ) . ' WHERE ' . implode( ' AND ', $wheres ) . ' LIMIT 1;' );
+        return static::query("UPDATE ".static::table($table)." SET " . implode( ', ', $bits ) . ' WHERE ' . implode( ' AND ', $wheres ) . ' LIMIT 1;' );
     }
     public static function delete($table, $where) {
         $wheres = array();
@@ -194,7 +194,7 @@ class iDataBase {
         }else{
             return false;
         }
-        return static::query("DELETE FROM ".iPHP_DB_PREFIX_TAG."{$table} WHERE " . implode( ' AND ', $wheres ));
+        return static::query("DELETE FROM ".static::table($table)." WHERE " . implode( ' AND ', $wheres ));
     }
     /**
      * Get one variable from the database
@@ -224,7 +224,7 @@ class iDataBase {
         }else{
             return false;
         }
-        return static::value("SELECT ".implode( ', ', $fields )." FROM ".iPHP_DB_PREFIX_TAG."{$table} WHERE " . implode( ' AND ', $wheres ) . ' LIMIT 1;' );
+        return static::value("SELECT ".implode( ', ', $fields )." FROM ".static::table($table)." WHERE " . implode( ' AND ', $wheres ) . ' LIMIT 1;' );
     }
     public static function value($query=null, $x = 0, $y = 0) {
         static::$func_call = __CLASS__."::value(\"$query\",$x,$y)";

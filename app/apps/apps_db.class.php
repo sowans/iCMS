@@ -63,13 +63,11 @@ class apps_db {
             case 'text':
                 $data_type = 'TEXT';
                 $len = null;
-                $data_default   = null;
             break;
             case 'mediumtext':
             case 'editor':
                 $data_type = 'MEDIUMTEXT';
                 $len = null;
-                $data_default   = null;
             break;
             case 'float':
             case 'double':
@@ -88,14 +86,13 @@ class apps_db {
             $unsigned && $data_len.=' UNSIGNED';
         }
 
-        if($data_default!==null){
-            $data_default = " DEFAULT '$default'";
-        }
+        $default_sql = " DEFAULT '$default'";
+
         if($field=='primary'){
-            $data_default = 'AUTO_INCREMENT';
+            $default_sql = 'AUTO_INCREMENT';
         }
 
-        $sql = self::idf_escape($name)." $data_type$data_len NOT NULL $data_default COMMENT '$comment'";
+        $sql = self::idf_escape($name)." $data_type$data_len NOT NULL $default_sql COMMENT '$comment'";
 
         switch ($alter) {
           case 'ADD':
@@ -173,7 +170,7 @@ class apps_db {
     //     $base_fields && $fields_sql = array_merge($fields_sql,apps_mod::base_fields_index());
     //     $sql= "CREATE TABLE `#iCMS@__{$name}` ("
     //         .implode(",\n", $fields_sql).
-    //     ') ENGINE=MYISAM AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;';
+    //     ') ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;';
 
     //      if($ret){
     //         return $sql;
@@ -195,7 +192,7 @@ class apps_db {
         $indexs && $fields_sql = array_merge($fields_sql,$indexs);
         $sql= "CREATE TABLE `#iCMS@__{$name}` ("
             .implode(",\n", $fields_sql).
-        ') ENGINE=MYISAM AUTO_INCREMENT=0 DEFAULT CHARSET='.iPHP_DB_CHARSET.';';
+        ') ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET='.iPHP_DB_CHARSET.';';
 
          if($query==='sql'){
             return $sql;
@@ -452,7 +449,7 @@ class apps_db {
     * @param string
     * @return bool
     */
-    public static function alter_table2($table, $name, $fields, /*$foreign,*/ $comment, $auto_increment, $engine='MyISAM', $collation='utf8_general_ci',$partitioning='') {
+    public static function alter_table2($table, $name, $fields, /*$foreign,*/ $comment, $auto_increment, $engine='InnoDB', $collation='utf8_general_ci',$partitioning='') {
         $alter = array();
         foreach ($fields as $field) {
             $alter[] = ($field[1]
