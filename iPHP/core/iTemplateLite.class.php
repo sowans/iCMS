@@ -868,11 +868,11 @@ class iTemplateLite_Compiler extends iTemplateLite {
 	}
 
 	function _compile_custom_function($function, $modifiers, $arguments, &$_result){
-		return $this->internal('compile_custom_function',array($function, $modifiers, $arguments, $_result, &$this));
+		return $this->internal('compile_custom_function',array($function, $modifiers, $arguments, &$_result, &$this));
 	}
 
 	function _compile_custom_block($function, $modifiers, $arguments, &$_result){
-		return $this->internal('compile_custom_block',array($function, $modifiers, $arguments, $_result, &$this));
+		return $this->internal('compile_custom_block',array($function, $modifiers, $arguments, &$_result, &$this));
 	}
 
 	function _compile_if($arguments, $elseif = false, $while = false){
