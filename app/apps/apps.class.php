@@ -21,7 +21,6 @@ class apps {
         '1' => '系统应用',
         '0' => '系统组件',
     );
-
     const PKG_EXT = 'package';
 
     public static function uninstall($app){
