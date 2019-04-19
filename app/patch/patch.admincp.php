@@ -24,6 +24,9 @@ class patchAdmincp{
     /**
      * [升级检查]
      */
+    public static function check_update() {
+        include admincp::view("check_update","patch");
+    }
     public function do_check(){
 		if(empty($this->patch)){
 			if($_GET['ajax']){
@@ -73,12 +76,33 @@ class patchAdmincp{
         patch::setTime();
         $this->msg  = patch::update();//更新文件
         $is_upgrade = patch::$upgrade;
-		include admincp::view("patch");
+		  include admincp::view("patch");
     }
+    /**
+     * [升级程序]
+     */
     public function do_upgrade(){
         $this->msg  = patch::run();//升级
         $is_upgrade = patch::$upgrade;
         include admincp::view("patch");
+    }
+    public function do_check_upgrade(){
+        $json = array('code' => "0");
+        $files = patch::get_upgrade_files(true);
+        if($files){
+            foreach ($files as $d => $value) {
+              $text.='第['.$d.']号升级程序<br />';
+            }
+            $json = array(
+                'code' => "1",
+                'url'  => __ADMINCP__.'=patch&do=upgrade&force=1',
+                'msg'  => "发现升级程序！<br />".$text."<br />是否现在进行升级?",
+            );
+        }
+        iUI::json($json,true);
+    }
+    public static function check_upgrade() {
+        include admincp::view("check_upgrade","patch");
     }
     //===================git=========
     /**
@@ -112,10 +136,6 @@ class patchAdmincp{
           'M'=>'更改'
         );
     	include admincp::view("git.show");
-    }
-
-    public static function check_update() {
-        include admincp::view("check_update","patch");
     }
     /**
      * [检查版信息]

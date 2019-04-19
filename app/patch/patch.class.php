@@ -206,31 +206,37 @@ class patch {
         self::get_upgrade_files() && self::$upgrade = true;
 		return $msg;
 	}
-	public static function get_upgrade_files() {
+	public static function get_upgrade_files($flag=false) {
 		$files = array();
 		$patch_dir = iPHP_APP_DIR.'/patch/files/';
 		list($release,$gitTime) = self::getTime();
 		foreach (glob($patch_dir."*.php") as $file) {
 			$d = str_replace(array($patch_dir,'db.','fs.','.php'), '', $file);
-			$time = strtotime($d.'5959');
-			if($time>$release){
-				if($gitTime){
-					if($time>$gitTime){
-						$files[$d] = $file;
+			if ($flag) {
+				$files[$d] = $file;
+			}else{
+				$time = strtotime($d.'5959');
+				if($time>$release){
+					if($gitTime){
+						if($time>$gitTime){
+							$files[$d] = $file;
+						}else{
+							iFS::del($file);
+						}
 					}else{
-						iFS::del($file);
+						$files[$d] = $file;
 					}
 				}else{
-					$files[$d] = $file;
+					iFS::del($file);
 				}
-			}else{
-				iFS::del($file);
 			}
+
 		}
 		return $files;
 	}
 	public static function run() {
-		$files = self::get_upgrade_files();
+		$flag  = isset($_GET['force']);
+		$files = self::get_upgrade_files($flag);
 		if($files){
 			self::$upgrade = true;
 			ksort($files);

@@ -324,6 +324,10 @@ class contentAdmincp{
                 $sql.=" AND `id` IN ('{$kws}')";
                 break;
                 case "tkd":   $sql.=" AND CONCAT(title,keywords,description) REGEXP '{$kws}'";break;
+                default:
+                if($this->app['fields'][$_GET['st']]){
+                    $sql.=" AND `".$_GET['st']."`='{$kws}'";
+                }
             }
         }
 

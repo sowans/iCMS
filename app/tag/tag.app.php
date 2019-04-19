@@ -31,6 +31,10 @@ class tagApp extends appsApp {
 
     public function tag($val, $field = 'name', $tpl = 'tag') {
         $val OR iPHP::error_404('TAG不能为空', 30002);
+        if(strpos($val,'\\x') !== false) {
+            $val = str_replace('\\x', '%x', $val);
+            $val = urldecode($val);
+        }
         is_array($val) OR $tag = iDB::row("
             SELECT * FROM `#iCMS@__tag`
             WHERE `$field`='$val'

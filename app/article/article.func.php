@@ -373,13 +373,13 @@ class articleFunc{
 		}
 		$field = '`id`';
 		if ($vars['order'] == 'p') {
-			// $field = 'max(id)'; //INNODB
-			// $sql .= " AND `id` < '{$vars['id']}'";
-			$sql .= " AND `id` < '{$vars['id']}' ORDER BY id DESC LIMIT 1";//MyISAM
+			$field = 'max(id)'; //INNODB
+			$sql .= " AND `id` < '{$vars['id']}'";
+			// $sql .= " AND `id` < '{$vars['id']}' ORDER BY id DESC LIMIT 1";//MyISAM
 		} else if ($vars['order'] == 'n') {
-			// $field = 'min(id)';//INNODB
-			// $sql .= " AND `id` > '{$vars['id']}'";
-			$sql .= " AND `id` > '{$vars['id']}' ORDER BY id ASC LIMIT 1";//MyISAM
+			$field = 'min(id)';//INNODB
+			$sql .= " AND `id` > '{$vars['id']}'";
+			// $sql .= " AND `id` > '{$vars['id']}' ORDER BY id ASC LIMIT 1";//MyISAM
 		}
 		$hash = md5($sql);
 		if ($vars['cache']) {

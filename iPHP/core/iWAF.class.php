@@ -9,6 +9,7 @@
 defined('iPHP_WAF_POST') OR define('iPHP_WAF_POST',true);// 检测POST
 
 class iWAF {
+	public static $IS_CHECK_DATA = true;
 	public static $URL_ARRAY = array(
 		'xss'=>"=\+\v(?:8|9|\+|/)|%0acontent\-(?:id|location|type|transfer\-encoding)",
 	);
@@ -30,6 +31,8 @@ class iWAF {
 	}
 
 	public static function check_data($arr,$waf=null) {
+		if(!self::$IS_CHECK_DATA) return true;
+
 		$waf===null && $waf = self::$ARGS_ARRAY;
 		foreach($arr as $key=>$value){
 			if(is_array($key)||is_object($key)){

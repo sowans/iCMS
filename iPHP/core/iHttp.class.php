@@ -38,7 +38,7 @@ class iHttp{
     public static $CURLOPT_HTTPHEADER     = null;
     public static $CURLOPT_OPTIONS        = array();
 
-    protected static $_count  = 0;
+    protected static $remote_count  = 0;
 
     public static function is_url($url,$strict=false) {
         $url = trim($url);
@@ -201,8 +201,11 @@ class iHttp{
     }
     //获取远程页面的内容
     public static function remote($url, $postdata = null,$files = array()) {
+        function_exists('curl_init') OR print "curl extension is missing. Please check your PHP configuration".PHP_EOL;
+
+        self::$remote_count++;
         $url = str_replace(array(' ','&amp;'), array('%20','&'), $url);
-        (iPHP_SHELL && self::$debug) && print date("Y-m-d H:i:s ")."\033[36miHttp::remote\033[0m [".(self::$_count+1)."] => ".$url.PHP_EOL;
+        (iPHP_SHELL && self::$debug) && print date("Y-m-d H:i:s ")."\033[36miHttp::remote\033[0m [".self::$remote_count."] => ".$url.PHP_EOL;
 
         if (empty($url)) {
             echo "url:empty\n";
@@ -210,180 +213,179 @@ class iHttp{
         }
         self::$SAFE_CHECK && $url = self::is_safe($url);
 
-        if (function_exists('curl_init')) {
-            if (self::$CURLOPT_REFERER === null) {
-                $uri = parse_url($url);
-                self::$CURLOPT_REFERER = $uri['scheme'] . '://' . $uri['host'];
-            }
-            if(stripos($url, 'mmbiz.qpic.cn')!==false){
-                self::$CURLOPT_REFERER = 'http://weixin.qq.com';
-            }
-            $options = array(
-                CURLOPT_URL                     => $url,
-                CURLOPT_REFERER                 => self::$CURLOPT_REFERER,
-                CURLOPT_USERAGENT               => self::$CURLOPT_USERAGENT,
-                CURLOPT_ENCODING                => self::$CURLOPT_ENCODING,
-                CURLOPT_TIMEOUT                 => self::$CURLOPT_TIMEOUT, //数据传输的最大允许时间
-                CURLOPT_CONNECTTIMEOUT          => self::$CURLOPT_CONNECTTIMEOUT, //连接超时时间
-                CURLOPT_RETURNTRANSFER          => 1,
-                CURLOPT_FAILONERROR             => 0,
-                CURLOPT_HEADER                  => 0,
-                CURLOPT_NOSIGNAL                => true,
-                // CURLOPT_DNS_USE_GLOBAL_CACHE => true,
-                // CURLOPT_DNS_CACHE_TIMEOUT    => 86400,
-                CURLOPT_SSL_VERIFYPEER          => false,
-                CURLOPT_SSL_VERIFYHOST          => false,
-                // CURLOPT_FOLLOWLOCATION       => 1,// 使用自动跳转
-                // CURLOPT_MAXREDIRS            => 7,//查找次数，防止查找太深
-            );
-            if (self::$PROXY_URL) {
-                $options[CURLOPT_URL] = self::$PROXY_URL.urlencode($url);
-            }
-            $options[CURLOPT_POST] = 0;
+        if (self::$CURLOPT_REFERER === null) {
+            $uri = parse_url($url);
+            self::$CURLOPT_REFERER = $uri['scheme'] . '://' . $uri['host'];
+        }
+        if(stripos($url, 'mmbiz.qpic.cn')!==false){
+            self::$CURLOPT_REFERER = 'http://weixin.qq.com';
+        }
+        $options = array(
+            CURLOPT_URL                     => $url,
+            CURLOPT_REFERER                 => self::$CURLOPT_REFERER,
+            CURLOPT_USERAGENT               => self::$CURLOPT_USERAGENT,
+            CURLOPT_ENCODING                => self::$CURLOPT_ENCODING,
+            CURLOPT_TIMEOUT                 => self::$CURLOPT_TIMEOUT, //数据传输的最大允许时间
+            CURLOPT_CONNECTTIMEOUT          => self::$CURLOPT_CONNECTTIMEOUT, //连接超时时间
+            CURLOPT_RETURNTRANSFER          => 1,
+            CURLOPT_FAILONERROR             => 0,
+            CURLOPT_HEADER                  => 0,
+            CURLOPT_NOSIGNAL                => true,
+            // CURLOPT_DNS_USE_GLOBAL_CACHE => true,
+            // CURLOPT_DNS_CACHE_TIMEOUT    => 86400,
+            CURLOPT_SSL_VERIFYPEER          => false,
+            CURLOPT_SSL_VERIFYHOST          => false,
+            // CURLOPT_FOLLOWLOCATION       => 1,// 使用自动跳转
+            // CURLOPT_MAXREDIRS            => 7,//查找次数，防止查找太深
+        );
+        if (self::$PROXY_URL) {
+            $options[CURLOPT_URL] = self::$PROXY_URL.urlencode($url);
+        }
+        $options[CURLOPT_POST] = 0;
 
-            if (is_array($files)) {
-                if (class_exists('CURLFile',false)) {
-                    defined('CURLOPT_SAFE_UPLOAD') && $options[CURLOPT_SAFE_UPLOAD] = 1;
-                    foreach ($files as $key => $value) {
-                        $postdata[$key] = new CURLFile($value);
-                    }
-                } else {
-                    if (defined('CURLOPT_SAFE_UPLOAD')) {
-                        if (version_compare('5.6',PHP_VERSION,'>=')) {
-                            $options[CURLOPT_SAFE_UPLOAD] = 0;
-                        }
-                    }
-                    foreach ($files as $key => $value) {
-                        $postdata[$key] = "@$value";
+        if (is_array($files)) {
+            if (class_exists('CURLFile',false)) {
+                defined('CURLOPT_SAFE_UPLOAD') && $options[CURLOPT_SAFE_UPLOAD] = 1;
+                foreach ($files as $key => $value) {
+                    $postdata[$key] = new CURLFile($value);
+                }
+            } else {
+                if (defined('CURLOPT_SAFE_UPLOAD')) {
+                    if (version_compare('5.6',PHP_VERSION,'>=')) {
+                        $options[CURLOPT_SAFE_UPLOAD] = 0;
                     }
                 }
-            }
-            if ($postdata!==null) {
-                $options[CURLOPT_POST] = 1;
-                $options[CURLOPT_POSTFIELDS] = $postdata;
-            }
-            if (self::$CURLOPT_COOKIE) {
-                $options[CURLOPT_COOKIE] = self::$CURLOPT_COOKIE;
-            }
-            if (self::$CURLOPT_COOKIEFILE) {
-                $options[CURLOPT_COOKIEFILE] = self::$CURLOPT_COOKIEFILE;
-            }
-
-            if (self::$CURLOPT_COOKIEJAR) {
-                $options[CURLOPT_COOKIEJAR] = self::$CURLOPT_COOKIEJAR;
-            }
-            if (self::$CURLOPT_HTTPHEADER) {
-                $options[CURLOPT_HTTPHEADER] = self::$CURLOPT_HTTPHEADER;
-            }
-
-            if (self::$CURL_PROXY || self::$CURL_PROXY_ARRAY) {
-                $proxy = self::proxy_test($options);
-                $proxy && self::proxy_set($options, $proxy);
-            }
-            if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')){
-                $options[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
-            }
-            if (self::$callback['progress'] && is_callable(self::$callback['progress'])) {
-                $options[CURLOPT_NOPROGRESS] = FALSE;
-                $options[CURLOPT_PROGRESSFUNCTION] = array(__CLASS__,'progressCallback');
-            }
-            if (self::$callback['header'] && is_callable(self::$callback['header'])) {
-                $options[CURLOPT_HEADERFUNCTION] = self::$callback['header'];
-            }
-
-            self::$CURLOPT_OPTIONS && $options = array_merge($options, self::$CURLOPT_OPTIONS);
-
-            if (self::$callback['options'] && is_callable(self::$callback['options'])) {
-                call_user_func_array(self::$callback['options'],array(&$options));
-            }
-
-            self::$handle = curl_init();
-            curl_setopt_array(self::$handle, $options);
-
-            if(self::$CURL_MULTI){
-                return self::$handle;
-            }
-            $responses = curl_exec(self::$handle);
-            $info  = self::$CURL_INFO   = curl_getinfo(self::$handle);
-            self::$CURL_ERRNO  = curl_errno(self::$handle);
-            self::$CURL_ERRNO && self::$CURL_ERROR = curl_error(self::$handle);
-
-            if (self::$CURL_HTTP_CODE !== null) {
-                $code_array = self::$CURL_HTTP_CODE;
-                is_array($code_array) OR $code_array = explode(',', $code_array);
-
-                if (in_array($info['http_code'], $code_array)) {
-                    return $responses;
+                foreach ($files as $key => $value) {
+                    $postdata[$key] = "@$value";
                 }
             }
+        }
+        if ($postdata!==null) {
+            $options[CURLOPT_POST] = 1;
+            $options[CURLOPT_POSTFIELDS] = $postdata;
+        }
+        if (self::$CURLOPT_COOKIE) {
+            $options[CURLOPT_COOKIE] = self::$CURLOPT_COOKIE;
+        }
+        if (self::$CURLOPT_COOKIEFILE) {
+            $options[CURLOPT_COOKIEFILE] = self::$CURLOPT_COOKIEFILE;
+        }
 
-            if ($info['http_code'] == 404 || $info['http_code'] == 500) {
+        if (self::$CURLOPT_COOKIEJAR) {
+            $options[CURLOPT_COOKIEJAR] = self::$CURLOPT_COOKIEJAR;
+        }
+        if (self::$CURLOPT_HTTPHEADER) {
+            $options[CURLOPT_HTTPHEADER] = self::$CURLOPT_HTTPHEADER;
+        }
+
+        if (self::$CURL_PROXY || self::$CURL_PROXY_ARRAY) {
+            $proxy = self::proxy_test($options);
+            $proxy && self::proxy_set($options, $proxy);
+        }
+        if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')){
+            $options[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
+        }
+        if (self::$callback['progress'] && is_callable(self::$callback['progress'])) {
+            $options[CURLOPT_NOPROGRESS] = FALSE;
+            $options[CURLOPT_PROGRESSFUNCTION] = array(__CLASS__,'progressCallback');
+        }
+        if (self::$callback['header'] && is_callable(self::$callback['header'])) {
+            $options[CURLOPT_HEADERFUNCTION] = self::$callback['header'];
+        }
+        self::$CURLOPT_OPTIONS && $options = array_merge($options, self::$CURLOPT_OPTIONS);
+
+        if (self::$callback['options'] && is_callable(self::$callback['options'])) {
+            call_user_func_array(self::$callback['options'],array(&$options));
+        }
+
+        self::$handle = curl_init();
+        curl_setopt_array(self::$handle, $options);
+
+        if(self::$CURL_MULTI){
+            self::$remote_count = 0;
+            return self::$handle;
+        }
+        $responses = curl_exec(self::$handle);
+        $info  = self::$CURL_INFO   = curl_getinfo(self::$handle);
+        self::$CURL_ERRNO  = curl_errno(self::$handle);
+        self::$CURL_ERRNO && self::$CURL_ERROR = curl_error(self::$handle);
+
+        if (self::$callback['exec'] && is_callable(self::$callback['exec'])) {
+            $flag = call_user_func_array(self::$callback['exec'],array($responses,$info));
+            if($flag===FALSE){
+                self::$remote_count = 0;
+                return $responses;
+            }
+        }
+
+        if (self::$CURL_HTTP_CODE !== null) {
+            $code_array = self::$CURL_HTTP_CODE;
+            is_array($code_array) OR $code_array = explode(',', $code_array);
+
+            if (in_array($info['http_code'], $code_array)) {
+                self::$remote_count = 0;
+                return $responses;
+            }
+        }
+
+        if ($info['http_code'] == 404 || $info['http_code'] == 500) {
+            curl_close(self::$handle);
+            echo $url . "\n";
+            echo "http_code:" . $info['http_code'] . PHP_EOL;
+            unset($responses, $info);
+            self::$remote_count = 0;
+            return false;
+        }
+        if (($info['http_code'] == 301 || $info['http_code'] == 302) && self::$remote_count < self::$CURL_COUNT) {
+            $newurl = $info['redirect_url'];
+            if (empty($newurl)) {
+                curl_setopt(self::$handle, CURLOPT_HEADER, 1);
+                $header = curl_exec(self::$handle);
+                preg_match('|Location: (.*)|i', $header, $matches);
+                $newurl = ltrim($matches[1], '/');
+                if (empty($newurl)) {
+                    self::$remote_count = 0;
+                    return false;
+                }
+
+                if (!strstr($newurl, 'http://')) {
+                    $host = $uri['scheme'] . '://' . $uri['host'];
+                    $newurl = $host . '/' . $newurl;
+                }
+            }
+            $newurl = trim($newurl);
+            curl_close(self::$handle);
+            unset($responses, $info);
+            return self::remote($newurl, $postdata,$files);
+        }
+
+        if (self::$CURL_CONTENT_TYPE !== null && $info['content_type']) {
+            if (stripos($info['content_type'], self::$CURL_CONTENT_TYPE) === false) {
                 curl_close(self::$handle);
-                echo $url . "\n";
-                echo "http_code:" . $info['http_code'] . "\n";
+                echo $url.PHP_EOL;
+                echo "content_type:" . $info['content_type'] .PHP_EOL.PHP_EOL;
                 unset($responses, $info);
+                self::$remote_count = 0;
                 return false;
             }
-            if (($info['http_code'] == 301 || $info['http_code'] == 302) && self::$_count < self::$CURL_COUNT) {
-                $newurl = $info['redirect_url'];
-                if (empty($newurl)) {
-                    curl_setopt(self::$handle, CURLOPT_HEADER, 1);
-                    $header = curl_exec(self::$handle);
-                    preg_match('|Location: (.*)|i', $header, $matches);
-                    $newurl = ltrim($matches[1], '/');
-                    if (empty($newurl)) {
-                        return false;
-                    }
+        }
 
-                    if (!strstr($newurl, 'http://')) {
-                        $host = $uri['scheme'] . '://' . $uri['host'];
-                        $newurl = $host . '/' . $newurl;
-                    }
-                }
-                $newurl = trim($newurl);
+        if (self::$CURL_ERRNO > 0 || empty($responses) || empty($info['http_code'])) {
+            if (self::$remote_count < self::$CURL_COUNT) {
                 curl_close(self::$handle);
                 unset($responses, $info);
-                self::$_count++;
-                return self::remote($newurl, $postdata,$filepath);
-            }
-
-            if (self::$CURL_CONTENT_TYPE !== null && $info['content_type']) {
-                if (stripos($info['content_type'], self::$CURL_CONTENT_TYPE) === false) {
-                    curl_close(self::$handle);
-                    echo $url . "\n";
-                    echo "content_type:" . $info['content_type'] . "\n";
-                    unset($responses, $info);
-                    return false;
-                }
-            }
-
-            if (self::$CURL_ERRNO > 0 || empty($responses) || empty($info['http_code'])) {
-                if (self::$_count < self::$CURL_COUNT) {
-                    self::$_count++;
-                    curl_close(self::$handle);
-                    unset($responses, $info);
-                    return self::remote($url, $postdata,$filepath);
-                } else {
-                    curl_close(self::$handle);
-                    unset($responses, $info);
-                    echo $url . " remote:".self::$_count."\n";
-                    echo "cURL Error (".self::$CURL_ERRNO."): ".self::$CURL_ERROR."\n";
-                    return false;
-                }
-            }
-            curl_close(self::$handle);
-        } elseif (ini_get('allow_url_fopen') && ($handle = fopen($url, 'rb'))) {
-            if (function_exists('stream_get_contents')) {
-                $responses = stream_get_contents($handle);
+                return self::remote($url,$postdata,$files);
             } else {
-                while (!feof($handle) && connection_status() == 0) {
-                    $responses .= fread($handle, 8192);
-                }
+                curl_close(self::$handle);
+                unset($responses, $info);
+                echo $url . " iHttp::remote:".self::$remote_count.PHP_EOL;
+                echo "cURL Error (".self::$CURL_ERRNO.") ".self::$CURL_ERROR.PHP_EOL.PHP_EOL;
+                self::$remote_count = 0;
+                return false;
             }
-            fclose($handle);
-        } else {
-            $responses = file_get_contents(urlencode($url));
         }
+        curl_close(self::$handle);
+        self::$remote_count = 0;
         return $responses;
     }
     public static function send($url, $POSTFIELDS=null,$ret=false) {

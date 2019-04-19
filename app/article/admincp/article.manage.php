@@ -227,11 +227,13 @@ $(function(){
               <th><i class="fa fa-arrows-v"></i></th>
               <th class="span1">ID</th>
               <th>标题</th>
+<?php if($maxperpage<1000){?>
               <th class="span2">日期</th>
               <th style="width:80px;">栏目</th>
               <th style="width:60px;">编辑</th>
               <th class="span1">点/评</th>
               <th style="width:120px;">操作</th>
+<?php } ?>
             </tr>
           </thead>
           <tbody>
@@ -261,6 +263,7 @@ $(function(){
                     <?php echo $value['title'] ; ?>
                   </a>
                 </div>
+<?php if($maxperpage<500){?>
                 <div class="row-actions">
                   <a href="<?php echo __ADMINCP__; ?>=files&indexid=<?php echo $value['id'] ; ?>&appid=<?php echo self::$appid;?>&method=database" class="tip-bottom" title="查看文章图片库" target="_blank"><i class="fa fa-picture-o"></i></a>
                   <a href="<?php echo APP_URI; ?>&do=findpic&id=<?php echo $value['id'] ; ?>" class="tip-bottom" title="查找文章所有图片" target="_blank"><i class="fa fa-picture-o"></i></a>
@@ -303,11 +306,14 @@ $(function(){
                 <?php if($value['pic'] && self::$config['showpic']){ ?>
                 <a href="<?php echo APP_URI; ?>&do=preview&id=<?php echo $value['id'] ; ?>" data-toggle="modal" title="预览"><img src="<?php echo iFS::fp($value['pic'],'+http'); ?>" style="height:120px;"/></a>
                 <?php } ?>
+<?php } ?>
+
               </td>
+<?php if($maxperpage<1000){?>
               <td><?php if($value['pubdate']) echo get_date($value['pubdate'],'Y-m-d H:i');?><br />
                 <?php if($value['postime']) echo get_date($value['postime'],'Y-m-d H:i');?></td>
               <td>
-                <a href="<?php echo admincp::uri("cid=".$value['cid'],$uriArray); ?>"><?php echo $C['name'] ; ?></a><br />
+                <a href="<?php echo admincp::uri("cid=".$value['cid'],$uriArray); ?>"><?php echo $C['name']?:$value['cid'] ; ?></a><br />
                 <?php
                  if($value['scid']){
                    $scid_array = explode(',', $value['scid']);
@@ -350,6 +356,7 @@ $(function(){
                 <a href="<?php echo APP_FURI; ?>&do=del&id=<?php echo $value['id'] ; ?>" target="iPHP_FRAME" class="del btn btn-danger btn-mini" onclick="return confirm('确定要删除?');"/>永久删除</a>
                 <?php } ?>
               </td>
+<?php } ?>
             </tr>
             <?php }  ?>
           </tbody>

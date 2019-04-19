@@ -1059,7 +1059,7 @@ class articleAdmincp{
             $pageNum   = 0;
             $resource  = array();
             foreach ($textArray as $key => $p) {
-                $text = preg_replace(array('/<[\/\!]*?[^<>]*?>/is','/\s*/is'),'',$p);
+                $text = preg_replace(array('/<[\/\!]*?[^<>]*?>/is','/\s{2,}/is'),'',$p);
                 // $pageLen   = strlen($resource);
                 // $output    = implode('',array_slice($textArray,$key));
                 // $outputLen = strlen($output);

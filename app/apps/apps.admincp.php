@@ -71,8 +71,7 @@ class appsAdmincp{
         $apptype = (int)$_POST['apptype'];
         $type    = (int)$_POST['type'];
         $status  = (int)$_POST['status'];
-        // $create  = (int)$_POST['create']?true:false;
-        $create  = true;
+
         if($_POST['menu']){
           $menu = json_decode(stripcslashes($_POST['menu']));
           $menu = addslashes(cnjson_encode($menu));
@@ -120,7 +119,7 @@ class appsAdmincp{
               $fname OR iUI::alert('发现自定义字段中有空字段名!');
               $field_array[$fname] = $value;
               if($output['field']=="MEDIUMTEXT"){
-                $addons_fieldata[$key] = $value;
+                $dataTable_field_array[$key] = $value;
                 unset($fieldata[$key]);//从基本表移除
               }
             }
@@ -140,37 +139,32 @@ class appsAdmincp{
               $array['fields'] = '';
               $msg = "应用信息添加完成!";
             }else if($type=='2'){
-              if($create){
+
                 iDB::check_table($array['app']) && iUI::alert('['.$array['app'].']数据表已经存在!');
-              }
-              if($addons_fieldata){
-                $addons_name = apps_mod::data_table_name($array['app']);
-                if($create){
-                  iDB::check_table($addons_name) && iUI::alert('['.$addons_name.']附加表已经存在!');
+                if($dataTable_field_array){
+                    $dataTable_name = apps_mod::data_table_name($array['app']);
+                    iDB::check_table($dataTable_name) && iUI::alert('['.$dataTable_name.']附加表已经存在!');
                 }
-              }
 
               //创建基本表
               $tb = apps_db::create_table(
                 $array['app'],
                 apps_mod::get_field_array($fieldata),//获取字段数组
                 apps_mod::base_fields_index(),//索引
-                $create
+                true
               );
               array_push ($tb,null,$array['name']);
               $table_array = array();
               $table_array[$array['app']]= $tb;//记录基本表名
 
-              //有MEDIUMTEXT类型字段就创建xxx_data附加表
-              if($addons_fieldata){
+              //有MEDIUMTEXT类型字段就创建xxx_cdata附加表
+              if($dataTable_field_array){
                 $union_id = apps_mod::data_union_key($array['app']);//关联基本表id
-                $addons_base_fields = apps_mod::data_base_fields($array['app']);//xxx_data附加表的基础字段
-                $addons_fieldata = $addons_base_fields+$addons_fieldata;
-                $table_array += apps_mod::data_create_table($addons_fieldata,$addons_name,$union_id,$create);
-                // //添加到字段数据里
-                // $field_array = array_merge($field_array,$addons_base_fields);
-                // $array['fields'] = addslashes(cnjson_encode($field_array));
+                $dataTbale_base_fields = apps_mod::data_base_fields($array['app']);//xxx_data附加表的基础字段
+                $dataTable_field_array = $dataTbale_base_fields+$dataTable_field_array;
+                $table_array += apps_mod::data_create_table($dataTable_field_array,$dataTable_name,$union_id,true);
               }
+
               $table_array+=apps_meta::table_array($app);
 
               $array['table']  = $table_array;
@@ -203,76 +197,46 @@ class appsAdmincp{
              * 找出字段数据中的 MEDIUMTEXT类型字段
              * PS:函数内会unset(json_field[key]) 所以要在 基本表make_alter_sql前执行
              */
-            $_addons_json_field = apps_mod::find_MEDIUMTEXT($_json_field);
-            $addons_json_field = apps_mod::find_MEDIUMTEXT($json_field);
-
-            // print_r($_addons_json_field);
-            // print_r($addons_json_field);
+            $_DT_json_field = apps_mod::find_MEDIUMTEXT($_json_field);
+            $DT_json_field  = apps_mod::find_MEDIUMTEXT($json_field);
 
             //基本表 新旧数据计算交差集 origin 为旧字段名
-            $sql_array = apps_db::make_alter_sql($json_field,$_json_field,$_POST['origin']);
-            if($sql_array){
+            $alter_sql_array = apps_db::make_alter_sql($json_field,$_json_field,$_POST['origin']);
+            if($alter_sql_array){
                 $t_fields  = apps_db::fields('#iCMS@__'.$array['app']);
-                foreach ($sql_array as $skey => $sql) {
+                foreach ($alter_sql_array as $skey => $sql) {
                     $p = explode('`', $sql);
                     if(strpos($sql, 'CHANGE')!==false || strpos($sql, 'DROP COLUMN')!==false){
                         if(!$t_fields[$p[1]]){//检查当前表 字段是否存在
-                            unset($sql_array[$skey]);
+                            unset($alter_sql_array[$skey]);
                         }
                     }
                 }
-                $sql_array && apps_db::alter_table($array['app'],$sql_array);
+                $alter_sql_array && apps_db::alter_table($array['app'],$alter_sql_array);
             }
 
-            //MEDIUMTEXT类型字段 新旧数据计算交差集 origin 为旧字段名
-            $addons_sql_array = apps_db::make_alter_sql($addons_json_field,$_addons_json_field,$_POST['origin']);
-
-            $addons_name = apps_mod::data_table_name($array['app']);
-            //存在附加表数据
-            if($addons_fieldata){
-              if($addons_sql_array){
-                //附加表名
-                //检测附加表是否存在
-                if($table_array[$addons_name] && iDB::check_table($addons_name)){
-                  //表存在执行 alter
-                  apps_db::alter_table($addons_name,$addons_sql_array);
-                }else{
-                  // 不存在 创建
-                  if($addons_fieldata){
-                    iDB::check_table($addons_name) && iUI::alert('['.$addons_name.']附加表已经存在!');
-                    //有MEDIUMTEXT类型字段创建xxx_data附加表
-                    $union_id = apps_mod::data_union_key($array['app']);
-                    $addons_base_fields = apps_mod::data_base_fields($array['app']);//xxx_data附加表的基础字段
-                    $addons_fieldata = $addons_base_fields+$addons_fieldata;
-                    $table_array += apps_mod::data_create_table($addons_fieldata,$addons_name,$union_id);
+            //附加表
+            $dataTable_name = apps_mod::data_table_name($array['app']);
+            if($table_array[$dataTable_name] && iDB::check_table($dataTable_name)){
+                //MEDIUMTEXT类型字段 新旧数据计算交差集 origin 为旧字段名
+                $dataTable_alter_array = apps_db::make_alter_sql($DT_json_field,$_DT_json_field,$_POST['origin']);
+                //表存在 执行alter
+                $dataTable_alter_array && apps_db::alter_table($dataTable_name,$dataTable_alter_array);
+                //表存在 但无表结构数据 则删除表
+                if(empty($dataTable_field_array)){
+                    apps_mod::drop_table($dataTable_field_array,$table_array,$dataTable_name);
                     $array['table'] = addslashes(cnjson_encode($table_array));
-                    // //添加到字段数据里
-                    // $field_array = array_merge($field_array,$addons_base_fields);
-                    // $array['fields'] = addslashes(cnjson_encode($field_array));
-                  }
                 }
-              }
             }else{
-              if($apptype=="2"){ //只删除自定义应用的表
-                //不存在附加表数据 直接删除附加表 返回 table的json值 $table_array为引用参数
-                apps_mod::drop_table($addons_fieldata,$table_array,$addons_name);
-                $array['table'] = addslashes(cnjson_encode($table_array));
-              }else{
-                if($table_array){
-                  $data_tables = next($table_array);
-                  $union_id = apps_mod::data_union_key($array['app']);
-                  //判断是否自动生成的表
-                  if(is_array($data_tables) &&
-                    in_array(apps_mod::DATA_PRIMARY_KEY ,$data_tables) &&
-                    in_array($union_id ,$data_tables))
-                  {
-                    apps_mod::drop_table($addons_fieldata,$table_array,$addons_name);
+                //表不存在 但有表结构数据 则创建表
+                if($dataTable_field_array){
+                    //有MEDIUMTEXT类型字段创建xxx_cdata附加表
+                    $union_id = apps_mod::data_union_key($array['app']);
+                    $dataTbale_base_fields = apps_mod::data_base_fields($array['app']);//xxx_cdata附加表的基础字段
+                    $dataTable_field_array = $dataTbale_base_fields+$dataTable_field_array;
+                    $table_array += apps_mod::data_create_table($dataTable_field_array,$dataTable_name,$union_id);
                     $array['table'] = addslashes(cnjson_encode($table_array));
-                  }else{
-                    apps_db::alter_table($addons_name,$addons_sql_array);
-                  }
                 }
-              }
             }
 
             iDB::update('apps', $array, array('id'=>$id));

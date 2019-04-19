@@ -543,13 +543,11 @@ class spider_content {
         }
     }
     public static function real_empty($text){
-        $text = str_replace(array('&nbsp;','　'), '', $text);
-        $text = preg_replace(array(
-            '/\s*/','/\r*/','/\n*/',
-            '@<p[^>]*>\s*<br[^>]*>\s*</p>@',
-            '@<(\w+)>\s*<\$1>@',
-            '@</*(p|strong|b|span)>@'
-        ), '', $text);
+        $text = strip_tags($text, '<img>');
+        $text = preg_replace(array('/\s*/','/\r*/','/\n*/'), '', $text);
+        $text = str_replace(array('&nbsp;','&#12288;'),'', $text);
+        $text = htmlentities($text);
+        $text = str_replace(array('&nbsp;','&#12288;','&amp;nbsp;','&amp;#12288;'),'', $_text);
         $text = trim($text);
         return $text;
     }

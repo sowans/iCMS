@@ -269,5 +269,6 @@ window.setTimeout(function(){
 <?php iPHP::callback(array('apps_storeAdmincp','check_update'));?>
 <?php iPHP::callback(array('patchAdmincp','check_version'));?>
 <?php iPHP::callback(array('patchAdmincp','check_update'));?>
+<?php iPHP::callback(array('patchAdmincp','check_upgrade'));?>
 <?php iPHP::callback(array('cacheAdmincp','clean_cache'));?>
 <?php admincp::foot();?>

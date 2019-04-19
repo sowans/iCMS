@@ -137,7 +137,7 @@ class appsApp {
             AND `status` ='1' LIMIT 1;",
         ARRAY_A);
 
-        if($flag===false && empty($data)){
+        if($flag===false){
             return $data;
         }
 
