@@ -427,6 +427,7 @@ function rule_data_rule_td($dkey,$data = array()){
         </optgroup>
         <optgroup label="特殊处理">
           <option value='@check_urls' title="独立检查,链接保存在新表">链接检查</option>
+          <option value='@collect_urls' title="收集其它链接">收集链接</option>
         </optgroup>
       </select>
       <select multiple="multiple" class="hide" name="<?php echo $DR_name;?>[helper][]" id="sort_<?php echo $DR_id;?>_helper"></select>

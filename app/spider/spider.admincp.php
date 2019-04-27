@@ -101,11 +101,13 @@ class spiderAdmincp {
 		$doType == "inbox" && $sql .= " AND `publish` ='0'";
 		$_GET['pid'] && $sql .= " AND `pid` ='" . (int) $_GET['pid'] . "'";
 		$_GET['rid'] && $sql .= " AND `rid` ='" . (int) $_GET['rid'] . "'";
+		$_GET['status'] && $sql .= " AND `status` ='" . (int) $_GET['status'] . "'";
 		$_GET['starttime'] && $sql .= " AND `addtime`>=UNIX_TIMESTAMP('" . $_GET['starttime'] . " 00:00:00')";
 		$_GET['endtime'] && $sql .= " AND `addtime`<=UNIX_TIMESTAMP('" . $_GET['endtime'] . " 23:59:59')";
 
 		$sql .= category::search_sql($this->cid);
 
+		$projArray = spider_project::option(0, 'array');
 		$ruleArray = spider_rule::option(0, 'array');
 		$postArray = spider_post::option(0, 'array');
 		list($orderby,$orderby_option) = get_orderby();

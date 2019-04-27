@@ -70,27 +70,28 @@ class spider_content {
             list($length,$numeric) = explode(',', $random);
             return random($length, empty($numeric)?0:1);
         }
-        if(is_array($html)){
-            if($data['rule']==='<%content%>'){
-                $content = $html;
-            }else{
-                $contentArray      = array();
+        if($data['rule']==='<%content%>'){
+            $content = $html;
+        }else{
+            $contentArray = array();
+            if(is_array($html)){
                 foreach ($html as $hkey => $_html) {
                     $contentArray[] = spider_content::match($_html,$data,$rule);
                 }
                 $content = implode('#--iCMS.PageBreak--#', $contentArray);
-                unset($contentArray,$_html);
+                unset($_html);
+            }else{
+                self::$hash        = array();
+                $_content          = spider_content::match($html,$data,$rule);
+                $cmd5              = md5($_content);
+                $contentArray[]    = $_content;
+                self::$hash[$cmd5] = spider::$url;
+                $data['page'] && self::page_data($html,$data,$rule,$contentArray);
+                $content = implode('#--iCMS.PageBreak--#', $contentArray);
+                // $content = $contentArray;
+                unset($_content);
             }
-        }else{
-            $contentArray      = array();
-            self::$hash        = array();
-            $_content          = spider_content::match($html,$data,$rule);
-            $cmd5              = md5($_content);
-            $contentArray[]    = $_content;
-            self::$hash[$cmd5] = spider::$url;
-            $data['page'] && self::page_data($html,$data,$rule,$contentArray);
-            $content = implode('#--iCMS.PageBreak--#', $contentArray);
-            unset($contentArray,$_content);
+            unset($contentArray);
         }
         unset($html);
         //遍历 例:FOREACH@<p><img src="[KEY@source]" />[KEY@add_intro]</p>
@@ -181,6 +182,7 @@ class spider_content {
                 echo "<b>3.发布前处理</b>".htmlspecialchars($data['cleanafter']).'<br />';
             }
         }
+        is_array($content) && $content = array_filter($content);
         if($sfuncArray)foreach ($sfuncArray as $key => $func) {
             $content = self::helper_sfunc($content,$func,$rule);
         }
@@ -264,10 +266,6 @@ class spider_content {
         }
         if ($data['img_absolute'] && $content) {
             $content = spider_tools::img_url_complement($content,$rule['__url__']);
-        }
-        //@check_urls
-        if ($data['check_urls']) {
-            $content && $content = spider_tools::check_urls($content);
         }
         if ($data['capture']) {
             $content && $content = spider_tools::remote($content);
@@ -354,6 +352,11 @@ class spider_content {
         //@check_urls
         if ($data['check_urls']) {
             $content && $content = spider_tools::check_urls($content);
+        }
+        //@collect_urls
+        if ($data['collect_urls']) {
+            $content && $content = spider_tools::collect_urls($content);
+
         }
         return $content;
     }
@@ -579,9 +582,10 @@ class spider_content {
                     }else{
                         $_content = phpQuery::pq($doc_value)->$content_fun();
                     }
+
                     $cmd5 = md5($_content);
                     if($match_hash[$cmd5]){
-                        break;
+                        continue;
                     }
                     if ($data['trim']) {
                         $_content = trim($_content);

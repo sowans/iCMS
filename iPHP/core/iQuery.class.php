@@ -148,7 +148,7 @@ class iQuery {
      * @return [type]       [description]
      */
     public function attr_array($attr=null) {
-        preg_match_all('@([\w-_]+)=["|\']*(.+?[^"|\'|>|/]*)["|\']*@is', $this->context, $matches);
+        preg_match_all('@([\w\-_]+)=["|\']*(.+?[^"|\'|>|/]*)["|\']*@is', $this->context, $matches);
         if($matches[1]){
             $array = array();
             foreach ($matches[1] as $key => $value) {

@@ -24,4 +24,15 @@ class spider_project {
     	}
         return $project;
     }
+    public static function option($id = 0, $output = null) {
+        $rs = iDB::all("SELECT * FROM `#iCMS@__spider_project` order by id desc");
+        foreach ((array) $rs AS $proj) {
+            $rArray[$proj['id']] = $proj['name'];
+            $opt .= "<option value='{$proj['id']}'" . ($id == $proj['id'] ? " selected='selected'" : '') . ">{$proj['name']}[id='{$proj['id']}'] </option>";
+        }
+        if ($output == 'array') {
+            return $rArray;
+        }
+        return $opt;
+    }
 }

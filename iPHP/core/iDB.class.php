@@ -156,14 +156,14 @@ class iDataBase {
         static::query("INSERT ".($IGNORE?'IGNORE':'')." INTO ".static::table($table)." (`" . implode('`,`',$fields) . "`) VALUES ('".implode("','",$data)."')");
         return static::$insert_id;
     }
-    public static function insert_multi($table,$data,$fields=null) {
+    public static function insert_multi($table,$data,$IGNORE=false,$fields=null) {
         $datasql = array();
         foreach ((array)$data as $key => $d) {
             $fields===null && $fields = array_keys($d);
             $datasql[]= "('".implode("','",$d)."')";
         }
         if($datasql){
-            return static::query("INSERT INTO ".static::table($table)." (`" . implode('`,`',$fields) . "`) VALUES ".implode(',',$datasql));
+            return static::query("INSERT ".($IGNORE?'IGNORE':'')." INTO ".static::table($table)." (`" . implode('`,`',$fields) . "`) VALUES ".implode(',',$datasql));
         }
     }
     /**

@@ -12,9 +12,11 @@ admincp::head();
 ?>
 <script type="text/javascript">
 $(function(){
-	<?php if($_GET['cid']){  ?>
+  iCMS.select('status',"<?php echo $_GET['status']; ?>");
+  iCMS.select('rid',"<?php echo $_GET['rid'] ; ?>");
+  iCMS.select('pid',"<?php echo $_GET['pid'] ; ?>");
 	iCMS.select('cid',"<?php echo $_GET['cid'] ; ?>");
-	<?php } ?>
+
 	$("#<?php echo APP_FORMID;?>").batch();
 });
 </script>
@@ -38,6 +40,24 @@ $(function(){
           <input type="checkbox" name="sub" id="sub"/>
           子栏目 </span>
         </div>
+        <div class="input-prepend"> <span class="add-on">采集方案</span>
+          <select name="pid" id="pid" class="chosen-select span3">
+            <option value=""></option>
+            <option value="all">所有方案</option>
+            <?php foreach ($projArray as $key => $value) {
+              echo '<option value="'.$key.'">'.$value.'</option>';
+            };?>
+          </select>
+        </div>
+        <div class="input-prepend"> <span class="add-on">采集规则</span>
+          <select name="rid" id="rid" class="chosen-select span3">
+            <option value=""></option>
+            <option value="all">所有规则</option>
+            <?php foreach ($ruleArray as $key => $value) {
+              echo '<option value="'.$key.'">'.$value.'</option>';
+            };?>
+          </select>
+        </div>
         <div class="input-prepend input-append"><span class="add-on"><i class="fa fa-calendar"></i></span>
           <input type="text" class="ui-datepicker" name="starttime" value="<?php echo $_GET['starttime']; ?>" placeholder="开始时间" />
           <span class="add-on">-</span>
@@ -49,6 +69,16 @@ $(function(){
           <span class="add-on">条记录</span>
         </div>
         <div class="clearfloat mb10"></div>
+        <div class="input-prepend">
+          <span class="add-on">状 态</span>
+          <select name="status" id="status" class="chosen-select span3">
+            <option value=""></option>
+            <option value="all">所有状态</option>
+            <option value="0"> 未发布 [status='0']</option>
+            <option value="1" selected='selected'> 发布 [status='1']</option>
+            <?php echo propAdmincp::get("status") ; ?>
+          </select>
+        </div>
         <div class="input-prepend input-append"> <span class="add-on">关键字</span>
           <input type="text" name="keywords" class="span2" id="keywords" value="<?php echo $_GET['keywords']; ?>" />
           <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i> 搜 索</button>
@@ -100,6 +130,7 @@ $(function(){
               <td><?php echo $rs[$i]['indexid']; ?></td>
               <td><?php echo $rs[$i]['status']; ?>/<?php echo $rs[$i]['publish']; ?></td>
               <td>
+<?php if($_GET['perpage']<500){?>
                 <a href="<?php echo __ADMINCP__; ?>=files&indexid=<?php echo $rs[$i]['indexid'] ; ?>&method=database" class="tip-bottom" title="查看内容使用的图片" target="_blank"><i class="fa fa-picture-o"></i></a>
                 <a href="<?php echo __ADMINCP__; ?>=spider_project&do=add&pid=<?php echo $rs[$i]['pid'] ; ?>" class="btn btn-small" target="_blank"><i class="fa fa-edit"></i> 编辑方案</a>
                 <a href="<?php echo __ADMINCP__; ?>=spider_rule&do=add&rid=<?php echo $rs[$i]['rid'] ; ?>" class="btn btn-small" target="_blank"><i class="fa fa-edit"></i> 编辑规则</a>
@@ -119,6 +150,7 @@ $(function(){
                 <?php if($rs[$i]['indexid']){?>
                 <a href="<?php echo APP_FURI; ?>&do=delcontent&sid=<?php echo $rs[$i]['id']; ?>&pid=<?php echo $rs[$i]['pid']; ?>&indexid=<?php echo $rs[$i]['indexid'] ; ?>" target="iPHP_FRAME" class="del btn btn-small btn-danger" title='删除采集数据和发布的内容'  onclick="return confirm('确定要删除?');"/><i class="fa fa-trash-o"></i> 删除 & 内容</a>
                 <?php }?>
+<?php }?>
               </td>
             </tr>
             <?php } ?>

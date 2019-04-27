@@ -593,6 +593,53 @@ class spider_tools {
         }
         return $content;
     }
+    public static function collect_urls($content) {
+        if(is_array($content)){
+            $content = array_filter($content);
+            $content = array_unique($content);
+        }
+
+        if(spider::$dataTest){
+
+        }
+
+        $pid   = spider::$pid;
+        $rid   = spider::$rid;
+        $table = 'spider_collect_urls_r'.$rid;
+        $path  = iPHP_APP_CACHE.'/spider/'.$table.'.txt';
+        if($rid){
+            if(!file_exists($path)){
+                if(!iDB::check_table($table)){
+                    $sql ='
+    CREATE TABLE `#iCMS@__'.$table.'` (
+      `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+      `url` varchar(255) NOT NULL DEFAULT \'\',
+      `pid` int(10) unsigned NOT NULL DEFAULT \'0\',
+      `iid` int(10) unsigned NOT NULL DEFAULT \'0\',
+      PRIMARY KEY (`id`),
+      UNIQUE KEY `url` (`url`),
+      KEY `pid` (`pid`),
+      KEY `iid` (`iid`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET='.iPHP_DB_CHARSET;
+                    iDB::query($sql);
+                    file_put_contents($path, time());
+                }
+            }
+
+            if($pid){
+                $data = array();
+                if(is_array($content)){
+                    foreach ($content as $url) {
+                        $data[]= array('url'=>$url,'pid'=>$pid);
+                    }
+                    $data && iDB::insert_multi($table,$data,true);
+                }else{
+                    iDB::insert($table,array('url'=>$content,'pid'=>$pid),true);
+                }
+            }
+        }
+        return $content;
+    }
     public static function url_complement($baseUrl,$href){
         $href = trim($href);
         if (iFS::checkHttp($href)){

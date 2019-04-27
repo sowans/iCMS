@@ -248,6 +248,10 @@ class spider_data {
                     $responses[$key] = str_replace('#--iCMS.PageBreak--#', ',', $responses[$key]);
                 }
             }
+            if(is_array($responses[$key])){
+                $responses[$key] = array_filter($responses[$key]);
+                $responses[$key] = array_unique($responses[$key]);
+            }
         }
 
         if(isset($responses['title']) && empty($responses['title'])){
