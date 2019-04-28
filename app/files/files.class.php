@@ -51,7 +51,7 @@ class files {
     public static $_MAP_TABLE       = null;
 
     public static $PREG_IMG         = '@<img[^>]+src=(["\']?)(.*?)\\1[^>]*?>@is';
-    public static $IMG_EXT          = array('jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp');
+    public static $IMG_EXT          = array('jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'svg');
 
     public static function config($table = array()) {
         empty($table) && $table = array('files','files_map');

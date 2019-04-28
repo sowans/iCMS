@@ -60,7 +60,7 @@ if($_POST['action']=='install'){
 	iPHP_DB_PASSWORD OR iUI::alert("请填写数据库密码",'js:top.callback("#DB_PASSWORD");');
 	iPHP_DB_NAME OR iUI::alert("请填写数据库名",'js:top.callback("#DB_NAME");');
 	strstr(iPHP_DB_PREFIX, '.') && iUI::alert("您指定的数据表前缀包含点字符，请返回修改",'js:top.callback("#DB_PREFIX");');
-	//preg_match('/([a-zA-z\_]+)/is', $db_prefix) OR iUI::alert("您指定的数据表前缀包含非法字符，请返回修改",'js:top.callback("#DB_PREFIX");');
+	preg_match('/^[a-zA-z\_]+$/is', iPHP_DB_PREFIX) OR iUI::alert("您指定的数据表前缀包含非法字符，请返回修改",'js:top.callback("#DB_PREFIX");');
 
 	$admin_name OR iUI::alert("请填写超级管理员账号",'js:top.callback("#ADMIN_NAME");');
 	$admin_password OR iUI::alert("请填写超级管理员密码",'js:top.callback("#ADMIN_PASSWORD");');
@@ -143,11 +143,17 @@ if($_POST['action']=='install'){
         config_set($v,$n);
     }
     configAdmincp::cache();
-
+    del_patch_files();
 //写入数据库配置<hr />开始安装数据库<hr />数据库安装完成<hr />设置超级管理员<hr />更新网站缓存<hr />
 	iFS::write($lock_file,'iCMS.'.time(),false);
 	iFS::rmdir(iPATH.'install');
 	iUI::success("安装完成",'js:top.install.step4();');
+}
+function del_patch_files() {
+    $files = glob(iPATH."app/patch/files/*.php");
+    if(is_array($files)) foreach ($files as $file) {
+        iFS::del($file);
+    }
 }
 function config_set($value, $name) {
     is_array($value) && $value = addslashes(json_encode($value));

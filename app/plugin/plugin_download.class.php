@@ -25,7 +25,8 @@ class plugin_download{
         return $content;
     }
     public static function markdown($content) {
-        preg_match_all('/!\[(.*?)\]\((.+)\)/', $content, $matches);
+        $_content = str_replace('![', "\n![", $content);
+        preg_match_all('/!\[(.*?)\]\((.+)\)/', $_content, $matches);
 
         foreach ((array)$matches[2] as $key => $url) {
             $path = iFS::fp($url,'-http');
@@ -40,7 +41,7 @@ class plugin_download{
                 $durl = filesApp::get_url($name);
                 $title = iSecurity::escapeStr(addslashes($title));
                 $replace[$key] = '<a class="attachment" href="'.$durl.'" target="_blank" title="点击下载['.$title.']">'.$title.'</a>';
-                $search [$key] = $matches[0][$key];
+                $search [$key] = trim($matches[0][$key]);
             }
         }
 

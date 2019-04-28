@@ -82,7 +82,7 @@ class tag {
         return $self;
     }
 	public static function add($tags,$userid="0",$iid="0",$cid='0',$tcid='0') {
-		$a        = explode(',',$tags);
+		$a        = is_array($tags)?$tags:explode(',',$tags);
 		$c        = count($a);
 		$tagArray = array();
 	    for($i=0;$i<$c;$i++) {

@@ -272,12 +272,12 @@ class iView {
                     return $_tpl;
                 }
             }
-            // iPHP/$tpl
-            if ($_tpl = self::check_tpl($tpl, iPHP_APP)) {
-                return $_tpl;
-            }
             // iPHP/设备名/$tpl
             if ($_tpl = self::check_tpl($tpl, iPHP_APP.'/'.self::$config['template']['device'])) {
+                return $_tpl;
+            }
+            // iPHP/$tpl
+            if ($_tpl = self::check_tpl($tpl, iPHP_APP)) {
                 return $_tpl;
             }
             // // 其它移动设备$tpl
@@ -315,7 +315,9 @@ class iView {
     public static function check_tpl($tpl, $dir=null,$flag=null) {
         $flag===null && $flag = iPHP_APP.':/';
         $dir && $tpl = str_replace($flag, $dir, $tpl);
-        if (is_file(self::$handle->template_dir . "/" . $tpl)) {
+        $tpl  = ltrim($tpl,'/');
+        $tdir = rtrim(self::$handle->template_dir,'/');
+        if (is_file($tdir . "/" . $tpl)) {
             return $tpl;
         }
         return false;

@@ -18,7 +18,7 @@ class iFS {
 	public static $ERROR = null;
 	public static $ERROR_TYPE = false;
 	public static $EXTS = array(
-		"png", "jpg", "jpeg", "gif", "bmp", "webp", "psd", "tif",
+		"png", "jpg", "jpeg", "gif", "bmp", "webp", "psd", "tif","svg",
 		"flv", "swf", "mkv", "avi", "rm", "rmvb", "mpeg", "mpg", "mp4",
 		"ogg", "ogv", "mov", "wmv", "webm", "mp3","aac","m4a", "wav", "mid", "amr",
 		"rar", "zip", "tar", "gz", "7z", "bz2", "cab", "iso",
