@@ -264,7 +264,8 @@ class apps_store {
     }
     public static function setup_update($app,$flag=false){
         $ROOTPATH = iPHP_APP_DIR.'/'.$app.'/';
-        foreach (glob($ROOTPATH."iCMS.APP.UPDATE.*.php") as $filename) {
+        $array = glob($ROOTPATH."iCMS.APP.UPDATE.*.php");
+        if(is_array($array)) foreach ($array as $filename) {
             $d    = str_replace(array($ROOTPATH,'iCMS.APP.UPDATE.','.php'), '', $filename);
             $time = strtotime($d.'00');
             if($time>self::$uptime){
@@ -273,7 +274,8 @@ class apps_store {
         }
         //插件
         $ROOTPATH = iPHP_APP_DIR.'/';
-        foreach (glob($ROOTPATH."iCMS.".$app.".UPDATE.*.php") as $filename) {
+        $array2 = glob($ROOTPATH."iCMS.".$app.".UPDATE.*.php");
+        if(is_array($array2)) foreach ($array2 as $filename) {
             $d    = str_replace(array($ROOTPATH,'iCMS.'.$app.'.UPDATE.','.php'), '', $filename);
             $time = strtotime($d.'00');
             if($time>self::$uptime){

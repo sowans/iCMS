@@ -106,7 +106,11 @@ class iDB extends iDataBase {
 
     //  Get SQL/DB error.
     public static function get_error() {
-        self::$last_error = mysql_error(self::$link);
+        if(is_bool(self::$link)){
+            self::$last_error = mysql_error();
+        }else{
+            self::$last_error = mysql_error(self::$link);
+        }
         return self::$last_error;
     }
 }

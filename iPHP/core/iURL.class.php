@@ -268,6 +268,11 @@ class iURL {
             $category['htmlext'] && self::$config['ext'] = $category['htmlext'];
 
             $i = self::build($url,$router_dir,$router_url);
+
+            if(strpos($i->href,self::PAGE_SIGN)!==false) {
+                $purl = $i->href;
+            }
+
             self::page_sign($i);
 
             if($purl){

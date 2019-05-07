@@ -406,9 +406,8 @@ class iDataBase {
 
         static::get_error();
         $error OR $error  = static::$last_error;
-
         if ($error) {
-            $message = "<strong>iDB error:</strong> [$error]<br /><code>".static::$last_query."</code>";
+            $message = "<strong>iDB error:</strong> {$error} [".static::$last_error."]<br /><code>".static::$last_query."</code>";
             trigger_error($message,E_USER_ERROR);
         } else {
             return false;
@@ -429,6 +428,7 @@ class iDataBase {
         unset($trace,$backtrace);
     }
 }
+
 if(strtolower(iPHP_DB_TYPE)==="sqlite"){
     // require_once iPHP_CORE.'/DB/SQLite.class.php';//还有很多问题暂时不能用
 }elseif(strtolower(iPHP_DB_TYPE)==="pgsql"){

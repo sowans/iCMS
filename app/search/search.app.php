@@ -48,7 +48,7 @@ class searchApp {
     private function search_log($search){
         // $interval = 30;
         // $ip    = iPHP::get_ip();
-        // $time  = time();
+        $time  = time();
         // $key   = 'search/'.$ip;
         // $stime = iCache::get($key);
 
