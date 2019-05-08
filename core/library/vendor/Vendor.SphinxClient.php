@@ -12,18 +12,21 @@ defined('iPHP_LIB') OR exit('iPHP vendor need define iPHP_LIB');
 require dirname(__FILE__) .'/SphinxClient/sphinx.class.php';
 
 function SphinxClient($hosts) {
-
-	if(empty($hosts)){
-		return false;
-	}
-
-	$SC = new SphinxClient();
-	if(strstr($hosts, 'unix:')){
-		$hosts	= str_replace("unix://",'',$hosts);
-		$SC->SetServer($hosts);
+	if(isset($GLOBALS['iSphinx'])){
+		$GLOBALS['iSphinx']->init();
 	}else{
-		list($host,$port)=explode(':',$hosts);
-		$SC->SetServer($host,(int)$port);
+		if(empty($hosts)){
+			return false;
+		}
+
+		$GLOBALS['iSphinx'] = new SphinxClient();
+		if(strstr($hosts, 'unix:')){
+			$hosts	= str_replace("unix://",'',$hosts);
+			$GLOBALS['iSphinx']->SetServer($hosts);
+		}else{
+			list($host,$port)=explode(':',$hosts);
+			$GLOBALS['iSphinx']->SetServer($host,(int)$port);
+		}
 	}
-	return $SC;
+	return $GLOBALS['iSphinx'];
 }

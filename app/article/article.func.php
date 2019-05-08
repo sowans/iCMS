@@ -261,13 +261,14 @@ class articleFunc{
 		$page = (int) $_GET['page'];
 		$maxperpage = isset($vars['row']) ? (int) $vars['row'] : 10;
 		$start = ($page && isset($vars['page'])) ? ($page - 1) * $maxperpage : 0;
-		$SPH->SetMatchMode(SPH_MATCH_EXTENDED);
+		$SPH->SetMatchMode(SPH_MATCH_EXTENDED2);
 		if ($vars['mode']) {
 			$vars['mode'] == "SPH_MATCH_BOOLEAN" && $SPH->SetMatchMode(SPH_MATCH_BOOLEAN);
 			$vars['mode'] == "SPH_MATCH_ANY" && $SPH->SetMatchMode(SPH_MATCH_ANY);
 			$vars['mode'] == "SPH_MATCH_PHRASE" && $SPH->SetMatchMode(SPH_MATCH_PHRASE);
 			$vars['mode'] == "SPH_MATCH_ALL" && $SPH->SetMatchMode(SPH_MATCH_ALL);
 			$vars['mode'] == "SPH_MATCH_EXTENDED" && $SPH->SetMatchMode(SPH_MATCH_EXTENDED);
+			$vars['mode'] == "SPH_MATCH_EXTENDED2" && $SPH->SetMatchMode(SPH_MATCH_EXTENDED2);
 		}
 
 		isset($vars['userid']) && $SPH->SetFilter('userid', array($vars['userid']));
@@ -292,11 +293,9 @@ class articleFunc{
 		}
 		$SPH->SetLimits($start, $maxperpage, 10000);
 
-		$orderby = '@id DESC, @weight DESC';
-		$order_sql = ' order by id DESC';
+		$orderby = '@weight DESC, @id DESC';
 
 		$vars['orderby'] && $orderby = $vars['orderby'];
-		$vars['ordersql'] && $order_sql = ' order by ' . $vars['ordersql'];
 
 		$vars['pic'] && $SPH->SetFilter('haspic', array(1));
 		$vars['id!'] && $SPH->SetFilter('@id', array($vars['id!']), true);
@@ -330,6 +329,9 @@ class articleFunc{
 		}
 
 		$where_sql = " `id` in($ids)";
+		$order_sql = " ORDER BY FIELD(`id`,{$ids})";
+		$vars['ordersql'] && $order_sql = ' ORDER BY ' . $vars['ordersql'];
+
 		$offset = 0;
 		if ($vars['page']) {
 			$total = (int)$vars['total'];

@@ -423,6 +423,9 @@ class SphinxClient
 		// per-client-object settings
 		$this->_host		= "unix:///tmp/sphinx.sock";
 		$this->_port		= 0;
+		$this->init();
+	}
+	function init(){
 		$this->_path		= false;
 		$this->_socket		= false;
 
