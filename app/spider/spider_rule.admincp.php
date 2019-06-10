@@ -82,20 +82,28 @@ class spider_ruleAdmincp {
 		$rs['rule'] && $rule = $rs['rule'];
 		if (empty($rule['data'])) {
 			$rule['data'] = array(
-				array('name' => 'title','helper' => array('trim'),'empty' => true),
-				array('name' => 'body', 'helper' => array('trim','format'),'empty' => true,'page' => true, 'multi' => true),
+				array('name' => 'title','empty' => true,
+					'process'=>array(
+						array('helper'=>'trim'),
+						array('helper'=>'dataclean','rule'=>'DOM::img')
+					)
+				),
+				array('name' => 'body','empty' => true,'page' => true, 'multi' => true,
+					'process'=>array(
+						array('helper'=>'format'),
+						array('helper'=>'trim')
+					)
+				),
 			);
 		}else{
-			//兼容旧版
-			$helper = spider_content::$helperMap;
-			if(is_array($rule['data']))foreach ($rule['data'] as $key => $value) {
-				if(is_array($value))foreach ($value as $k => $v) {
-					$fk = array_search($k, $helper);
-					if($fk!==false){
-						$rule['data'][$key]['helper'][]=$helper[$fk];
-					}
-				}
-			}
+			// //兼容旧版
+			// if(is_array($rule['data']))foreach ($rule['data'] as $key => $value) {
+			// 	if(isset($value['process'])){
+			// 		continue;
+			// 	}
+			// 	$rule['data'][$key]['process'] = self::old7014($value);
+			// 	unset($rule['data'][$key]['cleanbefor'],$rule['data'][$key]['helper'],$rule['data'][$key]['cleanafter']);
+			// }
 			$rule['fs']['encoding']&& $rule['http']['ENCODING'] = $rule['fs']['encoding'];
 			$rule['fs']['referer'] && $rule['http']['REFERER'] = $rule['fs']['referer'];
 		}
@@ -123,7 +131,7 @@ class spider_ruleAdmincp {
 			empty($rule['list_url_rule']) && iUI::alert('列表链接规则不能为空！');
 		}
 
-		$rule = addslashes(serialize($rule));
+		$rule = addslashes(json_encode($rule));
 		$fields = array('name', 'rule');
 		$data = compact($fields);
 		if ($id) {
@@ -141,7 +149,7 @@ class spider_ruleAdmincp {
 	public function do_export() {
 		$rs = iDB::row("select `name`, `rule` from `#iCMS@__spider_rule` where id = '$this->rid'");
 		$data = array('name' => addslashes($rs->name), 'rule' => addslashes($rs->rule));
-		$data = base64_encode(serialize($data));
+		$data = base64_encode(json_encode($data));
 		Header("Content-type: application/octet-stream");
 		Header("Content-Disposition: attachment; filename=spider.rule." . $rs->name . '.txt');
         echo $data;
@@ -161,7 +169,7 @@ class spider_ruleAdmincp {
 			$data = file_get_contents($path);
 			if ($data) {
 				$data = base64_decode($data);
-				$data = unserialize($data);
+				$data = json_decode($data,true);
 				iDB::insert("spider_rule", $data);
 			}
 			@unlink($path);

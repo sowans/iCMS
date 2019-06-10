@@ -10,15 +10,9 @@
 defined('iPHP') OR exit('What are you doing?');
 
 class spider_content {
-    public static $hash    = null;
-    public static $content = null;
+    public static $hash  = null;
+    public static $match_data = null;
 
-    //兼容旧版
-    public static $helperMap = array(
-        'format','cleanhtml','mergepage','autobreakpage',
-        'trim','filter','json_decode','array',
-        'capture','download','img_absolute'
-    );
     /**
      * 抓取资源
      * @param  [string] $html      [抓取结果]
@@ -74,6 +68,7 @@ class spider_content {
             $content = $html;
         }else{
             $contentArray = array();
+            self::$match_data = null;
             if(is_array($html)){
                 foreach ($html as $hkey => $_html) {
                     $contentArray[] = spider_content::match($_html,$data,$rule);
@@ -122,70 +117,8 @@ class spider_content {
         //     print_r('<b>['.$name.']匹配结果:</b><div style="max-height:300px;overflow-y: scroll;">'.htmlspecialchars($content).'</div>');
         //     echo "<hr />";
         // }
-        if ($data['cleanbefor']) {
-            if(is_array($content)){
-                foreach ($content as $key => $value) {
-                    $content[$key] = spider_tools::dataClean($data['cleanbefor'], $value);
-                }
-            }else{
-                $content = spider_tools::dataClean($data['cleanbefor'], $content);
-            }
-            if (spider::$dataTest) {
-                echo "<b>1.规则后处理</b>".htmlspecialchars($data['cleanbefor']).'<br />';
-            }
-        }
 
-        if(isset($data['helper'])){
-        }else{
-            $data['helper'] = array();
-            //兼容旧版
-            foreach ($data as $kh => $vh) {
-                if(array_search($kh, self::$helperMap)!==false){
-                    $data['helper'][] = $kh;
-                }
-            }
-        }
-        if (spider::$dataTest && $data['helper']) {
-            echo "<b>2.方法处理:</b>".htmlspecialchars(implode(',', $data['helper'])).'<br />';
-        }
-        //特殊处理方法
-        //@方法
-        //@check_urls
-        $sfuncArray = array();
-        foreach ((array)$data['helper'] as $key => $value) {
-            if(substr($value, 0,1)=='@'){
-                $sfuncArray[] = array(substr($value,1)=>true);
-                continue;
-            }
-            $func = array($value=>true);
-            if(is_array($content) && strpos($value, 'array_')===false){
-                foreach ($content as $ckey => $cvalue) {
-                    $content[$ckey] = self::helper($cvalue,$func,$rule);
-                }
-            }else{
-                $content = self::helper($content,$func,$rule);
-            }
-            if($content===null){
-                return null;
-            }
-        }
-        if ($data['cleanafter']) {
-            if(is_array($content)){
-                foreach ($content as $key => $value) {
-                    $content[$key] = spider_tools::dataClean($data['cleanafter'], $value);
-                }
-            }else{
-                $content = spider_tools::dataClean($data['cleanafter'], $content);
-            }
-
-            if (spider::$dataTest) {
-                echo "<b>3.发布前处理</b>".htmlspecialchars($data['cleanafter']).'<br />';
-            }
-        }
-        is_array($content) && $content = array_filter($content);
-        if($sfuncArray)foreach ($sfuncArray as $key => $func) {
-            $content = self::helper_sfunc($content,$func,$rule);
-        }
+        $content = spider_process::run($content,$data,$rule);
 
         if (spider::$callback['content'] && is_callable(spider::$callback['content'])) {
             $content = call_user_func_array(spider::$callback['content'],array($content,$data));
@@ -195,171 +128,7 @@ class spider_content {
         }
         return $content;
     }
-    public static function helper($content,$data,$rule){
-        if ($data['stripslashes']) {
-            $content = stripslashes($content);
-        }
-        if ($data['addslashes']) {
-            $content = addslashes($content);
-        }
-        if ($data['base64_encode']) {
-            $content = base64_encode($content);
-        }
-        if ($data['base64_decode']) {
-            $content = base64_decode($content);
-        }
-        if ($data['urlencode']) {
-            $content = urlencode($content);
-        }
-        if ($data['urldecode']) {
-            $content = urldecode($content);
-        }
-        if ($data['rawurlencode']) {
-            $content = rawurlencode($content);
-        }
-        if ($data['rawurldecode']) {
-            $content = rawurldecode($content);
-        }
-        if ($data['parse_str']) {
-            $content = parse_url_qs($content);
-        }
-        if ($data['http_build_query'] && is_array($content)) {
-            $content = http_build_query($content);
-        }
-        if ($data['trim']) {
-            if(is_array($content)){
-                $content = array_map('trim', $content);
-            }else{
-                $content = str_replace('&nbsp;','',trim($content));
-            }
-        }
-        if($data['json_encode'] && is_array($content)){
-            $content = json_encode($content);
-        }
-        if ($data['json_decode']) {
-            $content = json_decode($content,true);
-            if(is_null($content)){
-                return self::msg(
-                    'JSON ERROR:'.json_last_error_msg(),
-                    'content.json_decode.error',
-                    $name,$rule
-                );
-            }
-        }
-        if ($data['htmlspecialchars_decode']) {
-            $content = htmlspecialchars_decode($content);
-        }
-        if ($data['htmlspecialchars']) {
-            $content = htmlspecialchars($content);
-        }
-        if ($data['cleanhtml']) {
-            $content = preg_replace('/<[\/\!]*?[^<>]*?>/is', '', $content);
-        }
-        if ($data['format'] && $content) {
-            $content = autoformat($content);
-        }
-        if ($data['nl2br'] && $content) {
-            $content = nl2br($content);
-        }
-        if ($data['url_absolute'] && $content) {
-            $content = spider_tools::url_complement($rule['__url__'],$content);
-        }
-        if ($data['img_absolute'] && $content) {
-            $content = spider_tools::img_url_complement($content,$rule['__url__']);
-        }
-        if ($data['capture']) {
-            $content && $content = spider_tools::remote($content);
-        }
-        if ($data['download']) {
-            $content && $content = iFS::http($content);
-        }
 
-        if ($data['autobreakpage'] && $content) {
-            $content = spider_tools::autoBreakPage($content);
-        }
-        if ($data['mergepage'] && $content) {
-            $content = spider_tools::mergePage($content);
-        }
-        if ($data['filter']) {
-            $fwd = iPHP::callback(array("filterApp","run"),array(&$content),false);
-            if($fwd){
-                return self::msg(
-                    '中包含【'.$fwd.'】被系统屏蔽的字符!',
-                    'content.filter',
-                    $name,$rule
-                );
-            }
-        }
-        if ($data['empty']) {
-            $empty = $content;
-            is_array($content) && $empty = implode('', $content);
-            $empty = self::real_empty($empty);
-            if(empty($empty)){
-                return self::msg(
-                    '规则设置了不允许为空.当前抓取结果为空!请检查,规则是否正确!',
-                    'content.empty',
-                    $name,$rule
-                );
-            }
-            unset($empty);
-        }
-        if ($data['xml2array']) {
-            $content = iUtils::xmlToArray($content);
-        }
-        if($data['array']){
-            if(strpos($content, '#--iCMS.PageBreak--#')!==false){
-                $content = explode('#--iCMS.PageBreak--#', $content);
-            }
-            if(empty($content)){
-                return null;
-            }
-            return (array)$content;
-        }
-        if($data['clean_cn_blank']){
-            $_content = htmlentities($content);
-            $content  = str_replace(array('&#12288;','&amp;#12288;'),'', $_content);
-            unset($_content);
-        }
-        if($data['array_filter_empty']){
-            if(is_array($content)){
-                $content = array_filter($content);
-            }else{
-                if(strpos($content, '#--iCMS.PageBreak--#')!==false){
-                    $content = explode('#--iCMS.PageBreak--#', $content);
-                    $content = array_filter($content);
-                }
-            }
-        }
-        if($data['array_reverse']){
-            if(is_array($content)){
-                $content = array_reverse($content);
-            }else{
-                if(strpos($content, '#--iCMS.PageBreak--#')!==false){
-                    $content = explode('#--iCMS.PageBreak--#', $content);
-                    $content = array_reverse($content);
-                }
-            }
-        }
-        if(($data['implode']||$data['array_implode']) && is_array($content)){
-            $content = implode(',', $content);
-        }
-        if($data['explode'] && is_string($content)){
-            $content = explode(',', $content);
-        }
-        return $content;
-    }
-    public static function helper_sfunc($content,$data,$rule){
-        //@check_urls
-        if ($data['check_urls']) {
-            $content && $content = spider_tools::check_urls($content);
-        }
-        //@collect_urls
-        if ($data['collect_urls']) {
-            $content && $content = spider_tools::collect_urls($content);
-
-        }
-        return $content;
-    }
     public static function page_data($html,$data,$rule,&$contentArray){
         if(empty($rule['page_url'])){
             $rule['page_url'] = $rule['list_url'];
@@ -458,6 +227,7 @@ class spider_content {
             if (spider::$dataTest) {
                 // echo "<b>分页规则:</b>逻辑方式<br />";
                 echo "<b>内容页网址:</b>".$rule['__url__'] . "<br />";
+                echo "<b>分页区域规则:</b>".iSecurity::escapeStr($page_area_rule). "<br />";
                 echo "<b>分页网址提取规则:</b>".iSecurity::escapeStr($page_url_rule). "<br />";
                 echo "<b>分页合成:</b>".$rule['page_url'] . "<br />";
                 echo "<b>分页列表:</b><pre>";
@@ -537,22 +307,13 @@ class spider_content {
             if (spider::$dataTest) {
                 echo "<b>最终分页列表:</b><pre>";
                 print_r($pageurl);
-                echo "</pre><hr />";
+                echo "</pre>";
             }
         }else{
             foreach ((array)spider::$allHtml as $ahkey => $phtml) {
                 $contentArray[] = spider_content::match($phtml,$data,$rule);
             }
         }
-    }
-    public static function real_empty($text){
-        $text = strip_tags($text, '<img>');
-        $text = preg_replace(array('/\s*/','/\r*/','/\n*/'), '', $text);
-        $text = str_replace(array('&nbsp;','&#12288;'),'', $text);
-        $text = htmlentities($text);
-        $text = str_replace(array('&nbsp;','&#12288;','&amp;nbsp;','&amp;#12288;'),'', $_text);
-        $text = trim($text);
-        return $text;
     }
     public static function match($html,$data,$rule){
         $match_hash = array();
@@ -645,13 +406,13 @@ class spider_content {
                             $match_hash[$cmd5] = true;
                             foreach ($mat as $key => $value) {
                                 if(!is_numeric($key)){
-                                    self::$content[$mkey][$key] = trim($value);
+                                    self::$match_data[$mkey][$key] = trim($value);
                                 }
                             }
                         }
                         if (spider::$dataTest) {
                             echo "<b>[".$data['name']."]多条匹配结果:</b><pre>";
-                            print_r(iSecurity::escapeStr(self::$content));
+                            var_dump(iSecurity::escapeStr(self::$match_data));
                             echo "</pre>";
                         }
                         $content = implode('#--iCMS.PageBreak--#', $conArray);
@@ -661,16 +422,16 @@ class spider_content {
                         $content = $matches['content'];
                         foreach ($matches as $key => $value) {
                             if(!is_numeric($key)){
-                                self::$content[$key] = trim($value);
+                                self::$match_data[$key] = trim($value);
                             }
                         }
                         if (spider::$dataTest) {
                             echo "<b>[".$data['name']."]匹配结果:</b><pre>";
-                            print_r(iSecurity::escapeStr(self::$content));
+                            var_dump(iSecurity::escapeStr(self::$match_data));
                             echo "</pre>";
                         }
                     }
-                    if(self::$content && preg_match('/<%content(\d*)%>/i', $data['cleanbefor'])){
+                    if(self::$match_data && preg_match('/<%content(\d*)%>/i', $data['cleanbefor'])){
                         $content = self::replace_content($data['cleanbefor']);
                     }
                 } else {
@@ -688,7 +449,7 @@ class spider_content {
             if(preg_match('/\[.*?\]/i', $pv)){
                 unset($pieces[$pk]);
                 $_content = trim($pv,"[]\n\r");
-                foreach (self::$content as $ckey => $cvalue) {
+                foreach (self::$match_data as $ckey => $cvalue) {
                     if(is_array($cvalue)){
                         $_content = trim($pv,"[]\n\r");
                         foreach ($cvalue as $ck => $cv) {
@@ -704,19 +465,7 @@ class spider_content {
         }
         $replace = implode("\n", $pieces);
         is_array($content) && $content = implode("\n#--iCMS.PageBreak--#\n", $content);
-        self::$content = null;
+        self::$match_data = null;
         return $content;
-    }
-    public static function msg($msg,$type,$name,$rule){
-        $msg = '['.$name.']'.$msg;
-        if(spider::$dataTest){
-            exit('<h1>'.$msg.'</h1>');
-        }
-        if(spider::$work){
-            spider_error::log($msg,$rule['__url__'],$type);
-            return null;
-        }else{
-            iUI::alert($msg);
-        }
     }
 }

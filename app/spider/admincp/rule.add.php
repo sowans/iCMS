@@ -10,10 +10,23 @@
 defined('iPHP') OR exit('What are you doing?');
 admincp::head();
 ?>
+<script type="text/javascript" src="./app/admincp/ui/jquery/jquery-ui.min.js"></script>
 <style>
-.rule_data_name { width:100%; }
+.rule_data_name {}
 .delprop { width:45px; }
 .chosen-container-multi .chosen-choices li.search-choice span{font-size: 14px;}
+.data-processing-group.btn-group.open .dropdown-toggle{box-shadow:none;}
+.data-processing-group .dropdown-menu>li>a{width: auto;}
+.processing-item-fun{margin-right: 5px;}
+.processing-item-dcl{display:block !important;clear: both;margin-top: 2px;}
+/*.divider-text{
+    height: 24px !important;
+    background-color: #333 !important;
+    text-align: center !important;
+    line-height: 24px !important;
+    color: #fff !important;
+    margin: 0px !important;
+}*/
 </style>
 <script type="text/javascript">
 $(function() {
@@ -46,7 +59,48 @@ $(function() {
         }
     });
 
-    $(".addprop").click(function() {
+    $('.PresetMethod').on("mouseover", 'a.dropdown-DHMenu', function() {
+        var pp = $(this).parent();
+        var li = $("li.dropdown-submenu",".data_helper_clone").clone(true);
+        // li.mouseout(function(event) {
+        //   console.log(this);
+        //   $(".dropdown-menu",pp).html('');
+        // });
+        $(".dropdown-menu",pp).empty().html(li);
+    })
+    $('.data-processing-group').on("click", 'a[data-act]', function() {
+      var tr = $(this).parents('tr');
+      var name = $('.rule_data_rule',tr).attr('name'),id = $('.rule_data_rule',tr).attr('id');
+      var act  = $(this).data('act'),title=$(this).attr('title');
+      var length =parseInt($(".processing div:last",tr).attr('data-key'))+1;
+
+      if(!length) length=0;
+      if(act=='dataclean'){
+        var div = '<?php processing_item("'+name+'",array('helper'=>"'+act+'",'dataclean'=>true),"'+length+'",'规则采集后数据整理');?>';
+      }else{
+        var div = '<?php processing_item("'+name+'",array('helper'=>"'+act+'"),"'+length+'","'+title+'");?>';
+      }
+      $(".processing",tr).append(div);
+    });
+
+    $('.processing').sortable({
+      update: function( event, ui ) {
+          var target = $(event.target);
+          $('[data-key]', target).each(function(idx) {
+            var dk = $(this).attr('data-key');
+            $(this).attr('data-key',idx);
+            $('input', this).each(function(i) {
+              this.name = this.name.replace('[process]['+dk+']', '[process]['+idx+']');
+            });
+          });
+      }
+    }).disableSelection();
+
+    $('.processing').on("click", ".process_del", function() {
+        $(this).parent().parent().remove();
+    });
+
+    $(".add_items").click(function() {
         // var length=$("#spider-data tbody tr").length+1;
         var length =parseInt($("#spider-data tbody tr:last").attr('data-key'))+1;
         var href   =$(this).attr("href");
@@ -88,9 +142,12 @@ $(function() {
     $(".preg_checkbox,.dom_checkbox").on("click", function() {
         var pp=$(this).parents('td');
         var checkedStatus=$(this).prop("checked");
+        var btn = $(".preg_rule",pp);
         if(this.className=='dom_checkbox') {
+            btn.css('display',!checkedStatus?'':'none');
             var cb=$(".preg_checkbox", pp).prop("checked", !checkedStatus);
         } else {
+            btn.css('display',checkedStatus?'':'none');
             var cb=$(".dom_checkbox", pp).prop("checked", !checkedStatus);
         }
         $.uniform.update(cb);
@@ -310,9 +367,9 @@ function select_sort_value(a, e, p) {
             <table class="table table-hover">
               <thead>
                 <tr>
-                  <th>数据项名称</th>
-                  <th>规则</th>
-                  <th>数据处理</th>
+                  <th class="span3">数据项名称</th>
+                  <th class="span6">规则</th>
+                  <th style="text-align: left;">数据处理</th>
                 </tr>
               </thead>
               <tbody>
@@ -327,12 +384,12 @@ function rule_data_rule_td($dkey,$data = array()){
 ?>
 
   <td>
-    <div class="btn-group btn-group-vertical">
+    <div class="input-prepend input-append">
+      <span class="add-on"><a class="delprop"><i class="fa fa-trash-o"></i></a></span>
       <input name="<?php echo $DR_name;?>[name]" type="text" class="rule_data_name" value="<?php echo $data['name'];?>"/>
-      <a class="btn btn-danger delprop"><i class="fa fa-trash-o"></i> 删除</a>
     </div>
   </td>
-  <td class="rule_data_rule" id="<?php echo $DR_id;?>">
+  <td class="rule_data_rule" id="<?php echo $DR_id;?>" name="<?php echo $DR_name;?>">
     <div class="<?php echo $data['data@source']?:'hide';?> data_datasource">
       <div class="input-prepend">
         <span class="add-on">数据源</span>
@@ -341,9 +398,24 @@ function rule_data_rule_td($dkey,$data = array()){
       <div class="clearfloat mb10"></div>
     </div>
     <textarea name="<?php echo $DR_name;?>[rule]" class="span6" id="<?php echo $DR_target;?>"><?php echo htmlspecialchars($data['rule']);?></textarea>
-    <div class="preg_rule">
+    <div class="clearfloat"></div>
+    <div class="preg_rule input-prepend input-append" <?php if($data['dom']){ echo ' style="display:none;"';};?>>
       <a class="btn" href="<%content%>" data-toggle="insertContent" data-target="#<?php echo $DR_target;?>">插入内容标识</a>
       <a class="btn" href="<%var%>" data-toggle="insertContent" data-target="#<?php echo $DR_target;?>">插入变量标识</a>
+    </div>
+    <div class="btn-group data-processing-group">
+      <a class="btn dropdown-toggle" data-toggle="dropdown" tabindex="-1">添加数据处理 <span class="caret"></span></a>
+      <ul class="dropdown-menu">
+        <li><a class="tip-right" href="##" title="处理项目采集规则匹配前的原始数据">规则前:数据处理</a></li>
+        <li class="divider"></li>
+        <li><a class="tip-right" href="##" title="处理项目的匹配数据" data-act='dataclean'>数据处理</a></li>
+        <li class="divider"></li>
+        <li class="dropdown-submenu PresetMethod" title="预置方法">
+          <a href="javascript:;" title="使用预置方法对数据进行处理" class="dropdown-toggle tip-left dropdown-DHMenu" data-toggle="dropdown"><i class="fa fa-code"></i> <span>预置方法</span></a>
+          <ul class="dropdown-menu">
+          </ul>
+        </li>
+      </ul>
     </div>
     <div class="clearfloat mb10"></div>
     <label class="checkbox">
@@ -372,97 +444,34 @@ function rule_data_rule_td($dkey,$data = array()){
       匹配多条
     </label>
   </td>
-  <td>
-    <div class="input-prepend">
-      <span class="add-on s4">1.规则后</span>
-      <textarea name="<?php echo $DR_name;?>[cleanbefor]" class="span6 <?php echo $tip_class;?>"title="规则采集后数据整理"><?php echo htmlspecialchars($data['cleanbefor']);?></textarea>
-    </div>
-    <div class="clearfloat mb10"></div>
-    <div class="input-prepend helper-wrap">
-      <span class="add-on" style="width:55px;text-align: left;">2.处理</span>
-      <select id="<?php echo $DR_id;?>_helper" data-placeholder="选择数据处理方法..." class="rule_data_helper <?php echo $chosen_class;?> span6" multiple="multiple">
-        <optgroup label="常用处理">
-          <option value='trim'>去首尾空白</option>
-          <option value='format'>HTML格式化</option>
-          <option value='cleanhtml'>移除HTML标识</option>
-          <option value='img_absolute'>图片地址补全</option>
-          <option value='array'>返回数组</option>
-          <option value='url_absolute'>URL补全</option>
-          <option value='capture' title="抓取并直接返回结果">抓取结果</option>
-          <option value='download' title="下载并保存成文件">下载</option>
-          <option value='filter' title="启用屏蔽词过滤">屏蔽词过滤</option>
-          <option value='array_filter_empty'>清除空值数组</option>
-          <option value='clean_cn_blank'>清除中文空格</option>
-          <option value='array_reverse'>相反数组</option>
-        </optgroup>
-        <optgroup label="转义">
-          <option value='stripslashes' title="返回去除转义反斜线后的字符串">去除反斜线</option>
-          <option value='addslashes' title="返回加上了反斜线的字符串">加上反斜线</option>
-          <option value='htmlspecialchars_decode' title="将特殊的 HTML 实体转换回普通字符">反转义HTML字符</option>
-          <option value='htmlspecialchars' title="将特殊字符转换为 HTML 实体">转义HTML字符</option>
-          <option value='xml2array'>xml转Array</option>
-        </optgroup>
-        <optgroup label="分页">
-          <option value='mergepage'>合并分页</option>
-          <option value='autobreakpage'>自动分页</option>
-        </optgroup>
-        <optgroup label="解析/解码">
-          <option value='urldecode'>解码 URL 字符串(urldecode)</option>
-          <option value='rawurldecode'>解码 URL 字符串(rawurldecode)</option>
-          <option value='parse_str'>URL字符串解析(parse_str)</option>
-          <option value='json_decode'>JSON解码(json_decode) </option>
-          <option value='base64_decode'>base64 解码(base64_decode) </option>
-          <option value='auth_decode'>解密(auth_decode) </option>
-        </optgroup>
-        <optgroup label="生成/编码">
-          <option value='urlencode'>编码 URL 字符串(urlencode)</option>
-          <option value='rawurlencode'>编码 URL 字符串(rawurlencode)</option>
-          <option value='http_build_query'>Array转URL字符串(http_build_query)</option>
-          <option value='json_encode'>JSON编码(json_encode) </option>
-          <option value='auth_encode'>加密(auth_encode) </option>
-        </optgroup>
-        <optgroup label="字符串">
-          <option value='array_explode'>字符串=>数组</option>
-          <option value='array_implode'>数组=>字符串</option>
-        </optgroup>
-        <optgroup label="特殊处理">
-          <option value='@check_urls' title="独立检查,链接保存在新表">链接检查</option>
-          <option value='@collect_urls' title="收集其它链接">收集链接</option>
-        </optgroup>
-      </select>
-      <select multiple="multiple" class="hide" name="<?php echo $DR_name;?>[helper][]" id="sort_<?php echo $DR_id;?>_helper"></select>
-    </div>
-    <span class="help-inline">可多选，按顺序处理</span>
-    <?php if($dkey!=='__KEY__'){?>
-    <script>
-    $(function(){
-      <?php
-        if($data['helper']){
-          $_helper = $data['helper'];
-          if(!is_array($data['helper'])){
-            $_helper = explode(',', $data['helper']);
-          }
-          $helper_json = json_encode($_helper);
-      ?>
-      // $("#<?php echo $DR_id;?>_helper").setSelectionOrder(<?php echo $helper_json;?>, true);
-      var helper_json = <?php echo $helper_json;?>;
-      var helper_id   = $("#<?php echo $DR_id;?>_helper");
-      var helper_sort = $("#sort_<?php echo $DR_id;?>_helper");
-      helper_id.setSelectionOrder(helper_json, true);
-      $.each(helper_json, function(ii, v) {
-          helper_sort.append(select_sort_option(helper_id,v));
-      });
-      <?php }?>
-    })
-    </script>
-    <?php }?>
-    <div class="clearfloat mb10"></div>
-    <div class="input-prepend">
-      <span class="add-on s4">3.发布前</span>
-      <textarea name="<?php echo $DR_name;?>[cleanafter]" class="span6 <?php echo $tip_class;?>" title="发布前数据整理"><?php echo htmlspecialchars($data['cleanafter']);?></textarea>
-    </div>
+  <td class="processing">
+    <?php if($data['process']) foreach ($data['process'] as $key => $value) {
+        if(is_array($value)){
+          $title = spider_process::$helperMaps[$value['helper']][1];
+          processing_item($DR_name,$value,$key,$title);
+        }
+    }
+    ?>
   </td>
 <?php }?>
+<?php
+function processing_item($name,$item=array(),$length=0,$title=''){
+  if($item['helper']=='dataclean'||$item['dataclean']){
+    $div ='<div class="input-prepend processing-item-dcl" data-key="'.$length.'">'.
+      '<span class="add-on"><a class="process_del"><i class="fa fa-trash-o"></i></a>'.
+      '<input name="'.$name.'[process]['.$length.'][helper]" type="hidden" value="'.$item['helper'].'" />'.
+      '</span>'.
+      '<span class="add-on">整理</span>'.
+      '<input type="text" name="'.$name.'[process]['.$length.'][rule]" class="span5 tip-top" title="'.$title.'" value="'.$item['rule'].'"/>'.
+    '</div>';
+  }else{
+    $div ='<div class="input-prepend input-append processing-item-fun" data-key="'.$length.'">'.
+      '<span class="add-on"><a class="process_del"><i class="fa fa-trash-o"></i></a></span>'.
+      '<span class="add-on">'.$title.'<input name="'.$name.'[process]['.$length.'][helper]" type="hidden" value="'.$item['helper'].'" /></span>'.
+    '</div>';
+  }
+  echo $div;
+} ?>
               <?php
                 if($rule['data'])foreach((array)$rule['data'] AS $dkey=>$data){
                 echo '<tr data-key="'.$dkey.'">';
@@ -475,7 +484,7 @@ function rule_data_rule_td($dkey,$data = array()){
                 <tr>
                   <td colspan="4">
                     <p class="mb10"> <span class="label label-info">摘要:description</span> <span class="label label-info">标签:tags</span> <span class="label label-info">出处:source</span> <span class="label label-info">作者:author</span> <span class="label label-info">关键字:keywords</span></p>
-                    <a href="#spider-data" class="btn btn-primary addprop"/>新增数据项</a></td>
+                    <a href="#spider-data" class="btn btn-primary add_items"/>新增数据项</a></td>
                 </tr>
               </tfoot>
             </table>
@@ -628,4 +637,17 @@ function rule_data_rule_td($dkey,$data = array()){
     <?php echo rule_data_rule_td('__KEY__'); ?>
   </tr>
 </table>
+<div class="hide data_helper_clone">
+  <?php foreach (spider_process::getArray() as $title => $collection){ ?>
+    <li class="dropdown-submenu">
+        <a href="javascript:;" title="<?php echo $title; ?>" class="dropdown-toggle tip-left" data-toggle="dropdown"><i class="fa fa-code"></i> <span><?php echo $title; ?></span></a>
+        <ul class="dropdown-menu">
+          <?php foreach ($collection as $act => $value){ ?>
+            <li><a href="javascript:;" title="<?php echo $value[2]; ?>" data-act='<?php echo $act; ?>'> <i class="fa fa-magic"></i><span><?php echo $value[1]; ?></span></a></li>
+          <?php } ?>
+        </ul>
+    </li>
+  <?php } ?>
+</div>
+
 <?php admincp::foot();?>

@@ -228,6 +228,7 @@ class spider_tools {
               $find = str_replace('IF::','', $expr);
               empty($tf) && $tf = '1:0';
               list($t,$f) = explode(':', $tf);
+              $t = str_replace('<%SELF%>',$content, $t);
               $content = strpos($content, $find)===false?$f:$t;
             }else if(strpos($rule, 'CUT::')!==false){
               $len = str_replace('CUT::','', $rule);
@@ -280,9 +281,8 @@ class spider_tools {
                 //DOM::div.class::attr::ooxx
                 //DOM::div.class[fun][attr]
                 //DOM::div.title[attr][data-title]
-                if(strpos($rule, '::')){//兼容
-                    list($pq_dom, $pq_fun,$pq_attr) = explode("::", $rule);
-                }else{
+                list($pq_dom, $pq_fun,$pq_attr) = explode("::", $rule);
+                if(strpos($rule, '][')!==false){
                     list($pq_dom, $pq_fun,$pq_attr) = explode("[", $rule);
                     $pq_fun  = rtrim($pq_fun,']');
                     $pq_attr = rtrim($pq_attr,']');
@@ -622,6 +622,7 @@ class spider_tools {
       KEY `iid` (`iid`)
     ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET='.iPHP_DB_CHARSET;
                     iDB::query($sql);
+                    iFS::mkdir(dirname($path));
                     file_put_contents($path, time());
                 }
             }
@@ -1014,5 +1015,25 @@ class spider_tools {
             }
         }
 
+    }
+    public static function real_empty($text){
+        is_array($text) && $text = implode('', $text);
+
+        $text = strip_tags($text, '<img>');
+        $text = preg_replace(array('/\s*/','/\r*/','/\n*/'), '', $text);
+        $text = str_replace(array('&nbsp;','&#12288;'),'', $text);
+        $text = htmlentities($text);
+        $text = str_replace(array('&nbsp;','&#12288;','&amp;nbsp;','&amp;#12288;'),'', $text);
+        $text = trim($text);
+        return $text;
+    }
+    public static function lastId($name,$id=null){
+        $path = __DIR__.'/lastId.'.$name.'.txt';
+        if($id===null){
+            file_exists($path) OR file_put_contents($path, 1);
+            $lastId  = trim(file_get_contents($path));
+            return $lastId;
+        }
+        file_put_contents($path, $id);
     }
 }

@@ -160,10 +160,21 @@ class spider_data {
                 }
             }
 
+
             $content = spider_content::crawl($content_html,$data,$rule,$responses);
             if($content === null){
                 $responses[$dname] = null;
                 continue;
+            }
+            if($data['empty']){
+                $empty = spider_tools::real_empty($content);
+                if(empty($empty)){
+                    return spider_error::msg(
+                        '规则设置了不允许为空.当前抓取结果为空!请检查,规则是否正确!',
+                        'content.empty',
+                        $data['name'],$rule['__url__']
+                    );
+                }
             }
             //子采集
             //ooxx@URLS 获取主采集,抓取的链接

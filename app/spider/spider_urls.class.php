@@ -13,6 +13,7 @@ spider_urls::$timer[0] = time();
 
 class spider_urls {
     public static $urls  = null;
+    public static $rule  = null;
     public static $work  = null;
     public static $ids   = array();
     public static $timer = array();
@@ -52,6 +53,7 @@ class spider_urls {
 
         $srule = spider_rule::get($rid);
         $rule  = $srule['rule'];
+        self::$rule && $rule = spider_urls::$rule;
         $urls  = $rule['list_urls'];
 
         $project['urls']&& $urls = $project['urls'];
@@ -547,16 +549,49 @@ class spider_urls {
      * @param  [type] $_url [description]
      * @return [type]       [description]
      */
-    public static function urls_match($_url){
-        preg_match('|.*<(.*)>.*|is',$_url, $_matches);
+    public static function urls_match($url){
+        preg_match_all('|<(.*?)>|',$url, $matches);
+        foreach ($matches[1] as $key => $value) {
+           $url = self::urls_make($url,$value);
+        }
+        return (array)$url;
+    }
+    public static function urls_make($url,$rule){
         $urlsList = array();
-        if($_matches){
-            if(strpos($_matches[1], 'DATE:')!==false){
-                list($type,$format) = explode(':',$_matches[1]);
-                $urlsList[]= str_replace('<'.$_matches[1].'>', date($format),trim($_matches[0]));
+        if(is_array($url)){
+            foreach ($url as $key => $vurl) {
+                $_urlsList = self::urls_make($vurl,$rule);
+                $urlsList = array_merge($urlsList,$_urlsList);
+            }
+        }else{
+            if(strpos($rule, 'DATE:')!==false){
+                list($type,$format) = explode(':',$rule);
+                $urlsList[]= str_replace('<'.$rule.'>', date($format),trim($url));
+            }elseif(strpos($rule, 'FOR:')!==false){
+                //<FOR:1-100>
+                list($type,$format) = explode(':',$rule);
+                list($start,$end) = explode('-', $format);
+                if($start>$end){
+                //<FOR:100-1>
+                    for ($i = $start; $i >=$end; $i--) {
+                        $urlsList[]= str_replace('<'.$rule.'>', $i,trim($url));
+                    }
+                }else{
+                //<FOR:1-100>
+                    for ($i = $start; $i <=$end; $i++) {
+                        $urlsList[]= str_replace('<'.$rule.'>', $i,trim($url));
+                    }
+                }
+            }elseif(strpos($rule, 'EACH:')!==false){
+                //<EACH:1,2,3,4>
+                list($type,$format) = explode(':',$rule);
+                $array = explode(',', $format);
+                foreach ($array as $key => $value) {
+                    $urlsList[]= str_replace('<'.$rule.'>', $value,trim($url));
+                }
             }else{
-                list($format,$begin,$num,$step,$zeroize,$reverse) = explode(',',$_matches[1]);
-                $url = str_replace($_matches[1], '*',trim($_matches[0]));
+                list($format,$begin,$num,$step,$zeroize,$reverse) = explode(',',$rule);
+                $url = str_replace($rule, '*',trim($url));
                 $_urlsList = spider_tools::mkurls($url,$format,$begin,$num,$step,$zeroize,$reverse);
                 $urlsList = array_merge($urlsList,$_urlsList);
             }

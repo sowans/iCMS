@@ -16,7 +16,7 @@ class spider_rule {
     	$rs = $GLOBALS[$key];
     	if(!isset($GLOBALS[$key])){
 	        $rs = iDB::row("SELECT * FROM `#iCMS@__spider_rule` WHERE `id`='$id' LIMIT 1;", ARRAY_A);
-	        $rs['rule'] && $rs['rule'] = stripslashes_deep(unserialize($rs['rule']));
+	        $rs['rule'] && $rs['rule'] = (array)stripslashes_deep(json_decode($rs['rule'],true));
 	        $rs['rule']['user_agent'] OR $rs['rule']['user_agent'] = "Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)";
         	$GLOBALS[$key] = $rs;
         }

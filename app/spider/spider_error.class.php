@@ -31,4 +31,16 @@ class spider_error {
             $flag && print '<b>'.$msg.'</b><hr />';
         }
     }
+    public static function msg($msg,$type,$name,$url){
+        $msg = '['.$name.']'.$msg;
+        if(spider::$dataTest){
+            exit('<h1>'.$msg.'</h1>');
+        }
+        if(spider::$work){
+            spider_error::log($msg,$url,$type);
+            return null;
+        }else{
+            iUI::alert($msg);
+        }
+    }
 }
