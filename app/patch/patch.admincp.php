@@ -91,12 +91,12 @@ class patchAdmincp{
         $files = patch::get_upgrade_files(true);
         if($files){
             foreach ($files as $d => $value) {
-              $text.='第['.$d.']号升级程序<br />';
+              $text.='<span class="span3">第#'.$d.'#号升级程序</span>';
             }
             $json = array(
                 'code' => "1",
                 'url'  => __ADMINCP__.'=patch&do=upgrade&force=1',
-                'msg'  => "发现升级程序！<br />".$text."<br />是否现在进行升级?",
+                'msg'  => "发现！<br /><div>".$text."</div><hr class='clearfix'/>是否现在进行升级?",
             );
         }
         iUI::json($json,true);

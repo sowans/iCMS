@@ -9,10 +9,23 @@
 */
 class searchAdmincp{
     public function __construct() {
+        $this->appid = iCMS_APP_SEARCH;
     	$this->id	= (int)$_GET['id'];
+    }
+    public function do_save_config(){
+        $disable = explode("\n",$_POST['config']['disable']);
+        $_POST['config']['disable'] = array_unique($disable);
+        configAdmincp::save('999999','search',array($this,'cache'));
+    }
+
+    public static function cache($config=null){
+        $config===null && $config  = configAdmincp::get('999999','filter');
+        iCache::set('search/disable',$config['disable'],0);
     }
 
     public function do_iCMS(){
+        $config = configAdmincp::app('999999','search',true);
+
         if($_GET['keywords']) {
 			$sql =" WHERE `search` like '%{$_GET['keywords']}%'";
         }

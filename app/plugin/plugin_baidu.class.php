@@ -62,5 +62,37 @@ class plugin_baidu{
         }
         return true;
     }
+    /**
+     * http://ping.baidu.com/ping.html
+     * http://help.baidu.com/question?prod_id=99&class=0&id=3046
+     * @param [type] $url [description]
+     */
+    public static function RPC2($url){
+        $pingRpc  = 'http://ping.baidu.com/ping/RPC2';
+        $baiduXML = '<?xmlversion="1.0"?>';
+        $baiduXML .= '<methodCall>';
+        $baiduXML .= '<methodName>weblogUpdates.ping</methodName>';
+        $baiduXML .= '<params>';
+        $baiduXML .= '<param><value><string>' . $url . '</string></value></param>';
+        $baiduXML .= '<param><value><string>' . $url . '</string></value></param>';
+        $baiduXML .= '</params>' . "\n";
+        $baiduXML .= '</methodCall>';
+        $header   = array(
+            'Accept: */*',
+            'Referer: http://ping.baidu.com/ping.html',
+            'User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36',
+            'Host:ping.baidu.com',
+            'Content-Type:text/xml',
+        );
+        $curl     = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $pingRpc);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $baiduXML);
+        $result = curl_exec($curl);
+        curl_close($curl);
+        return $result;
+    }
 
 }

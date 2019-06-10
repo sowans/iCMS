@@ -45,8 +45,8 @@ class indexApp {
             $host = iSecurity::escapeStr($_GET['host']);
             empty($host) && $host = iPHP_REQUEST_HOST;
             $cid = $domain[$host];
-            if(empty($cid) && iPHP_REQUEST_SCHEME=='http'){
-                $host = str_replace('http://', '', $host);//兼容无协义域名
+            if(empty($cid) && in_array(strtolower(iPHP_REQUEST_SCHEME), array('http','https'))){
+                $host = str_replace(array('http://','https://'), '', $host);//兼容无协议域名
                 $cid = $domain[$host];
             }
             if($cid){

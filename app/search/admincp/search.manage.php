@@ -13,6 +13,13 @@ admincp::head();
 <script type="text/javascript">
 $(function(){
 	$("#<?php echo APP_FORMID;?>").batch();
+  $("#setting").click(function(event) {
+      var setting_wrap = document.getElementById("setting_wrap");
+      iCMS.dialog({
+        title: 'iCMS - 设置搜索禁用词',
+        content:setting_wrap
+      });
+  });
 });
 </script>
 
@@ -20,6 +27,9 @@ $(function(){
   <div class="widget-box">
     <div class="widget-title"> <span class="icon"> <i class="fa fa-search"></i> </span>
       <h5>搜索</h5>
+      <div class="pull-right">
+        <button class="btn btn-success" type="button" id="setting"><i class="fa fa-send"></i> 设置搜索禁用词</button>
+      </div>
     </div>
     <div class="widget-content">
       <form action="<?php echo iPHP_SELF ; ?>" method="get" class="form-inline">
@@ -92,5 +102,16 @@ $(function(){
       </form>
     </div>
   </div>
+</div>
+<div id="setting_wrap" style="display:none;">
+  <form action="<?php echo APP_FURI; ?>&do=save_config" method="post" target="iPHP_FRAME">
+        <div>
+        <textarea name="config[disable]" class="span6" style="height: 300px;"><?php echo implode("\n",(array)$config['disable']) ; ?></textarea>
+        </div>
+        <span class="help-inline">每行一个</span>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit"><i class="fa fa-check"></i> 提交</button>
+        </div>
+  </form>
 </div>
 <?php admincp::foot();?>

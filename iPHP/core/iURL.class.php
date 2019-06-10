@@ -241,6 +241,10 @@ class iURL {
         }
         empty($router_url) && $router_url = self::$config['url'];
         empty($router_dir) && $router_dir = self::$config['dir'];
+
+        if(strpos($router_url,'*')!==false) {
+            $router_url = str_replace('*', random(6), $router_url);
+        }
         //[xxxxx]类自定链接优先
         if($array['clink']){
             preg_match('/\[(.+)\]/', $array['clink'], $match);

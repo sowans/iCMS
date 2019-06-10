@@ -28,7 +28,8 @@ admincp::head();
           <textarea name="config[filter]" class="span6" style="height: 300px;"><?php echo implode("\n",(array)$config['filter']) ; ?></textarea>
         </div>
         <span class="help-inline">每行一个<br />
-        过滤词格式:过滤词=***</span> </div>
+        过滤词格式:过滤词=***</span>
+      </div>
         <div class="form-actions">
           <button class="btn btn-primary" type="submit"><i class="fa fa-check"></i> 提交</button>
         </div>

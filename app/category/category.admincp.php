@@ -709,11 +709,13 @@ class categoryAdmincp {
             $rs  = iDB::all("
                 SELECT `cid`,`domain`
                 FROM `#iCMS@__category`
-                WHERE `domain`!='' and `status`='1'");
+                WHERE `domain`!='' and `status`='1'
+            ");
             foreach((array)$rs AS $C) {
                 $domain[$C['domain']] = $C['cid'];
             }
         }
+
         configAdmincp::set(array(
             'domain'=>$domain
         ),'category',iCMS_APP_CATEGORY,false);

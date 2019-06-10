@@ -7,6 +7,7 @@ window.iCMS = $.extend(window.iCMS,{
         iCMS.FORMER     = iCMS.require("former");
         iCMS.dialog     = iCMS.UI.dialog;
         iCMS.alert      = iCMS.UI.alert;
+        iCMS.isMobile   = iCMS.require("isMobile");
     }
 });
 

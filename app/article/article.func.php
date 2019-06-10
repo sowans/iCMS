@@ -200,7 +200,7 @@ class articleFunc{
 		if ($vars['cache']) {
 			$cache_name = iPHP_DEVICE . '/'.self::$app.'/' . $hash;
 			$resource = iCache::get($cache_name);
-			if(is_array($resource)) return $resource;
+			if($resource!==null) return $resource;
 		}
 
 		if ($offset) {
@@ -230,6 +230,8 @@ class articleFunc{
 			$where_sql = "WHERE `".self::$table."`.`id` IN({$ids})";
 			$order_sql = "ORDER BY FIELD(`id`,{$ids})";
 			$limit = '';
+		}else{
+			return array();
 		}
 
 		if (empty($resource)) {
@@ -302,6 +304,7 @@ class articleFunc{
 
 		$SPH->setSortMode(SPH_SORT_EXTENDED, $orderby);
 
+		is_array($vars['q']) && $vars['q'] = implode('|', $vars['q']);
 		$query = str_replace(',', '|', $vars['q']);
 		$query = str_replace('/', '|', $query);
 		$vars['acc'] && $query = '"' . $vars['q'] . '"';

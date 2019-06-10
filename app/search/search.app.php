@@ -23,6 +23,7 @@ class searchApp {
         $q  = iSecurity::encoding($q);
         $q  = iSecurity::escapeStr($q);
 
+        filterApp::$disable = iCache::get('search/disable');
         $fwd = iPHP::callback(array("filterApp","run"),array(&$q),false);
         $fwd && iPHP::error_404('非法搜索词!', 60002);
 

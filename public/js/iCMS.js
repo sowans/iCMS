@@ -4,6 +4,7 @@
 (function (){
     var paths  = [
             'icms.js',
+            'isMobile.js',
             'plugin.js',
             'timer.js',
             'poshytip.js',
