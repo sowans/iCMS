@@ -114,24 +114,18 @@ class tagFunc{
             $ids_array = iSQL::get_rand_ids('#iCMS@__tag',$where_sql,$maxperpage,'id');
         }
 
-    	$hash = md5($where_sql.$order_sql.$limit);
-
     	if($vars['cache']){
-    		$cache_name = iPHP_DEVICE.'/tag/'.$hash;
-            $vars['page'] && $cache_name.= "/".(int)$GLOBALS['page'];
-    		$resource = iCache::get($cache_name);
-            if(is_array($resource)) return $resource;
+            $hash = md5(json_encode($vars) . $order_sql);
+            $cache_name = iPHP_DEVICE.'/tag/'.$hash.'/'.$offset.'_'.$maxperpage;
+            isset($vars['cache_name']) && $cache_name = $vars['cache_name'];
+            $c_resource = iCache::get($cache_name);
+            if(is_array($c_resource)) return $c_resource;
     	}
-        if($map_sql || $offset){
-            if($vars['cache']){
-    			$map_cache_name = iPHP_DEVICE.'/tag_map/'.$hash;
-    			$ids_array      = iCache::get($map_cache_name);
-            }
-            if(empty($ids_array)){
-                $ids_array = iDB::all("SELECT `id` FROM `#iCMS@__tag` {$where_sql} {$order_sql} {$limit}");
-                $vars['cache'] && iCache::set($map_cache_name,$ids_array,$cache_time);
-            }
+
+        if(empty($ids_array)){
+            $ids_array = iDB::all("SELECT `id` FROM `#iCMS@__tag` {$where_sql} {$order_sql} {$limit}");
         }
+
         if($ids_array){
             $ids       = iSQL::values($ids_array);
             $ids       = $ids?$ids:'0';
@@ -139,12 +133,11 @@ class tagFunc{
             $limit     = '';
         }
 
-    	$resource = iDB::all("SELECT * FROM `#iCMS@__tag` {$where_sql} {$order_sql} {$limit}");
+        $resource = iDB::all("SELECT * FROM `#iCMS@__tag` {$where_sql} {$order_sql} {$limit}");
         self::$last_query = iDB::$last_query;
-    	if($resource){
-            $resource = self::tag_array($vars,$resource);
-            $vars['cache'] && iCache::set($cache_name,$resource,$cache_time);
-        }
+        $resource && $resource = self::tag_array($vars,$resource);
+
+        $vars['cache'] && iCache::set($cache_name,$resource,$cache_time);
     	return $resource;
     }
 

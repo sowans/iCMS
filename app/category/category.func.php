@@ -95,20 +95,19 @@ class categoryFunc{
 	        $ids_array = iSQL::get_rand_ids('#iCMS@__category',$where_sql,$maxperpage,'cid');
 	    }
 
+		if($vars['cache']){
+			$hash = md5(json_encode($vars) . $order_sql);
+			$cache_name = iPHP_DEVICE . '/category/'.$hash.'/'.$offset.'_'.$maxperpage;
+			isset($vars['cache_name']) && $cache_name = $vars['cache_name'];
+			$c_resource = iCache::get($cache_name);
+			if(is_array($c_resource)) return $c_resource;
+		}
+
 		if ($ids_array) {
 			$ids = iSQL::values($ids_array,'cid');
 			$ids = $ids ? $ids : '0';
 			$where_sql = "WHERE `#iCMS@__category`.`cid` IN({$ids})";
 			$limit = '';
-		}
-
-		$hash = md5($where_sql.$order_sql.$limit.$cache_time);
-		if($vars['cache']){
-			$cache_name = iPHP_DEVICE.'/category/'.$hash;
-			isset($vars['cache_name']) && $cache_name = $vars['cache_name'];
-	        $vars['page'] && $cache_name.= "/".(int)$GLOBALS['page'];
-			$resource = iCache::get($cache_name);
-	        if(is_array($resource)) return $resource;
 		}
 
 		$resource = iDB::all("SELECT `cid` FROM `#iCMS@__category` {$where_sql} {$order_sql} {$limit}");

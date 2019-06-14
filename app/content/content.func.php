@@ -186,7 +186,7 @@ class contentFunc {
         isset($vars['startdate']) && $where_sql .= " AND `pubdate`>='" . strtotime($vars['startdate']) . "'";
         isset($vars['enddate']) && $where_sql .= " AND `pubdate`<='" . strtotime($vars['enddate']) . "'";
         isset($vars['where']) && $where_sql .= $vars['where'];
-
+		isset($vars['where[]']) && $where_sql .= iSQL::where($vars['where[]'],true);
 
         if($map_where){
 			$map_sql = iSQL::select_map($map_where, 'join');
@@ -239,33 +239,22 @@ class contentFunc {
 				$map_order_sql = " ORDER BY `".self::$table."`.`id` $by";
 			}
 		}
-
-		$hash = md5(json_encode($vars) . $order_sql . $limit);
+        $map_order_sql && $order_sql = $map_order_sql;
 
 		if ($vars['cache']) {
-			$cache_name = iPHP_DEVICE . '/'.self::$app.'/' . $hash;
-			$resource = iCache::get($cache_name);
-			if(is_array($resource)) return $resource;
+            $hash = md5(json_encode($vars) . $order_sql);
+            $cache_name = iPHP_DEVICE . '/'.self::$app.'/'.$hash.'/'.$offset.'_'.$maxperpage;
+            isset($vars['cache_name']) && $cache_name = $vars['cache_name'];
+            $c_resource = iCache::get($cache_name);
+            if(is_array($c_resource)) return $c_resource;
 		}
 
-		if ($offset) {
-			if ($vars['cache']) {
-                $page_cache_name = iPHP_DEVICE . '/'.self::$app.'_page/' . $hash;
-				$ids_array = iCache::get($page_cache_name);
-			}
-		}
-		$map_order_sql && $order_sql = $map_order_sql;
 		if (empty($ids_array)) {
 			$sql = "SELECT ".$distinct." `".self::$table."`.`id` FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}";
 			if (strpos($sql, '`cid` IN')!==false && empty($map_order_sql) && iCMS::$config['debug']['db_optimize_in']){
-				$_sql = iSQL::optimize_in($sql);
-				$_sql && $sql = $_sql;
+				$sql = iSQL::optimize_in($sql);
 			}
 			$ids_array = iDB::all($sql);
-// echo iDB::$last_query;
-			if($vars['cache'] && $page_cache_name){
-				iCache::set($page_cache_name, $ids_array, $cache_time);
-			}
 		}
 
 		if ($ids_array) {
@@ -274,13 +263,11 @@ class contentFunc {
 			$where_sql = "WHERE `".self::$table."`.`id` IN({$ids})";
 			$order_sql = "ORDER BY FIELD(`id`,{$ids})";
 			$limit = '';
-		}
 
-		if (empty($resource)) {
-			$resource = iDB::all("SELECT `".self::$table."`.* FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}");
+            $resource = iDB::all("SELECT `".self::$table."`.* FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}");
             $resource = contentFunc::content_array($vars, $resource);
-			$vars['cache'] && iCache::set($cache_name, $resource, $cache_time);
 		}
+		$vars['cache'] && iCache::set($cache_name, $resource, $cache_time);
 		return $resource;
 	}
     public static function content_prev($vars) {
@@ -298,35 +285,36 @@ class contentFunc {
 		}
 		$field = '`id`';
 		if ($vars['order'] == 'p') {
-			// $field = 'max(id)'; //INNODB
-			// $sql .= " AND `id` < '{$vars['id']}'";
-			$sql .= " AND `id` < '{$vars['id']}' ORDER BY id DESC LIMIT 1";//MyISAM
+			$field = 'max(id)'; //INNODB
+			$sql .= " AND `id` < '{$vars['id']}'";
+			// $sql .= " AND `id` < '{$vars['id']}' ORDER BY id DESC LIMIT 1";//MyISAM
 		} else if ($vars['order'] == 'n') {
-			// $field = 'min(id)';//INNODB
-			// $sql .= " AND `id` > '{$vars['id']}'";
-			$sql .= " AND `id` > '{$vars['id']}' ORDER BY id ASC LIMIT 1";//MyISAM
+			$field = 'min(id)';//INNODB
+			$sql .= " AND `id` > '{$vars['id']}'";
+			// $sql .= " AND `id` > '{$vars['id']}' ORDER BY id ASC LIMIT 1";//MyISAM
 		}
 		$hash = md5($sql);
 		if ($vars['cache']) {
-            $cache = iPHP_DEVICE . '/'.self::$app.'/' . $hash;
-			$array = iCache::get($cache);
+            $cache_name = iPHP_DEVICE . '/'.self::$app.'/' . $hash;
+            $c_resource = iCache::get($cache_name);
+            if(is_array($c_resource)) return $c_resource;
 		}
-		if (empty($array)) {
-			$rs = iDB::row("
-				SELECT * FROM `".self::$table."` WHERE `id` =(SELECT {$field} FROM `".self::$table."` WHERE `status`='1' {$sql})
-			");
-			if ($rs) {
-				$category = categoryApp::get_cache_cid($rs->cid);
-				$array = array(
-					'id'    => $rs->id,
-					'title' => $rs->title,
-					'pic'   => filesApp::get_pic($rs->pic),
-					'url'   => iURL::get(self::$app, array((array) $rs, $category))->href,
-				);
-			}
-			$vars['cache'] && iCache::set($cache, $array, $cache_time);
+
+		$rs = iDB::row("
+			SELECT * FROM `".self::$table."` WHERE `id` =(SELECT {$field} FROM `".self::$table."` WHERE `status`='1' {$sql})
+		");
+		if ($rs) {
+			$category = categoryApp::get_cache_cid($rs->cid);
+			$resource = array(
+				'id'    => $rs->id,
+				'title' => $rs->title,
+				'pic'   => filesApp::get_pic($rs->pic),
+				'url'   => iURL::get(self::$app, array((array) $rs, $category))->href,
+			);
 		}
-		return $array;
+		$vars['cache'] && iCache::set($cache_name, $resource, $cache_time);
+
+		return $resource;
 	}
     private static function content_array($vars, $variable) {
         $resource = array();

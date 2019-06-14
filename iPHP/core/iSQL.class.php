@@ -263,39 +263,49 @@ class iSQL {
             return $sql;
         }
         // print($sql);
-        preg_match_all("@SELECT\s*`.+`\.`(\w+)`\s*FROM(.+)\s*(`(\w+)`\s*IN\s*\((.+)\))(.*?)\s*(ORDER\s*BY\s*`(.+)`\s*\w+)\s*(LIMIT\s*\d+,\d+)@is", $sql, $matches);
-        // var_dump($matches);
-        $cids = str_replace("'", '', $matches[5][0]);
+        preg_match("@(SELECT.+)(FROM(.+)WHERE)(.+)\s*(ORDER\s*BY\s*`(.+)`\s*\w+)\s*(LIMIT\s*\d+,\d+)$@is", $sql, $sqlmat);
+        // var_dump($sqlmat);
+        $ORDER_field = trim($sqlmat[6]);
+
+        $whereSQL = str_replace(' and ', ' AND ', $sqlmat[4]);
+        if(empty($whereSQL)){
+            return $sql;
+        }
+        preg_match("@`(\w+)`\s*IN\s*\((.*?)\)@is", $whereSQL, $match);
+        // var_dump($match);
+        $optimize_field = $match[1];
+        $cids = str_replace("'", '', $match[2]);
+
+        if(empty($cids)||empty($optimize_field)){
+            return $sql;
+        }
+
+        $whereArray = explode(' AND', $whereSQL);
+        foreach ($whereArray as $key => $value) {
+            if (preg_match("@`{$optimize_field}`([\s|NOT]*)\s*IN\s*\(.*?\)@is", $value,$aaa)){
+                unset($whereArray[$key]);
+            }
+        }
+        $whereSQL = implode(' AND ', $whereArray);
+        $eol = $sqlmat[5].' '.$sqlmat[7];
         if($cids){
             $cidArray = explode(',', $cids);
             if($cidArray && count($cidArray)>1){
-                $primary        = $matches[1][0];
-                $from_where     = $matches[2][0];
-                $orderby_field  = $matches[8][0];
-                $optimize_field = $matches[4][0];
-                $where_sql      = $matches[6][0];
-                $orderby_sql    = $matches[7][0];
-                $limit_sql      = $matches[9][0];
-                if (strpos($from_where, 'NOT IN')!==false){
-                    $from_where = preg_replace("/AND\s*`".$optimize_field."`\s*NOT\s*IN\s*\(.+\)/", '', $from_where);
-                }
                 $sqlArray[] = array();
                 foreach ($cidArray as $key => $value) {
-                    $pieces = array();
-                    $pieces[] = '(SELECT `'.$primary.'`';
-                    if($orderby_field!==$primary){
-                        $pieces[]= ',`'.$orderby_field.'`';
+                    $nsql = $sqlmat[1];
+                    if(strtolower($ORDER_field)!='id'){
+                        $nsql.= ','.$sqlmat[3].'.`'.$ORDER_field.'`';
                     }
-                    $pieces[]= 'FROM '.$from_where;// FROM AND
-                    $pieces[]= $optimize_field." = '".$value."'";
-                    $pieces[]= $where_sql; //ORDER BY
-                    $pieces[]= $orderby_sql; //ORDER BY
-                    $limit && $pieces[]= $limit_sql; //LIMIT
-                    $pieces[]= ')';
-                    $sqlArray[$key] = implode(' ', $pieces);
+                    $nsql.= $sqlmat[2];
+                    $nsql.= ' `'.$optimize_field.'`=\''.$value.'\' AND ';
+                    $nsql.= $whereSQL;
+                    $nsql = '( '.$nsql.' '.$eol.')';
+                    $sqlArray[$key] = $nsql;
                 }
-                return implode("\nUNION ALL\n", $sqlArray)."\n".$orderby_sql.' '.$limit_sql;
+                $sql = implode("\nUNION ALL\n", $sqlArray)."\n ".$eol;
             }
         }
+        return $sql;
     }
 }

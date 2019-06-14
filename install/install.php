@@ -14,7 +14,6 @@ define('iPHP',TRUE);
 define('iPHP_APP','iCMS'); //应用名
 define('iPHP_DEBUG', true);
 define('iPHP_APP_MAIL','support@iCMSdev.com');
-define('iPATH',real_path(dirname(strtr(__FILE__,'\\','/'))."/../"));
 
 if($_POST['action']=='install'){
     $db_host     = trim($_POST['DB_HOST']);
@@ -36,7 +35,7 @@ if($_POST['action']=='install'){
     define('iPHP_DB_ENGINE',$db_engine);      // MYSQL引擎
     define('iPHP_DB_PREFIX_TAG','#iCMS@__');
 
-    require_once iPATH.'iPHP/iPHP.php';
+    require_once __DIR__.'/../iPHP/iPHP.php';
     require_once iPHP_CORE.'/iUI.class.php';
     require_once iPHP_APP_CORE.'/iCMS.class.php';
 
@@ -58,16 +57,19 @@ if($_POST['action']=='install'){
 	iPHP_DB_HOST OR iUI::alert("请填写数据库服务器地址",'js:top.callback("#DB_HOST");');
 	iPHP_DB_USER OR iUI::alert("请填写数据库用户名",'js:top.callback("#DB_USER");');
 	iPHP_DB_PASSWORD OR iUI::alert("请填写数据库密码",'js:top.callback("#DB_PASSWORD");');
+    is_numeric(iPHP_DB_PORT) OR iUI::alert("数据库端口出错",'js:top.callback("#DB_PORT");');
 	iPHP_DB_NAME OR iUI::alert("请填写数据库名",'js:top.callback("#DB_NAME");');
+    preg_match('/^[a-zA-z\_]+$/is', iPHP_DB_NAME) OR iUI::alert("数据库名包含非法字符，请返回修改",'js:top.callback("#DB_NAME");');
 	strstr(iPHP_DB_PREFIX, '.') && iUI::alert("您指定的数据表前缀包含点字符，请返回修改",'js:top.callback("#DB_PREFIX");');
-	preg_match('/^[a-zA-z\_]+$/is', iPHP_DB_PREFIX) OR iUI::alert("您指定的数据表前缀包含非法字符，请返回修改",'js:top.callback("#DB_PREFIX");');
+    preg_match('/^[a-zA-z\_]+$/is', iPHP_DB_PREFIX) OR iUI::alert("您指定的数据表前缀包含非法字符，请返回修改",'js:top.callback("#DB_PREFIX");');
+    in_array(strtolower(iPHP_DB_CHARSET), array('utf8','utf8mb4')) OR iUI::alert("非法字符集",'js:top.callback("#DB_CHARSET");');
 
 	$admin_name OR iUI::alert("请填写超级管理员账号",'js:top.callback("#ADMIN_NAME");');
 	$admin_password OR iUI::alert("请填写超级管理员密码",'js:top.callback("#ADMIN_PASSWORD");');
-	strlen($admin_password)<6 && iUI::alert("请填写超级管理员密码",'js:top.callback("#ADMIN_PASSWORD");');
+	strlen($admin_password)<6 && iUI::alert("超级管理员密码不能小于6位字符",'js:top.callback("#ADMIN_PASSWORD");');
     //检测数据库文件
-    $sql_file      = dirname(strtr(__FILE__,'\\','/')).'/iCMS.sql';
-    $data_sql_file = dirname(strtr(__FILE__,'\\','/')).'/iCMS-data.sql';
+    $sql_file      = __DIR__.'/iCMS.sql';
+    $data_sql_file = __DIR__.'/iCMS-data.sql';
     is_readable($sql_file) OR iUI::alert('数据库文件[iCMS.sql]不存在或者读取失败','js:top.callback();',10);
     is_readable($data_sql_file) OR iUI::alert('数据库文件[iCMS-data.sql]不存在或者读取失败','js:top.callback();',10);
 

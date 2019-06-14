@@ -298,8 +298,10 @@ class articleAdmincp{
         $urls[] = $iurl['href'];
         if($iurl['mobile']['url']){
             $urls[] = $iurl['mobile']['url'];
+            $m_rpc = plugin_baidu::RPC2($iurl['mobile']['url']);
         }
         $res = plugin_baidu::ping($urls);
+        $p_rpc = plugin_baidu::RPC2($iurl['href']);
         // if($iurl['mip']['url']){
         //     $mip = plugin_baidu::ping($iurl['mip']['url'],'mip');
         // }
@@ -1036,8 +1038,8 @@ class articleAdmincp{
                 article::data_update(array('body'=>$body),compact('id'));
             }
         }
-        // if(isset($_POST['autopic']) && empty($haspic)){
-        if(isset($_POST['autopic'])){
+
+        if($_POST['autopic']){
             $autopic = filesAdmincp::remotepic($body,'autopic');
             if($autopic){
                 $sizeMap = array('b','m','s');

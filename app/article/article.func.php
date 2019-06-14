@@ -12,6 +12,12 @@ class articleFunc{
 	public static $app   = 'article';
 	public static $appid = iCMS_APP_ARTICLE;
 	public static $table = '#iCMS@__article';
+
+    public static function article_category($vars) {
+        $vars['apps'] = self::$app;
+        return categoryFunc::category_list($vars);
+    }
+
 	public static function article_list($vars) {
 		if ($vars['loop'] === "rel" && empty($vars['id'])) {
 			return false;
@@ -194,34 +200,22 @@ class articleFunc{
 				$map_order_sql = " ORDER BY `".self::$table."`.`id` $by";
 			}
 		}
-
-		$hash = md5(json_encode($vars) . $order_sql . $limit);
+		$map_order_sql && $order_sql = $map_order_sql;
 
 		if ($vars['cache']) {
-			$cache_name = iPHP_DEVICE . '/'.self::$app.'/' . $hash;
-			$resource = iCache::get($cache_name);
-			if($resource!==null) return $resource;
+			$hash = md5(json_encode($vars) . $order_sql);
+			$cache_name = iPHP_DEVICE . '/'.self::$app.'/'.$hash.'/'.$offset.'_'.$maxperpage;
+			isset($vars['cache_name']) && $cache_name = $vars['cache_name'];
+			$c_resource = iCache::get($cache_name);
+			if(is_array($c_resource)) return $c_resource;
 		}
 
-		if ($offset) {
-			if ($vars['cache']) {
-                $page_cache_name = iPHP_DEVICE . '/'.self::$app.'_page/' . $hash;
-				$ids_array = iCache::get($page_cache_name);
-			}
-		}
-		$map_order_sql && $order_sql = $map_order_sql;
 		if (empty($ids_array)) {
 			$sql = "SELECT ".$distinct." `".self::$table."`.`id` FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}";
 			if (strpos($sql, '`cid` IN')!==false && empty($map_order_sql) && iCMS::$config['debug']['db_optimize_in']){
-				$_sql = iSQL::optimize_in($sql);
-				$_sql && $sql = $_sql;
+				$sql = iSQL::optimize_in($sql);
 			}
 			$ids_array = iDB::all($sql);
-
-
-			if($vars['cache'] && $page_cache_name){
-				iCache::set($page_cache_name, $ids_array, $cache_time);
-			}
 		}
 
 		if ($ids_array) {
@@ -229,22 +223,26 @@ class articleFunc{
 			$ids = $ids ? $ids : '0';
 			$where_sql = "WHERE `".self::$table."`.`id` IN({$ids})";
 			$order_sql = "ORDER BY FIELD(`id`,{$ids})";
-			$limit = '';
-		}else{
-			return array();
-		}
+			$limit     = '';
 
-		if (empty($resource)) {
-			$resource = iDB::all("SELECT `".self::$table."`.* FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}");
-			$resource = articleFunc::article_array($vars, $resource);
-			$vars['cache'] && iCache::set($cache_name, $resource, $cache_time);
+			$resource  = iDB::all("SELECT `".self::$table."`.* FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}");
+			$resource  = articleFunc::article_array($vars, $resource);
 		}
+		$vars['cache'] && iCache::set($cache_name, $resource, $cache_time);
 		return $resource;
 	}
 	public static function article_search($vars) {
 		if(empty(iCMS::$config['sphinx']['host'])) return array();
 
 		$resource = array();
+		if($vars['cache']){
+			$cache_time = isset($vars['time']) ? (int) $vars['time'] : -1;
+			$hash = md5(json_encode($vars));
+			$cache_name = iPHP_DEVICE . '/'.self::$app.'/s_' . $hash;
+			$c_resource = iCache::get($cache_name);
+			if(is_array($c_resource)) return $c_resource;
+		}
+
 		$hidden = categoryApp::get_cache('hidden');
 		$hidden && $where_sql .= iSQL::in($hidden, 'cid', 'not');
 		$SPH = iPHP::vendor('SphinxClient',iCMS::$config['sphinx']['host']);
@@ -318,6 +316,7 @@ class articleFunc{
 			$SPH->_warning  && $msg[] = '[WARNING]'.$SPH->GetLastWarning();
 			$SPH->_connerror&& $msg[] = '[connerror]'.$SPH->connerror;
 			iUI::warning(implode('<hr />', $msg));
+			return array();
 		}
 
 		$ids_array = array();
@@ -328,7 +327,8 @@ class articleFunc{
 			$ids = implode(',', (array) $ids_array);
 		}
 		if (empty($ids)) {
-			return;
+			$vars['cache'] && iCache::set($cache_name, array(), $cache_time);
+			return array();
 		}
 
 		$where_sql = " `id` in($ids)";
@@ -353,6 +353,7 @@ class articleFunc{
 		}
 		$resource = iDB::all("SELECT * FROM `".self::$table."` WHERE {$where_sql} {$order_sql} LIMIT {$maxperpage}");
 		$resource = articleFunc::article_array($vars, $resource);
+		$vars['cache'] && iCache::set($cache_name, $resource, $cache_time);
 		return $resource;
 	}
 	public static function article_data($vars) {
