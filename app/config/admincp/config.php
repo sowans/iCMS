@@ -513,7 +513,7 @@ function template_device_td($key,$device=array()){
             <?php include admincp::view("apps.meta","apps");?>
           </div>
           <div id="config-ext" class="tab-pane hide">
-            <?php config::scan_config('ext');?>
+            <?php foreach (config::scan_config('ext') as $path) { include $path;} ?>
           </div>
         </div>
         <div class="form-actions">

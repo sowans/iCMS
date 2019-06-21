@@ -157,10 +157,12 @@ class config{
         include admincp::view('config',null,true);
     }
     public static function scan_config($tab='*'){
-        foreach (glob(iPHP_APP_DIR."/*/admincp/*.config.{$tab}.php") as $path) {
-            // var_dump($path);
-            // preg_match("@.*?/(\w+)/admincp/((\w+)\.config\.(\w+))\.php@", $path, $match);
-            include $path;
-        }
+        return (array)glob(iPHP_APP_DIR."/*/admincp/*.config.{$tab}.php");
+
+        // foreach (glob(iPHP_APP_DIR."/*/admincp/*.config.{$tab}.php") as $path) {
+        //     // var_dump($path);
+        //     // preg_match("@.*?/(\w+)/admincp/((\w+)\.config\.(\w+))\.php@", $path, $match);
+        //     include $path;
+        // }
     }
 }
