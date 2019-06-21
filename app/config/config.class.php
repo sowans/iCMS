@@ -13,6 +13,13 @@ class config{
     public static $appid = 0;
     public static $data  = array();
 
+    public static function table(){
+        $table = 'config';
+        if(iPHP_APP_SITE!='iCMS'){
+            $table = 'config_'.str_replace('.', '_', iPHP_APP_SITE);
+        }
+        return $table;
+    }
     /**
      * [cache 更新配置]
      * @return [type] [description]
@@ -83,7 +90,7 @@ class config{
         if ($name === NULL) {
             $sql = "appid< '999999'";
             $appid === NULL OR $sql = " AND `appid`='$appid'";
-            $rs  = iDB::all("SELECT * FROM `#iCMS@__config` WHERE $sql");
+            $rs  = iDB::all("SELECT * FROM `#iCMS@__".self::table()."` WHERE $sql");
             foreach ((array)$rs AS $c) {
                 $value = $c['value'];
                 // strpos($c['value'], 'a:')===false OR $value = serialize($c['value']);
@@ -93,7 +100,7 @@ class config{
             self::$data = $config;
             return $config;
         } else {
-            $value = iDB::value("SELECT `value` FROM `#iCMS@__config` WHERE `appid`='$appid' AND `name` ='$name'");
+            $value = iDB::value("SELECT `value` FROM `#iCMS@__".self::table()."` WHERE `appid`='$appid' AND `name` ='$name'");
             // strpos($value, 'a:')===false OR $value = unserialize($value);
             $value = (array)json_decode($value,true);
             self::$data = $value;
@@ -111,18 +118,18 @@ class config{
         $cache && iCache::set('config/' . $name, $value, 0);
         // is_array($value) && $value = addslashes(serialize($value));
         is_array($value) && $value = addslashes(cnjson_encode($value));
-        $check  = iDB::value("SELECT `name` FROM `#iCMS@__config` WHERE `appid` ='$appid' AND `name` ='$name'");
+        $check  = iDB::value("SELECT `name` FROM `#iCMS@__".self::table()."` WHERE `appid` ='$appid' AND `name` ='$name'");
         $fields = array('appid','name','value');
         $data   = compact ($fields);
         if($check===null){
-            iDB::insert('config',$data);
+            iDB::insert(self::table(),$data);
         }else{
-            iDB::update('config', $data, array('appid'=>$appid,'name'=>$name));
+            iDB::update(self::table(),$data, array('appid'=>$appid,'name'=>$name));
         }
     }
     public static function del($name, $appid) {
         if($name &&$appid){
-            iDB::query("DELETE FROM `#iCMS@__config` WHERE `appid` ='$appid' AND `name` ='$name'");
+            iDB::query("DELETE FROM `#iCMS@__".self::table()."` WHERE `appid` ='$appid' AND `name` ='$name'");
         }
     }
     /**
@@ -148,5 +155,12 @@ class config{
     }
     public static function view(){
         include admincp::view('config',null,true);
+    }
+    public static function scan_config($tab='*'){
+        foreach (glob(iPHP_APP_DIR."/*/admincp/*.config.{$tab}.php") as $path) {
+            // var_dump($path);
+            // preg_match("@.*?/(\w+)/admincp/((\w+)\.config\.(\w+))\.php@", $path, $match);
+            include $path;
+        }
     }
 }

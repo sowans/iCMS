@@ -258,6 +258,13 @@ class iSQL {
             }
         }
     }
+    public static function orderby_field($array,$idArray,$field='id'){
+        foreach ($idArray as $key => $value) {
+            $idx = array_search($value[$field],array_column($array,$field));
+            $resource[$key] = $array[$idx];
+        }
+        return $resource;
+    }
     public static function optimize_in($sql,$limit=true){
         if(strtolower(iPHP_DB_TYPE)!=="mysql"){
             return $sql;
@@ -295,7 +302,7 @@ class iSQL {
                 foreach ($cidArray as $key => $value) {
                     $nsql = $sqlmat[1];
                     if(strtolower($ORDER_field)!='id'){
-                        $nsql.= ','.$sqlmat[3].'.`'.$ORDER_field.'`';
+                        $nsql.= ','.$sqlmat[3].'.`'.$ORDER_field.'` ';
                     }
                     $nsql.= $sqlmat[2];
                     $nsql.= ' `'.$optimize_field.'`=\''.$value.'\' AND ';

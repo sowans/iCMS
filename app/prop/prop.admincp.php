@@ -285,7 +285,7 @@ class propAdmincp{
             $name = $data[$pid];
             if($pid!='0'){
                 $flag = '<i class="fa fa-flag"></i> '.$name;
-                echo ($url?'<a href="'.str_replace('{PID}',$pid,$url).'">'.$flag.'</a>':$flag).'<br />';
+                echo ($url?'<a href="'.str_replace(array('{PID}','%7BPID%7D'),$pid,$url).'">'.$flag.'</a>':$flag).'<br />';
             }
         }
     }

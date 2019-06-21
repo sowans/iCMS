@@ -85,7 +85,7 @@ class appsAdmincp{
         empty($app) && $app = iPinyin::get($name);
         empty($title) && $title = $name;
 
-        $table_array  = $_POST['table'];
+        $table_array  = (array)$_POST['table'];
         if($table_array){
           $table_array  = array_filter($table_array);
           $table  = addslashes(cnjson_encode($table_array));

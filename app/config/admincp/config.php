@@ -74,12 +74,12 @@ function modal_tpl_index(el,a){
         <li><a href="#config-thumb" data-toggle="tab">缩略图</a></li>
         <li><a href="#config-watermark" data-toggle="tab">水印</a></li>
         <li><a href="#config-time" data-toggle="tab">时间</a></li>
-        <li><a href="#config-other" data-toggle="tab">其它</a></li>
         <li><a href="#config-patch" data-toggle="tab">更新</a></li>
         <li><a href="#config-grade" data-toggle="tab">高级</a></li>
         <li><a href="#config-mail" data-toggle="tab">邮件</a></li>
         <li><a href="#apps-metadata" data-toggle="tab">动态属性</a></li>
-        <?php //apps::config('tabs');?>
+        <li><a href="#config-other" data-toggle="tab">其它</a></li>
+        <li><a href="#config-ext" data-toggle="tab">扩展</a></li>
       </ul>
     </div>
     <div class="widget-content nopadding iCMS-config">
@@ -492,26 +492,6 @@ function template_device_td($key,$device=array()){
               </div>
             </div>
             <span class="help-inline">后台侧边栏默认开启,启用后可选择打开或者最小化</span>
-            <hr />
-            <h3 class="title">百度站长平台 主动推送(实时)</h3>
-            <span class="help-inline">申请地址:http://zhanzhang.baidu.com/ (需要权限)</span>
-            <div class="clearfloat"></div>
-            <div class="input-prepend"> <span class="add-on">站点</span>
-              <input type="text" name="config[api][baidu][sitemap][site]" class="span3" id="baidu_sitemap_site" value="<?php echo $config['api']['baidu']['sitemap']['site'] ; ?>"/>
-            </div>
-            <span class="help-inline">在站长平台验证的站点，比如www.example.com</span>
-            <div class="clearfloat mt10"></div>
-            <div class="input-prepend"> <span class="add-on">准入密钥</span>
-              <input type="text" name="config[api][baidu][sitemap][access_token]" class="span3" id="baidu_sitemap_access_token" value="<?php echo $config['api']['baidu']['sitemap']['access_token'] ; ?>"/>
-            </div>
-            <span class="help-inline">在站长平台申请的推送用的准入密钥</span>
-            <div class="clearfloat mb10"></div>
-            <div class="input-prepend"> <span class="add-on">同步推送</span>
-              <div class="switch" data-on-label="启用" data-off-label="关闭">
-                <input type="checkbox" data-type="switch" name="config[api][baidu][sitemap][sync]" id="baidu_sitemap_sync" <?php echo $config['api']['baidu']['sitemap']['sync']?'checked':''; ?>/>
-              </div>
-            </div>
-            <span class="help-inline">启用文章发布时同步推送 如果发布文章无法正常返回 建议关闭</span>
           </div>
           <div id="config-patch" class="tab-pane hide">
             <div class="input-prepend"> <span class="add-on">系统更新</span>
@@ -531,6 +511,9 @@ function template_device_td($key,$device=array()){
           </div>
           <div id="apps-metadata" class="tab-pane hide">
             <?php include admincp::view("apps.meta","apps");?>
+          </div>
+          <div id="config-ext" class="tab-pane hide">
+            <?php config::scan_config('ext');?>
           </div>
         </div>
         <div class="form-actions">

@@ -9,16 +9,34 @@
 */
 class plugin_baidu{
     public static $out = null;
+
+    public static function push($urls) {
+        self::ping($urls);
+        foreach ((array)$urls as $key => $url) {
+            self::xzh($url);
+            self::RPC2($url);
+        }
+    }
     /**
-     * [百度站长平台 主动推送(实时)]
+     * [ping 百度站长平台 主动推送]
+     * @param  [type] $urls [description]
+     * @param  [type] $type [description]
+     * @param  string $act  [urls:推送,update:更新,del:删除]
+     * @return [type]       [description]
      */
-    public static function ping($urls,$type=null) {
+    public static function ping($urls,$type=null,$act='urls') {
         $site          = iCMS::$config['api']['baidu']['sitemap']['site'];
         $access_token  = iCMS::$config['api']['baidu']['sitemap']['access_token'];
+
+        if(iCMS::$config['plugin']['baidu']['sitemap']){
+            $site          = iCMS::$config['plugin']['baidu']['sitemap']['site'];
+            $access_token  = iCMS::$config['plugin']['baidu']['sitemap']['access_token'];
+        }
+
         if(empty($site)||empty($access_token)){
             return false;
         }
-        $api ='http://data.zz.baidu.com/urls?site='.$site.'&token='.$access_token;
+        $api ='http://data.zz.baidu.com/'.$act.'?site='.$site.'&token='.$access_token;
         $type && $api.='&type='.$type;
         $ch = curl_init();
         $options =  array(
@@ -30,13 +48,19 @@ class plugin_baidu{
         );
         curl_setopt_array($ch, $options);
         $result = curl_exec($ch);
-        self::$out = json_decode($result);
-        if(self::$out->success){
+        self::$out['ping'] = json_decode($result);
+        if(self::$out['ping']->success){
             return true;
         }
         return false;
     }
-
+    /**
+     * [xzh description]
+     * @param  [type] $urls [description]
+     * @param  string $type [realtime:天级收录,batch:周级收录]
+     * @param  [type] &$out [description]
+     * @return [type]       [description]
+     */
     public static function xzh($urls,$type='realtime',&$out=null) {
         $appid = iCMS::$config['plugin']['baidu']['xzh']['appid'];
         $token = iCMS::$config['plugin']['baidu']['xzh']['token'];
@@ -56,8 +80,8 @@ class plugin_baidu{
         );
         curl_setopt_array($ch, $options);
         $result = curl_exec($ch);
-        $out   = json_decode($result,true);
-        if($out['error']){
+        self::$out['xzh'] = json_decode($result,true);
+        if(self::$out['xzh']['error']){
             return false;
         }
         return true;
@@ -90,9 +114,10 @@ class plugin_baidu{
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $baiduXML);
-        $result = curl_exec($curl);
+        $xml = curl_exec($curl);
         curl_close($curl);
-        return $result;
+        self::$out['RPC2'] = iUtils::xmlToArray($xml);
+        return self::$out['RPC2']->params->param->value->int?false:true;
     }
 
 }
