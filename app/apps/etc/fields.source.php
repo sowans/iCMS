@@ -1,5 +1,16 @@
-<?php defined('iPHP') OR exit('What are you doing?');?>
-{
+<?php
+/**
+* iCMS - i Content Management System
+* Copyright (c) 2007-2019 iCMSdev.com. All rights reserved.
+*
+* @author icmsdev <master@icmsdev.com>
+* @site https://www.icmsdev.com
+* @licence https://www.icmsdev.com/LICENSE.html
+*
+*/
+defined('iPHP') OR exit('What are you doing?');
+
+return '{
     "id": "id=id&label=内容id&comment=主键%20自增ID&field=PRIMARY&name=id&default=&type=PRIMARY&len=10&class=span2",
     "1": "UI:BR",
     "cid": "id=cid&label=栏目&field=INT&name=cid&default=&type=category&len=10&class=span3&validate%5B%5D=empty",
@@ -41,4 +52,4 @@
     "mobile": "id=mobile&label=发布设备&comment=0:pc;1:手机&field=TINYINT&name=mobile&default=0&type=device:hidden&len=1&class=span2",
     "37": "UI:BR",
     "postype": "id=postype&label=发布类型&comment=0:用户;1:管理员&field=TINYINT&name=postype&default=1&type=postype:hidden&len=1&class=span2"
-}
+}';

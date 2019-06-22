@@ -107,7 +107,11 @@ class iPHP {
 			strpos($site, '..') === false OR self::error_throw('What are you doing','001');
 		}
 
-		define('iPHP_APP_SITE', $site);
+		if(!defined('iPHP_APP_SITE')){
+			$site OR self::error_throw('Please define iPHP_APP_SITE ', '0000');
+			define('iPHP_APP_SITE', $site);
+		}
+
 		define('iPHP_APP_CONF', iPHP_CONF_DIR . '/' . iPHP_APP_SITE); //网站配置目录
 		define('iPHP_APP_CONFIG', iPHP_APP_CONF . '/config.php'); //网站配置文件
 		is_file(iPHP_APP_CONFIG) OR self::error_throw('Unable to find "' . iPHP_APP_SITE . '" config file ('.iPHP_APP_CONFIG.').Please install '.iPHP_APP, '0001');

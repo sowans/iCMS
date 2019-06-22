@@ -205,7 +205,20 @@ function get_php_content($content){
 function check_priv($p,$priv){
     return is_array($p)?array_intersect((array)$p,(array)$priv):in_array((string)$p,(array)$priv);
 }
-
+function iCMS_php_head(){
+    return '<?php
+/**
+* iCMS - i Content Management System
+* Copyright (c) 2007-'.date("Y").' iCMSdev.com. All rights reserved.
+*
+* @author icmsdev <master@icmsdev.com>
+* @site https://www.icmsdev.com
+* @licence https://www.icmsdev.com/LICENSE.html
+*
+*/
+defined(\'iPHP\') OR exit(\'What are you doing?\');
+';
+}
 function orderby_option($array,$by="DESC"){
     $opt = '';
     $byText = ($by=="ASC"?"升序":"降序");
@@ -235,4 +248,78 @@ function get_orderby($array=null){
     // $obj->sql = $orderby;
     // $obj->option = $option;
     // return $obj;
+}
+
+/**
+ * Json数据格式化
+ * @param  Mixed  $data   数据
+ * @param  String $indent 缩进字符，默认4个空格
+ * @return JSON
+ * @source 来源网络
+ * @author 佚名
+*/
+
+function jsonFormat($data, $indent=null){
+    is_array($data) OR $data = json_decode($data,true);
+    if(empty($data)){
+        return '';
+    }
+    // 对数组中每个元素递归进行urlencode操作，保护中文字符
+    array_walk_recursive($data, 'jsonFormatProtect');
+
+    // json encode
+    $data = json_encode($data);
+
+    // 将urlencode的内容进行urldecode
+    $data = urldecode($data);
+
+    // 缩进处理
+    $ret = '';
+    $pos = 0;
+    $length = strlen($data);
+    $indent = isset($indent)? $indent : '    ';
+    $newline = "\n";
+    $prevchar = '';
+    $outofquotes = true;
+
+    for($i=0; $i<=$length; $i++){
+
+        $char = substr($data, $i, 1);
+
+        if($char=='"' && $prevchar!='\\'){
+            $outofquotes = !$outofquotes;
+        }elseif(($char=='}' || $char==']') && $outofquotes){
+            $ret .= $newline;
+            $pos --;
+            for($j=0; $j<$pos; $j++){
+                $ret .= $indent;
+            }
+        }
+
+        $ret .= $char;
+
+        if(($char==',' || $char=='{' || $char=='[') && $outofquotes){
+            $ret .= $newline;
+            if($char=='{' || $char=='['){
+                $pos ++;
+            }
+
+            for($j=0; $j<$pos; $j++){
+                $ret .= $indent;
+            }
+        }
+
+        $prevchar = $char;
+    }
+
+    return $ret;
+}
+
+/** 将数组元素进行urlencode
+* @param String $val
+*/
+function jsonFormatProtect(&$val){
+    if($val!==true && $val!==false && $val!==null){
+        $val = urlencode($val);
+    }
 }

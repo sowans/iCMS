@@ -237,7 +237,7 @@ class apps_mod {
     public static function iurl($rs){
       if($rs['table'] && $rs['apptype']=="2"){
         $table  = reset($rs['table']);
-        $router = array('rule'=>'4','primary'=>$table['primary'],'page'=>'p');
+        $rule = array('rule'=>'4','primary'=>$table['primary'],'page'=>'p');
       }else{
         $array = array(
             'http'     => array('rule'=>'0','primary'=>''),
@@ -246,11 +246,11 @@ class apps_mod {
             'article'  => array('rule'=>'2','primary'=>'id','page'=>'p'),
             'tag'      => array('rule'=>'3','primary'=>'id'),
         );
-        $router = $array[$rs['app']];
-        if(empty($router) && $rs['config']['iurl']){
-          $router = $rs['config']['iurl'];
+        $rule = $array[$rs['app']];
+        if(empty($rule) && $rs['config']['iurl']){
+          $rule = $rs['config']['iurl'];
         }
       }
-      return $router;
+      return $rule;
     }
 }

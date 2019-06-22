@@ -222,10 +222,12 @@ class articleFunc{
 			$ids = iSQL::values($ids_array);
 			$ids = $ids ? $ids : '0';
 			$where_sql = "WHERE `".self::$table."`.`id` IN({$ids})";
-			$order_sql = "ORDER BY FIELD(`id`,{$ids})";
+			// $order_sql = "ORDER BY FIELD(`id`,{$ids})";
+			$order_sql = '';
 			$limit     = '';
 
 			$resource  = iDB::all("SELECT `".self::$table."`.* FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}");
+			$resource  = iSQL::orderby_field($resource,$ids_array);
 			$resource  = articleFunc::article_array($vars, $resource);
 		}
 		$vars['cache'] && iCache::set($cache_name, $resource, $cache_time);

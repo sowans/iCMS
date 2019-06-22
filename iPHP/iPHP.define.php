@@ -67,6 +67,7 @@ defined('iPHP_MEMORY_LIMIT') OR define('iPHP_MEMORY_LIMIT', '128M');
 defined('iPHP_TPL_VAR') OR define('iPHP_TPL_VAR',iPHP_APP);
 defined('iPHP_TPL_FUN') OR define('iPHP_TPL_FUN',iPHP_APP_DIR.'/func');
 //-----------------其它-----------------------
+defined('iPHP_ERROR_HEADER') OR define('iPHP_ERROR_HEADER',true);
 defined('iPHP_SHELL') OR define('iPHP_SHELL',PHP_SAPI=='cli'?true:false);
 defined('iPHP_PROTOCOL') OR define('iPHP_PROTOCOL',iPHP_APP.'://');
 defined('iPHP_CORE_CLASS') OR define('iPHP_CORE_CLASS',

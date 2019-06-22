@@ -28,7 +28,7 @@ class config{
         $config         = self::get();
         $config['apps'] = apps::get_appsid();
         $config['iurl'] = apps::get_iurl();
-        $config['router']['config'] = apps::router_cache();
+        $config['router']['config'] = apps::get_router();
         $config['meta'] = array();
         $data = apps_meta::data(iCMS_APP_CONFIG,1);
         $data && $config['meta'] = $data['meta'];
