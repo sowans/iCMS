@@ -230,7 +230,7 @@ class menu {
 		}
 
         $href = self::href($a);
-		$a['children'] && $children = count($a['children']);
+		$children = is_array($a['children'])?count($a['children']):0;
 
 		if($children && $mType=='nav'){
 			$a['class']	= $level?'dropdown-submenu':'dropdown';
