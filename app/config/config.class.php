@@ -15,6 +15,7 @@ class config{
 
     public static function table(){
         $table = 'config';
+        defined('iPHP_APP_SITE') OR define('iPHP_APP_SITE', iPHP_APP);
         if(iPHP_APP_SITE!='iCMS'){
             $table = 'config_'.str_replace('.', '_', iPHP_APP_SITE);
         }

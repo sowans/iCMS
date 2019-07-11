@@ -621,6 +621,16 @@ class iPHP {
 		}
 		exit();
 	}
+	public static function error_log($erro) {
+		@file_put_contents(iPHP_APP_CACHE.'/error_log_'.md5(sha1(iPHP_KEY)).'.php'
+			,"<?php exit('What the fuck!');?>"
+			.PHP_EOL.'['.date("Y-m-d H:i:s").'] '.self::get_ip()
+			.PHP_EOL.iPHP_REQUEST_URL
+			.PHP_EOL.html2text($erro)
+			.PHP_EOL.PHP_EOL
+			,FILE_APPEND
+		);
+	}
 	public static function error_handler($errno, $errstr, $errfile, $errline) {
 	    if (!(error_reporting() & $errno)) {
 	        // This error code is not included in error_reporting, so let it fall
@@ -664,7 +674,7 @@ class iPHP {
 		}
 		$html .= "</pre>";
 		$html = iSecurity::filter_path($html);
-
+		iPHP_DEBUG_ERRORLOG && self::error_log($html);
 		self::$callback['error'] OR self::$callback['error'] = array('iUI','error');
 		self::callback(self::$callback['error'],array($html,'system'));
 	}

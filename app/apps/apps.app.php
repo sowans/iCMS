@@ -12,6 +12,7 @@ class appsApp {
     public $_app     = null;
     public $_primary ='id';
     public $_table   = null;
+    public $_gets   = null;
     public $methods  = array('iCMS','clink','search','hits','vote','comment');
 
     public static $s_app  = null;
@@ -36,6 +37,12 @@ class appsApp {
         $v = (int) $_GET[$this->_primary];
         $p = isset($_GET['p']) ? (int) $_GET['p'] : 1;
         $f = $this->_primary;
+        $dir = iSecurity::escapeStr($_GET['dir']);
+        $dir && $this->_gets['cid'] = categoryApp::get_cache('dir2cid',$dir);
+
+        $cid = iSecurity::escapeStr($_GET['cid']);
+        $cid && $this->_gets['cid'] = $cid;
+
         if(isset($_GET['clink'])){
             $v = iSecurity::escapeStr($_GET['clink']);
             $f = 'clink';
@@ -131,9 +138,11 @@ class appsApp {
         $table===null && $table = '`#iCMS@__'.$name.'`';
         $field===null && $field = $primary;
 
+        $this->_gets['cid'] && $sql = " AND `cid`='".(int)$this->_gets['cid']."'";
+
         $data = iDB::row("
             SELECT * FROM {$table}
-            WHERE `".$field."`='".$fvar. "'
+            WHERE `".$field."`='".$fvar. "' {$sql}
             AND `status` ='1' LIMIT 1;",
         ARRAY_A);
 

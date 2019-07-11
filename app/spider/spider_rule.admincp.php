@@ -85,7 +85,7 @@ class spider_ruleAdmincp {
 				array('name' => 'title','empty' => true,
 					'process'=>array(
 						array('helper'=>'trim'),
-						array('helper'=>'dataclean','rule'=>'DOM::img')
+						array('helper'=>'cleanhtml')
 					)
 				),
 				array('name' => 'body','empty' => true,'page' => true, 'multi' => true,

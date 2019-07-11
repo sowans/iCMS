@@ -177,10 +177,12 @@ class formerApp{
             case 'multi_image':
                 $nkey     = $key.'_array';
                 // $valArray = unserialize($value);
-                if(preg_match('/^a:\d+:\{/', $value)){
-                    $valArray = unserialize($value);
-                }else{
-                    $valArray = json_decode($value,true);
+                if(!is_array($value)){
+                    if(preg_match('/^a:\d+:\{/', $value)){
+                        $valArray = unserialize($value);
+                    }else{
+                        $valArray = json_decode($value,true);
+                    }
                 }
                 if($value && empty($valArray)){
                     $valArray = explode("\n", $value);
@@ -285,6 +287,7 @@ class formerApp{
             break;
             case 'markdown';
                 if($value){
+                    //$rs[$key] = $value;
                     $plugin = array('markdown'=> true,'htmlspecialchars' =>true);
                     $rs[$key] = iPHP::callback(array("plugin_markdown","HOOK"),array($value,&$plugin));
                 }

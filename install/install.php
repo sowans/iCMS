@@ -14,6 +14,7 @@ define('iPHP',TRUE);
 define('iPHP_APP','iCMS'); //应用名
 define('iPHP_DEBUG', true);
 define('iPHP_APP_MAIL','support@iCMSdev.com');
+define('iPHP_APP_SITE', iPHP_APP);
 
 if($_POST['action']=='install'){
     $db_host     = trim($_POST['DB_HOST']);

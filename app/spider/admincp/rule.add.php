@@ -19,6 +19,7 @@ admincp::head();
 .data-processing-group .dropdown-menu>li>a{width: auto;}
 .processing-item-fun{margin-right: 5px;}
 .processing-item-dcl{display:block !important;clear: both;margin-top: 2px;}
+.ui-helper-hidden-accessible{display: none;}
 /*.divider-text{
     height: 24px !important;
     background-color: #333 !important;
@@ -462,7 +463,7 @@ function processing_item($name,$item=array(),$length=0,$title=''){
       '<input name="'.$name.'[process]['.$length.'][helper]" type="hidden" value="'.$item['helper'].'" />'.
       '</span>'.
       '<span class="add-on">整理</span>'.
-      '<input type="text" name="'.$name.'[process]['.$length.'][rule]" class="span5 tip-top" title="'.$title.'" value="'.$item['rule'].'"/>'.
+      '<input type="text" name="'.$name.'[process]['.$length.'][rule]" class="span5 tip-top" title="'.$title.'" value="'.htmlspecialchars($item['rule']).'"/>'.
     '</div>';
   }else{
     $div ='<div class="input-prepend input-append processing-item-fun" data-key="'.$length.'">'.

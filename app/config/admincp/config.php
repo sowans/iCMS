@@ -167,7 +167,7 @@ function modal_tpl_index(el,a){
                 <input type="checkbox" data-type="switch" name="config[debug][php]" id="debug_php" <?php echo $config['debug']['php']?'checked':''; ?>/>
               </div>
             </div>
-            <span class="help-inline">程序错误提示!如果网站显示空白或者不完整,可开启此项,方便排除错误.<a onclick="javscript:$('.debug_php_trace,.debug_access_log').toggle();">更多</a></span>
+            <span class="help-inline">程序错误提示!如果网站显示空白或者不完整,可开启此项,方便排除错误.<a onclick="javscript:$('.debug_php_trace,.debug_access_log,.debug_php_errorlog').toggle();">更多</a></span>
             <div class="<?php echo $config['debug']['php_trace']?'':'hide'; ?> debug_php_trace">
               <div class="clearfloat mb10"></div>
               <div class="input-prepend"> <span class="add-on">程序调试信息</span>
@@ -176,6 +176,16 @@ function modal_tpl_index(el,a){
                 </div>
               </div>
               <span class="help-inline">显示程序调试信息</span>
+            </div>
+            <div class="clearfloat mb10"></div>
+            <div class="<?php echo $config['debug']['php_errorlog']?'':'hide'; ?> debug_php_errorlog">
+              <div class="clearfloat mb10"></div>
+              <div class="input-prepend"> <span class="add-on">保存错误信息</span>
+                <div class="switch">
+                  <input type="checkbox" data-type="switch" name="config[debug][php_errorlog]" id="debug_php_errorlog" <?php echo $config['debug']['php_errorlog']?'checked':''; ?>/>
+                </div>
+              </div>
+              <span class="help-inline">保存错误信息到文件,方便调试</span>
             </div>
             <div class="clearfloat mb10"></div>
             <div class="<?php echo $config['debug']['access_log']?'':'hide'; ?> debug_access_log">

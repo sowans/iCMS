@@ -33,6 +33,7 @@ class iDefine {
     public static function debug($conf) {
         defined('iPHP_DEBUG') OR define('iPHP_DEBUG', $conf['php']); //程序调试模式
         defined('iPHP_DEBUG_TRACE') OR define('iPHP_DEBUG_TRACE', $conf['php_trace']); //程序调试模式
+        defined('iPHP_DEBUG_ERRORLOG') OR define('iPHP_DEBUG_ERRORLOG', $conf['php_errorlog']); //程序调试模式
         defined('iPHP_DB_DEBUG') OR define('iPHP_DB_DEBUG', $conf['db']); //数据调试
         defined('iPHP_DB_TRACE') OR define('iPHP_DB_TRACE', $conf['db_trace']); //SQL跟踪
         defined('iPHP_DB_EXPLAIN') OR define('iPHP_DB_EXPLAIN', $conf['db_explain']); //SQL解释
