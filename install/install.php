@@ -51,6 +51,7 @@ if($_POST['action']=='install'){
     $router_url     = iSecurity::escapeStr(trim($_POST['ROUTER_URL'],'/'));
     $admin_name     = iSecurity::escapeStr(trim($_POST['ADMIN_NAME']));
     $admin_password = iSecurity::escapeStr(trim($_POST['ADMIN_PASSWORD']));
+    $setup_mode     = iSecurity::escapeStr(trim($_POST['SETUP_MODE']));
 
 	$lock_file = iPATH.'cache/install.lock';
 	file_exists($lock_file) && iUI::alert('请先删除 cache/install.lock 这个文件。','js:top.callback();');
@@ -60,9 +61,9 @@ if($_POST['action']=='install'){
 	iPHP_DB_PASSWORD OR iUI::alert("请填写数据库密码",'js:top.callback("#DB_PASSWORD");');
     is_numeric(iPHP_DB_PORT) OR iUI::alert("数据库端口出错",'js:top.callback("#DB_PORT");');
 	iPHP_DB_NAME OR iUI::alert("请填写数据库名",'js:top.callback("#DB_NAME");');
-    preg_match('/^[a-zA-z\_]+$/is', iPHP_DB_NAME) OR iUI::alert("数据库名包含非法字符，请返回修改",'js:top.callback("#DB_NAME");');
+    preg_match('/^[a-zA-z0-9\_]+$/is', iPHP_DB_NAME) OR iUI::alert("数据库名包含非法字符，请返回修改",'js:top.callback("#DB_NAME");');
 	strstr(iPHP_DB_PREFIX, '.') && iUI::alert("您指定的数据表前缀包含点字符，请返回修改",'js:top.callback("#DB_PREFIX");');
-    preg_match('/^[a-zA-z\_]+$/is', iPHP_DB_PREFIX) OR iUI::alert("您指定的数据表前缀包含非法字符，请返回修改",'js:top.callback("#DB_PREFIX");');
+    preg_match('/^[a-zA-z0-9\_]+$/is', iPHP_DB_PREFIX) OR iUI::alert("您指定的数据表前缀包含非法字符，请返回修改",'js:top.callback("#DB_PREFIX");');
     in_array(strtolower(iPHP_DB_CHARSET), array('utf8','utf8mb4')) OR iUI::alert("非法字符集",'js:top.callback("#DB_CHARSET");');
 
 	$admin_name OR iUI::alert("请填写超级管理员账号",'js:top.callback("#ADMIN_NAME");');
@@ -108,7 +109,11 @@ if($_POST['action']=='install'){
 
     iDB::$show_errors = true;
 
-	run_query($sql);
+    $DROP_TABLE_IF_EXISTS = false;
+    if($setup_mode=='cover'){//覆盖安装
+        $DROP_TABLE_IF_EXISTS = true;
+    }
+	run_query($sql,$DROP_TABLE_IF_EXISTS);
 //导入默认数据
     $data_sql = iFS::read($data_sql_file);
     run_query($data_sql);
@@ -171,7 +176,7 @@ function config_set($value, $name) {
     }
 }
 
-function run_query($sql) {
+function run_query($sql,$DROP_TABLE_IF_EXISTS=false) {
 	$sql      = str_replace("\r", "\n", $sql);
 	$resource = array();
 	$num      = 0;
@@ -188,6 +193,13 @@ function run_query($sql) {
     foreach($resource as $key=>$query) {
         $query = trim($query);
         $query = str_replace('`icms_', '`#iCMS@__', $query);
+        if(strripos($query,'CREATE TABLE')!==false && $DROP_TABLE_IF_EXISTS){
+            preg_match('/CREATE\sTABLE\s`(.*?)`\s\(/is', $query, $match);
+            if($match[1]){
+                $DROP_TABLE_SQL = 'DROP TABLE IF EXISTS `'.$match[1].'`;';
+                iDB::query($DROP_TABLE_SQL);
+            }
+        }
         $query && iDB::query($query);
     }
 }

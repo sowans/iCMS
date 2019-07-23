@@ -465,6 +465,16 @@ $lock_file = iPATH.'cache/install.lock';
 							<span class="help-block">默认InnoDB,如果数据量请求量都不大可以选MyISAM。</span>
 						</div>
 					</div>
+					<div class="control-group">
+						<label class="control-label" for="SETUP_MODE">安装方式</label>
+						<div class="controls">
+							<select id="SETUP_MODE" name="SETUP_MODE" class="form-control">
+							  <option value="new" selected="selected">全新安装</option>
+							  <option value="cover">覆盖安装</option>
+							</select>
+							<span class="help-block">覆盖安装会清空原有数据。</span>
+						</div>
+					</div>
 					<h2>设置超级管理员</h2>
 					<div class="control-group">
 						<label class="control-label" for="ADMIN_NAME">账号</label>
