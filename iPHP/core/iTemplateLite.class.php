@@ -21,6 +21,7 @@ class iTemplateLite {
 	public $debugging                 = false;
 	public $error_reporting_header 	  = null;
 	public $reserved_template_varname = 'iTemplateLite';
+	public $reserved_func_name 		  = 'FuncName';
 
 	// private internal variables
 	public $_vars                     = array();	// stores all internal assigned variables
@@ -274,6 +275,7 @@ class iTemplateLite {
 			$compiler->_file                     = &$this->_file;
 			$compiler->php_extract_vars          = &$this->php_extract_vars;
 			$compiler->reserved_template_varname = &$this->reserved_template_varname;
+			$compiler->reserved_func_name         = &$this->reserved_func_name;
 			$compiler->_iVARS                    = &$this->_iVARS;
 			$compiler->default_modifiers         = &$this->default_modifiers;
 			$compile_code = $compiler->_compile_file($template_file);
@@ -378,6 +380,7 @@ class iTemplateLite_Compiler extends iTemplateLite {
 	public $plugins_dir               = "";
 	public $template_dir              = "";
 	public $reserved_template_varname = "";
+	public $reserved_func_name         = "";
 	public $default_modifiers         = array();
 	public $template_callback         = null;
 
@@ -590,9 +593,9 @@ class iTemplateLite_Compiler extends iTemplateLite {
 	}
 	function _parse_function($function, $modifiers, $arguments){
 		if(strpos($function,$this->reserved_template_varname.':')!==false){
-			list($function,$app,$method)=explode(':',$function);
+			list($function,$class,$method)=explode(':',$function);
 		}
-		//var_dump($function,$app,$method);
+		//var_dump($function,$class,$method);
 		switch ($function) {
 			case 'include':
 				$include_file = $this->internal('compile_include',array($arguments, &$this));
@@ -601,18 +604,16 @@ class iTemplateLite_Compiler extends iTemplateLite {
 			break;
 			case $this->reserved_template_varname:
 				$_args = $this->_parse_arguments($arguments);
-				if(isset($_args['app'])){
-					//原app
-					$_args['_app'] = '"'.$app.'"';
-				}else{
-					$_args['app'] = '"'.$app.'"';
-				}
+				$_args[$this->reserved_func_name] = '"'.$class.'"';
+				// if(isset($_args['app'])){
+				// 	$_args['_'.$this->reserved_func_name] = '"'.$class.'"';
+				// 	$_args[$this->reserved_func_name] = '"'.$this->_dequote($_args['app']).'"';
+				// }
 
-				if($method && !isset($_args['method'])){
-					$_args['method'] = '"'.$method.'"';
-				}
+				$method && $_args['FuncMethod'] = '"'.$method.'"';
+				// isset($_args['method']) && $_args['FuncMethod'] = '"'.$this->_dequote($_args['method']).'"';
 
-				isset($_args['app']) OR $this->trigger_error("missing 'app' attribute in '".$this->reserved_template_varname."'", E_USER_ERROR, __FILE__, __LINE__);
+				isset($_args[$this->reserved_func_name]) OR $this->trigger_error("missing 'app' attribute in '".$this->reserved_template_varname."'", E_USER_ERROR, __FILE__, __LINE__);
 
 				foreach ($_args as $key => $value){
 					$arg_list[] = "'$key' => $value";
@@ -620,13 +621,13 @@ class iTemplateLite_Compiler extends iTemplateLite {
 
 				$code = '<?php $this->callback("func",array(array('.implode(',', (array)$arg_list).'),$this)); ?>';
 
-				if($app && isset($_args['loop'])){
+				if($class && isset($_args['loop'])){
 					$this->_iPHP_stack[count($this->_iPHP_stack)-1] = true;
-					$app_args = $this->_dequote($app);
-					$_args['method'] && $app_args.='_'.$this->_dequote($_args['method']);
-					$_args['as'] 	 && $app_args = $this->_dequote($_args['as']);
+					$class_args = $this->_dequote($class);
+					$_args['FuncMethod'] && $class_args.='_'.$this->_dequote($_args['FuncMethod']);
+					$_args['as'] 	     && $class_args = $this->_dequote($_args['as']);
 
-					$arguments = 'app=$'.$app_args;
+					$arguments = $this->reserved_func_name.'=$'.$class_args;
 					isset($_args['start'])	&& $arguments.=" start={$_args['start']} ";
 					isset($_args['step'])	&& $arguments.=" step={$_args['step']} ";
 					isset($_args['max'])	&& $arguments.=" max={$_args['max']} ";

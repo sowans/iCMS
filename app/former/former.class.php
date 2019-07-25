@@ -747,6 +747,7 @@ class former {
         $field_post  = array();
         $orig_post   = $data_post = array();
         $imap_array  = array();
+        $file_array  = array();
         // $data_table  = next($app['table']);
         $data_table  = apps_mod::get_data_table($app['table']);
         $data_table && former::base_fields_merge($app,$data_table);
@@ -781,6 +782,22 @@ class former {
               $data_post[$key] = $value;
               unset($field_post[$key]);
             }
+            if(in_array($fields['type'], array('image','multi_image','file','multi_file'))){
+                if (is_array($value)) {
+                    $file_array = array_merge($file_array,$value);
+                }else{
+                    $file_array[]= $value;
+                }
+            }
+            if(in_array($fields['type'], array('editor'))){
+                $content = $value;
+                is_array($content) && $content = implode('', $content);
+                $content = stripslashes($content);
+                $array   = files::preg_img($content,$match);
+                $file_array = array_merge($file_array,$array);
+                unset($content);
+            }
+            $file_array && $file_array = array_filter($file_array);
 
             if(in_array($fields['type'], array('multi_image','multi_file'))){
                 if (is_array($value)) {
@@ -830,7 +847,7 @@ class former {
         /**
          * array(表单数据,表名,_orig_字段数据用于比较);
          */
-        return array($variable,$tables,$orig_post,$imap_array,$tag_array);
+        return array($variable,$tables,$orig_post,$imap_array,$tag_array,$file_array);
     }
     /**
      * 表单数据处理

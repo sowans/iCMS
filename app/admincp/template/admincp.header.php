@@ -20,6 +20,7 @@ defined('iPHP') OR exit('What are you doing?');
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta content="iCMSdev.com" name="Copyright" />
 <link rel="stylesheet" href="./app/admincp/ui/bootstrap/2.3.2/css/bootstrap.min.css" type="text/css" />
+<link rel="stylesheet" href="./app/admincp/ui/bootstrap/2.3.2/css/bootstrap-responsive.min.css" type="text/css" />
 <link rel="stylesheet" href="./app/admincp/ui/bootstrap/2.3.2/css/datepicker.css" type="text/css" />
 <link rel="stylesheet" href="./app/admincp/ui/bootstrap/2.3.2/css/bootstrap-switch.css" type="text/css" />
 <link rel="stylesheet" href="./app/admincp/ui/font-awesome/4.2.0/css/font-awesome.min.css" type="text/css" />

@@ -763,6 +763,11 @@ class articleAdmincp{
             $aid  = article::insert(compact($fields));
             iPHP::callback(array("spider","callback"),array($this,$aid,'primary'));
 
+            $pic  && files::set_map(self::$appid,$aid,$pic,'path');
+            $bpic && files::set_map(self::$appid,$aid,$bpic,'path');
+            $mpic && files::set_map(self::$appid,$aid,$mpic,'path');
+            $spic && files::set_map(self::$appid,$aid,$spic,'path');
+
             if($tags){
                 if(isset($_POST['tag_status'])){
                     tag::$add_status = $_POST['tag_status'];
@@ -830,6 +835,11 @@ class articleAdmincp{
 
             article::update(compact($fields),array('id'=>$aid));
             $return = iPHP::callback(array("spider","callback"),array($this,$aid,'primary'));
+
+            $pic  && files::set_map(self::$appid,$aid,$pic,'path');
+            $bpic && files::set_map(self::$appid,$aid,$bpic,'path');
+            $mpic && files::set_map(self::$appid,$aid,$mpic,'path');
+            $spic && files::set_map(self::$appid,$aid,$spic,'path');
 
             iMap::init('prop',self::$appid,'pid');
             iMap::diff($pid,$_pid,$aid);

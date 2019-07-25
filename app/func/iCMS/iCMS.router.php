@@ -12,18 +12,34 @@ function iCMS_router($vars){
 		echo 'javascript:;';
 		return;
 	}
-	$key = $vars['key'];
-	$router = $vars['url'];
-	unset($vars['url'],$vars['app'],$vars['key']);
-	$url = iURL::router($router);
+
+	$print = isset($vars['print'])?$vars['print']:true;
+
+	$as    = $vars['as'];
+	$url   = $vars['url'];
+
+	if(isset($vars['set'])){
+		$GLOBALS['iCMS:router'] = $vars;
+		return;
+	}
+	iView::assign('Router',null);
+	if($url==$GLOBALS['iCMS:router']['url']){
+		iView::assign('Router',$GLOBALS['iCMS:router']);
+	}
+
+	unset($vars['url'],$vars['app'],$vars['as'],$vars['print'],$vars['get']);
+
+	$url = iURL::router($url);
+
 	$vars['query'] && $url = iURL::make($vars['query'],$url);
 
 	if($url && !iFS::checkHttp($url) && $vars['host']){
 		$url = rtrim(iCMS_URL,'/').'/'.ltrim($url, '/');;
 	}
 	empty($url) && $url = 'javascript:;';
-	if($key){
-		return iView::assign($key,$url);
-	}
-	echo $url;
+
+	if($as) return $url;
+
+	$print && print($url);
+	return $url;
 }

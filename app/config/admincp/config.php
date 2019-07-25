@@ -276,7 +276,7 @@ function modal_tpl_index(el,a){
               <div class="clearfloat mb10"></div>
               <div class="input-prepend input-append"> <span class="add-on">桌面端模板</span>
                 <input type="text" name="config[template][desktop][tpl]" class="span3" id="template_desktop_tpl" value="<?php echo $config['template']['desktop']['tpl'] ; ?>"/>
-                <?php echo filesAdmincp::modal_btn('模板','template_desktop_tpl','dir');?>
+                <?php echo filesAdmincp::modal_btn('模板','template_desktop_tpl','dir',null,'select_tmpl');?>
               </div>
               <span class="help-inline">网站桌面端模板默认模板</span>
               <div class="clearfloat mb10"></div>
@@ -302,7 +302,7 @@ function modal_tpl_index(el,a){
               <div class="clearfloat mb10"></div>
               <div class="input-prepend input-append"> <span class="add-on">移动端模板</span>
                 <input type="text" name="config[template][mobile][tpl]" class="span3" id="template_mobile_tpl" value="<?php echo $config['template']['mobile']['tpl'] ; ?>"/>
-                <?php echo filesAdmincp::modal_btn('模板','template_mobile_tpl','dir');?>
+                <?php echo filesAdmincp::modal_btn('模板','template_mobile_tpl','dir',null,'select_tmpl');?>
               </div>
               <span class="help-inline">网站移动端模板默认模板,如果不想让程序自行切换请留空</span>
               <div class="clearfloat mb10"></div>
@@ -356,13 +356,13 @@ function template_device_td($key,$device=array()){
     <div class="clearfloat mb10"></div>
     <div class="input-prepend input-append"> <span class="add-on">设备模板</span>
       <input type="text" name="config[template][device][<?php echo $key;?>][tpl]" class="span3" id="<?php echo $td_key;?>_tpl" value="<?php echo $device['tpl'];?>"/>
-      <?php echo filesAdmincp::modal_btn('模板',"<?php echo $td_key;?>_tpl",'dir');?>
+      <?php echo filesAdmincp::modal_btn('模板',"{$td_key}_tpl",'dir',null,'select_tmpl');?>
     </div>
     <span class="help-inline">识别到的设备会使用这个模板设置</span>
     <div class="clearfloat mb10"></div>
     <div class="input-prepend input-append"> <span class="add-on">首页模板</span>
       <input type="text" name="config[template][device][<?php echo $key;?>][index]" class="span3" id="<?php echo $td_key;?>_index" value="<?php echo $device['index']?:'{iTPL}/index.htm';?>"/>
-      <?php echo filesAdmincp::modal_btn('模板',"<?php echo $td_key;?>_index",'file','tpl_index');?>
+      <?php echo filesAdmincp::modal_btn('模板',"{$td_key}_index",'file','tpl_index');?>
     </div>
     <span class="help-inline">设备的首页模板</span>
   </td>

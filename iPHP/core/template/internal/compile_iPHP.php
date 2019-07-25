@@ -14,9 +14,10 @@ function compile_iPHP($arguments, &$object){
 	$props   = "\$_i{$hash}";
 	$props_a = "\$_i{$hash}_a";
 	$output  = "<?php $props = array();\n";
+	$func    = $object->reserved_func_name;
 	foreach ($attrs as $attr_name => $attr_value){
 		switch ($attr_name){
-			case 'app':
+			case $func:
 				$output .= "{$props}['total'] = $attr_value?count($attr_value):0;\n";
 				$output .= "{$props_a}={$attr_value};unset($attr_value);\n";
 				break;
@@ -59,8 +60,7 @@ function compile_iPHP($arguments, &$object){
 	$output .= "{$props}['next'] = {$props}['index'] + {$props}['step'];\n";
 	$output .= "{$props}['first'] = ({$props}['rownum'] == 1);\n";
 	$output .= "{$props}['last'] = ({$props}['rownum'] == {$props}['total']);\n";
-	$output .= "{$attrs['app']} = array_merge((array){$props_a}[{$props}['index']],(array){$props});\n";
+	$output .= $attrs[$func]." = array_merge((array){$props_a}[{$props}['index']],(array){$props});\n";
 	$output .= "?>";
-//print_r($output);
 	return $output;
 }

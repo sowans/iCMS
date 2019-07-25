@@ -48,9 +48,15 @@ class appsAdmincp{
         if($rs['menu']){
           $rs['menu'] = jsonFormat($rs['menu']);
         }
+        // if($rs['router']){
+        //   $rs['router'] = jsonFormat($rs['router']);
+        // }
+        //
+        // }
         if($rs['router']){
-          $rs['router'] = jsonFormat($rs['router']);
+          is_array($rs['router']) OR $rs['router'] = json_decode($rs['router'],true);
         }
+
         include admincp::view("apps.add");
     }
 
@@ -70,7 +76,11 @@ class appsAdmincp{
           $menu = addslashes(cnjson_encode($menu));
         }
         if($_POST['router']){
-          $router = json_decode(stripcslashes($_POST['router']));
+          $routerArray = $_POST['router'];
+          $router = array();
+          foreach ($routerArray as $ridx => $rv) {
+            $router[$rv[0]] = array($rv[1],$rv[2]);
+          }
           $router = addslashes(json_encode($router));
         }
         $name OR iUI::alert('应用名称不能为空!');

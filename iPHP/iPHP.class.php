@@ -263,6 +263,7 @@ class iPHP {
 			list($a,$b) = explode('_', $name);
 			if( !(substr($name,-7,7) == 'Admincp') &&
 				!(substr($name,-3,3) == 'App') &&
+				!(substr($name,-4,4) == 'Func') &&
 				!in_array($a, self::$reserved)
 			) {
 				$file = $name.'.class';
@@ -285,20 +286,25 @@ class iPHP {
 				}
 			}
 			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
-		}else if(substr($name,-4,4) == 'Func') {
+		}else if(substr($name,-4,4) == 'Func'||substr($name,-4,4) == 'Tmpl') {
+			$type = substr($name,-4,4);
 			//app.func.php:
-			$app  = substr($name,0,-4);
-			$file = $app.'.func';
-			if(strpos($app,'_') !== false) {
-				list($flag,$app) = explode('_', $app);
-			}
-			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
-		}else if(substr($name,-4,4) == 'Tmpl') {
 			//app.tmpl.php:
 			$app  = substr($name,0,-4);
-			$file = $app.'.tmpl';
+			$file = $app.'.'.strtolower($type);
 			if(strpos($app,'_') !== false) {
-				list($flag,$app) = explode('_', $app);
+				$pieces = explode('_', $app);
+				if(in_array($pieces[0], self::$reserved)){
+					//DO_app.func.php
+					//MY_app.func.php
+					//DO_app.tmpl.php
+					//MY_app.tmpl.php
+					list($flag,$app) = $pieces;
+				}else{
+					//app_ooxx.func.php
+					//app_ooxx.tmpl.php
+					list($app,$flag) = $pieces;
+				}
 			}
 			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
 		}else if(substr($name,-7,7) == 'Admincp') {
@@ -626,6 +632,8 @@ class iPHP {
 			,"<?php exit('What the fuck!');?>"
 			.PHP_EOL.'['.date("Y-m-d H:i:s").'] '.self::get_ip()
 			.PHP_EOL.iPHP_REQUEST_URL
+			.($_GET?PHP_EOL.'$_GET=>'.var_export($_GET,true):'')
+			.($_POST?PHP_EOL.'$_POST=>'.var_export($_POST,true):'')
 			.PHP_EOL.html2text($erro)
 			.PHP_EOL.PHP_EOL
 			,FILE_APPEND

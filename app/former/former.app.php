@@ -68,7 +68,7 @@ class formerApp{
 
         if($app['fields']){
 
-            list($variable,$tables,$orig_post,$imap,$tags) = former::post_data($app);
+            list($variable,$tables,$orig_post,$imap,$tags,$files) = former::post_data($app);
 
             // if(!$variable){
             //     iUI::alert("表单数据处理出错!");
@@ -142,6 +142,9 @@ class formerApp{
                 }else{
                     tag::add($value[0],members::$userid,$id,$value[1]);
                 }
+            }
+            if($files)foreach ($files as $key => $value) {
+                files::set_map($app['id'],$id,$value,'path');
             }
             return $update;
         }

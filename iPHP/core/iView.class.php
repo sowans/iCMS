@@ -14,6 +14,8 @@ class iView {
     public static $gateway  = null;
     public static $config   = array();
     public static $template = array();
+    const TPL_FUNC_NAME   = 'FuncClass';
+    const TPL_FUNC_Method = 'FuncMethod';
 
     public static function init($config = array()) {
         self::$config   = $config;
@@ -29,6 +31,7 @@ class iView {
         $tpl->template_dir = iPHP_TPL_DIR;
         $tpl->compile_dir  = iPHP_TPL_CACHE;
         $tpl->reserved_template_varname = iPHP_TPL_VAR;
+        $tpl->reserved_func_name        = self::TPL_FUNC_NAME;
         $tpl->error_reporting_header    = "<?php defined('iPHP') OR exit('What are you doing?');error_reporting(iPHP_TPL_DEBUG?E_ALL & ~E_NOTICE:0);?>\n";
         $tpl->left_delimiter  = '<!--{';
         $tpl->right_delimiter = '}-->';
@@ -68,10 +71,10 @@ class iView {
     public static function callback_register($func,$type) {
         list($app,$method) = explode(':', $func);
         //app:method => testTmpl::block_cut
-        //payment:cut
-        if(self::check_file($app)){
-            $typeMap  = array('compiler','block','function','output');
-            $class    = in_array($type, $typeMap)?'Tmpl':'Func';
+        //payment:cut => paymentTmpl::block_cut
+        $typeMap  = array('compiler','block','function','output');
+        $class    = in_array($type, $typeMap)?'Tmpl':'Func';
+        if(self::check_file($app,strtolower($class))){
             $callback = array($app.$class,$type.($method?'_'.$method:''));
             if(class_exists($callback[0]) && method_exists($callback[0], $callback[1])){
                 return implode('::', $callback);
@@ -93,80 +96,80 @@ class iView {
      * iPHP:aaaApp:method
      */
     public static function callback_func($args,$tpl) {
-        is_array($args['app']) && $args['app'] = $args['app']['app'];
-        $keys = $args['app'].($args['method']?'_'.$args['method']:'');
+        //iPHP:app:method >> appFunc::app_method
+        $FN = $args[self::TPL_FUNC_NAME];
+        $FM = $args[self::TPL_FUNC_Method];
+
+        //iPHP:app:method app="aaa" method="bbb" >> aaaFunc::aaa_bbb
+        $args['app']     && $FN = $args['app'];
+        $args['method']  && $FM = $args['method'];
+
+        (is_array($FN) && $FN['app']) && $FN = $FN['app'];
+
+        $keys = $FN.($FM?'_'.$FM:'');
         isset($args['as']) && $keys = $args['as'];
         $isMultiArgs = false;
         //模板标签 对应>> 类::静态方法
-        //iPHP:app:method >> appFunc::app_method
-        if($args['method']){
-            $callback = array(
-                $args['app'].'Func',
-                $args['app'].'_'.$args['method']
-            );
-            if(strpos($args['app'], 'App')!==false){
+        if($FM){
+            if(substr($FN, -3,3)==='App'){
                 //iPHP:aaaApp:method >> aaaApp::method
                 //$aaaApp_method
-                $callback = array(
-                    $args['app'],
-                    $args['method']
-                );
+                $callback = array($FN,$FM);
                 $isMultiArgs = true;
-            }
-            if(strpos($args['app'], 'Class')!==false){
+            }else if(substr($FN, -5,5)==='Class'){
                 //iPHP:aaaClass:method >> aaa::method
                 ////$aaaClass_method
-                $callback = array(
-                    substr($args['app'], 0,-5),
-                    $args['method']
-                );
+                $callback = array(substr($FN, 0,-5),$FM);
                 $isMultiArgs = true;
-            }
-            //自定义APP模板调用
-            //iPHP:content:list app="test" >> contentFunc::content_list
-            //iPHP:test:list >> contentFunc::content_list
-            if(self::$config['define']){
-                $apps = self::$config['define']['apps'];
-                $func = self::$config['define']['func'];
-                if(!self::check_file($args['app']) && $apps[$args['app']]){
-                    // 判断自定义APP app/test/test.func.php 程序是否存在
-                    // 程序不存在调用 contentFunc::content_list
-                    $callback = array(
-                        $func.'Func',
-                        $func.'_'.$args['method']
-                    );
+            }else{
+                //iPHP:app:method >> appFunc::app_method
+                $callback = array($FN.'Func',$FN.'_'.$FM);
+                //自定义APP模板调用
+                //iPHP:content:list app="test" >> contentFunc::content_list
+                //iPHP:test:list >> contentFunc::content_list
+                if(self::$config['define']){
+                    $apps = self::$config['define']['apps'];
+                    $func = self::$config['define']['func'];
+                    if(!self::check_file($FN) && $apps[$FN]){
+                        // 判断自定义APP app/test/test.func.php 程序是否存在
+                        // 程序不存在调用 contentFunc::content_list
+                        $callback = array($func.'Func',$func.'_'.$FM);
+                    }
                 }
+                //用户重写 iPHP:app:method 调用 MY_aaaFunc::aaa_method
+                self::callback_func_my($callback);
+            }
+            //是否多参数
+            if(isset($args['isMultiArgs'])){
+                $isMultiArgs = $args['isMultiArgs'];
+                unset($args['isMultiArgs']);
             }
 
-            if($args['_app']){
-                //iPHP:app:method _app="aaa" >> aaaFunc::aaa_method
-                $keys     = isset($args['as'])?$args['as']:$args['_app'].'_'.$args['method'];
-                $callback = array(
-                    $args['_app'].'Func',
-                    $args['_app'].'_'.$args['method']
-                );
-            }
-            self::callback_func_my($callback);
             if(!method_exists($callback[0],$callback[1]) && strpos($callback[1], '__')===false){
                 iPHP::error_throw("Unable to find method '{$callback[0]}::{$callback[1]}'");
             }
         }else{
             //iPHP:func
-            $callback = self::system_func($args['app']);
+            $callback = self::system_func($FN,$args['run']);
         }
+        //合并 参数
         if(isset($args['vars'])){
             $vars = $args['vars'];
             unset($args['vars'],$vars['loop'],$vars['page']);
             $args = array_merge($args,$vars);
         }
+        self::args($args);
+        //设置参数
+        isset($args['args']) && $args = $args['args'];
 
+        $tpl->assign($keys.'_vars',$args);
         if(is_array($callback)){
             // iPHP:app:_method >> app_method::func
             // iPHP:app:_method func='aaa' >> app_method::aaa
             strpos($callback[1], '__')!==false && $callback = array('iView','callback_func_proxy');
             $tpl->assign($keys,call_user_func_array($callback, $isMultiArgs?(array)$args:array($args)));
         }else{
-            $tpl->assign($keys,$callback($args));
+            $callback && $tpl->assign($keys,$callback($args));
         }
     }
     public static function system_func($func,$run=false,$vars=array()){
@@ -182,6 +185,8 @@ class iView {
         }
     }
     public static function callback_func_my(&$callback=null){
+        //用户重写 iPHP:app:method 调用 MY_aaaFunc::aaa_method
+        //app/aaa/MY_aaa.func.php
         if($callback){
             $my = $callback;
             $my[0] = 'MY_'.$my[0];
@@ -328,6 +333,20 @@ class iView {
             return $dir;
         }
         return false;
+    }
+    public static function args(&$params,$recursive=false) {
+      foreach ((array)$params as $pk => $pv) {
+            $pk = trim($pk);
+            if(strpos($pk, '[')!==false && substr($pk, -1)==']'){
+                $pa = str_multi_array($pk,'[',$pv);
+                unset($params[$pk]);
+                if($recursive){
+                    $params = array_merge_recursive((array)$params,(array)$pa);
+                }else{
+                    $params = array_merge((array)$params,(array)$pa);
+                }
+            }
+        }
     }
     public static function app_vars($app_name = true, $out = false) {
         $app_name === true && $app_name = iPHP::$app_name;

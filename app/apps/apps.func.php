@@ -588,10 +588,10 @@ class appsFunc{
                 $vars['app'] = $app;
                 $app = 'content';
             }
-            unset($vars['apps'],$vars['_app']);
+            unset($vars['apps']);
         }else{
             $app = $vars['app'];
-            unset($vars['app'],$vars['_app']);
+            unset($vars['app']);
         }
         $class = $app.'Func';
         $func  = $app.'_list';

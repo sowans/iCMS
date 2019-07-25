@@ -252,6 +252,21 @@ class filesAdmincp{
     	}
 		iUI::json(array('code'=>0,'msg'=>'创建失败,请检查目录权限!!'));
     }
+    public function do_select_tmpl(){
+        $dira = glob(iPHP_TPL_DIR.'/*/index.htm');
+        $dirb = glob(iPHP_TPL_DIR.'/*/*/index.htm');
+        $dira = str_replace(array(iPHP_TPL_DIR,'/','index.htm'), '', $dira);
+        $dirb = str_replace(array(iPHP_TPL_DIR.'/','/index.htm'), '', $dirb);
+
+        $c = array_fill(0,count($dira),array('index.htm'));
+        $dirArray = array_combine($dira, $c);
+        foreach ($dirb as $key => $value) {
+            list($a,$b) = explode('/', $value);
+            $dirArray[$a][] = $b;
+        }
+
+        include admincp::view("files.tmpl");
+    }
     /**
      * [选择模板文件页]
      * @return [type] [description]

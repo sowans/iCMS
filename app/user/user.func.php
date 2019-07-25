@@ -19,7 +19,7 @@ class userFunc{
 
     	$vars['uid']   OR iUI::warning('iCMS&#x3a;user&#x3a;data 标签出错! 缺少"uid"属性或"uid"值为空.');
     	$uid = $vars['uid'];
-    	if($uid=='me'){
+    	if($uid=='me'||$uid=='@me'){
     		$uid  = 0;
     		$auth = user::get_cookie();
     		$auth && $uid = user::$userid;

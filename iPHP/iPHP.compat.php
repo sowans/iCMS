@@ -141,7 +141,7 @@ function format_time($time, $flag = 's'){
 
     return $t;
 }
-function format_date($date,$isShowDate=true){
+function format_date($date,$format='Y-m-d H:i'){
     $limit = time() - $date;
     if($limit < 60){
         return '刚刚';
@@ -155,8 +155,8 @@ function format_date($date,$isShowDate=true){
     if($limit >= 86400 and $limit<259200){
         return floor($limit/86400) . '天之前';
     }
-    if($limit >= 259200 and $isShowDate){
-        return get_date($date,'Y-m-d H:i');
+    if($limit >= 259200 and $format){
+        return get_date($date,$format);
     }else{
         return '';
     }
@@ -510,6 +510,7 @@ function str_multi_array($string,$s='.',$value=null){
     $a = $value;
     foreach ($a_array as $k => $v) {
         $s==='[' && $v = rtrim($v,']');
+        empty($v) && $v=0;
         $a = array($v=>$a);
         count($a)>1 && array_shift($a);
     }

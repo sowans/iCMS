@@ -69,8 +69,24 @@ $(function(){
       tr.append('<td class="type_3"><button class="btn btn-small btn-danger del_table" type="button"><i class="fa fa-trash-o"></i> 删除</button></td>');
       $("#table_list").append(tr);
   });
+  $(".add_router_item").click(function(){
+    // var clone = $("#table_item").clone();
+    // console.log(clone);
+      var key = $("#routerList").find('tr').size();
+      var tr = $("<tr>");
+      for (var i = 0; i < 3; i++) {
+          var td = $("<td>");
+          td.html('<input type="text" name="router['+key+']['+i+']" class="span6" value=""/>');
+          tr.append(td);
+      };
+      tr.append('<td><button class="btn btn-small btn-danger del_router" type="button"><i class="fa fa-trash-o"></i> 删除</button></td>');
+      $("#routerList").append(tr);
+  });
   var doc = $(document);
   doc.on("click",".del_table",function(){
+      $(this).parent().parent().remove();
+  });
+  doc.on("click",".del_router",function(){
       $(this).parent().parent().remove();
   });
 })
@@ -84,6 +100,7 @@ $(function(){
       <ul class="nav nav-tabs" id="apps-add-tab">
         <li class="active"><a href="#apps-add-base" data-toggle="tab"><i class="fa fa-info-circle"></i> 基本信息</a></li>
         <li><a href="#apps-add-menu" data-toggle="tab"><i class="fa fa-bars"></i> 配置</a></li>
+        <li><a href="#apps-add-router" data-toggle="tab"><i class="fa fa-bars"></i> 路由表</a></li>
         <?php if($rs['table'])foreach ($rs['table'] as $key => $tval) {?>
         <li><a href="#apps-add-<?php echo $key; ?>-field" data-toggle="tab"><i class="fa fa-database"></i> <?php echo $tval['label']?$tval['label']:$tval['name']; ?>表字段</a></li>
         <?php }?>
@@ -247,14 +264,34 @@ $(function(){
             </div>
             <div class="clearfloat mb10"></div>
             <div class="input-prepend">
-              <span class="add-on">路由配置</span>
-              <textarea name="router" id="router" class="span8" style="height:150px;"><?php echo $rs['router'];?></textarea>
-            </div>
-            <div class="clearfloat mb10"></div>
-            <div class="input-prepend">
               <span class="add-on">内容网址</span>
               <textarea name="config[iurl]" id="config_iurl" class="span8" style="height:120px;"><?php echo $rs['config']['iurl']?cnjson_encode($rs['config']['iurl']):'' ; ?></textarea>
             </div>
+          </div>
+          <div id="apps-add-router" class="tab-pane">
+            <button type="button" class="btn btn-primary add_router_item">
+                <i class="fa fa-plus-square"></i> 添加
+            </button>
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>路由表</th>
+                  <th>静态链接</th>
+                  <th>动态链接</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="routerList">
+                <?php $ridx=0;if(is_array($rs['router']))foreach ($rs['router'] as $key => $router) { ?>
+                <tr>
+                  <td><input type="text" name="router[<?php echo $ridx; ?>][0]" class="span6" value="<?php echo $key;?>"/></td>
+                  <td><input type="text" name="router[<?php echo $ridx; ?>][1]" class="span6" value="<?php echo $router[0];?>"/></td>
+                  <td><input type="text" name="router[<?php echo $ridx; ?>][2]" class="span6" value="<?php echo $router[1];?>"/></td>
+                  <td><button class="btn btn-small btn-danger del_router" type="button"><i class="fa fa-trash-o"></i> 删除</button></td>
+                </tr>
+                <?php $ridx++; } ?>
+              </tbody>
+            </table>
           </div>
           <!-- 数据表字段 -->
           <?php include admincp::view("apps.table","apps");?>
