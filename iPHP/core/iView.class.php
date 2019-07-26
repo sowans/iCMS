@@ -130,9 +130,10 @@ class iView {
                 if(self::$config['define']){
                     $apps = self::$config['define']['apps'];
                     $func = self::$config['define']['func'];
+                    // 判断自定义APP app/test/test.func.php 程序是否存在
                     if(!self::check_file($FN) && $apps[$FN]){
-                        // 判断自定义APP app/test/test.func.php 程序是否存在
                         // 程序不存在调用 contentFunc::content_list
+                        $args['app'] = $FN; //参数必需设置
                         $callback = array($func.'Func',$func.'_'.$FM);
                     }
                 }

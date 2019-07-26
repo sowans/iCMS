@@ -14,7 +14,7 @@ admincp::head($navbar);
 
 </script>
 <style type="text/css">
-.tmpl{position: relative; text-align: center;height: 250px;border:1px solid #ccc;margin-bottom: 10px; background-color: #fff;padding: 10px 0px;}
+.tmpl{cursor: pointer; position: relative; text-align: center;height: 250px;border:1px solid #ccc;margin-bottom: 10px; background-color: #fff;padding: 10px 0px;}
 .tmpl .icon{display: none;height: 50px;width: 50px}
 .tmpl.active{color: #3a87ad;
     background-color: #d9edf7;
@@ -42,7 +42,10 @@ admincp::head($navbar);
     function(){
       $(".tmpl").removeClass('selected');
       $(this).addClass('selected');
-      modal_callback($('input',this)[0]);
+      var me=this;
+      window.setTimeout(function(){
+        modal_callback($('input',me)[0]);
+      },1000);
     },
     function(){$(this).removeClass('selected');},
   );
@@ -61,18 +64,21 @@ admincp::head($navbar);
           $package = json_decode(file_get_contents($jpath),true);
           $title = $package['title'];
         }
-
+        $preview = './template/'.$path.'/preview.jpg';
     ?>
       <?php foreach ($value as $tk => $tmpl) {
           if ($tmpl!='index.htm') {
               $path = $dir.'/'.$tmpl;
               $_title = $package['template'][$tmpl]['title'];
               // $_title && $title.='-'.$_title;
+              $_preview = './template/'.$path.'/preview.jpg';
+              is_file($_preview) && $preview = $_preview;
           }
+          is_file($preview) OR $preview ='./app/admincp/ui/nopic.jpg';
       ?>
           <div class="tmpl span3">
               <input class="hide" type="checkbox" value="<?php echo $path; ?>" checked/>
-              <img class="preview" src="./template/7wan/preview.jpg">
+              <img class="preview" src="<?php echo $preview; ?>">
               <div class="clearfix"></div>
               <h2 class="title"><?php echo $title;?></h2>
               <p class="text-info"><?php echo $_title;?></p>
