@@ -13,7 +13,7 @@ function iCMS_url($vars){
         unset($vars['url']);
     }
     $ret = $vars['ret'];
-    unset($vars['app'],$vars['as'],$vars['ret']);
+    unset($vars[iView::TPL_FUNC_NAME],$vars['as'],$vars['ret']);
     $url = iURL::make($vars,$url);
     if($ret){
         echo $url;

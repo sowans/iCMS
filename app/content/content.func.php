@@ -27,10 +27,16 @@ class contentFunc {
         if((empty($vars['app'])||$vars['app']=='content') && self::$data){
             $vars['app'] = self::$data['app'];
         }
-        self::$apps = apps::get_app($vars['app']);
-        if(empty(self::$apps)||$vars['app']=='content'){
+        $ap = isset($vars['appid'])?$vars['appid']:$vars['app'];
+
+        if(empty($ap)||$ap=='content'){
             iUI::warning('iCMS&#x3a;content&#x3a;'.$func.' 标签出错! 缺少参数"app"或"app"值为空.');
         }
+
+        self::$apps = apps::get_app($ap);
+
+        empty(self::$apps) && iUI::warning('iCMS&#x3a;content&#x3a;'.$func.' 标签出错! 缺少参数"app"或"app"值为空.');
+
         self::$tables  = apps::get_table(self::$apps);
         self::$app     = self::$apps['app'];
         self::$appid   = self::$apps['id'];

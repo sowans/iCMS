@@ -27,7 +27,7 @@ function iCMS_router($vars){
 		iView::assign('Router',$GLOBALS['iCMS:router']);
 	}
 
-	unset($vars['url'],$vars['app'],$vars['as'],$vars['print'],$vars['get']);
+	unset($vars['url'],$vars['as'],$vars['print'],$vars['get']);
 
 	$url = iURL::router($url);
 
