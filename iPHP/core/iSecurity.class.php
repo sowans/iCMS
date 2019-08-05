@@ -141,6 +141,7 @@ class iSecurity {
 			$data = str_replace(array('\"',"\'","\\\\"), array('&#34;','&#39;','&#92;'), $data);
 	        $data = str_replace(array("%3C", '<'), '&#60;', $data);
 	        $data = str_replace(array("%3E", '>'), '&#62;', $data);
+			$data = str_replace(array('"',"'"), array('&#34;','&#39;'), $data);
 	    }
 	    return $data;
 	}
@@ -241,5 +242,10 @@ class iSecurity {
             }
         }
         return $string;
-    }
+	}
+	public static function safeStr($string) {
+		return is_array($string) ?
+			array_map("iSecurity::safeStr", $string) :
+			preg_replace('/\W+/is','',$string);
+	}
 }

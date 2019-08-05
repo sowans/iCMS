@@ -16,7 +16,7 @@ class filesAdmincp{
     public function __construct() {
         self::$appid    = apps::id(__CLASS__);
 	    $this->from		= iSecurity::escapeStr($_GET['from']);
-	    $this->callback	= iSecurity::escapeStr($_GET['callback']);
+	    $this->callback	= iSecurity::safeStr($_GET['callback']);
 		$this->click	= iSecurity::escapeStr($_GET['click']);
         $this->target   = iSecurity::escapeStr($_GET['target']);
         $this->format   = iSecurity::escapeStr($_GET['format']);

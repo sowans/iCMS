@@ -71,9 +71,16 @@ class tag {
 	public static function cache($value=0,$field='id'){}
 
     public static function name($name){
+        if(is_array($name)){
+            $name = array_filter($name);
+            $name = array_unique($name);
+            $name = implode(',', $name);
+        }
         $name = trim($name);
-        $name = preg_replace('/<[\/\!]*?[^<>]*?>/is','',$name);
         $name = htmlspecialchars_decode($name);
+        $name = html2text($name);
+        $name = str_replace('，', ',',$name);
+        $name = iSecurity::escapeStr($name);
         return $name;
     }
     public static function field($field){

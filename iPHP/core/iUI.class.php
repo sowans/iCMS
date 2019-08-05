@@ -63,8 +63,8 @@ class iUI extends iPagination{
         return $msg;
 	}
 	public static function json($a, $break = true, $ret = false) {
-		$json = json_encode($a);
-		$_GET['callback'] && $json = htmlspecialchars($_GET['callback']).'(' . $json . ')';
+        $json = json_encode($a);
+        $_GET['callback'] && $json = iSecurity::safeStr($_GET['callback']).'(' . $json . ')';
 		$_GET['script'] && exit("<script>{$json};</script>");
 		if ($ret) {
 			return $json;
@@ -73,7 +73,7 @@ class iUI extends iPagination{
 		$break && exit();
 	}
 	public static function js_callback($a, $callback = null, $node = 'parent') {
-		$callback === null && $callback = htmlspecialchars($_GET['callback']);
+		$callback === null && $callback = iSecurity::safeStr($_GET['callback']);
 		empty($callback) && $callback = 'callback';
 		$json = json_encode($a);
 		echo "<script>window.{$node}.{$callback}($json);</script>";
@@ -144,7 +144,7 @@ class iUI extends iPagination{
 		echo '<script type="text/javascript">' . $code . '</script>';
 		self::$break && exit();
 	}
-    public static function error($value,$type='app') {
+    public static function error($value,$type='app',$errstr=null) {
         if(iPHP_SHELL){
             $value = str_replace(array("<b>", "</b>"), array("\033[31m","\033[0m"), $value);
             $value = html2text($value);

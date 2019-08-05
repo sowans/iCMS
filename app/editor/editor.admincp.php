@@ -103,13 +103,7 @@ class editorAdmincp{
         $result = preg_replace("/\/\*[\s\S]+?\*\//", "", $config_json, true);
 
         if (isset($_GET["callback"])) {
-            if (preg_match("/^[\w_]+$/", $_GET["callback"])) {
-                echo htmlspecialchars($_GET["callback"]) . '(' . $result . ')';
-            } else {
-                echo json_encode(array(
-                    'state'=> 'callback参数不合法'
-                ));
-            }
+            echo iSecurity::safeStr($_GET["callback"]).'(' . $result . ')';
         } else {
             echo $result;
         }

@@ -63,7 +63,7 @@ admincp::head();
 </div>
 </script>
 <script type="text/javascript">
-var upordurl="<?php echo $this->category_uri; ?>&do=updateorder";
+var upordurl="<?php echo $this->category_uri; ?>&do=updateorder&CSRF_TOKEN=<?php echo iPHP_WAF_CSRF_TOKEN;?>";
 $(function(){
     $("#tree").treeview({
       tpl:'tree_li',

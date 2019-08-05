@@ -175,7 +175,7 @@ class tagAdmincp{
 
         $cid         = (int)$_POST['cid'];
         $_cid        = iSecurity::escapeStr($_POST['_cid']);
-        category::check_priv($cid,($tid?'ce':'ca'),'alert');
+        category::check_priv($cid,($id?'ce':'ca'),'alert');
 
         $tcid        = (int)$_POST['tcid'];
         $_tcid       = iSecurity::escapeStr($_POST['_tcid']);

@@ -199,6 +199,8 @@ class admincp {
 				$tpl = iPHP_APP_DIR.'/'.$dir.'/admincp';
 			}
 		}
+		$_GET = iSecurity::escapeStr($_GET);
+
 		$def = $tpl . '/' . $name . '.def.php';
 		if(file_exists($def)){
 			return $def;

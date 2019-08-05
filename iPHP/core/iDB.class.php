@@ -153,6 +153,7 @@ class iDataBase {
      */
     public static function insert($table, $data,$IGNORE=false) {
         $fields = array_keys($data);
+        $fields = static::field($fields);
         static::query("INSERT ".($IGNORE?'IGNORE':'')." INTO ".static::table($table)." (`" . implode('`,`',$fields) . "`) VALUES ('".implode("','",$data)."')");
         return static::$insert_id;
     }
@@ -163,6 +164,7 @@ class iDataBase {
             $datasql[]= "('".implode("','",$d)."')";
         }
         if($datasql){
+            $fields = static::field($fields);
             return static::query("INSERT ".($IGNORE?'IGNORE':'')." INTO ".static::table($table)." (`" . implode('`,`',$fields) . "`) VALUES ".implode(',',$datasql));
         }
     }
@@ -176,11 +178,11 @@ class iDataBase {
     public static function update($table, $data, $where) {
         $bits = $wheres = array();
         foreach ( array_keys($data) as $k ){
-            $bits[] = "`$k` = '$data[$k]'";
+            $bits[] = "`".static::field($k)."` = '$data[$k]'";
         }
         if ( is_array( $where ) ){
             foreach ( $where as $c => $v )
-                $wheres[] = "`$c` = '" . addslashes( $v ) . "'";
+                $wheres[] = "`".static::field($c)."` = '" . addslashes( $v ) . "'";
         }else{
             return false;
         }
@@ -190,7 +192,7 @@ class iDataBase {
         $wheres = array();
         if ( is_array( $where ) ){
             foreach ( $where as $c => $v )
-                $wheres[] = "$c = '" . addslashes( $v ) . "'";
+                $wheres[] = static::field($c)." = '" . addslashes( $v ) . "'";
         }else{
             return false;
         }
@@ -208,23 +210,25 @@ class iDataBase {
         if ( is_array( $field ) ){
             foreach ( $field as $c => $f )
                 $fields[] = "`$f`";
-        }else{
-            return false;
         }
+
+        $fields = static::field($fields);
 
         if ( is_array( $where ) ){
             foreach ( $where as $c => $v ){
                 if(strpos($c,'!')===false){
-                    $wheres[] = "$c = '" . addslashes( $v ) . "'";
+                    $wheres[] = static::field($c)."= '" . addslashes( $v ) . "'";
                 }else{
                     $c = str_replace('!', '', $c);
-                    $wheres[] = "$c != '" . addslashes( $v ) . "'";
+                    $wheres[] = static::field($c)."!= '" . addslashes( $v ) . "'";
                 }
             }
+        }
+        if($fields && $wheres){
+            return static::value("SELECT ".implode( ', ', $fields )." FROM ".static::table($table)." WHERE " . implode( ' AND ', $wheres ) . ' LIMIT 1;' );
         }else{
             return false;
         }
-        return static::value("SELECT ".implode( ', ', $fields )." FROM ".static::table($table)." WHERE " . implode( ' AND ', $wheres ) . ' LIMIT 1;' );
     }
     public static function value($query=null, $x = 0, $y = 0) {
         static::$func_call = __CLASS__."::value(\"$query\",$x,$y)";
@@ -333,7 +337,12 @@ class iDataBase {
             }
         }
     }
-
+	public static function field($string) {
+        return is_array($string) ?
+            array_map("iDB::field", $string) :
+            preg_replace('/[^a-zA-Z0-9_\-`]/is','',$string);
+    }
+    
     public static function server_info() {
 
     }

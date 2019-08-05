@@ -682,12 +682,7 @@ class articleAdmincp{
         $creative    = (int)$_POST['creative'];
         $markdown    = (int)$_POST['markdown'];
 
-        if(is_array($_POST['tags'])){
-            $_POST['tags'] = array_filter($_POST['tags']);
-            $_POST['tags'] = array_unique($_POST['tags']);
-            $_POST['tags'] = implode(',', $_POST['tags']);
-        }
-        $tags = str_replace('，', ',',iSecurity::escapeStr($_POST['tags']));
+        $tags = tag::name($_POST['tags']);
 
         is_array($_POST['related']) && $related = json_encode($_POST['related']);
 
@@ -704,7 +699,6 @@ class articleAdmincp{
         $pubdate   = str2time($_POST['pubdate']);
         $postype   = $_POST['postype']?$_POST['postype']:0;
         $userid OR $userid = members::$userid;
-        $tags && $tags = preg_replace('/<[\/\!]*?[^<>]*?>/is','',$tags);
 
         if(self::$config['filter'] && is_array(self::$config['filter']) && !isset($_POST['nofilter'])) {
             foreach (self::$config['filter'] as $fkey => $fvalue) {

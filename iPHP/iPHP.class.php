@@ -172,8 +172,8 @@ class iPHP {
 			$do     = iSecurity::escapeStr($_POST['action']);
 			$prefix = 'ACTION_';
 		}
-		self::$app_name = $app;
-		self::$app_do = $do;
+		self::$app_name   = $app;
+		self::$app_do     = $do;
 		self::$app_method = $prefix . $do;
         self::define_device();
 		self::callback(self::$callback['run']['begin']);
@@ -191,21 +191,24 @@ class iPHP {
 			self::callback(self::$callback['run']['call'],array(self::$app,$method,$args));
 
 			$init_method   = '__init__';
+			$prefix_start  = $prefix.'init';
 			$before_method = 'before_'.$method;
 			$after_method  = 'after_'.$method;
 
 			if ($args) {
 				if ($args === 'object') return self::$app;
 
-				method_exists(self::$app, $init_method)  && call_user_func_array(array(self::$app, $init_method), (array) $args);
-				method_exists(self::$app, $before_method)&& call_user_func_array(array(self::$app, $before_method), (array) $args);
+				method_exists(self::$app, $init_method)   && call_user_func_array(array(self::$app, $init_method), (array) $args);
+				method_exists(self::$app, $prefix_start)  && call_user_func_array(array(self::$app, $prefix_start), (array) $args);
+				method_exists(self::$app, $before_method) && call_user_func_array(array(self::$app, $before_method), (array) $args);
 				return call_user_func_array(array(self::$app, $method), (array) $args);
 			} else {
 				if(!method_exists(self::$app, $method)){
 					iPHP::error_404('Call to undefined method <b>' . self::$class_name . '::'.$method.'</b>', '0004');
 				}
-				method_exists(self::$app, $init_method)  && self::$app->$init_method();
-				method_exists(self::$app, $before_method)&& self::$app->$before_method();
+				method_exists(self::$app, $init_method)   && self::$app->$init_method();
+				method_exists(self::$app, $prefix_start)  && self::$app->$prefix_start();
+				method_exists(self::$app, $before_method) && self::$app->$before_method();
 				return self::$app->$method();
 			}
 		} else {
@@ -379,23 +382,17 @@ class iPHP {
 		return $ip[$format];
 	}
 	//设置COOKIE
-	public static function set_cookie($name, $value = "", $life = 0, $httponly = false) {
+	public static function set_cookie($name, $value = "", $life = 0, $httponly = true) {
 		// $cookiedomain = iPHP_COOKIE_DOMAIN;
 		$cookiedomain = '';
 		$cookiepath = iPHP_COOKIE_PATH;
 		$value = rawurlencode($value);
 		$life = ($life ? $life : iPHP_COOKIE_TIME);
 		$name = iPHP_COOKIE_PRE . '_' . $name;
-		// $_COOKIE[$name] = $value;
 		$timestamp = time();
 		$life = $life > 0 ? $timestamp + $life : ($life < 0 ? $timestamp - 31536000 : 0);
-		$path = $httponly && PHP_VERSION < '5.2.0' ? $cookiepath . '; HttpOnly' : $cookiepath;
 		$secure = $_SERVER['SERVER_PORT'] == 443 ? 1 : 0;
-		if (PHP_VERSION < '5.2.0') {
-			setcookie($name, $value, $life, $path, $cookiedomain, $secure);
-		} else {
-			setcookie($name, $value, $life, $path, $cookiedomain, $secure, $httponly);
-		}
+		setcookie($name, $value, $life, $cookiepath, $cookiedomain, $secure, $httponly);
 	}
 	//取得COOKIE
 	public static function get_cookie($name) {
@@ -684,6 +681,6 @@ class iPHP {
 		$html = iSecurity::filter_path($html);
 		iPHP_DEBUG_ERRORLOG && self::error_log($html);
 		self::$callback['error'] OR self::$callback['error'] = array('iUI','error');
-		self::callback(self::$callback['error'],array($html,'system'));
+		self::callback(self::$callback['error'],array($html,'system',$errstr));
 	}
 }
