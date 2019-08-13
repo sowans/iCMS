@@ -24,7 +24,14 @@ class article {
 
         return $fields;
     }
-
+    public static function get_data_table($id='',$prefix=true){
+        $table = 'article_data_'.($id%10);
+        if($prefix){
+            return '`#iCMS@__'.$table.'`';
+        }else{
+            return $table;
+        }
+    }
     public static function count_sql($sql=''){
         return "SELECT count(*) FROM `#iCMS@__article` {$sql}";
     }

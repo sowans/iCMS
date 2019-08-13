@@ -244,9 +244,9 @@ class articleFunc{
 			$c_resource = iCache::get($cache_name);
 			if(is_array($c_resource)) return $c_resource;
 		}
-
+		$where_sql = '';
 		$hidden = categoryApp::get_cache('hidden');
-		$hidden && $where_sql .= iSQL::in($hidden, 'cid', 'not');
+		$hidden && $where_sql.= iSQL::in($hidden, 'cid', 'not');
 		$SPH = iPHP::vendor('SphinxClient',iCMS::$config['sphinx']['host']);
 		$SPH->SetArrayResult(true);
 		if (isset($vars['weights'])) {
@@ -360,9 +360,24 @@ class articleFunc{
 	}
 	public static function article_data($vars) {
 		$vars['aid'] OR iUI::warning('iCMS&#x3a;'.self::$app.'&#x3a;data 标签出错! 缺少"aid"属性或"aid"值为空.');
-		$data = iDB::row("SELECT body,subtitle FROM `#iCMS@__article_data` WHERE aid='" . (int) $vars['aid'] . "' LIMIT 1;", ARRAY_A);
-		articleApp::hooked($data);
-		return $data;
+		if($vars['chapter']){
+			$by = strtoupper($vars['by']) == "DESC" ? "DESC" : "ASC";
+			$maxperpage = isset($vars['row']) ? (int) $vars['row'] : 10;
+			$ids_array = iDB::all("SELECT `id` FROM `#iCMS@__article_data` WHERE `aid`='" . (int) $vars['aid'] . "' ORDER BY `id` {$by} LIMIT 0,{$maxperpage};");
+
+			if ($ids_array) {
+				$ids = iSQL::values($ids_array);
+				$ids = $ids ? $ids : '0';
+				$where_sql = "WHERE `#iCMS@__article_data`.`id` IN({$ids})";
+				$resource  = iDB ::all("SELECT id,subtitle,body FROM `#iCMS@__article_data` {$where_sql};");
+				$resource  = iSQL::orderby_field($resource,$ids_array);
+			}	
+			array_map(array('articleApp','hooked'),$resource);
+		}else{
+			$resource = iDB::row("SELECT body,subtitle FROM `#iCMS@__article_data` WHERE aid='" . (int) $vars['aid'] . "' LIMIT 1;", ARRAY_A);
+			articleApp::hooked($resource);
+		}
+		return $resource;
 	}
 	public static function article_prev($vars) {
 		$vars['order'] = 'p';
@@ -457,7 +472,7 @@ class articleFunc{
 
 				if ($vars['page']) {
 					$value['page'] = $GLOBALS['page'] ? $GLOBALS['page'] : 1;
-					$value['total'] = $total;
+					$value['total'] = $vars['total'];
 				}
 				if ($vars['archive'] == "date") {
 					$_date = archive_date($value['postime']);

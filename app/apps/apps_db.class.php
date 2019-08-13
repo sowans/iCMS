@@ -147,14 +147,36 @@ class apps_db {
         // exit;
         return $sql_array;
     }
-    public static function alter_table($name,$sql=null){
-        if(empty($sql))return;
+    public static function alter_table($name,$sqlArray=null){
+        if(empty($sqlArray)) return;
+
+        $fields  = self::fields("#iCMS@__{$name}");
+        foreach($sqlArray as $k=>$sql ){
+            $unset = false;
+            if(strpos($sql,'DROP COLUMN')!==false){
+                preg_match('/`(.+)`/i',$sql,$match);
+                // 删除字段时 字段不存在 移除语句
+                !$fields[$match[1]] && $unset = true;
+            }elseif(strpos($sql,'ADD COLUMN')!==false){
+                preg_match('/`(.+)`/i',$sql,$match);
+                // 添加字段时 字段存在 移除语句
+                $fields[$match[1]] && $unset = true;
+            }elseif(strpos($sql,'CHANGE ')!==false){
+                preg_match('/`(.+)`\s`(.+)`/i',$sql,$match);
+                // 旧字段不存在 或者 新字段存在 移除语句
+                if(!$fields[$match[1]] || $fields[$match[2]]){
+                    $unset = true;
+                }
+            }
+            if($unset) unset($sqlArray[$k]);
+        }
+
+        if(!is_array($sqlArray)) return;
 
         $alter_sql = "ALTER TABLE `#iCMS@__{$name}` ";
-        if(is_array($sql)){
-            $alter_sql.=implode(',', $sql);
-        }
+        $alter_sql.= implode(',', $sqlArray);
         $alter_sql.= ';';
+        
         iDB::query($alter_sql);
     }
     // public static function create_table($name,$fields=null,$base_fields=true,$PRIMARY='id',$index=null,$ret=false){
@@ -500,7 +522,7 @@ class apps_db {
     * @return bool
     */
     public static function drop_tables($tables) {
-        return iDB::query("DROP TABLE " . implode(", ", array_map(array(self,'table'), $tables)));
+        return iDB::query("DROP TABLE " . implode(", ", array_map(array(__CLASS__,'table'), $tables)));
     }
     /** Move tables to other schema
     * @param array
@@ -573,7 +595,7 @@ class apps_db {
     * @return string
     */
     public static function idf_escape($idf) {
-        return "`" . str_replace("`", "``", $idf) . "`";
+        return '`' . str_replace('`', '', $idf) . '`';
     }
     public static function idf_unescape($idf) {
         $last = substr($idf, -1);

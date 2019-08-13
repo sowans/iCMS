@@ -813,6 +813,9 @@ class iTemplateLite_Compiler extends iTemplateLite {
 				array_pop($this->_switch_stack);
 				return '<?php break; }; ?>';
 				break;
+			case 'break':
+				return '<?php break; ?>';
+				break;
 			case 'case':
 				if (count($this->_switch_stack) > 0){
 					$_result = "<?php ";
