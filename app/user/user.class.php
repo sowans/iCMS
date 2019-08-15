@@ -20,6 +20,7 @@ class user {
 	public static $format     = false;
 	public static $callback   = array();//回调
 	private static $AUTH      = 'USER_AUTH';
+	private static $TOKEN     = 'USER_TOKEN';//只用来判断是否登陆
 
 	public static function login_uri($uri=null){
 		$login_uri = iURL::router('user:login','?&');
@@ -246,6 +247,7 @@ class user {
 			return self::$callback['cookie'];
 		}
 		$auth     = auth_decode(iPHP::get_cookie(self::$AUTH));
+		$token    = iPHP::get_cookie(self::$TOKEN);
 		$userid   = auth_decode(iPHP::get_cookie('userid'));
 		$nickname = auth_decode(iPHP::get_cookie('nickname'));
 
@@ -265,9 +267,17 @@ class user {
 		return false;
 	}
 	public static function set_cookie($username,$password,$user){
-		iPHP::set_cookie(self::$AUTH, auth_encode((int)$user['uid'].USER_AUTHASH.$username.USER_AUTHASH.$password.USER_AUTHASH.$user['nickname'].USER_AUTHASH.$user['status']),self::$cookietime);
-		iPHP::set_cookie('userid',    auth_encode($user['uid']),self::$cookietime);
-		iPHP::set_cookie('nickname',  auth_encode($user['nickname']),self::$cookietime);
+		$auth = auth_encode(
+			(int)$user['uid'].USER_AUTHASH.
+			$username.USER_AUTHASH.
+			$password.USER_AUTHASH.
+			$user['nickname'].USER_AUTHASH.
+			$user['status']
+		);
+		iPHP::set_cookie(self::$AUTH,	$auth,self::$cookietime);
+		iPHP::set_cookie(self::$TOKEN,	iSecurity::secureToken($auth),self::$cookietime,false);
+		iPHP::set_cookie('userid',    	auth_encode($user['uid']),self::$cookietime,false);
+		iPHP::set_cookie('nickname',  	auth_encode($user['nickname']),self::$cookietime,false);
 	}
 
 	public static function status($url=null,$st=null) {
@@ -300,6 +310,7 @@ class user {
 	}
 	public static function logout(){
 		iPHP::set_cookie(self::$AUTH, '',-31536000);
+		iPHP::set_cookie(self::$TOKEN, '',-31536000);
 		iPHP::set_cookie('userid', '',-31536000);
 		iPHP::set_cookie('nickname', '',-31536000);
 		iPHP::set_cookie('seccode', '',-31536000);

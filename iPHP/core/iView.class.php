@@ -165,7 +165,7 @@ class iView {
             unset($args['vars'],$vars['loop'],$vars['page']);
             $args = array_merge($args,$vars);
         }
-        self::args($args);
+        // self::parse_vars($args);
         //设置参数
         isset($args['args']) && $args = $args['args'];
 
@@ -328,16 +328,19 @@ class iView {
         }
         return false;
     }
-    public static function args(&$params,$recursive=false) {
-      foreach ((array)$params as $pk => $pv) {
-            $pk = trim($pk);
-            if(strpos($pk, '[')!==false && substr($pk, -1)==']'){
-                $pa = str_multi_array($pk,'[',$pv);
-                unset($params[$pk]);
-                if($recursive){
-                    $params = array_merge_recursive((array)$params,(array)$pa);
+    public static function unfunc_vars(&$vars) {
+        unset($vars[iView::TPL_FUNC_NAME]);
+    }
+    public static function parse_vars(&$vars,$rec=false) {
+      foreach ((array)$vars as $vk => $v) {
+            $vk = trim($vk);
+            if(strpos($vk, '[')!==false && substr($vk, -1)==']'){
+                $va = str_multi_array($vk,'[',$v);
+                unset($vars[$vk]);
+                if($rec){
+                    $vars = array_merge_recursive((array)$vars,(array)$va);
                 }else{
-                    $params = array_merge((array)$params,(array)$pa);
+                    $vars = array_merge((array)$vars,(array)$va);
                 }
             }
         }

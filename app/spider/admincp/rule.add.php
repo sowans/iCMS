@@ -44,7 +44,7 @@ $(function() {
 
     $('#spider-data').on("click", ".delprop", function() {
         if(confirm('确定要删除?')) {
-            $(this).parent().parent().parent().remove();
+            $(this).parents('tr').remove();
         }
     });
 
@@ -112,20 +112,24 @@ $(function() {
         if(!length) length=0;
         ntr.attr('data-key', length);
 
-        $('input,textarea,td,select', ntr).each(function(i) {
-            if(this.id)   this.id   = this.id.replace('__KEY__', length);
-            if(this.name) this.name = this.name.replace('[__KEY__]', '['+length+']');
-            // if(this.type) this.type = this.type.replace('dr_checkbox', 'checkbox');
-            var type = $(this).attr('type');
-            if(type=="dr_checkbox"){
-                $(this).attr('type','checkbox');
-            }
-        });
+        $('[id],[name],[type],[data-target]',ntr).each(function(i) {
+          var id = $(this).attr('id');
+          if(id){
+            $(this).attr('id',id.replace('__KEY__', length));
+          }
+          var name = $(this).attr('name');
+          if(name){
+            $(this).attr('name',name.replace('[__KEY__]', '['+length+']'));
+          }
+          var target = $(this).attr('data-target');
+          if(target){
+            $(this).attr('data-target', target.replace('__KEY__', length));
+          }
 
-        $('a[data-target]', ntr).each(function(i) {
-            var target = $(this).attr('data-target');
-            target = target.replace('__KEY__', length);
-            $(this).attr('data-target', target);
+          var type = $(this).attr('type');
+          if(type=="dr_checkbox"){
+              $(this).attr('type','checkbox');
+          }
         });
 
         chosen_config.width=$(".rule_data_helper").width()+'px';

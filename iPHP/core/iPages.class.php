@@ -15,6 +15,7 @@ class iPages {
 	public $page_name  = "page";//page标签，用来控制url页。比如说xxx.php?page=2中的page
 	public $page_nav   = "NAV";
 	public $page_style = 0;
+	public $page_item  = '';
 	public $is_ajax    = false;//是否支持AJAX分页模式
 	public $ajax_fun   = null;   //AJAX动作名
 	public $titles     = array();
@@ -26,6 +27,7 @@ class iPages {
 	public $url       = null;//url地址头
 	public $offset    = 0;
 	public $lang      = array('index'=>'INDEX','prev'=>'PREV','next'=>'NEXT','last'=>'LAST','other'=>'Total','unit'=>'Page','list'=>'Articles','sql'=>'Records','tag'=>'Tags','comment'=>'Comments','message'=>'Messages');
+	public $class     = array('index'=>'INDEX','prev'=>'PREV','next'=>'NEXT','last'=>'LAST','other'=>'Total','unit'=>'Page','list'=>'Articles','sql'=>'Records','tag'=>'Tags','comment'=>'Comments','message'=>'Messages');
 
 	public static $config = array();
 	public static $setting = array();
@@ -37,7 +39,7 @@ class iPages {
 	* @param array $array['total'],$array['perpage'],$array['pn'],$array['unit'],$array['nowindex'],$array['url'],$array['ajax'],$array['pnName']...
 	*/
 	public function __construct($conf){
- 		array_key_exists('total',$conf) OR $this->error('need a param of total',1001);
+ 		array_key_exists('total',$conf) OR trigger_error('need a param of total(1001)');
  		self::$config 	 = $conf;
 		$this->total     = (int)$conf['total'];
 		$this->perpage   = $conf['perpage']?(int)$conf['perpage']:10;
@@ -49,13 +51,16 @@ class iPages {
 		isset($conf['url']) && $url = $conf['url'];
 		self::$config['url'] = $url;
 
-		//设置pagename
+		//配置
 		$conf['pnstyle']  && $this->page_style = $conf['pnstyle'];
 		$conf['pagenav']  && $this->page_nav   = strtoupper($conf['pagenav']);
 		$conf['page_name']&& $this->page_name  = $conf['page_name'];
+		$conf['item']     && $this->page_item  = $conf['item'];
+		$conf['barnum']   && $this->barnum     = $conf['barnum'];
 		$conf['target']   && $this->target     = $conf['target'];
 		$conf['titles']   && $this->titles     = $conf['titles'];
 		$conf['lang']     && $this->lang       = $conf['lang'];
+		$conf['class']    && $this->class      = $conf['class'];
 
 		$this->unit = $conf['unit']?$conf['unit']:$this->lang['sql'];
 		//设置当前页
@@ -99,7 +104,7 @@ class iPages {
 	* @param string $style
 	* @return string
 	*/
-	public function next_page($style='next_page'){
+	public function next_page($style='page_next'){
 		$p = $this->nowindex+1;
 		if($p>$this->totalpage){
 			$p = $this->totalpage;
@@ -114,7 +119,7 @@ class iPages {
 	* @param string $style
 	* @return string
 	*/
-	public function prev_page($style='prev_page'){
+	public function prev_page($style='page_prev'){
 		$p = $this->nowindex-1;
 		$p<2 && $p = 1;
 		$pnt = $this->get_title($p,$this->lang['prev']);
@@ -126,7 +131,7 @@ class iPages {
 	*
 	* @return string
 	*/
-	public function first_page($style='index_page'){
+	public function first_page($style='page_index'){
 		$pnt = $this->get_title(1,$this->lang['index']);
 		return $this->_get_link(1,$pnt,$style,true);
 	}
@@ -136,11 +141,11 @@ class iPages {
 	*
 	* @return string
 	*/
-	public function last_page($style='last_page'){
+	public function last_page($style='page_last'){
 		$pnt = $this->get_title($this->totalpage,$this->lang['last']);
 		return $this->_get_link($this->totalpage,$pnt,$style,true);
 	}
-	public function last_text($style='last_page'){
+	public function last_text($style='page_last'){
 		$text = $this->lang['other'].$this->totalpage.$this->lang['unit'];
 		$pnt  = $this->get_title($this->totalpage,$text);
 		return $this->_get_link($this->totalpage,$pnt,$style,true);
@@ -207,12 +212,12 @@ class iPages {
 		$return.='</select>';
 		return $return;
 	}
-	public function select_wrap($style='page_select'){
-		return '<span class="'.$style.'">'.
+	public function select_wrap($style='page_select_wrap'){
+		return $this->_get_text('<span class="'.$style.'">'.
 		$this->lang['di'].
 		$this->select().
 		$this->lang['unit'].
-		'</span>';
+		'</span>');
 	}
 	/**
 	* 获取mysql 语句中limit需要的值
@@ -333,11 +338,18 @@ class iPages {
 	/**
 	* 获取分页显示文字，比如说默认情况下_get_text('<a href="">1</a>')将返回[<a href="">1</a>]
 	*
-	* @param String $str
+	* @param String <li>%s</ii>
 	* @return string $url
 	*/
-	public function _get_text($str){
-		return $this->lang['item']?sprintf($this->lang['item'], $str):$str;
+	public function _get_text($text){
+		// if($this->page_item){
+		// 	if(strpos($this->page_item, '%s')!==false){
+		// 		$text = sprintf($this->page_item,$text);
+		// 	}else{
+		// 		$text = '<'.$this->page_item.'>'.$text.'</'.$this->page_item.'>';
+		// 	}
+		// }
+		return $this->page_item?sprintf($this->page_item,$text):$text;
 	}
 
 
@@ -349,18 +361,21 @@ class iPages {
 		if($style=='array'){
 			return $this->_get_array($i,$text);
 		}
-		$style	&& $style	= ' class="'.$style.'"';
+		if($style){
+			$this->class[$style] && $style = $this->class[$style];
+			$class	= ' class="'.$style.'"';
+		}
 
 		if(!$flag){
-			return $this->_get_text('<span'.$style.'>'.$text.'</span>');
+			return $this->_get_text('<span'.$class.'>'.$text.'</span>');
 		}
 
 		$url = $this->get_url($i);
 		if($this->is_ajax){
 	  		//如果是使用AJAX模式
-	  		$a = '<a'.$style.' href="javascript:;" onclick="'.$this->ajax_fun.'(\''.$url.'\',this)">'.$text.'</a>';
+	  		$a = '<a'.$class.' href="javascript:;" onclick="'.$this->ajax_fun.'(\''.$url.'\',this)">'.$text.'</a>';
 		}else{
-			$a = '<a'.$style.' href="'.$url.'" target="'.$this->target.'">'.$text.'</a>';
+			$a = '<a'.$class.' href="'.$url.'" target="'.$this->target.'">'.$text.'</a>';
 		}
 		return $this->_get_text($a);
 	}
@@ -371,12 +386,5 @@ class iPages {
 			'title' => $text,
 			'link'  => $this->_get_link($i,$text),
 		);
-	}
-
-	/**
-	* 出错处理方式
-	*/
-	public function error($msg,$code){
-		trigger_error($msg . '(' . $code . ')');
 	}
 }

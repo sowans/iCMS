@@ -17,7 +17,7 @@ class members{
     public static $group        = array();
     public static $priv         = array();
     public static $GATEWAY      = false;
-    public static $AUTH         = 'iCMS_AUTH';
+    public static $AUTH         = 'ADMIN_AUTH';
     public static $LOGIN_PAGE   = 'login.php';
     private static $LOGIN_COUNT = 0;
 

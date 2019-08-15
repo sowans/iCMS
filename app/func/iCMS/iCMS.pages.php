@@ -8,18 +8,36 @@
 * @licence https://www.icmsdev.com/LICENSE.html
 */
 function iCMS_pages($vars){
-	$c = iPages::$config;
-	if(isset($vars['url'])){
-		$c['url'] = $vars['url'];
-		if(strtolower($vars['url'])==='self'){
-			$c['url'] = $_SERVER['REQUEST_URI'];
-		}
+	$conf = iPages::$config;
+	if(empty($conf)){
+		return;
 	}
-	$query = array('page'=>'{P}');
-	$vars['query'] && $query = array_merge($query,$vars['query']);
+	iView::parse_vars($vars);
+	iView::unfunc_vars($vars);
 
-	iPages::$setting['index'] = iURL::make(array('page'=>null),$c['url']);
-	$c['url'] = iURL::make($query,$c['url']);
+	// $as = $vars['as'];
+	// $array = $vars['array'];
+	// $print = $vars['print'];
+	// unset($vars['as'],$vars['array'],$vars['print']);
 
-	return iPagination::assign($c);
+	if($vars['lang']){
+		$conf['lang'] = array_merge($conf['lang'],$vars['lang']);
+		unset($vars['lang']);
+	}
+
+	$conf = array_merge($conf,$vars);
+
+	if(isset($vars['url'])){
+		$conf['url'] = $vars['url'];
+		if(strtolower($vars['url'])==='self'){
+			$conf['url'] = $_SERVER['REQUEST_URI'];
+		}
+		$query = array('page'=>'{P}');
+		$vars['query'] && $query = array_merge($query,$vars['query']);
+		iPages::$setting['index'] = iURL::make(array('page'=>null),$conf['url']);
+		$conf['url'] = iURL::make($query,$conf['url']);
+	}
+	$obj = iPagination::make($conf);
+	return $obj;
+
 }

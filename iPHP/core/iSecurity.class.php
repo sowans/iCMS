@@ -248,4 +248,10 @@ class iSecurity {
 			array_map("iSecurity::safeStr", $string) :
 			preg_replace('/\W+/is','',$string);
 	}
+    public static function secureToken($token){
+        for ($i=0; $i <100 ; $i++) {
+            $token = sha1(md5($token));
+        }
+        return $token;
+    }
 }

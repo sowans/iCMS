@@ -302,10 +302,10 @@ class iTemplateLite {
 	}
 	function code_eol_replace(&$output){
 		$output = preg_replace(array(
-			'/\n+<\?php/is','/\?>\n+/is',
-			'/\s{2,}<\?php/is','/\?>\s{2,}/is'
+			'/\n{2,}<\?php/is','/\?>\n{2,}/is',
+			'/\s{2,}<\?php/is','/\?>\s{2,}/is',
 		),
-		array('<?php','?>','<?php','?>'), $output);
+		array('<?php',"?>\n",'<?php','?>'), $output);
 	}
 	function _run_output(&$content,$file){
 		if(!$this->_plugins['output']) return;
@@ -576,7 +576,6 @@ class iTemplateLite_Compiler extends iTemplateLite {
 
 		// extract the tag command, modifier and arguments
 		preg_match_all('/(?:(' . $this->_var_regexp . '|' . $this->_svar_regexp . '|\/?' . $this->_func_regexp . ')(' . $this->_mod_regexp . '*)(?:\s*[,\.]\s*)?)(?:\s+(.*))?/xs', $tag, $_match);
-
 		if ($_match[1][0][0] == '&' || $_match[1][0][0] == '$' || $_match[1][0][0] == "'" || $_match[1][0][0] == '"' || $_match[1][0][0] == '%'){
 			$_result = $this->_parse_variables($_match[1], $_match[2]);
 			if($_match[1][0][0] == '&'){

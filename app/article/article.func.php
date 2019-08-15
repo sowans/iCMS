@@ -180,16 +180,14 @@ class articleFunc{
 				);
 			}
 
-			$pagenav    = isset($vars['pagenav']) ? $vars['pagenav'] : "pagenav";
-			$pnstyle    = isset($vars['pnstyle']) ? $vars['pnstyle'] : 0;
-			$multi      = iPagination::make(array(
+			$multi = iPagination::make(array(
 				'total_type' => $total_type,
 				'total'      => $total,
 				'perpage'    => $maxperpage,
 				'unit'       => iUI::lang('iCMS:page:list'),
 				'nowindex'   => $GLOBALS['page']
 			));
-			$offset     = $multi->offset;
+			$offset = $multi->offset;
             iView::assign(self::$app."_list_total", $total);
 		}
 		$limit = "LIMIT {$offset},{$maxperpage}";
@@ -371,7 +369,7 @@ class articleFunc{
 				$where_sql = "WHERE `#iCMS@__article_data`.`id` IN({$ids})";
 				$resource  = iDB ::all("SELECT id,subtitle,body FROM `#iCMS@__article_data` {$where_sql};");
 				$resource  = iSQL::orderby_field($resource,$ids_array);
-			}	
+			}
 			array_map(array('articleApp','hooked'),$resource);
 		}else{
 			$resource = iDB::row("SELECT body,subtitle FROM `#iCMS@__article_data` WHERE aid='" . (int) $vars['aid'] . "' LIMIT 1;", ARRAY_A);

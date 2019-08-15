@@ -3,7 +3,7 @@ iCMS.define("config", {
     UHOME: '/user/{uid}/',
     PUBLIC: '/public/',
     COOKIE: 'iCMS_',
-    AUTH: 'USER_AUTH',
+    AUTH: 'USER_TOKEN',
     DIALOG: [],
     APP: 'iCMS'
 });

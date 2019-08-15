@@ -74,9 +74,6 @@ class iPagination {
     public static function make($conf) {
         empty($conf['lang']) && $conf['lang'] = iUI::lang(iPHP_APP . ':page');
         empty($conf['unit']) && $conf['unit'] = iUI::lang(iPHP_APP . ':page:list');
-        return self::assign($conf);
-    }
-    public static function assign($conf){
         $obj = new iPages($conf);
         iView::set_iVARS(array(
             'PAGES' => $obj,
