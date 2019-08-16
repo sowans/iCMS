@@ -113,7 +113,7 @@ class categoryApp{
         self::router($category);
         return $category;
     }
-    public static function get_cids($cid = "0",$all=true,$root_array=null) {
+    public static function get_cids($cid = "0",$all=true,$hidden=null,$root_array=null) {
         $root_array OR $root_array = categoryApp::get_cache("rootid");
         $cids = array();
         is_array($cid) OR $cid = explode(',', $cid);
@@ -122,12 +122,15 @@ class categoryApp{
         }
         if($all){
             foreach((array)$cids AS $_cid) {
-                $root_array[$_cid] && $cids+= self::get_cids($_cid,$all,$root_array);
+                $root_array[$_cid] && $cids+= self::get_cids($_cid,$all,$hidden,$root_array);
             }
         }
         $cids = array_unique($cids);
         $cids = array_filter($cids);
-
+        if($hidden){
+            is_array($hidden) OR $hidden = categoryApp::get_cache('hidden');
+            $cids = array_diff ($cids, $hidden);
+        }
         return $cids;
     }
     public static function get_cache($key=null,$value=null){

@@ -55,7 +55,7 @@ class iPagination {
             'total_type' => 'G',
             'lang'       => iUI::lang(iPHP_APP . ':page'),
         );
-        $conf['lang']['item'] = '<li>%s</li>';
+        $conf['item'] = '<li>%s</li>';
 
         $iPages = new iPages($conf);
         self::$offset = $iPages->offset;

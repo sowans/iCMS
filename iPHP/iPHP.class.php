@@ -321,8 +321,7 @@ class iPHP {
 			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
 		}else if (in_array($name, explode(',', iPHP_CORE_CLASS))) {
 			//iclass.class.php
-			$core===null && $core = iPHP_CORE;
-			$path = $core.'/'.$name.'.class.php';
+			$path = iPHP_CORE.'/'.$name.'.class.php';
 		}else if(array_key_exists($name,(array)iPHP::$apps)){
 			//app.class.php
 			$file OR $file = $name.'.class';

@@ -31,8 +31,6 @@ class articleFunc{
 		$where_sql = "WHERE `status`='{$status}'";
 		$vars['call'] == 'user' && $where_sql .= " AND `postype`='0'";
 		$vars['call'] == 'admin' && $where_sql .= " AND `postype`='1'";
-		$hidden = categoryApp::get_cache('hidden');
-		$hidden && $where_sql .= iSQL::in($hidden, 'cid', 'not');
 		$maxperpage = isset($vars['row']) ? (int) $vars['row'] : 10;
 		$cache_time = isset($vars['time']) ? (int) $vars['time'] : -1;
 		isset($vars['userid']) && $where_sql .= " AND `userid`='{$vars['userid']}'";
@@ -42,6 +40,8 @@ class articleFunc{
 			$where_sql .= " AND `ucid`='{$vars['ucid']}'";
 		}
 
+		$hidden = categoryApp::get_cache('hidden');
+		$hidden && $hidden_sql = true;
 		if (isset($vars['cid!'])) {
 			$ncids = explode(',', $vars['cid!']);
 			$vars['sub'] && $ncids += categoryApp::get_cids($ncids, true);
@@ -49,18 +49,21 @@ class articleFunc{
 		}
 		if ($vars['cid'] && !isset($vars['cids'])) {
 			$cid = explode(',', $vars['cid']);
-			$vars['sub'] && $cid += categoryApp::get_cids($cid, true);
+			$vars['sub'] && $cid += categoryApp::get_cids($cid, true,$hidden);
 			$where_sql .= iSQL::in($cid, 'cid');
+			$hidden_sql = false;
 		}
 		if (isset($vars['cids']) && !$vars['cid']) {
 			$cids = explode(',', $vars['cids']);
-			$vars['sub'] && $cids += categoryApp::get_cids($vars['cids'], true);
-
+			$vars['sub'] && $cids += categoryApp::get_cids($vars['cids'], true,$hidden);
+			$hidden_sql = false;
 			if ($cids) {
 				iMap::init('category', self::$appid,'cid');
 				$map_where += iMap::where($cids);
 			}
 		}
+		$hidden_sql && $where_sql .= iSQL::in($hidden, 'cid', 'not');
+
 		if (isset($vars['pid']) && !isset($vars['pids'])) {
 			iSQL::$check_numeric = true;
 			$where_sql .= iSQL::in($vars['pid'], 'pid');
@@ -210,7 +213,7 @@ class articleFunc{
 
 		if (empty($ids_array)) {
 			$sql = "SELECT ".$distinct." `".self::$table."`.`id` FROM `".self::$table."` {$where_sql} {$order_sql} {$limit}";
-			if (strpos($sql, '`cid` IN')!==false && empty($map_order_sql) && iCMS::$config['debug']['db_optimize_in']){
+			if (!$vars['page'] && strpos($sql, '`cid` IN')!==false && empty($map_order_sql) && iCMS::$config['debug']['db_optimize_in']){
 				$sql = iSQL::optimize_in($sql);
 			}
 			$ids_array = iDB::all($sql);

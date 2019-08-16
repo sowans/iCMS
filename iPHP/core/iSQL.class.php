@@ -270,7 +270,7 @@ class iSQL {
             return $sql;
         }
         // print($sql);
-        preg_match("@(SELECT.+)(FROM(.+)WHERE)(.+)\s*(ORDER\s*BY\s*`(.+)`\s*\w+)\s*(LIMIT\s*\d+,\d+)$@is", $sql, $sqlmat);
+        preg_match("@(SELECT.+)(FROM(.+)WHERE)(.+)\s*(ORDER\s*BY\s*`(.+)`\s*\w+)\s*(LIMIT\s*\d+,(\d+))$@is", $sql, $sqlmat);
         // var_dump($sqlmat);
         $ORDER_field = trim($sqlmat[6]);
 
@@ -295,6 +295,8 @@ class iSQL {
         }
         $whereSQL = implode(' AND ', $whereArray);
         $eol = $sqlmat[5].' '.$sqlmat[7];
+        $end = $sqlmat[5].' LIMIT 0,'.$sqlmat[8];
+        
         if($cids){
             $cidArray = explode(',', $cids);
             if($cidArray && count($cidArray)>1){
@@ -310,7 +312,7 @@ class iSQL {
                     $nsql = '( '.$nsql.' '.$eol.')';
                     $sqlArray[$key] = $nsql;
                 }
-                $sql = implode("\nUNION ALL\n", $sqlArray)."\n ".$eol;
+                $sql = implode("\nUNION ALL\n", $sqlArray)."\n ".$end;
             }
         }
         return $sql;
