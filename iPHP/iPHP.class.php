@@ -48,12 +48,12 @@ class iPHP {
 		set_error_handler(self::$handler['error'],E_ALL & ~E_NOTICE);
 		spl_autoload_register(self::$handler['autoload'], true, true);
 		// self::composer();
-		//waf
-		iWAF::filter();
 		//security
 		iSecurity::filter();
 		iSecurity::globals('page','GP',2);
 		iDefine::request();
+		//waf
+		iWAF::filter();
 	}
 	public static function autoload($class,$core=null){
 		$require = self::auto_require($class);
@@ -624,15 +624,18 @@ class iPHP {
 		exit();
 	}
 	public static function error_log($erro) {
-		@file_put_contents(iPHP_APP_CACHE.'/error_log_'.md5(sha1(iPHP_KEY)).'.php'
-			,"<?php exit('What the fuck!');?>"
+		defined('iPHP_DEBUG_ERRORLOG') OR define('iPHP_DEBUG_ERRORLOG', true); //兼容PHP7
+		if(!iPHP_DEBUG_ERRORLOG) return;
+
+		@file_put_contents(iPHP_APP_CACHE.'/error_log_'.md5(sha1(iPHP_KEY)).'.php',
+			"<?php exit('What the fuck!');?>"
 			.PHP_EOL.'['.date("Y-m-d H:i:s").'] '.self::get_ip()
 			.PHP_EOL.iPHP_REQUEST_URL
 			.($_GET?PHP_EOL.'$_GET=>'.var_export($_GET,true):'')
 			.($_POST?PHP_EOL.'$_POST=>'.var_export($_POST,true):'')
 			.PHP_EOL.html2text($erro)
-			.PHP_EOL.PHP_EOL
-			,FILE_APPEND
+			.PHP_EOL.PHP_EOL,
+			FILE_APPEND
 		);
 	}
 	public static function error_handler($errno, $errstr, $errfile, $errline) {
@@ -678,7 +681,7 @@ class iPHP {
 		}
 		$html .= "</pre>";
 		$html = iSecurity::filter_path($html);
-		iPHP_DEBUG_ERRORLOG && self::error_log($html);
+		self::error_log($html);
 		self::$callback['error'] OR self::$callback['error'] = array('iUI','error');
 		self::callback(self::$callback['error'],array($html,'system',$errstr));
 	}

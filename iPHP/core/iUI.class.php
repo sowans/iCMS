@@ -145,6 +145,8 @@ class iUI extends iPagination{
 		self::$break && exit();
 	}
     public static function error($value,$type='app',$errstr=null) {
+        $GLOBALS['hide_error'] && exit($errstr);
+        
         if(iPHP_SHELL){
             $value = str_replace(array("<b>", "</b>"), array("\033[31m","\033[0m"), $value);
             $value = html2text($value);

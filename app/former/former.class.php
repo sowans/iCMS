@@ -133,6 +133,7 @@ class former {
             $default = $field['default'];
 
             list($type,$_type) = explode(':', $field['type']);
+            $_value = $value;
             if($value!==null){
                 // isset($value) OR $value = $default;
                 if(!isset($value)){
@@ -146,6 +147,7 @@ class former {
             if($default && $value===null){
                 $value = $default;
             }
+
             $value = self::field_value($value,$type);
 
             $field['label']      && $label  = self::display($field['label'],'label');
@@ -382,11 +384,11 @@ class former {
                     $input.= $_input;
                 break;
                 case 'device':
-                    $value = iPHP_MOBILE?'1':'0';
+                    is_null($_value) && $value = iPHP_MOBILE?'1':'0';
                     $input->val($value);
                 break;
                 case 'postype':
-                    $value = self::$config['gateway']=='admincp'?'1':'0';
+                    is_null($_value) && $value = self::$config['gateway']=='admincp'?'1':'0';
                     $input->val($value);
                 break;
                 default:

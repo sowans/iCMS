@@ -54,7 +54,8 @@ class iWAF {
 			if (preg_match("@".$value."@is",$str)||
 				preg_match("@".$value."@is",urlencode($str))||
 				preg_match("@".$value."@is",urldecode($str))){
-				trigger_error('iWAF安全提示:当前操作可能存在某种危险代码',E_USER_ERROR);
+				$GLOBALS['hide_error'] = true;
+				trigger_error('<b>iWAF:</b>What the fuck!',E_USER_ERROR);
 			}
 		}
 	}

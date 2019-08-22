@@ -77,7 +77,6 @@ class categoryApp{
             $view_app = "category";
             $category['app']['app'] && $view_app = $category['app']['app'];
             iView::assign('APP', $category['app']); //绑定的应用信息
-            unset($category['app']);
             iView::assign('category',$category);
             if(strpos($tpl, '.htm')!==false){
             	return iView::render($tpl,$view_app);
