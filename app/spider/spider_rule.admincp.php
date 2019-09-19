@@ -166,21 +166,23 @@ class spider_ruleAdmincp {
         files::$check_data        = false;
         files::$cloud_enable      = false;
         iFS::$config['allow_ext'] = 'txt';
-		$F = iFS::upload('upfile');
+		$F = iFS::upload('upfile','spider');
 		$path = $F['RootPath'];
 		if ($path) {
 			$data = file_get_contents($path);
+			@unlink($path);
 			if ($data) {
 				$data = base64_decode($data);
 				$data = json_decode($data,true);
-				$rule = json_decode(stripslashes($data['rule']),true);
+				$rule = json_decode($data['rule'],true);
 				if($rule){
 					$data['rule'] = json_encode($rule);
 					$data = iSecurity::slashes($data);
 					iDB::insert("spider_rule", $data);
+				}else{
+					iUI::alert('导入规则出现错误');
 				}
 			}
-			@unlink($path);
 			iUI::success('规则导入完成', 'js:1');
 		}
 	}

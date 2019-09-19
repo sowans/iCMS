@@ -168,19 +168,23 @@ class spider_projectAdmincp {
         files::$check_data        = false;
         files::$cloud_enable      = false;
         iFS::$config['allow_ext'] = 'txt';
-        $F    = iFS::upload('upfile');
+        $F    = iFS::upload('upfile','spider');
         $path = $F['RootPath'];
         if($path){
             $data = file_get_contents($path);
+            @unlink($path);
             if($data){
                 $data = base64_decode($data);
-                $data = unserialize($data);
-                foreach ((array)$data as $key => $value) {
-                	$value = iSecurity::slashes($value);
-                    iDB::insert("spider_project",$value);
+                $data = json_decode($data,true);
+                if(is_array($data)){
+	                foreach ($data as $key => $value) {
+	                	$value = iSecurity::slashes($value);
+	                    iDB::insert("spider_project",$value);
+	                }
+                }else{
+                	iUI::alert('导入方案出现错误');
                 }
             }
-            @unlink($path);
             iUI::success('方案导入完成,请重新设置规则','js:1');
         }
     }
@@ -194,7 +198,10 @@ class spider_projectAdmincp {
         	FROM `#iCMS@__spider_project`
         	WHERE rid = '$this->rid'
         ");
-        $data = base64_encode(serialize($data));
+        if(empty($data)){
+        	iUI::alert('未找到属于规则:'.$this->rid.'的方案','js:1');
+        }
+        $data = base64_encode(json_encode($data));
         header("Content-type: application/octet-stream");
         header("Content-Disposition: attachment; filename=spider.rule.".$this->rid.'.project.txt');
 		echo $data;

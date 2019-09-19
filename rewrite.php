@@ -199,6 +199,8 @@ function rewrite($b,$k,$t){
                 $e = 'dir=$';
             }
         break;
+        case 'HASHID':  $e = 'HASHID=$';break;
+        case 'AUTHID':  $e = 'AUTHID=$';break;
         case 'NAME':    $e = 'name=$';break;
         case 'TITLE':   $e = 'title=$';break;
         case 'ZH_CN':   $e = 'name=$';break;
@@ -259,6 +261,8 @@ function preg($b,$t){
         case 'TITLE':   $e = '(.*?)';break;
         case 'ZH_CN':   $e = '(.*?)';break;
         case 'TKEY':    $e = '(.+)';break;
+        case 'AUTHID':  $e = '(.+)';break;
+        case 'HASHID':  $e = '(.+)';break;
         case 'LINK':    $e = '(.+)';break;
 
         case 'TCID':    $e = '(\d+)';break;
