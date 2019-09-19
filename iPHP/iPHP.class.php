@@ -624,10 +624,10 @@ class iPHP {
 		exit();
 	}
 	public static function error_log($erro) {
-		defined('iPHP_DEBUG_ERRORLOG') OR define('iPHP_DEBUG_ERRORLOG', true); //兼容PHP7
+		defined('iPHP_DEBUG_ERRORLOG') OR define('iPHP_DEBUG_ERRORLOG', false); //兼容PHP7
 		if(!iPHP_DEBUG_ERRORLOG) return;
 
-		@file_put_contents(iPHP_APP_CACHE.'/error_log_'.md5(sha1(iPHP_KEY)).'.php',
+		@file_put_contents(iPHP_APP_CACHE.'/error_log_'.md5(sha1(iPHP_KEY)).'.log',
 			"<?php exit('What the fuck!');?>"
 			.PHP_EOL.'['.date("Y-m-d H:i:s").'] '.self::get_ip()
 			.PHP_EOL.iPHP_REQUEST_URL

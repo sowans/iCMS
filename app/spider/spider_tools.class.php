@@ -1027,13 +1027,4 @@ class spider_tools {
         $text = trim($text);
         return $text;
     }
-    public static function lastId($name,$id=null){
-        $path = __DIR__.'/lastId.'.$name.'.txt';
-        if($id===null){
-            file_exists($path) OR file_put_contents($path, 1);
-            $lastId  = trim(file_get_contents($path));
-            return $lastId;
-        }
-        file_put_contents($path, $id);
-    }
 }

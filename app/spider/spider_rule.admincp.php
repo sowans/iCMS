@@ -147,11 +147,14 @@ class spider_ruleAdmincp {
 	 * @return [type] [description]
 	 */
 	public function do_export() {
-		$rs = iDB::row("select `name`, `rule` from `#iCMS@__spider_rule` where id = '$this->rid'");
-		$data = array('name' => addslashes($rs->name), 'rule' => addslashes($rs->rule));
-		$data = base64_encode(json_encode($data));
+		$row = iDB::row("
+			SELECT `name`, `rule`
+			FROM `#iCMS@__spider_rule`
+			WHERE id = '$this->rid'"
+		, ARRAY_A);
+		$data = base64_encode(json_encode($row));
 		Header("Content-type: application/octet-stream");
-		Header("Content-Disposition: attachment; filename=spider.rule." . $rs->name . '.txt');
+		Header("Content-Disposition: attachment; filename=spider.rule." . $row['name'] . '.txt');
         echo $data;
     }
 
@@ -170,7 +173,12 @@ class spider_ruleAdmincp {
 			if ($data) {
 				$data = base64_decode($data);
 				$data = json_decode($data,true);
-				iDB::insert("spider_rule", $data);
+				$rule = json_decode(stripslashes($data['rule']),true);
+				if($rule){
+					$data['rule'] = json_encode($rule);
+					$data = iSecurity::slashes($data);
+					iDB::insert("spider_rule", $data);
+				}
 			}
 			@unlink($path);
 			iUI::success('规则导入完成', 'js:1');

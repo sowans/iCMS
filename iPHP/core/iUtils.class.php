@@ -81,4 +81,19 @@ class iUtils {
         $xml.="</xml>";
         return $xml;
     }
+    /**
+     * [lastId 记录获取最后的ID]
+     * @param  [type] $name [description]
+     * @param  [type] $id   [description]
+     * @return [type]       [description]
+     */
+    public static function lastId($name,$id=null){
+        $path = __DIR__.'/lastId.'.$name.'.txt';
+        if($id===null){
+            file_exists($path) OR file_put_contents($path, 1);
+            $lastId  = trim(file_get_contents($path));
+            return $lastId;
+        }
+        file_put_contents($path, $id);
+    }
 }

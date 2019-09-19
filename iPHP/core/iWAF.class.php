@@ -69,16 +69,14 @@ class iWAF {
 	}
 	public static function CSRF_check($id=0,$key=null){
 		$token = $_POST['CSRF_TOKEN']?$_POST['CSRF_TOKEN']:$_GET['CSRF_TOKEN'];
-
 		if(defined('iPHP_WAF_CSRF')){
 			if(iPHP_WAF_CSRF){
 				return true;
 			}
 		}
-		if(stripos($_SERVER['HTTP_REFERER'],iPHP_SELF) && empty($_POST)){
-			return true;
-		}
-		if($_POST){
+		if(isset($_POST['CSRF_TOKEN'])||isset($_GET['CSRF_TOKEN'])){
+			empty($token) && trigger_error("TOKEN empty",E_USER_ERROR);
+
 			$hashids = iPHP::vendor('Hashids',array("len"=>'16'));
 			$md5     = md5(sha1(md5(iPHP_KEY).$key).$key);
 			$time 	 = time();
@@ -88,6 +86,16 @@ class iWAF {
 				return true;
 			}
 			trigger_error("TOKEN error",E_USER_ERROR);
+		}else{
+			$do = array("del","dels", "delete","save");
+			if (in_array($_GET['do'], $do)) {
+				trigger_error("TOKEN missing",E_USER_ERROR);
+			}
 		}
+
+		if(stripos($_SERVER['HTTP_REFERER'],iPHP_SELF) && empty($_POST)){
+			return true;
+		}
+
 	}
 }

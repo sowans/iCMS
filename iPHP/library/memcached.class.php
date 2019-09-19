@@ -82,7 +82,7 @@ define("MEMCACHE_COMPRESSED", 1<<1);
 /**
  * Minimum savings to store data compressed
  */
-define("COMPRESSION_SAVINGS", 0.20);
+define("COMPRESS_SAVINGS", 0.20);
 
 // }}}
 
