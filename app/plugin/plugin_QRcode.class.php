@@ -32,7 +32,7 @@ class plugin_QRcode {
             return $image;
         }
         $expires = 86400;
-        header("Cache-Control: maxage=" . $expires);
+        header("Cache-Control: max-age=" . $expires);
         header('Last-Modified: ' . gmdate('D, d M Y H:i:s', time()) . ' GMT');
         header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
         header('Content-type: image/png');

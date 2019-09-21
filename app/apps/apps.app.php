@@ -69,6 +69,15 @@ class appsApp {
         if(!method_exists($this, $func)){
             iPHP::error_404('Call to undefined method <b>' . __CLASS__ . '::'.$func.'</b>', '1004');
         }
+
+        $cdn = iCMS::$config['CDN'];
+        if($cdn['enable']){
+            $expires = $cdn['expires'];
+            @header("Cache-Control: ".$cdn['cache_control'].", max-age=" . $expires);
+            @header("Pragma: ".$cdn['cache_control']);
+            @header('Last-Modified: ' . gmdate('D, d M Y H:i:s', time()) . ' GMT');
+            @header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
+        }
         return $this->$func($v,$p,$f);
     }
     public function do_clink($a = null) {

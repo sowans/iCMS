@@ -19,6 +19,7 @@ class iTemplateLite {
 	public $php_handling              = "PHP_QUOTE";//2007-7-23 0:01 quote php tags
 	public $default_modifiers         = array();
 	public $debugging                 = false;
+	public $remove_compile_eol        = true;
 	public $error_reporting_header 	  = null;
 	public $reserved_template_varname = 'iTemplateLite';
 	public $reserved_func_name 		  = 'FuncName';
@@ -275,11 +276,11 @@ class iTemplateLite {
 			$compiler->_file                     = &$this->_file;
 			$compiler->php_extract_vars          = &$this->php_extract_vars;
 			$compiler->reserved_template_varname = &$this->reserved_template_varname;
-			$compiler->reserved_func_name         = &$this->reserved_func_name;
+			$compiler->reserved_func_name        = &$this->reserved_func_name;
 			$compiler->_iVARS                    = &$this->_iVARS;
 			$compiler->default_modifiers         = &$this->default_modifiers;
 			$compile_code = $compiler->_compile_file($template_file);
-			$this->code_eol_replace($compile_code);
+			$this->remove_compile_eol && $this->remove_compile_eol($compile_code);
 			if($ret==='code') return $compile_code;
 			file_put_contents($compile_file,$compile_code);
 		}
@@ -300,7 +301,7 @@ class iTemplateLite {
 		}
 
 	}
-	function code_eol_replace(&$output){
+	function remove_compile_eol(&$output){
 		$output = preg_replace(array(
 			'/\n{2,}<\?php/is','/\?>\n{2,}/is',
 			'/\s{2,}<\?php/is','/\?>\s{2,}/is',

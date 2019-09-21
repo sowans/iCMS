@@ -36,8 +36,7 @@ class iPHP {
 		self::timer_start();
 		@ini_set('magic_quotes_sybase', 0);
 		@ini_set("magic_quotes_runtime",0);
-		header('P3P: CP="CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR"');
-
+		@header('P3P:CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"');
 		if(function_exists('ini_get')) {
 		    $memorylimit = @ini_get('memory_limit');
 		    if($memorylimit && get_bytes($memorylimit) < 33554432 && function_exists('ini_set')) {

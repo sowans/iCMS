@@ -75,3 +75,25 @@ $(function(){
 </div>
 <span class="help-inline">设置分页总数缓存时间,设置此项分页性能将会有极大的提高.</span>
 <input type="hidden" name="config[cache][prefix]" id="cache_prefix" value="<?php echo iPHP_APP_SITE ?>"/>
+<hr />
+<div class="clearfloat mb10"></div>
+<div class="input-prepend">
+    <span class="add-on">CDN缓存控制</span>
+    <div class="switch">
+        <input type="checkbox" data-type="switch" name="config[CDN][enable]" id="CDN_enable" <?php echo $config['CDN']['enable']? 'checked': ''; ?>/>
+    </div>
+</div>
+<span class="help-inline">CDN缓存请求头控制,只对内容设置,列表类无设置</span>
+<div class="clearfloat mb10"></div>
+<div class="input-prepend">
+  <span class="add-on">设置缓存头</span>
+  <input type="text" name="config[CDN][cache_control]" class="span6" id="CDN_cache_control" value="<?php echo $config['CDN']['cache_control']?:'public, must-revalidate'; ?>"/>
+</div>
+<span class="help-inline">设置缓存头 Cache-Control</span>
+<div class="clearfloat mb10"></div>
+<div class="input-prepend input-append">
+  <span class="add-on">缓存过期时间</span>
+  <input type="text" name="config[CDN][expires]" class="span3" id="CDN_expires" value="<?php echo $config['CDN']['expires']?:'86400'; ?>"/>
+  <span class="add-on" style="width:24px;">秒</span>
+</div>
+<span class="help-inline">设置缓存过期时间 Expires.默认86400秒(一天)</span>

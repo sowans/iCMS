@@ -18,7 +18,7 @@ class iView {
     const TPL_FUNC_Method = 'FuncMethod';
 
     public static function init($config = array()) {
-        self::$config   = $config;
+        self::$config = $config;
         self::$handle = self::Template();
         self::$handle->assign('_GET', $_GET);
         self::$handle->assign('_POST', $_POST);
@@ -58,6 +58,9 @@ class iView {
             "output"   => array(__CLASS__,"callback_output"),
         );
         return $tpl;
+    }
+    public static function set_vars($key,$value) {
+        self::$handle->$key = $value;
     }
     public static function set_template_dir($dir) {
         self::$handle->template_dir = $dir;

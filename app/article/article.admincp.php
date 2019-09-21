@@ -309,10 +309,10 @@ class articleAdmincp{
             $msg = '推送完成';
             $dialog && iUI::success($msg,'js:1');
         }else{
-            $msg = '推送失败！['.$res->message.']';
+            $msg = '百度推送失败！<pre>'.var_export(plugin_baidu::$out,true).'</pre>';
             $dialog && iUI::alert($msg,'js:1');
         }
-        if(!$dialog) return $msg.'<br />';
+        if(!$dialog) return '<hr />'.$msg.'<br />';
     }
     public function do_check(){
         $id    = (int)$_GET['id'];
@@ -789,7 +789,7 @@ class articleAdmincp{
                 'pubdate' =>$pubdate
             ),(array)$category))->href;
 
-            if($status && iCMS::$config['api']['baidu']['sitemap']['sync']){
+            if($status && iCMS::$config['plugin']['baidu']['sitemap']['sync']){
                 $msg = $this->do_baiduping($aid,false);
             }
 
