@@ -69,6 +69,7 @@ $(function(){
   var hotkey = false;
 
 	$("#<?php echo APP_FORMID;?>").submit(function(){
+    var me = this;
     if(hotkey){
         if(this.action.indexOf('&keyCode=ctrl-s')===-1){
           this.action+='&keyCode=ctrl-s';
@@ -100,6 +101,18 @@ $(function(){
 				return false;
 			}
 		}
+    var submitBtn = $('button[type="submit"]',this);
+      submitBtn.button('loading');
+    iCMS.dialog({
+      id:"iCMS-DIALOG-ALERT",
+      content:"提交中，请稍候...",
+      time:10000,
+      height:'150',
+      icon: 'loading',
+    },function(){
+        submitBtn.button('reset');
+    });
+
     // if($('#ischapter').prop("checked") && $("#subtitle").val()==''){
     //   $("#subtitle").focus();
     //   iCMS.alert("章节模式下 章节标题不能为空!");
@@ -439,7 +452,7 @@ function _modal_dialog(cancel_text){
               </div>
               <div class="clearfloat mb10"></div>
             </div>
-              <button class="btn btn-primary" type="submit"><i class="fa fa-check"></i> 提交</button>
+              <button class="btn btn-primary" type="submit" data-loading-text="提交中，请稍候..."><i class="fa fa-check"></i> 提交</button>
               <div class="input-prepend">
                 <span class="add-on"><i class="fa fa-building-o"></i> 内容</span>
                 <select class="editor-page chosen-select">
@@ -601,7 +614,7 @@ function _modal_dialog(cancel_text){
           </div>
         </div>
         <div class="form-actions">
-          <button class="btn btn-primary" type="submit"><i class="fa fa-check"></i> 提交</button>
+          <button class="btn btn-primary" type="submit" data-loading-text="提交中，请稍候..."><i class="fa fa-check"></i> 提交</button>
         </div>
       </form>
     </div>

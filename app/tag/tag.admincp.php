@@ -421,6 +421,15 @@ class tagAdmincp{
                 $tpl = iSecurity::escapeStr($_POST['mtpl']);
                 $sql = "`tpl` = '$tpl'";
             break;
+            case 'tkey':
+                $rs = iDB::all("SELECT `id`,`name` FROM `#iCMS@__tag` where `id` IN ($ids)");
+                foreach($rs AS $tag){
+                    $id = $tag['id'];
+                    $tkey = strtolower(iPinyin::get($tag['name']));
+                    iDB::update("tag",compact('tkey'),compact('id'));
+                }
+                iUI::success('内链添加完成!','js:1');
+            break;
     		case 'keyword':
     			if($_POST['pattern']=='replace') {
     				$sql	="`keywords` = '".iSecurity::escapeStr($_POST['mkeyword'])."'";

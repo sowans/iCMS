@@ -262,12 +262,14 @@ class patch {
 		self::$upgrade = false;
 		return $msg;
 	}
-
+	public static $check_login = true;
 	public static function upgrade($func) {
 		if(self::$upgrade){
 			return $func;
 		}
-		members::gateway('bool')->check_login() OR exit("请先登陆");
+		if(self::$check_login){
+			members::gateway('bool')->check_login() OR exit("请先登陆");
+		}
 
 		$output = $func();
 		$output = str_replace('<iCMS>','<br />',$output);

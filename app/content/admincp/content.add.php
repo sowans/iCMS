@@ -46,7 +46,7 @@ admincp::head(!$preview);
         <?php }else{ ?>
         <?php }?>
         <div class="form-actions">
-          <button class="btn btn-primary" type="submit"><i class="fa fa-check"></i> 提交</button>
+          <button class="btn btn-primary" type="submit" data-loading-text="提交中，请稍候..."><i class="fa fa-check"></i> 提交</button>
         </div>
       </form>
     </div>

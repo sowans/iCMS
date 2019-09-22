@@ -234,6 +234,7 @@ $(function(){
                     <li><a data-toggle="batch" data-action="keyword"><i class="fa fa-star"></i> 设置关键字</a></li>
                     <li><a data-toggle="batch" data-action="tag"><i class="fa fa-tags"></i> 设置相关标签</a></li>
                     <li><a data-toggle="batch" data-action="tpl"><i class="fa fa-tags"></i> 设置模板</a></li>
+                    <li><a data-toggle="batch" data-action="tkey"><i class="fa fa-tags"></i> 重建标识</a></li>
                     <li class="divider"></li>
                      <li><a data-toggle="batch" data-action="keywords"><i class="fa fa-paperclip"></i> 设置为内链</a></li>
                     <li class="divider"></li>

@@ -87,7 +87,7 @@ $(function(){
 <div class="clearfloat mb10"></div>
 <div class="input-prepend">
   <span class="add-on">设置缓存头</span>
-  <input type="text" name="config[CDN][cache_control]" class="span6" id="CDN_cache_control" value="<?php echo $config['CDN']['cache_control']?:'public, must-revalidate'; ?>"/>
+  <input type="text" name="config[CDN][cache_control]" class="span6" id="CDN_cache_control" value="<?php echo $config['CDN']['cache_control']?:'public'; ?>"/>
 </div>
 <span class="help-inline">设置缓存头 Cache-Control</span>
 <div class="clearfloat mb10"></div>
