@@ -546,12 +546,12 @@ class categoryAdmincp {
             $config['step'] = array(
                 'title'    =>'<div class="alert">正在'.$map[$flag][1].'</div>',
                 'callback' =>$callback,
-                'url'      =>'do=cache_burst&_appid='.$appid.'&flag='.$flag,
+                'url'      =>'do=cache_burst&_appid='.$appid.'&flag='.$flag.'&CSRF_TOKEN='.iPHP_WAF_CSRF_TOKEN,
                 'msg'      =>array($this->category_name,'个')
             );
             //下一批
             $config['next'] = array(
-                'url'  =>'do=cache_burst&_appid='.$appid.'&flag='.$next.'&total='.$total,
+                'url'  =>'do=cache_burst&_appid='.$appid.'&flag='.$next.'&total='.$total.'&CSRF_TOKEN='.iPHP_WAF_CSRF_TOKEN,
                 'msg'  =>'<hr /><div class="alert alert-info">准备进行'.$map[$next][1].'</div>',
                 'time' =>'3',
             );

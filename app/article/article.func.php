@@ -149,7 +149,7 @@ class articleFunc{
 		}
 		isset($vars['startdate']) && $where_sql .= " AND `pubdate`>='" . strtotime($vars['startdate']) . "'";
 		isset($vars['enddate']) && $where_sql .= " AND `pubdate`<='" . strtotime($vars['enddate']) . "'";
-		isset($vars['where']) && $where_sql .= $vars['where'];
+		isset($vars['where']) && $where_sql .= ' AND '.ltrim(trim($vars['where']),'AND');
 		isset($vars['where[]']) && $where_sql .= iSQL::where($vars['where[]'],true);
 
         if($map_where){

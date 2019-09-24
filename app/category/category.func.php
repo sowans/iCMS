@@ -71,7 +71,7 @@ class categoryFunc{
 			$where_sql.= iMap::exists($vars['pids'],'`#iCMS@__category`.cid'); //主表小 map表大
 			// $map_where=iMap::where($vars['pids']); //主表大 map表大
 		}
-		isset($vars['where']) && $where_sql .= $vars['where'];
+		isset($vars['where']) && $where_sql .= ' AND '.ltrim(trim($vars['where']),'AND');;
 		isset($vars['where[]']) && $where_sql .= iSQL::where($vars['where[]'],true);
 
 		$by = strtoupper($vars['by'])=='DESC'?"DESC":"ASC";

@@ -168,4 +168,12 @@ $(function(){
 })
 </script>
 <span class="help-inline">文章内容出现emoji表情,会出现内容被截断的数据,可选相关处理方法</span>
+<div class="clearfloat mb10"></div>
+<div class="input-prepend">
+  <span class="add-on">文章提交等待</span>
+  <div class="switch" data-on-label="启用" data-off-label="关闭">
+    <input type="checkbox" data-type="switch" name="config[save_wait]" id="article_save_wait" <?php echo $config['save_wait']?'checked':''; ?>/>
+  </div>
+</div>
+<span class="help-inline">启用后 文章提交后将会提示,仿止重复提交</span>
 <?php configAdmincp::foot();?>

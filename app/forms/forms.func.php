@@ -106,7 +106,7 @@ class formsFunc{
             $where_sql.=" AND ".$vars['sfield']." {$vars['pattern']} '{$vars['keywords']}'";
           }
         }
-        isset($vars['where']) && $where_sql .= $vars['where'];
+        isset($vars['where']) && $where_sql .= ' AND '.ltrim(trim($vars['where']),'AND');;
         isset($vars['where[]']) && $where_sql .= iSQL::where($vars['where[]'],true);
 
         $vars['id'] && $where_sql .= iSQL::in($vars['id'], 'id');

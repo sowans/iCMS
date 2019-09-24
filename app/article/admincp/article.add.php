@@ -101,6 +101,7 @@ $(function(){
 				return false;
 			}
 		}
+    <?php if(self::$config['save_wait']){?>
     var submitBtn = $('button[type="submit"]',this);
       submitBtn.button('loading');
     iCMS.dialog({
@@ -112,7 +113,7 @@ $(function(){
     },function(){
         submitBtn.button('reset');
     });
-
+  <?php } ?>
     // if($('#ischapter').prop("checked") && $("#subtitle").val()==''){
     //   $("#subtitle").focus();
     //   iCMS.alert("章节模式下 章节标题不能为空!");

@@ -235,7 +235,7 @@ CREATE TABLE `icms_comment` (
 
 CREATE TABLE `icms_config` (
   `appid` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `name` varchar(200) NOT NULL DEFAULT '',
+  `name` varchar(128) NOT NULL DEFAULT '',
   `value` mediumtext NOT NULL,
   PRIMARY KEY (`appid`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

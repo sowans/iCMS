@@ -53,11 +53,11 @@ admincp::head();
         <a href="<?php echo __ADMINCP__;?>=<?php echo $this->_app;?>&do=add&<?php echo $this->_app_cid;?>={{cid}}" class="btn btn-small"><i class="fa fa-edit"></i> 添加<?php echo $this->_app_name;?></a>
         <a href="<?php echo __ADMINCP__;?>=<?php echo $this->_app;?>&<?php echo $this->_app_cid;?>={{cid}}&sub=on" class="btn btn-small"><i class="fa fa-list-alt"></i> <?php echo $this->_app_name;?>管理</a>
         {{if CP_EDIT}}
-        <a href="<?php echo $this->category_uri;?>&do=copy&cid={{cid}}" target="iPHP_FRAME"  class="btn btn-small"><i class="fa fa-clipboard"></i> 克隆</a>
+        <a href="<?php echo $this->category_uri;?>&do=copy&cid={{cid}}&CSRF_TOKEN=<?php echo iPHP_WAF_CSRF_TOKEN;?>" target="iPHP_FRAME"  class="btn btn-small"><i class="fa fa-clipboard"></i> 克隆</a>
         <a href="<?php echo $this->category_uri;?>&do=add&cid={{cid}}" title="编辑<?php echo $this->category_name;?>设置"  class="btn btn-small"><i class="fa fa-edit"></i> 编辑</a>
         {{/if}}
         {{if CP_DEL}}
-        <a href="<?php echo $this->category_furi;?>&do=del&cid={{cid}}" class="btn btn-small" onClick="return confirm(\'确定要删除此<?php echo $this->category_name;?>?\');" target="iPHP_FRAME"><i class="fa fa-trash-o"></i> 删除</a>
+        <a href="<?php echo $this->category_furi;?>&do=del&cid={{cid}}&CSRF_TOKEN=<?php echo iPHP_WAF_CSRF_TOKEN;?>" class="btn btn-small" onClick="return confirm(\'确定要删除此<?php echo $this->category_name;?>?\');" target="iPHP_FRAME"><i class="fa fa-trash-o"></i> 删除</a>
         {{/if}}
     </span>
 </div>

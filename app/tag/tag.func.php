@@ -82,7 +82,7 @@ class tagFunc{
                 $where_sql.= " AND CONCAT(tkey,name,seotitle,keywords) REGEXP '$keywords' ";
             }
         }
-        isset($vars['where']) && $where_sql .= $vars['where'];
+        isset($vars['where']) && $where_sql .= ' AND '.ltrim(trim($vars['where']),'AND');
         isset($vars['where[]']) && $where_sql .= iSQL::where($vars['where[]'],true);
 
         $vars['id'] && $where_sql .= iSQL::in($vars['id'], 'id');
