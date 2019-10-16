@@ -8,6 +8,8 @@
 * @licence https://www.icmsdev.com/LICENSE.html
 */
 class article {
+    public static $subDataTable = false;
+
     public static function fields($id=0){
         $fields  = array('cid', 'scid','ucid','pid',
             'title', 'stitle','keywords', 'tags', 'description','source',
@@ -25,7 +27,8 @@ class article {
         return $fields;
     }
     public static function get_data_table($id='',$prefix=true){
-        $table = 'article_data_'.($id%10);
+        $table = 'article_data';
+        self::$subDataTable && $table.= '_'.($id%10);
         if($prefix){
             return '`#iCMS@__'.$table.'`';
         }else{
@@ -59,7 +62,7 @@ class article {
         $rs    = iDB::row("SELECT * FROM `#iCMS@__article` WHERE `id`='$id' {$sql} LIMIT 1;",ARRAY_A);
         if($rs){
             $aid   = $rs['id'];
-            $adsql = "SELECT * FROM `#iCMS@__article_data` WHERE `aid`='$aid'";
+            $adsql = "SELECT * FROM ".self::get_data_table($aid)." WHERE `aid`='$aid'";
             $adid && $adsql.= " AND `id`='{$adid}'";
 
             if($rs['chapter']){
@@ -71,7 +74,7 @@ class article {
         return array($rs,$adrs);
     }
     public static function body($id=0){
-        $array = iDB::all("SELECT body FROM `#iCMS@__article_data` WHERE aid='$id'");
+        $array = iDB::all("SELECT body FROM ".self::get_data_table($id)." WHERE aid='$id'");
         $pieces = array_column($array, 'body');
         return implode('#--iCMS.PageBreak--#', $pieces);
     }
@@ -98,10 +101,12 @@ class article {
         return $fields;
     }
     public static function data_insert($data){
-        return iDB::insert('article_data',$data);
+        $aid = $data['aid'];
+        return iDB::insert(self::get_data_table($aid,false),$data);
     }
     public static function data_update($data,$where){
-        return iDB::update('article_data',$data,$where);
+        $aid = $data['aid'];
+        return iDB::update(self::get_data_table($aid,false),$data,$where);
     }
 
     public static function del($id){

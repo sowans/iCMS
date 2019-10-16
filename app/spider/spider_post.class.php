@@ -111,6 +111,7 @@ class spider_post {
             }else{
                 $result = $acp->$fun();
             }
+            is_array($result) OR $result = array($spo->primary=>$result);
 
             if($result) return $result;
 

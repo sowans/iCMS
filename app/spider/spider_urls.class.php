@@ -53,11 +53,11 @@ class spider_urls {
 
         $srule = spider_rule::get($rid);
         $rule  = $srule['rule'];
-        self::$rule && $rule = spider_urls::$rule;
+        self::$rule && $rule = self::$rule;
         $urls  = $rule['list_urls'];
 
         $project['urls']&& $urls = $project['urls'];
-        self::$urls     && $urls = spider_urls::$urls;
+        self::$urls     && $urls = self::$urls;
         $_urls          && $urls = $_urls;
 
         self::$ids = array('pid'=>$pid,'sid'=>$sid,'rid'=>$rid);
@@ -205,14 +205,6 @@ class spider_urls {
                 }
 
                 preg_match_all('|' . spider_tools::pregTag($rule['list_url_rule']) . '|is', $list_area, $lists, PREG_SET_ORDER);
-
-                if ($rule['sort'] == "1") {
-                    //arsort($lists);
-                } elseif ($rule['sort'] == "2") {
-                    asort($lists);
-                } elseif ($rule['sort'] == "3") {
-                    shuffle($lists);
-                }
             }
 
             $html = null;
@@ -246,6 +238,13 @@ class spider_urls {
             }
 
             $urlsData = self::lists_item_data($lists,$rule,$url);
+            if ($rule['sort'] == "1") {
+                //arsort($lists);
+            } elseif ($rule['sort'] == "2") {
+                krsort($urlsData);
+            } elseif ($rule['sort'] == "3") {
+                shuffle($urlsData);
+            }
 
             if (spider::$callback['urls'] && is_callable(spider::$callback['urls'])) {
                 $_work = call_user_func_array(spider::$callback['urls'],array(&$urlsData,$url));
@@ -483,7 +482,7 @@ class spider_urls {
                     print_r('<b>使用[rid:'.$_rid.']规则抓取列表</b>:'.$_urls);
                     echo "<hr />";
                 }
-                $_urlsList = (array)spider_urls::crawl($work,false,$_rid,$_urls,'CALLBACK@URL');
+                $_urlsList = (array)self::crawl($work,false,$_rid,$_urls,'CALLBACK@URL');
 
                 if($work=='shell'){
                     echo date("Y-m-d H:i:s ").'使用[rid:'.$_rid.']规则抓取列表'.PHP_EOL;

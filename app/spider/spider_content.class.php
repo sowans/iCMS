@@ -118,7 +118,7 @@ class spider_content {
         //     echo "<hr />";
         // }
 
-        $content = spider_process::run($content,$data,$rule);
+        $content = spider_process::run($content,$data,$rule,$responses);
 
         if (spider::$callback['content'] && is_callable(spider::$callback['content'])) {
             $content = call_user_func_array(spider::$callback['content'],array($content,$data));

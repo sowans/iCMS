@@ -12,9 +12,10 @@ class appsApp {
     public $_app     = null;
     public $_primary ='id';
     public $_table   = null;
-    public $_gets   = null;
+    public $_gets    = null;
     public $methods  = array('iCMS','clink','search','hits','vote','comment');
 
+    public static $statusMap  = '1';
     public static $s_app  = null;
     public static $config = null;
     public static $DATA   = null;
@@ -149,10 +150,11 @@ class appsApp {
 
         $this->_gets['cid'] && $sql = " AND `cid`='".(int)$this->_gets['cid']."'";
 
+        $sql.= iSQL::in(self::$statusMap, 'status');
         $data = iDB::row("
             SELECT * FROM {$table}
             WHERE `".$field."`='".$fvar. "' {$sql}
-            AND `status` ='1' LIMIT 1;",
+            LIMIT 1;",
         ARRAY_A);
 
         if($flag===false){

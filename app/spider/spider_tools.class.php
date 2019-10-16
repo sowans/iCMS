@@ -81,7 +81,13 @@ class spider_tools {
         }
     }
     public static function listData($url,$data=null){
+        if(spider::$callback['tools:listData']===false){
+            return false;
+        }
         $url = self::URN($url);
+        if (spider::$callback['tools:listData'] && is_callable(spider::$callback['tools:listData'])) {
+            return call_user_func_array(spider::$callback['tools:listData'],array($url,$data));
+        }
         if($data===null){
             $json = iDB::value("SELECT `data` FROM `#iCMS@__spider_url_data` where `url`='$url'");
             return json_decode($json,true);

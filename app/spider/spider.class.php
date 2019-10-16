@@ -79,19 +79,19 @@ class spider{
                         $sql  = "`url` = '$url'";
                     }
                     $label = $url.PHP_EOL;
-                    $msg   = $label.'该网址的文章已经发布过!请检查是否重复';
+                    $msg   = $label.'该网址的内容已经发布过!请检查是否重复';
                 break;
                 case '2'://按标题检查
                 case '5'://按标题检查更新
                     $sql   = "`title` = '$title'";
                     $label = $title.PHP_EOL;
-                    $msg   = $label.'该标题的文章已经发布过!请检查是否重复';
+                    $msg   = $label.'该标题的内容已经发布过!请检查是否重复';
                 break;
                 case '3'://网址和标题
                 case '6'://网址和标题更新
                     $sql   = "`url` = '$url' AND `title` = '$title'";
                     $label = $title.PHP_EOL.$url;
-                    $msg   = $label.'该网址和标题的文章已经发布过!请检查是否重复';
+                    $msg   = $label.'该网址和标题的内容已经发布过!请检查是否重复';
                 break;
             }
             switch ($project['self']) {
@@ -208,7 +208,9 @@ class spider{
         }
         $_POST = spider::$callback['_POST'];
         empty($_POST) && $_POST = spider_data::crawl();
-
+        if(spider::$callback['_POST:DATA'] && $_POST){
+            $_POST = array_merge($_POST,spider::$callback['_POST:DATA']);
+        }
         if($_POST===false) return false;
 
         foreach ((array)$_POST as $key => $value) {
@@ -232,7 +234,14 @@ class spider{
 
         $indexid = self::get_indexid();
         spider::$callback['url:indexid'] && $indexid = spider::$callback['url:indexid'];
-        $indexid && self::get_app_pdata($indexid,$app);
+
+        if($indexid){
+            if($spost->primary){
+                $_POST[$spost->primary] = $indexid;
+            }else{
+                self::get_app_pdata($indexid,$app);
+            }
+        }
 
         if (spider::$callback['post'] && is_callable(spider::$callback['post'])) {
             $_POST = call_user_func_array(spider::$callback['post'],array($_POST,spider::$callback['post:data'],spider::$sid));

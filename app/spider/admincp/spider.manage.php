@@ -16,7 +16,7 @@ $(function(){
   iCMS.select('rid',"<?php echo $_GET['rid'] ; ?>");
   iCMS.select('pid',"<?php echo $_GET['pid'] ; ?>");
 	iCMS.select('cid',"<?php echo $_GET['cid'] ; ?>");
-
+  iCMS.select('field',"<?php echo $_GET['field'] ; ?>");
 	$("#<?php echo APP_FORMID;?>").batch();
 });
 </script>
@@ -77,6 +77,15 @@ $(function(){
             <option value="0"> 未发布 [status='0']</option>
             <option value="1" selected='selected'> 发布 [status='1']</option>
             <?php echo propAdmincp::get("status") ; ?>
+          </select>
+        </div>
+        <div class="input-prepend">
+          <span class="add-on">字段</span>
+          <select name="field" id="field" class="chosen-select span3">
+            <option value=""></option>
+            <option value="indexid">indexid</option>
+            <option value="title">title</option>
+            <option value="url">url</option>
           </select>
         </div>
         <div class="input-prepend input-append"> <span class="add-on">关键字</span>

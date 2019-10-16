@@ -70,7 +70,7 @@ class spider_process {
         }
         return $array;
     }
-    public static function run($content,$data,$rule){
+    public static function run($content,$data,$rule,$responses){
         if($data['process']){
             spider::$dataTest && print "<b>数据处理:</b><br />";
             foreach ($data['process'] as $key => $value) {
@@ -97,10 +97,10 @@ class spider_process {
                 $value[$value['helper']] = true;
                 if(is_array($content)){
                     foreach ($content as $idx => $con) {
-                        $content[$idx] = self::helper($con,$value,$rule);
+                        $content[$idx] = self::helper($con,$value,$rule,$responses);
                     }
                 }else{
-                    $content = self::helper($content,$value,$rule);
+                    $content = self::helper($content,$value,$rule,$responses);
                 }
                 if($content===null){
                     return null;
@@ -116,9 +116,15 @@ class spider_process {
 
         return $content;
     }
-    public static function helper($content,$process,$rule){
+    public static function helper($content,$process,$rule,$responses){
         if ($process['dataclean']) {
             $content = spider_tools::dataClean($process['rule'], $content);
+            /**
+             * 在数据项里调用之前采集的数据[DATA@name][DATA@name.key]
+             */
+            if(strpos($content, '[DATA@')!==false){
+                $content = spider_tools::getDATA($responses,$content);
+            }
         }
         if ($process['stripslashes']) {
             $content = stripslashes($content);

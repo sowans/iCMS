@@ -19,6 +19,7 @@ class iPHP {
 	public static $app_file   = null;
 	public static $app_args   = null;
 	public static $app_vars   = null;
+	public static $app_dirs   = array();
 	public static $class_name = null;
 
 	public static $mobile     = false;
@@ -221,6 +222,9 @@ class iPHP {
 			require_once $path;
 		}
 	}
+	public static function app_dir($key,$value) {
+		self::$app_dirs[$key] = $value;
+	}
 	public static function app_destruct() {
 		$method = 'after_'.iPHP::$app_method;
 		$key    = 'is_'.$method;
@@ -287,6 +291,7 @@ class iPHP {
 					list($app,$flag) = $pieces;
 				}
 			}
+			$dir  = self::$app_dirs[$app]?:$app;
 			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
 		}else if(substr($name,-4,4) == 'Func'||substr($name,-4,4) == 'Tmpl') {
 			$type = substr($name,-4,4);
@@ -308,7 +313,8 @@ class iPHP {
 					list($app,$flag) = $pieces;
 				}
 			}
-			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
+			$dir  = self::$app_dirs[$app]?:$app;
+			$path = iPHP_APP_DIR . '/' . $dir . '/' . $file . '.php';
 		}else if(substr($name,-7,7) == 'Admincp') {
 			//app.admincp.php
 			$app  = substr($name,0,-7);
@@ -317,14 +323,16 @@ class iPHP {
 				//app_mo.admincp.php
 				list($app,$flag) = explode('_', $name);
 			}
-			$path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
+			$dir  = self::$app_dirs[$app]?:$app;
+			$path = iPHP_APP_DIR . '/' . $dir . '/' . $file . '.php';
 		}else if (in_array($name, explode(',', iPHP_CORE_CLASS))) {
 			//iclass.class.php
 			$path = iPHP_CORE.'/'.$name.'.class.php';
 		}else if(array_key_exists($name,(array)iPHP::$apps)){
 			//app.class.php
 			$file OR $file = $name.'.class';
-			$path = iPHP_APP_DIR . '/' . $name . '/' . $file . '.php';
+			$dir  = self::$app_dirs[$name]?:$name;
+			$path = iPHP_APP_DIR . '/' . $dir . '/' . $file . '.php';
 		}else if(strpos($name,'\\') !== false) {
 			//namespace aaa\bbb
 			$space = str_replace('\\', DIRECTORY_SEPARATOR, $name);

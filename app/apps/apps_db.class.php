@@ -116,6 +116,9 @@ class apps_db {
      * @return [type]               [description]
      */
     public static function make_alter_sql($N_fields,$O_fields,$field_origin){
+        if(!is_array($N_fields)||!is_array($O_fields)){
+            return false;
+        }
         $diff = array_diff_values($N_fields,$O_fields);
         $sql_array = array();
         //删除 或者更改过
@@ -176,7 +179,7 @@ class apps_db {
         $alter_sql = "ALTER TABLE `#iCMS@__{$name}` ";
         $alter_sql.= implode(',', $sqlArray);
         $alter_sql.= ';';
-        
+
         iDB::query($alter_sql);
     }
     // public static function create_table($name,$fields=null,$base_fields=true,$PRIMARY='id',$index=null,$ret=false){

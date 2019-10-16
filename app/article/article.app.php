@@ -19,7 +19,7 @@ class articleApp extends appsApp {
 		if ($article['chapter']) {
 			$all = iDB::all("
 				SELECT `id`,`subtitle`
-				FROM `#iCMS@__article_data`
+				FROM ".article::get_data_table($id)."
 				WHERE aid='" . (int) $id . "'
 				ORDER BY `id` ASC
 			", ARRAY_A);
@@ -58,7 +58,7 @@ class articleApp extends appsApp {
 				$adid = $chapterArray[$pkey]['id'];
 				$data = iDB::row("
 					SELECT body,subtitle
-					FROM `#iCMS@__article_data`
+					FROM ".article::get_data_table($article['id'])."
 					WHERE aid='" . (int) $article['id'] . "'
 					AND id='" . (int) $adid . "'
 				", ARRAY_A);

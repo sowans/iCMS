@@ -290,4 +290,16 @@ class menu {
 		$li.=$SMul.'</li>';
 		return $li;
 	}
+    public static function func($menu_array=null,$level = 1,$pid=0) {
+        $menu_array === null && $menu_array = menu::$menu_array;
+        foreach($menu_array AS $key=>$M) {
+            $child = $M['children']?true:false;
+            empty($M['id']) && $M['id'] = substr(md5($M['href']),8,16);
+            if (self::$callback['func'] && is_callable(self::$callback['func'])) {
+                $data = call_user_func_array(self::$callback['func'],array($M,$level,$child,$pid));
+            }
+            $child && $data.= self::func($M['children'],$level+1,$M['id']);
+        }
+        return $data;
+    }
 }

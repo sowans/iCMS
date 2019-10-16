@@ -11,6 +11,7 @@ class category {
     public static $appid = null;
     public static $priv = null;
     private static $instance = null;
+    public static $callback = null;
 
     public static function appid($appid,$priv=null){
         $self = new self();
@@ -430,6 +431,21 @@ class category {
             $sql= iSQL::in($cids,$field);
         }
         return $sql;
+    }
+    public static function func($cid="0",$level = 1) {
+        $cid_array  = (array)category::get_cid($cid);//获取$cid下所有子栏目ID
+        $cate_array = (array)category::get($cid_array);     //获取子栏目数据
+        $root_array = (array)category::rootid($cid_array);  //获取子栏目父栏目数据
+        foreach($cid_array AS $root=>$_cid) {
+            $C = (array)$cate_array[$_cid];
+            // $child = $root_array[$_cid];
+            $child = self::get_root($_cid);
+            if (self::$callback['func'] && is_callable(self::$callback['func'])) {
+                $data = call_user_func_array(self::$callback['func'],array($C,$level,$child));
+            }
+            $child && $data.= self::func($C['cid'],$level+1);
+        }
+        return $data;
     }
     public static function select_lite($scid="0",$cid="0",$level = 1,$url=false,$where=null) {
         $cid_array  = (array)category::get_cid($cid,$where);//获取$cid下所有子栏目ID

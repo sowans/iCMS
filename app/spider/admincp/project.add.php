@@ -178,6 +178,14 @@ $(function(){
             <textarea name="urls" id="urls" class="span6" style=""><?php echo $rs['urls'] ; ?></textarea>
             <a class="btn" id="makeurls">添加采集地址</a>
           </div>
+          <span class="help-inline">可用简单方法<br />
+    &lt;EACH:1,2,3,4&gt;
+<br />
+    &lt;FOR:1-100&gt;
+<br />
+    &lt;FOR:100-1&gt;
+<br />
+&lt;DATE:Y-M-D&gt;</span>
           <div class="clearfloat mb10"></div>
           <div class="input-prepend input-append"><span class="add-on">内容网址合成</span>
             <input type="text" name="config[list_url]" class="span6" id="list_url" value="<?php echo $rs['config']['list_url'] ; ?>"/>

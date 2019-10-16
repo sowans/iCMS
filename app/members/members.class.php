@@ -113,41 +113,45 @@ class members{
     public static function is_superadmin() {
         return (self::$data->gid === self::SUPERADMIN_GID);
     }
+    public static function process_priv($PA=null, $array) {
+        ksort($PA);
+        $j1 = json_encode($PA);
+        $j1 = substr($j1,0,-1);
+        foreach ($array as $key => $value) {
+            $QA = parse_url_qs($value);
+            ksort($QA);
+            $j2 = json_encode($QA);
+            if(strpos($j2, $j1)!==false){
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
+     * [check_priv description]
+     * @param  [type] $p   [传入权限字符或者REQUEST_URI]
+     * @param  [type] $ret [description]
+     * @return [type]      [description]
+     */
     public static function check_priv($p=null, $ret = null) {
         if (self::is_superadmin()) {
             return true;
         }
-        if(is_array($p)){
-            isset($p['priv']) && $p = $p['priv'];
-        }
-        //判断当前访问链接权限
-        if (!is_array($p) && stripos($p, '?') !==false){
-            // $p = preg_replace('@app=(\w+)_category@is', 'app=category', $p);
-            $parse = parse_url($p);
+        // $_SERVER['REQUEST_URI']
+        is_array($p) && $p = $p['priv'];//菜单传入数组
+        $parse = parse_url($p);
+        if($parse['query']){
             parse_str($parse['query'], $output);
             $pieces = array($output['app']);
             $output['do'] && $pieces['do']='do='.$output['do'];
-            // $output['do'] && $pieces['do'] = $output['do'];
-            $pp  = implode('&', $pieces);
-            $priv = check_priv($pp,self::$priv['menu']);
-            //在菜单权限无权限时 查找应用权限
-            if(!$priv){
-                $output['app'] = preg_replace('@(\w+)_category@is', 'category', $output['app']);
-                $pieces = array($output['app']);
-                $output['do'] && $pieces['do']=$output['do'];
-                $pp = implode('.', $pieces);
-                $priv = check_priv($pp,self::$priv['app']);
-            }
-        }else{
-            //一般用于判断菜单权限
-            $priv = check_priv($p,self::$priv['menu']);
-            if (!$priv){
-                $priv = check_priv($p,self::$priv['app']);
-            }
+            $p = implode('&', $pieces);
         }
-
-        $priv OR self::permission($p, $ret);
-        return $priv?true:false;
+        $pa = parse_url_qs($p);
+        $flag = self::process_priv($pa,self::$priv['menu']);
+        //在菜单权限无权限时 查找应用权限
+        $flag OR $flag = self::process_priv($pa,self::$priv['app']);
+        $flag OR self::permission($p, $ret);
+        return $flag?true:false;
     }
     public static function permission($p=null, $ret = null) {
         if($ret){

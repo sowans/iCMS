@@ -512,7 +512,7 @@ function processing_item($name,$item=array(),$length=0,$title=''){
                   <textarea name="rule[page_url_rule]" id="page_url_rule" class="span6"><?php echo $rule['page_url_rule'] ; ?></textarea>
                   <div class="btn-group btn-group-vertical"> <a class="btn" href="<%url%>" data-toggle="insertContent" data-target="#page_url_rule">网址</a> <a class="btn" href="<%var%>" data-toggle="insertContent" data-target="#page_url_rule">变量标识</a> </div>
                 </div>
-                <span class="help-inline">过滤网址</span>
+                <span class="help-inline">过滤网址:支持<%正则%>配或者数据处理格式</span>
               </div>
               <div id="spider-page-url-parse" class="tab-pane">
                 <div class="input-prepend input-append"><span class="add-on">当前网址分解</span>

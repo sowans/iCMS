@@ -97,7 +97,8 @@ class spiderAdmincp {
 	 */
 	public function do_manage($doType = null) {
 		$sql = " WHERE 1=1";
-		$_GET['keywords'] && $sql .= "  AND `title` REGEXP '{$_GET['keywords']}'";
+		$field = $_GET['field']?:'title';
+		$_GET['keywords'] && $sql .= "  AND `{$field}` REGEXP '{$_GET['keywords']}'";
 		$doType == "inbox" && $sql .= " AND `publish` ='0'";
 		$_GET['pid'] && $sql .= " AND `pid` ='" . (int) $_GET['pid'] . "'";
 		$_GET['rid'] && $sql .= " AND `rid` ='" . (int) $_GET['rid'] . "'";
