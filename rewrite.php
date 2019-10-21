@@ -124,6 +124,11 @@ if(in_array($ext, $exts)){
             $check && $REQUEST_URI = 'article.php?clink='.$clink;
         }
     }
+    if(empty($REQUEST_URI)){
+        if(preg_match('@^/index(_(\d+))*'.preg_quote($ext).'@', $path,$match)){
+            $REQUEST_URI = 'index.php?page='.intval($match[2]);
+        }
+    }
     if($REQUEST_URI){
         $name  = basename(parse_url($REQUEST_URI,PHP_URL_PATH),'.php');
         // $parts = pathinfo($parse['path']);

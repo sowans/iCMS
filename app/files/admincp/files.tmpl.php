@@ -14,7 +14,13 @@ admincp::head($navbar);
 
 </script>
 <style type="text/css">
-.tmpl{cursor: pointer; position: relative; text-align: center;height: 250px;border:1px solid #ccc;margin-bottom: 10px; background-color: #fff;padding: 10px 0px;}
+.rowa{display: flex;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    flex-shrink: 0;
+    justify-content: space-between;
+}
+.tmpl{width: 24%;cursor: pointer; position: relative; text-align: center;height: 250px;border:1px solid #ccc;margin-bottom: 10px; background-color: #fff;padding: 10px 0px;}
 .tmpl .icon{display: none;height: 50px;width: 50px}
 .tmpl.active{color: #3a87ad;
     background-color: #d9edf7;
@@ -53,7 +59,7 @@ admincp::head($navbar);
 </script>
 <div class="widget-box widget-plain">
   <div class="widget-content nopadding">
-    <div class="row">
+    <div class="rowa">
     <?php
       foreach ($dirArray as $dir => $value) {
         $path = $dir;
@@ -67,7 +73,7 @@ admincp::head($navbar);
         $preview = './template/'.$path.'/preview.jpg';
     ?>
       <?php foreach ($value as $tk => $tmpl) {
-          if ($tmpl!='index.htm') {
+          if ($tmpl!='/') {
               $path = $dir.'/'.$tmpl;
               $_title = $package['template'][$tmpl]['title'];
               // $_title && $title.='-'.$_title;
@@ -76,7 +82,7 @@ admincp::head($navbar);
           }
           is_file($preview) OR $preview ='./app/admincp/ui/nopic.jpg';
       ?>
-          <div class="tmpl span3">
+          <div class="tmpl">
               <input class="hide" type="checkbox" value="<?php echo $path; ?>" checked/>
               <img class="preview" src="<?php echo $preview; ?>">
               <div class="clearfix"></div>

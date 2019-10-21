@@ -258,13 +258,14 @@ class filesAdmincp{
         $dira = str_replace(array(iPHP_TPL_DIR,'/','index.htm'), '', $dira);
         $dirb = str_replace(array(iPHP_TPL_DIR.'/','/index.htm'), '', $dirb);
 
-        $c = array_fill(0,count($dira),array('index.htm'));
-        $dirArray = array_combine($dira, $c);
-        foreach ($dirb as $key => $value) {
+        $dirArray = array();
+        if(is_array($dira))foreach ($dira as $key => $a) {
+            $dirArray[$a][] = '/';
+        }
+        if(is_array($dirb))foreach ($dirb as $key => $value) {
             list($a,$b) = explode('/', $value);
             $dirArray[$a][] = $b;
         }
-
         include admincp::view("files.tmpl");
     }
     /**
