@@ -583,6 +583,13 @@ class spider_tools {
         }
         return $urls;
     }
+    public static function insert_urls($iid,$url,$source) {
+        return iDB::insert("spider_url_list",array(
+            'iid'    =>$iid,
+            'url'    =>$url,
+            'source' =>$source
+        ),true);
+    }
     public static function check_urls($content) {
         if(is_array($content)){
             $content = array_filter($content);
@@ -628,9 +635,9 @@ class spider_tools {
       KEY `iid` (`iid`)
     ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET='.iPHP_DB_CHARSET;
                     iDB::query($sql);
-                    iFS::mkdir(dirname($path));
-                    file_put_contents($path, time());
                 }
+                iFS::mkdir(dirname($path));
+                file_put_contents($path, time());
             }
 
             if($pid){

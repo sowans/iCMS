@@ -700,7 +700,7 @@ class iTemplateLite_Compiler extends iTemplateLite {
 						$fec_'.$hash.' == $_count_'.$hash.' && $this->_vars[\'' . $_args['value'] . '_last\'] = true;
 				';
 				if(isset($_args['start'])){
-					$_result.='if($fec_'.$hash.'<'.$_args['start'].'){$fec_'.$hash.'++;continue;}';
+					$_result.='if($fec_'.$hash.'<='.$_args['start'].'){$fec_'.$hash.'++;continue;}';
 				}
 				if(isset($_args['end'])){
 					$_result.='if($fec_'.$hash.'>'.$_args['end'].'){break;}';

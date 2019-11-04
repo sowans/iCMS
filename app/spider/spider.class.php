@@ -65,7 +65,7 @@ class spider{
             spider::$callback['checker:mode'] && $mode  = spider::$callback['checker:mode'];
             spider::$callback['checker:url']  && $url   = spider::$callback['checker:url'];
             spider::$callback['checker:title']&& $title = spider::$callback['checker:title'];
-            $hash = md5($url);
+            $jsid = md5($url);
             switch ($mode) {
                 case '1'://按网址检查
                 case '4'://按网址检查更新
@@ -93,6 +93,12 @@ class spider{
                     $label = $title.PHP_EOL.$url;
                     $msg   = $label.'该网址和标题的内容已经发布过!请检查是否重复';
                 break;
+                case '8'://路径和标题 hash
+                    $hash = self::get_hash($url,$title);
+                    $sql   = "`hash` = '$hash'";
+                    $label = $title.PHP_EOL.$url.PHP_EOL.$hash;
+                    $msg   = $label.'该网址和标题的内容已经发布过!请检查是否重复';
+                break;
             }
             switch ($project['self']) {
                 case '1':
@@ -109,7 +115,7 @@ class spider{
                 spider::$callback['url:data'] = $ret;
                 if(in_array($mode, array("1","2","3"))) {
                     if(in_array($ret['publish'], array("1","2"))) {
-                        $work===NULL && iUI::alert($msg, 'js:parent.$("#' . $hash . '").remove();');
+                        $work===NULL && iUI::alert($msg, 'js:parent.$("#' . $jsid . '").remove();');
                         if($work=='shell'){
                             echo date("Y-m-d H:i:s ")."\n\033[35m".$msg."\033[0m\n\n";
                             return false;
@@ -183,13 +189,15 @@ class spider{
             $row['indexid'] && self::get_app_pdata($row['indexid'],$app);
             return $row['id'];
         }
+        $hash  = self::get_hash($post['reurl'],$post['title']);
+
         return iDB::insert('spider_url',array(
             'appid'   => $appid,
             'cid'     => $post['cid'],
             'rid'     => spider::$rid,'pid'=> spider::$pid,
             'title'   => addslashes($post['title']),
             'url'     => addslashes($post['reurl']),
-            'hash'    => md5($post['reurl']),
+            'hash'    => $hash,
             'status'  => '1',
             'addtime' => time(),
             'publish' => '0',
@@ -321,6 +329,10 @@ class spider{
                 }
             }
         }
+    }
+    public static function get_hash($url,$title=null) {
+        $parse = parse_url($url);
+        return md5($title.$parse['path']);
     }
     public static function get_indexid() {
         $indexid = spider::$indexid?:(int)$_GET['indexid'];

@@ -11,6 +11,20 @@ class admincpApp{
     public function __construct() {
         menu::$callback['sidebar'] = array(__CLASS__,'__sidebar');
     }
+    public static function pre_process($method,$args) {
+        $_GET['perpage']>10000 && $_GET['perpage'] = 10000;
+
+        if($method=='do_batch'){
+            $bmIds = $_POST['bmIds'];
+            if(isset($_POST['bmIds']) && $bmIds){
+                $_POST['id'] = explode(',', $bmIds);
+            }
+        }
+        //默认开启
+        if(!iCMS::$config['debug']['access_log']){
+            iPHP::callback(array('admincpApp','access_log'));
+        }
+    }
     public static function get_seccode() {
         iSeccode::run();
         exit;

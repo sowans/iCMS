@@ -131,6 +131,8 @@ class admincp {
 		}
 
 		$app_methods = get_class_methods(self::$APP_OBJ);
+		$method      = self::$APP_METHOD;
+		$args === null && $args = self::$APP_ARGS;
 		in_array(self::$APP_METHOD, $app_methods) OR iPHP::error_throw('Call to undefined method <b>' . $obj_name . '::' . self::$APP_METHOD . '</b>', 1003);
 
 		//检验CSRF check
@@ -139,18 +141,9 @@ class admincp {
 		iPHP::callback(self::$callback['history'],APP_DOURI);
 		//检查URL权限
 		iPHP::callback(self::$callback['priv'],array(APP_DOURI,'page'));
-		//默认开启
-		iCMS::$config['debug']['access_log'] OR admincpApp::access_log();
+		//前置处理
+		iPHP::callback(array('admincpApp','pre_process'),array($method,$args));
 
-		$method = self::$APP_METHOD;
-		$args === null && $args = self::$APP_ARGS;
-
-		if($method=='do_batch'){
-	        $bmIds = $_POST['bmIds'];
-	        if(isset($_POST['bmIds']) && $bmIds){
-	            $_POST['id'] = explode(',', $bmIds);
-	        }
-		}
 		if ($args) {
 			if ($args === 'object') {
 				return self::$APP_OBJ;

@@ -335,7 +335,9 @@ class spider_data {
                 list($_s,$poid) = explode('@', $sPOST);
                 $spost  = spider_post::get($poid);
                 // $appid   = $spost->app;
-                $spost->primary && $_POST[$spost->primary] = $indexid;
+                if($indexid && $spost->primary){
+                    $_POST[$spost->primary] = $indexid;
+                }
                 $rcode = '1002';
             }
             if(spider::$work=='shell'){
@@ -353,13 +355,10 @@ class spider_data {
             }
             if($spost){
                 $_POST = array_merge($_POST,$data);
-                $id = spider_post::commit($rcode,false,$spost);
+                $ret = spider_post::commit($rcode,false,$spost);
+                is_array($ret) && $id = $ret[$spost->primary];
                 if($id){
-                    iDB::insert("spider_url_list",array(
-                        'iid'    =>$id,
-                        'url'    =>$_POST['reurl'],
-                        'source' =>$spost->app
-                    ));
+                    spider_tools::insert_urls($id,$_POST['reurl'],$spost->app);
                     if(spider::$work=='shell'){
                         echo date("Y-m-d H:i:s ")."(".$index."/".$count.")  \033[36mId:\033[0m".$id."\n";
                         $index++;

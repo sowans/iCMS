@@ -87,11 +87,12 @@ class iUtils {
      * @param  [type] $id   [description]
      * @return [type]       [description]
      */
-    public static function lastId($name,$id=null){
-        $path = __DIR__.'/lastId.'.$name.'.txt';
+    public static function lastId($id=null,$name=null){
+        $name ===null && $name = basename(iPHP_SELF);
+        $path = dirname(iPHP_SELF).'/'.$name.'.lastId.txt';
         if($id===null){
             file_exists($path) OR file_put_contents($path, 1);
-            $lastId  = trim(file_get_contents($path));
+            $lastId  = (int)trim(file_get_contents($path));
             return $lastId;
         }
         file_put_contents($path, $id);

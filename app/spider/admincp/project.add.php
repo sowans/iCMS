@@ -223,6 +223,7 @@ $(function(){
               <option value="5">按[标题]检查更新</option>
               <option value="6">按[网址]和[标题]检查更新</option>
               <option value="7">按[网址]检查,只更新[子采集]</option>
+              <option value="8">按[hash]检查</option>
             </select>
           </div>
           <div class="clearfloat mb10"></div>

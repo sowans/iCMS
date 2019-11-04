@@ -76,7 +76,7 @@ $(function(){
       var tr = $("<tr>");
       for (var i = 0; i < 3; i++) {
           var td = $("<td>");
-          td.html('<input type="text" name="router['+key+']['+i+']" class="span6" value=""/>');
+          td.html('<input type="text" name="router['+key+']['+i+']" value=""/>');
           tr.append(td);
       };
       tr.append('<td><button class="btn btn-small btn-danger del_router" type="button"><i class="fa fa-trash-o"></i> 删除</button></td>');
@@ -260,7 +260,7 @@ $(function(){
             </div>
             <div class="input-prepend">
               <span class="add-on">菜单配置</span>
-              <textarea name="menu" id="menu" class="span8" style="height:450px;"><?php echo $rs['menu'];?></textarea>
+              <textarea name="menu" id="menu" class="span8" style="height:450px;font-family: Consolas,monospace;"><?php echo $rs['menu'];?></textarea>
             </div>
             <div class="clearfloat mb10"></div>
             <div class="input-prepend">
@@ -275,18 +275,18 @@ $(function(){
             <table class="table table-hover">
               <thead>
                 <tr>
-                  <th>路由表</th>
-                  <th>静态链接</th>
-                  <th>动态链接</th>
+                  <th class="span3">路由表</th>
+                  <th class="span3">静态链接</th>
+                  <th class="span4">动态链接</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody id="routerList">
                 <?php $ridx=0;if(is_array($rs['router']))foreach ($rs['router'] as $key => $router) { ?>
                 <tr>
-                  <td><input type="text" name="router[<?php echo $ridx; ?>][0]" class="span6" value="<?php echo $key;?>"/></td>
-                  <td><input type="text" name="router[<?php echo $ridx; ?>][1]" class="span6" value="<?php echo $router[0];?>"/></td>
-                  <td><input type="text" name="router[<?php echo $ridx; ?>][2]" class="span6" value="<?php echo $router[1];?>"/></td>
+                  <td><input type="text" name="router[<?php echo $ridx; ?>][0]" value="<?php echo $key;?>"/></td>
+                  <td><input type="text" name="router[<?php echo $ridx; ?>][1]" value="<?php echo $router[0];?>"/></td>
+                  <td><input type="text" name="router[<?php echo $ridx; ?>][2]" value="<?php echo $router[1];?>"/></td>
                   <td><button class="btn btn-small btn-danger del_router" type="button"><i class="fa fa-trash-o"></i> 删除</button></td>
                 </tr>
                 <?php $ridx++; } ?>
