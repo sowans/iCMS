@@ -39,7 +39,7 @@ class iUtils {
      * @param string $xml
      * @return array|false
      */
-    public static function xmlToArray($xml){
+    public static function xmlToArray($xml,&$sxml=null){
         if (!$xml) {
             return false;
         }
@@ -54,9 +54,8 @@ class iUtils {
         //将XML转为array
         //禁止引用外部xml实体
         libxml_disable_entity_loader(true);
-
-        $data = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
-
+        $sxml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+        $data = json_decode(json_encode($sxml), true);
         return $data;
     }
     /**

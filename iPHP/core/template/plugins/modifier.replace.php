@@ -17,6 +17,8 @@ function tpl_modifier_replace($string, $search, $replace)
 		$r = explode(',',$replace);
 		return str_replace($s,$r, $string);
 	}else{
+		$search  = str_replace('@me', $string, $search);
+		$replace = str_replace('@me', $string, $replace);
 		return str_replace($search, $replace, $string);
 	}
 }

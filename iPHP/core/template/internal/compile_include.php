@@ -28,12 +28,7 @@ function compile_include($arguments, &$object){
 			$arg_list[] = "'$arg_name' => $arg_value";
 		}else{
 			$value = $object->_dequote($arg_value);
-
-			if(strpos($value,'$this->_vars')!==false){
-				$vars_output.='<?php $this->_vars[\''.$arg_name.'\'] = '.$value.'; ?>';
-			}else{
-				$object->_vars[$arg_name] = $value;
-			}
+			$vars_output.='<?php $this->_vars[\''.$arg_name.'\'] = "'.$value.'"; ?>';
 		}
 	}
 

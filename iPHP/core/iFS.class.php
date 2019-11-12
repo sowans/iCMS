@@ -19,11 +19,12 @@ class iFS {
 	public static $ERROR_TYPE = false;
 	public static $EXTS = array(
 		"png", "jpg", "jpeg", "gif", "bmp", "webp", "psd", "tif","svg",
-		"flv", "swf", "mkv", "avi", "rm", "rmvb", "mpeg", "mpg", "mp4",
+		"flv", "swf", "mkv", "avi", "rm", "rmvb", "mpeg", "mpg", "mp4","m3u8",
 		"ogg", "ogv", "mov", "wmv", "webm", "mp3","aac","m4a", "wav", "mid", "amr",
 		"rar", "zip", "tar", "gz", "7z", "bz2", "cab", "iso",
 		"doc", "docx", "xls", "xlsx", "ppt", "pptx", "pdf", "txt", "md", "xml",
 		"apk", "ipa",
+		"js", "css","json",
 		"html", "htm", "shtml",
 	);
 
@@ -237,15 +238,18 @@ class iFS {
 				// var_dump($sDir_PATH,$filepath);
 				$path = str_replace($sDir_PATH, '', $filepath);
 				$path = ltrim($path, '/');
-				if ($sFileType == "dir" && !in_array($rs, array('.', '..', 'admincp'))) {
+				if ($sFileType == "dir" && !in_array($rs, array('.', '..','admincp','iPHP','core','.git','.svn'))) {
 					$dirArray[] = array(
 						'path' => $path,
 						'name' => $rs,
 						'url' => $url . urlencode($path),
 					);
 				}
-				if ($sFileType == "file" && !in_array($rs, array('..', '.iPHP'))) {
+				if ($sFileType == "file" && !in_array($rs, array('..'))) {
 					$filext = iFS::get_ext($rs);
+					if(self::check_ext($filext, false)===false){
+						continue;
+					}
 					$fileinfo = array(
 						'path' => $path,
 						'dir' => dirname($path),

@@ -319,25 +319,18 @@ class iTemplateLite {
 	}
 	function _run_modifier(){
 		$arguments = func_get_args();
-		list($variable, $modifier, $php_function, $_map_array) = array_splice($arguments, 0, 4);
+		list($variable, $func, $flag, $multi) = array_splice($arguments, 0, 4);
 		array_unshift($arguments, $variable);
-		if(in_array($modifier,array("eval","assert","include","system","exec","shell_exec","passthru","set_time_limit","ini_alter","dl","openlog","syslog","readlink","symlink","link","leak","popen","escapeshellcmd","apache_child_terminate","apache_get_modules","apache_get_version","apache_getenv","apache_note","apache_setenv","virtual"))){
+		if(in_array($func,array("eval","assert","include","system","exec","shell_exec","passthru","set_time_limit","ini_alter","dl","openlog","syslog","readlink","symlink","link","leak","popen","escapeshellcmd","apache_child_terminate","apache_get_modules","apache_get_version","apache_getenv","apache_note","apache_setenv","virtual"))){
 			return false;
 		}
-		if ($_map_array){
-			if($php_function == "PHP"){
-				$variable = call_user_func_array($modifier, $arguments);
-			}else{
-				$variable = call_user_func_array($this->_plugins["modifier"][$modifier], $arguments);
-			}
+		$param = $multi?$arguments:array(&$arguments);
+		if($flag == "PHP"){
+			$result = call_user_func_array($func, $param);
 		}else{
-			if($php_function == "PHP"){
-				$variable = call_user_func_array($modifier, array(&$arguments));
-			}else{
-				$variable = call_user_func_array($this->_plugins["modifier"][$modifier], array(&$arguments));
-			}
+			$result = call_user_func_array($this->_plugins["modifier"][$func], $param);
 		}
-		return $variable;
+		return $result;
 	}
 
 	function _get_dir($dir){
@@ -577,9 +570,10 @@ class iTemplateLite_Compiler extends iTemplateLite {
 
 		// extract the tag command, modifier and arguments
 		preg_match_all('/(?:(' . $this->_var_regexp . '|' . $this->_svar_regexp . '|\/?' . $this->_func_regexp . ')(' . $this->_mod_regexp . '*)(?:\s*[,\.]\s*)?)(?:\s+(.*))?/xs', $tag, $_match);
+
 		if ($_match[1][0][0] == '&' || $_match[1][0][0] == '$' || $_match[1][0][0] == "'" || $_match[1][0][0] == '"' || $_match[1][0][0] == '%'){
 			$_result = $this->_parse_variables($_match[1], $_match[2]);
-			if($_match[1][0][0] == '&'){
+			if($_match[1][0][0] == '&'||preg_match('/"\$.*?=.*?"/', $_match[1][0])){
 				return "<?php $_result; ?>";
 			}
 			return "<?php echo $_result; ?>";
@@ -1084,7 +1078,7 @@ class iTemplateLite_Compiler extends iTemplateLite {
 		}elseif ($variable[0] == '"'){
 			// expand the quotes to pull any variables out of it
 			// fortunately variables inside of a quote aren't fancy, no modifiers, no quotes
-			//   just get everything from the $ to the ending space and parse it
+			// just get everything from the $ to the ending space and parse it
 			// if the $ is escaped, then we won't expand it
 			$_result = "";
 //			preg_match_all('/(?:[^\\\]' . $this->_dvar_regexp . ')/', substr($variable, 1, -1), $_expand);  // old match
@@ -1101,16 +1095,28 @@ class iTemplateLite_Compiler extends iTemplateLite {
 			$_result = $variable;
 			foreach($_expand as $value){
 				$value = trim($value);
-//				$_result = str_replace($value, '" . ' . $this->_parse_variable($value) . ' . "', $_result);
+				//解析{变量}
+				if(strpos($_result, '{'.$value.'}')!==false){
+					$_result = str_replace('{'.$value.'}', '" . ' . $this->_parse_variable($value) . ' . "', $_result);
+				}else{
 //mod 21:56 2008-4-27 math
-				$_result = str_replace($value,$this->_parse_variable($value), $this->_dequote($_result));
-//				echo $_result;
+					$_result = str_replace($value,$this->_parse_variable($value), $this->_dequote($_result));
+				}
 			}
 			$_result = str_replace("`", "", $_result);
 			return $_result;
 		}elseif ($variable[0] == "'"){
+			$_result = $variable;
+			//解析{变量}
+			if (strpos($variable, '{')!==false && strpos($variable, '}')!==false){
+				preg_match_all('/\{(' . $this->_dvar_regexp . ')\}/', $variable, $_expand);
+				if($_expand[1])foreach($_expand[1] as $k=>$value){
+					$value = trim($value);
+					$_result = str_replace($_expand[0][$k], "'." . $this->_parse_variable($value) . ".'", $_result);
+				}
+			}
 			// return the value just as it is
-			return $variable;
+			return $_result;
 		}elseif ($variable[0] == "%"){
 			return $this->_parse_section_prop($variable);
 		}else{
