@@ -12,6 +12,7 @@ class admincpApp{
         menu::$callback['sidebar'] = array(__CLASS__,'__sidebar');
     }
     public static function pre_process($method,$args) {
+        //Fixes 83
         $_GET['perpage']>10000 && $_GET['perpage'] = 10000;
 
         if($method=='do_batch'){
