@@ -8,7 +8,6 @@
 * @licence https://www.icmsdev.com/LICENSE.html
 */
 class article {
-    public static $subDataTable = false;
 
     public static function fields($id=0){
         $fields  = array('cid', 'scid','ucid','pid',
@@ -26,20 +25,25 @@ class article {
 
         return $fields;
     }
+
+    public static $subDataTable = false;
+    public static $creDataTable = false;
     public static function get_data_table($id='',$prefix=true){
         $table = 'article_data';
         self::$subDataTable && $table.= '_'.($id%10);
-        if($prefix){
-            return '`#iCMS@__'.$table.'`';
-        }else{
-            return $table;
+        $full = '`#iCMS@__'.$table.'`';
+        $prefix && $table = $full;
+        if(self::$subDataTable && self::$creDataTable){
+            iDB::query("CREATE TABLE IF NOT EXISTS ".$full." LIKE `#iCMS@__article_data`");
         }
+        return $table;
     }
+
     public static function count_sql($sql=''){
         return "SELECT count(*) FROM `#iCMS@__article` {$sql}";
     }
     public static function chapter_count($aid){
-        $count = iDB::value("SELECT count(id) FROM `#iCMS@__article_data` where `aid` = '$aid'");
+        $count = iDB::value("SELECT count(id) FROM ".self::get_data_table($aid)." where `aid` = '$aid'");
         iDB::query("UPDATE `#iCMS@__article` SET `chapter`='$count'  WHERE `id` = '$aid'");
     }
     public static function check($value,$id=0,$field='title'){
@@ -113,7 +117,7 @@ class article {
         iDB::query("DELETE FROM `#iCMS@__article` WHERE id='$id'");
     }
     public static function del_data($id,$f='aid'){
-        iDB::query("DELETE FROM `#iCMS@__article_data` WHERE `$f`='$id'");
+        iDB::query("DELETE FROM ".self::get_data_table($id)." WHERE `$f`='$id'");
     }
 }
 

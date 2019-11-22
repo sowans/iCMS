@@ -936,32 +936,29 @@ class iTemplateLite_Compiler extends iTemplateLite {
 		*/
 		$state = 0;
 		$key   = null;
+		$akey  = null;
 
 		foreach($_match[0] as $value){
 			switch($state){
 				case 0:
+					$key===null?$key=0:(is_numeric($key)?$key++:$key=0);
 					//解析 独立json
 					$ret = $this->_dejson($value);
 					if($ret!==false){
-						$key===null?$key=0:(is_numeric($key)?$key++:$key=0);
 						$_result[$key] = $ret;
 						$state = 0;
 						break;
 					}
 					// valid attribute name
 					if (is_string($value)){
-						$value = $this->_dequote($value);
+						$key = $this->_dequote($value);
 						//[]='aaa'
-						if(substr($value, 0,1)=='[' && substr($value, -1)==']'){
-							$_key = (int)str_replace(array('[',']'), '', $value);
-							if(empty($_key)){
-								$key===null?$key=0:$key++;
-							}else{
-								$key=$_key;
-							}
-						}else{
+						// if(substr($value, 0,1)=='[' && substr($value, -1)==']'){
+						// 	$_key = (int)str_replace(array('[',']'), '', $value);
+						// 	($_key==0 && $akey>0)?$akey++:$akey=$_key;
+						// }else{
 							$key = $value;
-						}
+						// }
 						$state  = 1;
 					}else{
 						$this->trigger_error("invalid attribute name: '$token'", E_USER_ERROR, __FILE__, __LINE__);

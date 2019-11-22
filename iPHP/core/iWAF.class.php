@@ -59,15 +59,17 @@ class iWAF {
 			}
 		}
 	}
-	public static function CSRF_token($id=0,$key=null){
-		$hashids = iPHP::vendor('Hashids',array("len"=>'16'));
-		$hash    = $hashids->encode($id, time());
-		$token   = md5(sha1(md5(iPHP_KEY).$key).$key).'_'.$hash;
-		$token   = urlencode($token);
+	public static function gethash($value=0,$key=null){
+		return md5(sha1(md5($value).$key).$key);
+	}
+	public static function CSRF_token($value=0,$key=null){
+		$token = self::gethash(iPHP_KEY,$key).'_'.$value.'_'.time();
+		$token = auth_encode($token,iPHP_COOKIE_TIME);
+		$token = urlencode($token);
 		define('iPHP_WAF_CSRF_TOKEN',$token);
 		return $token;
 	}
-	public static function CSRF_check($id=0,$key=null){
+	public static function CSRF_check($value=0,$key=null){
 		$token = $_POST['CSRF_TOKEN']?$_POST['CSRF_TOKEN']:$_GET['CSRF_TOKEN'];
 		if(defined('iPHP_WAF_CSRF')){
 			if(iPHP_WAF_CSRF){
@@ -77,12 +79,13 @@ class iWAF {
 		if(isset($_POST['CSRF_TOKEN'])||isset($_GET['CSRF_TOKEN'])){
 			empty($token) && trigger_error("TOKEN empty",E_USER_ERROR);
 
-			$hashids = iPHP::vendor('Hashids',array("len"=>'16'));
-			$md5     = md5(sha1(md5(iPHP_KEY).$key).$key);
-			$time 	 = time();
-			list($_md5,$_hash) = explode('_', $token);
-			list($_id,$_time)  = $hashids->decode($_hash);
-			if($md5==$_md5 && $id==$_id && $time-$_time<iPHP_COOKIE_TIME){
+			$md5  = self::gethash(iPHP_KEY,$key);
+			$time = time();
+			$auth = auth_decode(urldecode($token));
+			list($_md5,$_value,$_time) = explode('_', $auth);
+			if(empty($auth) || $time-$_time>iPHP_COOKIE_TIME){
+				trigger_error("安全令牌错误,请刷新页面或者重新登陆!",E_USER_ERROR);
+			}else if($md5==$_md5 && $value==$_value){
 				return true;
 			}
 			trigger_error("TOKEN error",E_USER_ERROR);

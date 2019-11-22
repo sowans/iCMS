@@ -57,6 +57,9 @@ function tpl_function_array($params, &$tpl){
     }
     // Examples:e3
     if($mas){
+        if(isset($params['_array'])){
+            $params = $params['_array'];
+        }
         if($array){
             array_push($array,$params);
             $params = $array;

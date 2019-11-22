@@ -27,6 +27,9 @@ class contentFunc {
         if((empty($vars['app'])||$vars['app']=='content') && self::$data){
             $vars['app'] = self::$data['app'];
         }
+        if(isset($vars['apps']) && is_array($vars['apps'])){
+            $vars['app'] = $vars['apps']['app'];
+        }
         $ap = isset($vars['appid'])?$vars['appid']:$vars['app'];
 
         if(empty($ap)||$ap=='content'){

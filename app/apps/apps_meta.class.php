@@ -59,7 +59,7 @@ class apps_meta {
                     if($md['name'] && empty($md['key'])){
                         $md['key'] = strtolower(iPinyin::get($md['name']));
                     }
-                    preg_match("/^[a-zA-Z0-9_\-\.]+$/",$md['key']) OR iUI::alert('字段名不能为空,只能由英文字母、数字或_-组成,不支持中文');
+                    preg_match("/^[a-zA-Z0-9_\-\.:]+$/",$md['key']) OR iUI::alert('字段名不能为空,只能由英文字母、数字或_-组成,不支持中文');
                     $md['key'] = trim($md['key']);
                     $_metadata[$md['key']] = $md;
                 }else{
