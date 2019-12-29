@@ -260,66 +260,7 @@ class spiderAdmincp {
 		iUI::$break = false;
 		iUI::flush_start();
 		iUI::dialog('开始采集', '', false, 0, false);
-echo '
-<script type="text/javascript">
-
-var $crawl_request = new Array();
-var $crawl_data = '.json_encode($jsonArray).';
-var $crawl_count = $crawl_data.length,$crawl_complete = 0;
-
-d.addEventListener("remove", function(){
-	crawl_stop();
-});
-
-if($crawl_count>0){
-	$crawl_data.forEach(function(v,i){
-		crawl_run(v);
-	});
-}
-
-top.$.ajaxSetup({
-	cache : false,
-	compelete:function(jqXHR){
-	    delete jqXHR;
-	    jqXHR = null;
-	}
-});
-
-function crawl_stop(){
-	for(var i=0;i<$crawl_request.length;i++){
-         $crawl_request[i].abort();
-    }
-    $crawl_request = new Array();
-
-	window.stop ? window.stop() : document.execCommand("Stop");
-}
-function is_complete(){
-	if($crawl_complete==$crawl_count){
-	    d.content(\'<table class=\"ui-dialog-table\" align=\"center\"><tr><td valign=\"middle\">全部采集完成!</td></tr></table>\');
-	    top.$.get("'.__ADMINCP__.'=spider_project&do=update_lastupdate",{"id":"'. $this->pid.'"});
-
-	    window.setTimeout(function(){
-	        d.destroy();
-	    },1000);
-	}
-}
-function crawl_run(a){
-	var $request = top.$.ajax({
-		type: "POST",
-		url:"'.APP_URI.'&do=crawl&CSRF_TOKEN='.iPHP_WAF_CSRF_TOKEN.'",
-		data:a,
-		success:function(msg){
-		    ++$crawl_complete;
-		    d.content(\'<table class=\"ui-dialog-table\" align=\"center\"><tr><td valign=\"middle\">\'+msg+\'[\'+a.index+\']采集完成 (\'+$crawl_complete+\':\'+$crawl_count+\')</td></tr></table>\');
-			parent.$("#"+a.md5).remove();
-			is_complete();
-		}
-	});
-	$crawl_request.push($request);
-}
-// var $crawl_count = '.$_count.',$crawl_complete = 0;
-</script>';
-
+		include admincp::view("spider.mpublish");
 // echo '<script type="text/javascript">';
 // 		foreach ((array) $pubArray as $i => $a) {
 // 			$a['index']    = $i;
@@ -330,8 +271,6 @@ function crawl_run(a){
 // 			iUI::flush();
 // 		}
 // echo '</script>';
-		iUI::flush();
-
 	}
 
 	/**

@@ -130,7 +130,7 @@ class tag {
             $data['status']  = self::$add_status;
             $data['field']   = self::$field;
 
-			$tid = iDB::insert('tag',$data);
+			$tid = iDB::insert('tag',$data,true);
 	    }
         iMap::init('tag',self::$appid,self::$field);
         iMap::add($tid,$iid);

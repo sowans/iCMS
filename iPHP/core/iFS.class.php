@@ -370,31 +370,28 @@ class iFS {
 	}
 
 	public static function mk_udir($udir = null,$md5=null,$ext=null) {
-		$format  = self::$config['dir_format'];
-        if(strpos($format,'md5:')!==false){
-			$FileDir = $format;
-			preg_match_all("@md5:([0-9,]+)@",$FileDir,$match);
-			if($match[1]){
-				foreach ($match[1] as $key => $value) {
-				    list($start,$len) = explode(',', $value);
-				    if($len===null){
-				        $len   = $start;
-				        $start = 0;
-				    }
-				    $dir = substr($md5, $start, $len);
-				    $FileDir = str_replace($match[0][$key], $dir, $FileDir);
-				}
+		$FileDir = self::$config['dir_format'];
+		preg_match_all('@\{(.+?)\}@', $FileDir, $matches);
+		if($matches[1])foreach ($matches[1] as $key => $value) {
+	        if(substr($value, 0, 4)=='md5:'){
+	        	$format = substr($value, 4);
+			    list($start,$len) = explode(',', $format);
+			    if($len===null){
+			        $len   = $start;
+			        $start = 0;
+			    }
+			    $dir = substr($md5, $start, $len);
+			}elseif($value=='EXT'){
+				$dir = $ext;
+			}else{
+				if(substr($value, 0, 5)=='date:'){
+					$value = substr($value, 5);
+		        }
+			    $dir = get_date(0, $value);
 			}
-			preg_match_all("@date:(\w+\-)@",$FileDir,$match);
-			if($match[1]){
-				foreach ($match[1] as $key => $value) {
-				    $dir = get_date(0, $value);
-				    $FileDir = str_replace($match[0][$key], $dir, $FileDir);
-				}
-			}
-        }else{
-			$FileDir = get_date(0, $format);
-        }
+			$FileDir = str_replace($matches[0][$key], $dir, $FileDir);
+		}
+
         if($udir){
         	self::check($udir,true);
         	$FileDir = $udir;
