@@ -146,11 +146,12 @@ class iView {
                 }
                 //app/test/MY_test.func.php
                 //用户重写 iPHP:test:method 调用 MY_testFunc::test_method
-                self::callback_func_my($callback);
+                self::callback_func_custom($callback,'MY');
             }
             //是否多参数
             if(isset($args['isMA'])){
                 $isMultiArgs = $args['isMA'];
+                ksort($args);
                 unset($args['isMA']);
             }
             if(!method_exists($callback[0],$callback[1]) && strpos($callback[1], '__')===false){
@@ -159,7 +160,7 @@ class iView {
         }else{
             //app/func/iPHP/iPHP.test.php
             //iPHP:test
-            $callback = self::system_func($TFN,$args['run']);
+            $callback = self::callback_func_system($TFN,$args['run']);
 
         }
         //合并 参数
@@ -168,42 +169,40 @@ class iView {
             unset($args['vars'],$vars['loop'],$vars['page']);
             $args = array_merge($args,$vars);
         }
-        // self::parse_vars($args);
-        //设置参数
-        isset($args['args']) && $args = $args['args'];
-
-        $tpl->assign($keys.'_vars',$args);
-
+        parse_bracket($args);//解析[]字符
+        $isnew = isset($args['new'])?true:false;
         isset($args['debug_func']) && var_dump($callback);
+        isset($args['args']) && $args = $args['args'];//设置参数
+        $tpl->assign($keys.'_vars',$args);
         if(is_array($callback)){
             // iPHP:app:_method >> testFunc::method
             strpos($callback[1], '__')!==false && $callback[1] = substr($callback[1], strpos($callback[1], '__')+2);
+            $isnew && $callback[0] = new $callback[0](); //动态方法 iPHP:app:method >> new test() ->method($args);
             $tpl->assign($keys,call_user_func_array($callback, $isMultiArgs?(array)$args:array($args)));
         }else{
             $callback && $tpl->assign($keys,$callback($args));
         }
     }
-    public static function system_func($func,$run=false,$vars=array()){
+    public static function callback_func_system($func,$run=false,$vars=array()){
         //iPHP:test >> iPHP_test
         //app/func/iPHP/iPHP.test.php
         $func_path = iPHP_TPL_FUN."/".iPHP_APP."/".iPHP_APP.".".$func.".php";
         $callback  = iPHP_APP.'_' . $func;
         function_exists($callback) OR require_once($func_path);
-        if($run){
-            return call_user_func_array($callback, array($vars));
-        }else{
-            return $callback;
-        }
+        return $run?
+                call_user_func_array($callback, array($vars)):
+                $callback;
     }
-    public static function callback_func_my(&$callback=null){
+    public static function callback_func_custom(&$callback=null,$prefix='MY',$type='func'){
         //用户重写 iPHP:test:method 调用 MY_testFunc::test_method
         //app/test/MY_test.func.php
         if($callback){
-            $my = $callback;
-            $my[0] = 'MY_'.$my[0];
-            $app  = substr($callback[0],0,-4);
-            $file = 'MY_'.$app.'.func';
-            $path = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
+            $my    = $callback;
+            $my[0] = $prefix.'_'.$my[0];
+            $pos   = strlen($type);
+            $app   = substr($callback[0],0,-$pos);
+            $file  = $prefix.'_'.$app.'.'.$type;
+            $path  = iPHP_APP_DIR . '/' . $app . '/' . $file . '.php';
             if(is_file($path)){
                 if(method_exists($my[0],$my[1]) && strpos($callback[1], '__')===false){
                     $callback = $my;
@@ -334,19 +333,8 @@ class iView {
     public static function unfunc_vars(&$vars) {
         unset($vars[iView::TPL_FUNC_NAME]);
     }
-    public static function parse_vars(&$vars,$rec=false) {
-      foreach ((array)$vars as $vk => $v) {
-            $vk = trim($vk);
-            if(strpos($vk, '[')!==false && substr($vk, -1)==']'){
-                $va = str_multi_array($vk,'[',$v);
-                unset($vars[$vk]);
-                if($rec){
-                    $vars = array_merge_recursive((array)$vars,(array)$va);
-                }else{
-                    $vars = array_merge((array)$vars,(array)$va);
-                }
-            }
-        }
+    public static function parse_vars(&$vars) {
+        return parse_bracket($vars);
     }
     public static function app_vars($app_name = true, $out = false) {
         $app_name === true && $app_name = iPHP::$app_name;

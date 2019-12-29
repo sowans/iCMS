@@ -516,3 +516,16 @@ function str_multi_array($string,$s='.',$value=null){
     }
     return $a;
 }
+function parse_bracket(&$arguments){
+    $array = array();
+    foreach ((array)$arguments as $ak => $av) {
+        $ak = trim($ak);
+        if(strpos($ak, '[')!==false && substr($ak, -1)==']'){
+            unset($arguments[$ak]);
+            $pa = str_multi_array($ak,'[',$av);
+            $array = array_merge_recursive((array)$array,(array)$pa);
+        }
+    }
+    $arguments = array_merge((array)$arguments,(array)$array);
+    return $arguments;
+}

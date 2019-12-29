@@ -15,6 +15,9 @@ class plugin_taoke{
      */
     public static function HOOK($content,&$resource=null) {
         plugin::init(__CLASS__);
+        if(stripos($content, 'taobao.com')===false && stripos($content, 'tmall.com')===false){
+            return $content;
+        }
         preg_match_all('@<[^>]+>((http|https)://.*(item|detail)\.(taobao|tmall)\.com/.+)</[^>]+>@isU', $content, $taoke_array);
         if ($taoke_array[1]) {
             $tk_array = array_unique($taoke_array[1]);

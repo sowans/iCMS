@@ -654,5 +654,5 @@ function processing_item($name,$item=array(),$length=0,$title=''){
     </li>
   <?php } ?>
 </div>
-
+<div style="height: 100px;"></div>
 <?php admincp::foot();?>

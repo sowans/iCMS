@@ -56,8 +56,8 @@ class spider_process {
         'json_encode'             => array('0x05','JSON编码(json_encode) ','JSON编码(json_encode) '),
         'auth_encode'             => array('0x05','加密(auth_encode) ','加密(auth_encode) '),
 
-        'array_explode'           => array('0x06','字符串=>数组','字符串=>数组'),
-        'array_implode'           => array('0x06','数组=>字符串','数组=>字符串'),
+        'explode'                 => array('0x06','字符串=>数组','字符串=>数组'),
+        'array_implode'           => array('0x06','数组=>字符串','数组=>字符串','input'),
 
         '@check_urls'             => array('0x07','链接检查','独立检查,链接保存在新表'),
         '@collect_urls'           => array('0x07','收集链接','收集其它链接'),
@@ -95,7 +95,7 @@ class spider_process {
                     echo '<br />';
                 }
                 $value[$value['helper']] = true;
-                if(is_array($content)){
+                if(is_array($content) && substr($value['helper'], 0,6)!=='array_'){
                     foreach ($content as $idx => $con) {
                         $content[$idx] = self::helper($con,$value,$rule,$responses);
                     }

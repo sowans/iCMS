@@ -453,7 +453,7 @@ class apps {
             return $rs['name'];
         }
 	}
-    public static function get_package($name,$dir,$REMOVE_PATH=null) {
+    public static function get_package($name,$app,$dir,$REMOVE_PATH=null) {
         iPHP::vendor('PclZip');
         $package = iPHP_APP_CACHE.'/'.$name.'.'.apps::PKG_EXT;
         $zip = new PclZip($package);
@@ -469,6 +469,9 @@ class apps {
         }else{
             $v_list = $zip->create($lists); //将文件进行压缩
         }
+        $path = iPATH.$app.'.php';
+        file_exists($path) && $zip->add(array($path), PCLZIP_OPT_REMOVE_PATH, iPATH);
+
         $v_list == 0 && iPHP::error_throw($zip->errorInfo(true)); //如果有误，提示错误信息。
         return $package;
     }

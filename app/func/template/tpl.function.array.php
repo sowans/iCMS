@@ -26,18 +26,8 @@ function tpl_function_array($params, &$tpl){
     unset($params['assign'],$params['merge'],$params['as'],$params['as[]'],$params['recursive']);
     // Examples:e1
     $merge && $params = array_merge((array)$tpl->_vars[$key],(array)$params);
-    foreach ((array)$params as $pk => $pv) {
-            $pk = trim($pk);
-            if(strpos($pk, '[')!==false && substr($pk, -1)==']'){
-                $pa = str_multi_array($pk,'[',$pv);
-                unset($params[$pk]);
-                if($recursive){
-                    $params = array_merge_recursive((array)$params,(array)$pa);
-                }else{
-                    $params = array_merge((array)$params,(array)$pa);
-                }
-            }
-    }
+    parse_bracket($params);
+
     // Examples:e2
     if($params['flag']=='col'){
         unset($params['flag']);
