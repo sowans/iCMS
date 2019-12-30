@@ -9,6 +9,7 @@
 */
 class propApp {
 	public $methods = array('iCMS');
+    public static $statusMap = array('禁用','启用');
 	public static function value($field=null,$app=null,$sort=true) {
         $app  && $pieces[] = $app;
         $field&& $pieces[] = $field;

@@ -21,31 +21,6 @@ class forms{
             // 'index_id' =>'KEY `id` (`status`,`id`)',
         );
     }
-    public static function base_fields_json(){
-      return '{
-        "id": "id=id&label=内容id&comment=主键%20自增ID&field=PRIMARY&name=id&default=&type=PRIMARY&len=10&class=span2"
-      }';
-        // "2": "UI:BR",
-        // "title": "id=title&label=标题&field=VARCHAR&name=title&type=text&default=&len=255&class=span6&validate%5B%5D=empty",
-        // "5": "UI:BR",
-        // "pubdate": "id=pubdate&label=发布时间&field=INT&name=pubdate&default=&type=datetime&len=10&class=span3",
-        // "postime": "id=postime&label=提交时间&field=INT&name=postime&default=&type=datetime:hidden&len=10&class=span3",
-        // "8": "UI:BR",
-        // "status": "id=status&label=状态&comment=0:草稿;1:正常;2:回收;3:审核;4:不合格&option=草稿=0;正常=1;回收=2;审核=3;不合格=4;&field=TINYINT&name=status&default=1&type=select&len=1&class=chosen-select span3"
-    }
-    public static function base_fields_array(){
-      $sql = implode(",\n", self::base_fields_sql());
-      preg_match_all("@`(.+)`\s(.+)\sDEFAULT\s'(.*?)'\sCOMMENT\s'(.+)'@", $sql, $matches);
-      return $matches;
-    }
-    public static function base_fields_sql(){
-        return array(
-            // 'title'   =>"`title` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '标题'",
-            // 'pubdate' =>"`pubdate` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '发布时间'",
-            // 'postime' =>"`postime` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '提交时间'",
-            // 'status'  =>"`status` TINYINT(1) UNSIGNED NOT NULL DEFAULT '1' COMMENT '状态 0:草稿;1:正常;2:回收;3:审核;4:不合格'",
-        );
-    }
     public static function get($vars=0,$field='id'){
         if(empty($vars)) return array();
         if($vars=='all'){

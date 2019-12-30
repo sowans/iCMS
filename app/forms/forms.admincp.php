@@ -51,7 +51,7 @@ class formsAdmincp{
       }
       $REFERER_URL = $_POST['REFERER'];
       if(empty($REFERER_URL)||strstr($REFERER_URL, '=form_save')){
-          $REFERER_URL= APP_URI.'&do=form_manage&fid='.$this->fid;
+          $REFERER_URL= APP_URI.'&do=data&fid='.$this->fid;
       }
       if($dialog){
         if($update){
@@ -155,9 +155,9 @@ class formsAdmincp{
           $rs['type']   = "1";
           $rs['status'] = "1";
           $rs['create'] = "1";
-          $rs['fields'] = forms::base_fields_json();
+          $rs['fields'] = apps::etc('forms','fields.source');
           $rs['fields'] = json_decode($rs['fields'],true);
-          $base_fields  = forms::base_fields_array();
+          $base_fields  = $rs['fields'];
           $rs['config']['enable'] = "1";
         }
         empty($rs['tpl']) && $rs['tpl'] = '{iTPL}/forms.htm';
@@ -198,30 +198,8 @@ class formsAdmincp{
           $config       = addslashes(cnjson_encode($config_array));
         }
 
-        $fields   = '';
         $fieldata = $_POST['fields'];
-        if(is_array($fieldata)){
-          $field_array = array();
-          foreach ($fieldata as $key => $value) {
-            $output = array();
-            parse_str($value,$output);
-            if(isset($output['UI:BR'])){
-              $field_array[$key] = 'UI:BR';
-            }else{
-              $output['label'] OR iUI::alert('发现自定义字段中空字段名称!');
-              $output['comment'] = $output['label'].($output['comment']?':'.$output['comment']:'');
-              $fname = $output['name'];
-              $fname OR iUI::alert('发现自定义字段中有空字段名!');
-              $field_array[$fname] = $value;
-              if($output['field']=="MEDIUMTEXT"){
-                $addons_fieldata[$key] = $value;
-                unset($fieldata[$key]);//从基本表移除
-              }
-            }
-          }
-          //字段数据存入数据库
-          $fields = addslashes(cnjson_encode($field_array));
-        }
+        $fields   = apps_mod::field_array($fieldata,$addons_fieldata);
 
         iFS::$force_ext = "jpg";
         iFS::checkHttp($pic) && $pic = iFS::http($pic);
@@ -278,24 +256,19 @@ class formsAdmincp{
         }else {
             iDB::value("SELECT `id` FROM `#iCMS@__forms` where `app` ='$app' AND `id` !='$id'") && iUI::alert('该表单已经存在!');
             $_fields     = iDB::value("SELECT `fields` FROM `#iCMS@__forms` where `id` ='$id'");//json
-            $_json_field = apps_mod::json_field($_fields);//旧数据
-            $json_field  = apps_mod::json_field($fields); //新数据
             /**
              * 找出字段数据中的 MEDIUMTEXT类型字段
              * PS:函数内会unset(json_field[key]) 所以要在 基本表make_alter_sql前执行
              */
-            $_addons_json_field = apps_mod::find_MEDIUMTEXT($_json_field);
-            $addons_json_field = apps_mod::find_MEDIUMTEXT($json_field);
-
-            // print_r($_addons_json_field);
-            // print_r($addons_json_field);
+            list($_json_field,$_DT_json_field) = apps_mod::json_field($_fields);//旧数据
+            list($json_field,$DT_json_field)   = apps_mod::json_field($fields); //新数据
 
             //基本表 新旧数据计算交差集 origin 为旧字段名
             $sql_array = apps_db::make_alter_sql($json_field,$_json_field,$_POST['origin']);
             $sql_array && apps_db::alter_table($array['app'],$sql_array);
 
             //MEDIUMTEXT类型字段 新旧数据计算交差集 origin 为旧字段名
-            $addons_sql_array = apps_db::make_alter_sql($addons_json_field,$_addons_json_field,$_POST['origin']);
+            $addons_sql_array = apps_db::make_alter_sql($DT_json_field,$_DT_json_field,$_POST['origin']);
 
             $addons_name = apps_mod::data_table_name($array['app']);
             //存在附加表数据
@@ -444,7 +417,7 @@ class formsAdmincp{
         );
       }
 
-      $package = apps::get_package($filename,$appdir,$remove_path);
+      $package = apps::get_package($filename,$rs['app'],$appdir,$remove_path);
       filesApp::attachment($package);
       iFS::rm($package);
       iFS::rm($app_data_file);

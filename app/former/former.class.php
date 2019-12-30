@@ -76,23 +76,13 @@ class former {
         return self::$variable;
     }
     /**
-     * 将由查询字符串(query string)组成的数组转换成二维数组
-     * @param  [type]  $data [查询字符串 数组]
+     * 获取字段数据
+     * @param  [type]  $data [字段配置]
      * @param  boolean $ui   [是否把UI标识返回数组]
      * @return [type]        [description]
      */
     public static function fields($data,$ui=false) {
-        $array = array();
-        foreach ($data as $key => $value) {
-          $output = array();
-          if($value=='UI:BR'){
-              $ui && $output = array('type'=>'br');
-          }else{
-              parse_str($value,$output);
-          }
-          $output && $array[$key] = $output;
-        }
-        return $array;
+        return apps_mod::get_field_array($data,$ui);
     }
     public static function base_fields_merge(&$app, array $data_table) {
         // if($data_table===null){
@@ -895,6 +885,18 @@ class former {
                 }
                 $pieces[]= '$("'.$id.'").'.$func.'(function(){';
                 $pieces[]= self::$validate;
+                $pieces[]= '
+    var submitBtn = $(\'button[type="submit"]\',this);
+    submitBtn.button(\'loading\');
+    iCMS.dialog({
+      id:"iPHP-DIALOG",
+      content:"提交中，请稍候...",
+      time:10000,
+      height:\'150\',
+      icon: \'loading\',
+    },function(){
+        submitBtn.button(\'reset\');
+    });';
                 $pieces[]= '});';
             }
             $pieces[]= self::$script;

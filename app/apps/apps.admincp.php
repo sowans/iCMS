@@ -30,10 +30,10 @@ class appsAdmincp{
             $rs['apptype'] = "2";
             $rs['config']['iFormer'] = '1';
             $rs['config']['menu']    = 'default';
-            $base_fields  = apps_mod::base_fields_array();
-            $rs['fields'] = apps::etc('apps','fields.source');
             $rs['menu']   = apps::etc('apps','menu.source');
+            $rs['fields'] = apps::etc('apps','fields.source');
             $rs['fields'] = json_decode($rs['fields'],true);
+            $base_fields  = $rs['fields'];
           }
         }else{
           if($rs['apptype']=="2"){
@@ -45,9 +45,9 @@ class appsAdmincp{
         if(empty($rs['config']['iurl'])){
           $rs['config']['iurl'] = apps_mod::iurl($rs);
         }
-        if($rs['menu']){
-          $rs['menu'] = jsonFormat($rs['menu']);
-        }
+
+        $rs['menu'] && $rs['menu'] = jsonFormat($rs['menu']);
+
         // if($rs['router']){
         //   $rs['router'] = jsonFormat($rs['router']);
         // }
@@ -106,33 +106,11 @@ class appsAdmincp{
         $config = array_filter($config);
         $config = addslashes(cnjson_encode($config));
 
-        $fields   = '';
         $fieldata = $_POST['fields'];
-        if(is_array($fieldata)){
-          $field_array = array();
-          foreach ($fieldata as $key => $value) {
-            $output = parse_url_qs($value);
-            if(isset($output['UI:BR'])){
-              $field_array[$key] = 'UI:BR';
-            }else{
-              preg_match("/[a-zA-Z0-9_\-]/",$output['name']) OR iUI::alert('['.$output['label'].'] 字段名只能由英文字母、数字或_-组成,不支持中文');
-              $output['label'] OR iUI::alert('发现自定义字段中空字段名称!');
-              $output['comment'] = $output['label'].($output['comment']?':'.$output['comment']:'');
-              $fname = $output['name'];
-              $fname OR iUI::alert('发现自定义字段中有空字段名!');
-              $field_array[$fname] = $value;
-              if($output['field']=="MEDIUMTEXT"){
-                $dataTable_field_array[$key] = $value;
-                unset($fieldata[$key]);//从基本表移除
-              }
-            }
-          }
-          //字段数据存入数据库
-          $fields = addslashes(cnjson_encode($field_array));
-        }
+        $fields   = apps_mod::field_array($fieldata,$dataTable_field_array);
 
-        $addtime = time();
-        $array   = compact(array('app','name','title','menu','router','table','config','fields','addtime','apptype','type','status'));
+        $addtime  = time();
+        $array    = compact(array('app','name','title','menu','router','table','config','fields','addtime','apptype','type','status'));
         // $array['menu'] = str_replace(array("\r","\n"),'',$array['menu']);
 
         if(empty($id)) {
@@ -193,14 +171,12 @@ class appsAdmincp{
         }else {
             iDB::value("SELECT `id` FROM `#iCMS@__apps` where `app` ='$app' AND `id` !='$id'") && iUI::alert('该应用已经存在!');
             $_fields     = iDB::value("SELECT `fields` FROM `#iCMS@__apps` where `id` ='$id'");//json
-            $_json_field = apps_mod::json_field($_fields);//旧数据
-            $json_field  = apps_mod::json_field($fields); //新数据
             /**
              * 找出字段数据中的 MEDIUMTEXT类型字段
              * PS:函数内会unset(json_field[key]) 所以要在 基本表make_alter_sql前执行
              */
-            $_DT_json_field = apps_mod::find_MEDIUMTEXT($_json_field);
-            $DT_json_field  = apps_mod::find_MEDIUMTEXT($json_field);
+            list($_json_field,$_DT_json_field) = apps_mod::json_field($_fields);//旧数据
+            list($json_field,$DT_json_field)   = apps_mod::json_field($fields); //新数据
 
             //基本表 新旧数据计算交差集 origin 为旧字段名
             $alter_sql_array = apps_db::make_alter_sql($json_field,$_json_field,$_POST['origin']);
@@ -349,7 +325,7 @@ class appsAdmincp{
         );
       }
 
-      $package = apps::get_package($filename,$appdir,$remove_path);
+      $package = apps::get_package($filename,$rs['app'],$appdir,$remove_path);
       filesApp::attachment($package);
       iFS::rm($package);
       iFS::rm($app_data_file);

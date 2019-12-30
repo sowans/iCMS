@@ -28,9 +28,10 @@
 <script type="text/javascript">
 <?php
 if($rs['fields']){
-  $field_array = apps_mod::get_field_array($rs['fields'],true);
-  foreach ($field_array as $key => $value) {
-    $readonly = apps_mod::base_fields_key($value['name']);
+  // $field_array = apps_mod::get_field_array($rs['fields'],true);
+  $base_fields_key = apps_mod::base_fields_key();
+  foreach ($rs['fields'] as $key => $value) {
+    $readonly = in_array($value['name'], $base_fields_key);
     echo "iFormer.render($('div'),".json_encode($value).",null,'".$value['id']."',".($readonly?'true':'false').").appendTo('#custom_field_list');";
   }
   echo "$('#custom_field_list').append('<div class=\"clearfloat\"></div>');";

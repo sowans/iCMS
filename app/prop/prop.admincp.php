@@ -33,15 +33,16 @@ class propAdmincp{
         $appid   = iSecurity::escapeStr($_POST['appid']);
         $app     = iSecurity::escapeStr($_POST['app']);
         $val     = iSecurity::escapeStr($_POST['val']);
-        $info     = iSecurity::escapeStr($_POST['info']);
+        $info    = iSecurity::escapeStr($_POST['info']);
         $sortnum = (int)$_POST['sortnum'];
         $name    = iSecurity::escapeStr($_POST['name']);
+        $status  = (int)$_POST['status'];
 
         $field OR iUI::alert('属性字段不能为空!');
         $name OR iUI::alert('属性名称不能为空!');
         // $app OR iUI::alert('所属应用不能为空!');
 
-        $fields = array('rootid','cid','field','app','appid','sortnum', 'name', 'val', 'info');
+        $fields = array('rootid','cid','field','app','appid','sortnum', 'name', 'val', 'info', 'status');
         $data   = compact ($fields);
 
 		if($pid){
@@ -110,9 +111,13 @@ class propAdmincp{
         iUI::success($msg,'url:'.APP_URI);
     }
     public function do_update(){
-    	foreach((array)$_POST['pid'] as $tk=>$pid){
-            iDB::query("update `#iCMS@__prop` set `app` = '".$_POST['app'][$tk]."', `name` = '".$_POST['name'][$tk]."', `value` = '".$_POST['value'][$tk]."' where `pid` = '$pid';");
-    	}
+        if($_POST['pid']){
+            foreach((array)$_POST['pid'] as $tk=>$pid){
+                iDB::query("update `#iCMS@__prop` set `app` = '".$_POST['app'][$tk]."', `name` = '".$_POST['name'][$tk]."', `value` = '".$_POST['value'][$tk]."' where `pid` = '$pid';");
+            }
+        }
+        $args = iSQL::update_args($_GET['_args']);
+        $args && iDB::update('prop',$data,array('pid'=>$this->pid));
     	$this->cache();
     	iUI::alert('更新完成');
     }
@@ -126,6 +131,9 @@ class propAdmincp{
     public function do_batch(){
         list($idArray,$ids,$batch) = iUI::get_batch_args("请选择要操作的属性");
     	switch($batch){
+            case 'status':
+                $data = array('status'=>$_POST['mstatus']);
+            break;
     		case 'dels':
 				iUI::$break	= false;
 	    		foreach($idArray AS $id){
@@ -138,7 +146,11 @@ class propAdmincp{
     			$this->cache();
     			iUI::success('属性缓存全部更新完成!','js:1');
     		break;
-		}
+            default:
+                $data = iSQL::update_args($batch);
+        }
+        $data && self::batch($data,$ids);
+        iUI::success('操作成功!','js:1');
 	}
 
     public function do_iCMS(){
@@ -314,5 +326,14 @@ class propAdmincp{
     }
     public static function _count(){
         return iDB::value("SELECT count(*) FROM `#iCMS@__prop`");
+    }
+    public static function batch($data,$ids){
+        if(empty($ids)){
+            return;
+        }
+        foreach ( array_keys($data) as $k ){
+            $bits[] = "`$k` = '$data[$k]'";
+        }
+        iDB::query("UPDATE `#iCMS@__prop` SET " . implode( ', ', $bits ) . " WHERE `pid` IN ($ids)");
     }
 }

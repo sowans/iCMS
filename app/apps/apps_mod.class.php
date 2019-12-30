@@ -33,40 +33,7 @@ class apps_mod {
     public static function data_union_key($name){
       return $name.self::DATA_UNION_KEY;
     }
-    public static function base_fields_array(){
-      $sql = implode(",\n", self::base_fields_sql());
-      preg_match_all("@`(.+)`\s(.+)\sDEFAULT\s'(.*?)'\sCOMMENT\s'(.+)'@", $sql, $matches);
-      return $matches;
-    }
-    public static function base_fields_sql(){
-        return array(
-            'cid'        =>"`cid` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '栏目id'",
-            'ucid'       =>"`ucid` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '用户分类'",
-            'pid'        =>"`pid` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '属性'",
-            'title'      =>"`title` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '标题'",
-            'editor'     =>"`editor` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '编辑名或用户名'",
-            'userid'     =>"`userid` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '用户ID'",
-            'pubdate'    =>"`pubdate` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '发布时间'",
-            'postime'    =>"`postime` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '提交时间'",
-            'clink'      =>"`clink` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '自定义链接'",
-            'tpl'        =>"`tpl` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '模板'",
-            'hits'       =>"`hits` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '总点击数'",
-            'hits_today' =>"`hits_today` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '当天点击数'",
-            'hits_yday'  =>"`hits_yday` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '昨天点击数'",
-            'hits_week'  =>"`hits_week` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '周点击'",
-            'hits_month' =>"`hits_month` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '月点击'",
-            'favorite'   =>"`favorite` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '收藏数'",
-            'comments'   =>"`comments` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '评论数'",
-            'good'       =>"`good` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '顶'",
-            'bad'        =>"`bad` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '踩'",
-            'sortnum'    =>"`sortnum` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '排序'",
-            'weight'     =>"`weight` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '权重'",
-            'creative'   =>"`creative` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' COMMENT '内容类型 0:转载;1:原创'",
-            'mobile'     =>"`mobile` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' COMMENT '发布设备 0:pc;1:手机'",
-            'postype'    =>"`postype` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' COMMENT '发布类型 0:用户;1管理员'",
-            'status'     =>"`status` TINYINT(1) UNSIGNED NOT NULL DEFAULT '1' COMMENT '状态 0:草稿;1:正常;2:回收;3:审核;4:不合格'",
-        );
-    }
+
     public static function base_fields_index(){
         return array(
             'index_id'         =>'KEY `id` (`status`,`id`)',
@@ -79,14 +46,9 @@ class apps_mod {
     }
     public static function base_fields_key($key=null){
         if(self::$base_fields_key===null){
-          $array = array(
-              'id','cid','ucid','pid',
-              'title','editor','userid','pubdate','postime','clink','tpl',
-              'hits','hits_today','hits_yday','hits_week','hits_month',
-              'favorite','comments','good','bad',
-              'sortnum','weight',
-              'creative','mobile','postype','status'
-          );
+            $json   = apps::etc('apps','fields.source');
+            $fields = json_decode($json,true);
+            $array  = array_column($fields, 'name');
         }else{
           $array = self::$base_fields_key;
         }
@@ -96,22 +58,65 @@ class apps_mod {
         return $array;
     }
     public static function data_base_fields($name=null) {
-      $primary_key = self::DATA_PRIMARY_KEY;
-      $a[$primary_key] = "id=".$primary_key."&label=附加表id&comment=主键%20自增ID&field=PRIMARY&name=".$primary_key."&default=&type=PRIMARY&len=10&";
-      if($name){
-        $union_id = self::data_union_key($name);
-        $a[$union_id] = "id=".$union_id."&label=关联内容ID&comment=内容ID%20关联".$name."表&field=INT&name=".$union_id."&default=&type=union&len=10";
-      }
-      return $a;
+        $a[self::DATA_PRIMARY_KEY] = array (
+          'id'       => self::DATA_PRIMARY_KEY,
+          'label'    => '附加表id',
+          'comment'  => '主键 自增ID',
+          'field'    => 'PRIMARY',
+          'name'     => self::DATA_PRIMARY_KEY,
+          'default'  => '',
+          'type'     => 'PRIMARY',
+          'len'      => '10',
+          'unsigned' => '1',
+        );
+        if($name){
+            $union_id = self::data_union_key($name);
+            $a[$union_id] = array (
+              'id'       => $union_id,
+              'label'    => '关联内容ID',
+              'comment'  => '内容ID 关联'.$name.'表',
+              'field'    => 'INT',
+              'name'     => $union_id,
+              'default'  => '',
+              'type'     => 'union',
+              'len'      => '10',
+              'unsigned' => '1',
+            );
+        }
+
+        return $a;
+    }
+    public static function field_array(&$fieldata=null,&$dataTable_field_array=array()){
+        $fields = '';
+        if(is_array($fieldata)){
+          $field_array = array();
+          foreach ($fieldata as $key => $value) {
+            $json = stripslashes($value);
+            $output = json_decode($json,true);
+            if($output['name']){
+              preg_match("/[a-zA-Z0-9_\-]/",$output['name']) OR iUI::alert('['.$output['label'].'] 字段名只能由英文字母、数字或_-组成,不支持中文');
+              $output['label'] OR iUI::alert('发现自定义字段中空字段名称!');
+              // empty($output['comment']) && $output['comment'] = $output['label'];
+              $fname = $output['name'];
+              $fname OR iUI::alert('发现自定义字段中有空字段名!');
+              $field_array[$fname] = $output;
+              if($output['field']=="MEDIUMTEXT"){
+                $dataTable_field_array[$key] = $output;
+                unset($fieldata[$key]);//从基本表移除
+              }
+            }else{
+              $field_array[$key] = $output;
+            }
+          }
+          //字段数据存入数据库
+          $fields = addslashes(cnjson_encode($field_array));
+        }
+        return $fields;
     }
     public static function json_field($json=null){
         if(empty($json)) return array();
-
-        $fieldata    = json_decode(stripcslashes($json),true);
-        //QS转数组
-        $field_array = apps_mod::get_field_array($fieldata);
-
-        $json_array  = array();
+        $field_array = json_decode(stripcslashes($json),true);
+        $json_array  = array(array(),array());
         foreach ($field_array as $key => $value) {
             $a = array();
             foreach ($value as $k => $v) {
@@ -119,17 +124,16 @@ class apps_mod {
                     $a[$k] = $v;
                 }
             }
-            ksort($a);
-            $json_array[$key] = json_encode($a);
+            if($a){
+                ksort($a);
+                $json = json_encode($a);
+                if(strtoupper($value['field'])=="MEDIUMTEXT"){
+                    $json_array[1][$key] = $json;
+                }else{
+                    $json_array[0][$key] = $json;
+                }
+            }
         }
-
-        // $json_array  = array_map('json_encode', $field_array);
-
-        // $json_array = array();
-        // foreach ($array as $key => $value) {
-        //     $json_array[$key] = json_encode($value);
-        // }
-
         return $json_array;
     }
     public static function drop_table($fieldata,&$table_array,$name) {
@@ -158,7 +162,7 @@ class apps_mod {
     public static function data_create_table($fieldata,$name,$union_id,$query=true) {
         $table = apps_db::create_table(
           $name,
-          apps_mod::get_field_array($fieldata),//获取字段数组
+          $fieldata,//获取字段数组
           array(//索引
             'index_'.$union_id =>'KEY `'.$union_id.'` (`'.$union_id.'`)'
           ),
@@ -168,26 +172,23 @@ class apps_mod {
         return array($name=>$table);
     }
     /**
-     * 将由查询字符串(query string)组成的数组转换成二维数组
-     * @param  [type]  $data [查询字符串 数组]
+     * 获取字段数据
+     * @param  [type]  $data [字段配置]
      * @param  boolean $ui   [是否把UI标识返回数组]
      * @return [type]        [description]
      */
     public static function get_field_array($data,$ui=false) {
         $array = array();
         if($data)foreach ($data as $key => $value) {
-          $output = array();
-          if($value=='UI:BR'){
-              $ui && $output = array('type'=>'br');
-          }else{
-              parse_str($value,$output);
-              // if($keys){
-              //   extract ($output);
-              //   $output = compact ($keys);
-              //   ksort($output);
-              // }
-          }
-          $output && $array[$key] = $output;
+            if(is_array($value)){
+                $array[$key] = $value;
+            }else{
+                $json = stripslashes($value);
+                $array[$key] = json_decode($json,true);
+            }
+            if($array[$key]['type']=='br' && !$ui){
+                unset($array[$key]);
+            }
         }
         return $array;
     }

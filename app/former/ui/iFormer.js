@@ -86,7 +86,7 @@ var iFormer = {
         var $container = this.widget('div').addClass(this.ui.class);
 
         if (obj['type'] == 'br') {
-            data = 'UI:BR';
+            data = '{"type":"br"}';
             $container.addClass('pagebreak');
             $container.dblclick(function(event) {
                 $container.remove();
@@ -350,7 +350,7 @@ var iFormer = {
             $container.append($origin);
         }
 
-        data = data||this.url_encode(obj);
+        data = data||JSON.stringify(obj);
 
         iFormer.fields(data,$container);
 
@@ -414,46 +414,6 @@ var iFormer = {
         $div.append(parent);
         $div.addClass('input-append');
     },
-    url_encode:function(param, key) {
-      if(param==null) return '';
-
-      var query = [],t = typeof (param);
-      if (t == 'string' || t == 'number' || t == 'boolean') {
-        query.push(key + '=' + encodeURIComponent(param));
-      } else {
-        for (var i in param) {
-          var k = key == null ? i : key + (param instanceof Array ? '[' + i + ']' : '.' + i);
-          var q = this.url_encode(param[i], k);
-          if(q!=='') query.push(q);
-        }
-      }
-      return query.join('&');
-    },
-    url_decode: function(query) {
-        var args = [],pairs = query.split("&");
-        for (var i = 0; i < pairs.length; i++) {
-            var pos = pairs[i].indexOf('=');
-            if (pos == -1) continue;
-            var argname = pairs[i].substring(0, pos);
-            argname = argname.replace(/\+/g, '%20');
-            argname = decodeURIComponent(argname);
-            var value = pairs[i].substring(pos + 1);
-            value = value.replace(/\+/g, '%20');
-            value = decodeURIComponent(value);
-
-            if(argname.indexOf('[')!=-1){
-              argname = argname.replace(/\[\d+\]/g, "[]");
-              argname = argname.replace('[]', '');
-              if(!args[argname]){
-                args[argname] = [];
-              }
-              args[argname].push(value);
-            }else{
-              args[argname] = value;
-            }
-        };
-        return args; // Return the object
-    },
     callback: function(func,ret,param) {
         if (typeof(func) === "function") {
             func(ret,param);
@@ -488,7 +448,7 @@ var iFormer = {
             var me = $(this),
             data   = $("[name='fields[]']",$container).val(),
             origin  = $("[name^='origin']",$container).val(),
-            obj    = iFormer.url_decode(data);
+            obj    = JSON.parse(data);
             // console.log(obj);
             iFormer.edit_dialog(obj,
                 function(param,qt) {
@@ -633,9 +593,26 @@ var iFormer = {
                 $('td[field="'+_id+'"]').attr('field', data.name).text(data.name);
 
                 //更新 fields[]
-                param = $("form", $fbox).serialize();
-                param = param.replace(/\+/g, '%20');
-                callback(data,param);
+                var param  = $("form", $fbox).serializeArray();
+                var fields = {};
+                $.each(param, function(index, val) {
+                    // console.log(index, val);
+                    var name = val['name'];
+                    if(name.indexOf('[')!=-1){
+                      name = name.replace(/\[\d+\]/g, "[]");
+                      name = name.replace('[]', '');
+                      if(!fields[name]){
+                        fields[name] = [];
+                      }
+                      if(val['value']!=''){
+                        fields[name].push(val['value']);
+                      }
+                    }else{
+                      fields[name] = val['value'];
+                    }
+                });
+
+                callback(data,JSON.stringify(fields));
                 me.freset(fbox);
                 return true;
             },

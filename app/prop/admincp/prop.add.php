@@ -18,6 +18,7 @@ $(function(){
   });
   iCMS.select('cid',"<?php echo $rs['cid'] ; ?>");
   iCMS.select('prop-app',"<?php echo $rs['app'] ; ?>");
+  iCMS.select('status', "<?php echo $rs['status'] ; ?>");
 });
 </script>
 <div class="iCMS-container">
@@ -29,6 +30,17 @@ $(function(){
       <form action="<?php echo APP_FURI; ?>&do=save" method="post" class="form-inline" id="iCMS-prop" target="iPHP_FRAME">
         <input name="pid" type="hidden" value="<?php echo $this->pid ; ?>" />
         <div id="<?php echo APP_BOXID;?>" class="tab-content">
+          <div class="input-prepend input-append">
+              <span class="add-on">属性状态</span>
+              <select name="status" id="status" class="chosen-select span4">
+                  <?php foreach (propApp::$statusMap as $key => $value) { ?>
+                    <option value="<?php echo $key?>"> <?php echo $value?> [status='<?php echo $key?>']</option>
+                  <?php };?>
+                  <?php echo propAdmincp::get("status") ; ?>
+              </select>
+              <?php echo propAdmincp::btn_add('添加状态');?>
+          </div>
+          <div class="clearfloat mb10"></div>
           <div class="input-prepend"> <span class="add-on">所属栏目</span>
             <select name="cid" id="cid" class="span4 chosen-select">
               <option value="0"> ==== 暂无所属栏目 ==== </option>

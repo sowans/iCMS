@@ -64,6 +64,7 @@ $(function(){
               <th>字段</th>
               <th>应用</th>
               <th>栏目</th>
+              <th>状态</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -82,11 +83,12 @@ $(function(){
               <td><a href="<?php echo admincp::uri(array("field"=>$rs[$i]['field']),$uriArray); ?>"><?php echo $rs[$i]['field'] ; ?></a></td>
               <td><a href="<?php echo admincp::uri(array("_app"=>$rs[$i]['app']),$uriArray); ?>"><?php echo $rs[$i]['app'] ; ?></a></td>
               <td><a href="<?php echo admincp::uri(array("cid"=>$rs[$i]['cid']),$uriArray); ?>"><?php echo $C['name'] ; ?></a></td>
+              <td><?php echo propApp::$statusMap[$rs[$i]['status']];?></td>
               <td><?php if($rs[$i]['status']=="1"){ ?>
-                <a href="<?php echo APP_FURI; ?>&do=update&id=<?php echo $rs[$i]['pid'] ; ?>&_args=status:0" class="btn btn-small" target="iPHP_FRAME"><i class="fa fa-power-off"></i> 禁用</a>
+                <a href="<?php echo APP_FURI; ?>&do=update&pid=<?php echo $rs[$i]['pid'] ; ?>&_args=status:0" class="btn btn-small btn-warning" target="iPHP_FRAME"><i class="fa fa-power-off"></i> 禁用</a>
                 <?php } ?>
                 <?php if($rs[$i]['status']=="0"){ ?>
-                <a href="<?php echo APP_FURI; ?>&do=update&id=<?php echo $rs[$i]['pid'] ; ?>&_args=status:1" class="btn btn-small" target="iPHP_FRAME"><i class="fa fa-play-circle"></i> 启用</a>
+                <a href="<?php echo APP_FURI; ?>&do=update&pid=<?php echo $rs[$i]['pid'] ; ?>&_args=status:1" class="btn btn-small btn-success" target="iPHP_FRAME"><i class="fa fa-play-circle"></i> 启用</a>
                 <?php } ?>
                 <a href="<?php echo APP_URI; ?>&do=add&pid=<?php echo $rs[$i]['pid'] ; ?>&act=copy" class="btn btn-small"><i class="fa fa-copy "></i> 复制</a>
                 <a href="<?php echo APP_URI; ?>&do=add&pid=<?php echo $rs[$i]['pid'] ; ?>" class="btn btn-small"><i class="fa fa-edit"></i> 编辑</a>
@@ -96,14 +98,15 @@ $(function(){
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="9"><div class="pagination pagination-right" style="float:right;"><?php echo iPagination::$pagenav ; ?></div>
+              <td colspan="10"><div class="pagination pagination-right" style="float:right;"><?php echo iPagination::$pagenav ; ?></div>
                 <div class="input-prepend input-append mt20"> <span class="add-on">全选
                   <input type="checkbox" class="checkAll checkbox" data-target="#<?php echo APP_BOXID;?>" />
                   </span>
                   <div class="btn-group dropup" id="iCMS-batch"> <a class="btn dropdown-toggle" data-toggle="dropdown" tabindex="-1"><i class="fa fa-wrench"></i> 批 量 操 作 </a><a class="btn dropdown-toggle" data-toggle="dropdown" tabindex="-1"> <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                       <li><a data-toggle="batch" data-action="refresh"><i class="fa fa-refresh"></i> 更新缓存</a></li>
-              		  <li class="divider"></li>
+              		    <li><a data-toggle="batch" data-action="status"><i class="fa fa-cog"></i> 设置状态</a></li>
+                      <li class="divider"></li>
                       <li><a data-toggle="batch" data-action="dels"><i class="fa fa-trash-o"></i> 删除</a></li>
                     </ul>
                   </div>
@@ -112,6 +115,19 @@ $(function(){
           </tfoot>
         </table>
       </form>
+    </div>
+  </div>
+</div>
+<div class='iCMS-batch'>
+  <div id="statusBatch">
+    <div class="input-prepend">
+      <span class="add-on">状态</span>
+      <select name="mstatus" id="mstatus" class="span3" data-placeholder="请选择状态">
+        <?php foreach (propApp::$statusMap as $key => $value) { ?>
+          <option value="<?php echo $key?>"> <?php echo $value?> [status='<?php echo $key?>']</option>
+        <?php };?>
+        <?php echo propAdmincp::get("status") ; ?>
+      </select>
     </div>
   </div>
 </div>
