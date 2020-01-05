@@ -116,7 +116,7 @@ class apps_mod {
     public static function json_field($json=null){
         $json_array  = array(array(),array());
         if(empty($json)) return $json_array;
-        $field_array = json_decode(stripcslashes($json),true);
+        $field_array = json_decode($json,true);
         foreach ($field_array as $key => $value) {
             $a = array();
             foreach ($value as $k => $v) {

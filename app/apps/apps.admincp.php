@@ -176,7 +176,7 @@ class appsAdmincp{
              * PS:函数内会unset(json_field[key]) 所以要在 基本表make_alter_sql前执行
              */
             list($_json_field,$_DT_json_field) = apps_mod::json_field($_fields);//旧数据
-            list($json_field,$DT_json_field)   = apps_mod::json_field($fields); //新数据
+            list($json_field,$DT_json_field)   = apps_mod::json_field(stripcslashes($fields)); //新数据
 
             //基本表 新旧数据计算交差集 origin 为旧字段名
             $alter_sql_array = apps_db::make_alter_sql($json_field,$_json_field,$_POST['origin']);
