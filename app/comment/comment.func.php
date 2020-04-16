@@ -36,21 +36,23 @@ class commentFunc{
 		return $data;
 	}
 	private static function list_display($vars){
+		$vars['app'] 		 = 'comment';
 		$vars['do']          = 'list';
 		$vars['page_ajax']   = 'comment_page_ajax';
 		$vars['total_cache'] = 'G';
-		$tpl = 'list.default';
 		isset($vars['_display']) && $vars['display'] = $vars['_display'];
-		unset($vars['method'],$vars['_display']);
+		unset($vars['method'], $vars['_display']);
+		iView::unvars($vars);
 		$vars['query'] = http_build_query($vars);
 		$vars['param'] = array(
-			'suid'  => (int)$vars['suid'],
-			'iid'   => (int)$vars['iid'],
-			'cid'   => (int)$vars['cid'],
-			'appid' => (int)$vars['appid'],
+			'suid'  => (int) $vars['suid'],
+			'iid'   => (int) $vars['iid'],
+			'cid'   => (int) $vars['cid'],
+			'appid' => (int) $vars['appid'],
 			'title' => iSecurity::escapeStr($vars['title']),
 		);
-		iView::assign('comment_vars',$vars);
+		$tpl = 'list.default';
+		iView::assign('comment_vars', $vars);
 		iView::display("iCMS://comment/{$tpl}.htm");
 	}
 	public static function comment_list($vars){

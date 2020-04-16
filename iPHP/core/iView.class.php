@@ -93,6 +93,10 @@ class iView {
             iPHP::callback(self::$config['callback']['output'],array(&$content));
         }
     }
+    public static function unvars(&$args)
+    {
+        unset($args[self::TPL_FUNC_NAME], $args[self::TPL_FUNC_Method]);
+    }
     /**
      * iPHP:test:method
      * iPHP:func

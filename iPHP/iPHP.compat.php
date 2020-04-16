@@ -8,11 +8,7 @@
  * @license http://www.iiiphp.com/license
  * @version 2.1.0
  */
-if (!function_exists('get_magic_quotes_gpc')) {
-	function get_magic_quotes_gpc(){
-		return false;
-	}
-}
+
 if (!function_exists('gc_collect_cycles')) {
 	function gc_collect_cycles(){
 		return false;
@@ -193,7 +189,7 @@ function csubstr($str,$len,$end=''){
     $s = $str;
     while ($i < $ll)  {
         //获取字符的asscii
-        $byte = ord($str{$i});
+        $byte = ord($str[$i]);
         //如果是1字节的字符
         if ($byte < 0x80)  {
             $l++;
@@ -481,7 +477,7 @@ function select_fields($array,$fields='',$map=false){
 }
 function get_bytes($val) {
     $val = trim($val);
-    $last = strtolower($val{strlen($val)-1});
+    $last = strtolower($val[strlen($val)-1]);
     switch($last) {
         case 'g': $val *= 1024;
         case 'm': $val *= 1024;

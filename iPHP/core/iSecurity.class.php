@@ -73,12 +73,11 @@ class iSecurity {
 			}
 		}
 
-		if (!get_magic_quotes_gpc()) {
-			self::slashes($_POST);
-			self::slashes($_GET);
-			self::slashes($_COOKIE);
-			self::slashes($_FILES);
-		}
+		self::slashes($_POST);
+		self::slashes($_GET);
+		self::slashes($_COOKIE);
+		self::slashes($_FILES);
+		
 		self::get_server(array(
 			'HTTP_REFERER','HTTP_HOST','HTTP_X_FORWARDED_FOR','HTTP_USER_AGENT',
 			'HTTP_CLIENT_IP','HTTP_SCHEME','HTTPS','PHP_SELF','REMOTE_ADDR',
