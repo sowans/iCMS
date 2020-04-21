@@ -183,8 +183,17 @@ class apps_mod {
             if(is_array($value)){
                 $array[$key] = $value;
             }else{
-                $json = stripslashes($value);
-                $array[$key] = json_decode($json,true);
+                $text = stripslashes($value);
+                $array[$key] = json_decode($text,true);
+                //向前兼容
+                if($array[$key]===null){
+                  if($text=='UI:BR'){
+                      $output = array('type'=>'br');
+                  }else{
+                      strpos($text,'&')!==false && parse_str($text,$output);
+                  }
+                  $output && $array[$key] = $output;
+                }
             }
             if($array[$key]['type']=='br' && !$ui){
                 unset($array[$key]);
