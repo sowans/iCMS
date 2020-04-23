@@ -207,10 +207,11 @@ class patch {
 		return $msg;
 	}
 	public static function get_upgrade_files($flag=false) {
-		$files = array();
-		$patch_dir = iPHP_APP_DIR.'/patch/files/';
+		$files       = array();
+		$patch_dir   = iPHP_APP_DIR.'/patch/files/';
+		$patch_files = glob($patch_dir."*.php");
 		list($release,$gitTime) = self::getTime();
-		foreach (glob($patch_dir."*.php") as $file) {
+		if(is_array($patch_files)) foreach ($patch_files as $file) {
 			$d = str_replace(array($patch_dir,'db.','fs.','.php'), '', $file);
 			if ($flag) {
 				$files[$d] = $file;

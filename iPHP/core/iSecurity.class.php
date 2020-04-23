@@ -72,12 +72,16 @@ class iSecurity {
 				unset($GLOBALS[$key]);
 			}
 		}
+		//兼容PHP5.3 magic_quotes_gpc=1
+		define('GET_MAGIC_QUOTES_GPC', !@ini_get('magic_quotes_gpc'));
 
-		self::slashes($_POST);
-		self::slashes($_GET);
-		self::slashes($_COOKIE);
-		self::slashes($_FILES);
-		
+		if(GET_MAGIC_QUOTES_GPC){
+			self::slashes($_POST);
+			self::slashes($_GET);
+			self::slashes($_COOKIE);
+			self::slashes($_FILES);
+		}
+
 		self::get_server(array(
 			'HTTP_REFERER','HTTP_HOST','HTTP_X_FORWARDED_FOR','HTTP_USER_AGENT',
 			'HTTP_CLIENT_IP','HTTP_SCHEME','HTTPS','PHP_SELF','REMOTE_ADDR',
