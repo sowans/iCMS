@@ -37,6 +37,7 @@ class iPHP {
 		self::timer_start();
 		@ini_set('magic_quotes_sybase', 0);
 		@ini_set("magic_quotes_runtime",0);
+		@ini_set("magic_quotes_gpc",0);
 		@header('P3P:CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"');
 		if(function_exists('ini_get')) {
 		    $memorylimit = @ini_get('memory_limit');
