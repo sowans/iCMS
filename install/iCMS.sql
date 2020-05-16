@@ -425,6 +425,7 @@ CREATE TABLE `icms_prop` (
   `name` varchar(255) NOT NULL DEFAULT '',
   `val` varchar(255) NOT NULL DEFAULT '',
   `info` varchar(512) NOT NULL DEFAULT '',
+  `status` tinyint(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`pid`),
   KEY `field` (`field`),
   KEY `cid` (`cid`),

@@ -101,7 +101,7 @@ class iDataBase {
     */
     public static function tables_list() {
         return iDB::all(iDB::version() >= 5
-            ? "SELECT TABLE_NAME, TABLE_TYPE FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_NAME"
+            ? "SELECT TABLE_NAME, TABLE_TYPE FROM `information_schema`.`TABLES` WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_NAME"
             : "SHOW TABLES"
         );
     }
@@ -154,7 +154,7 @@ class iDataBase {
     public static function insert($table, $data,$IGNORE=false) {
         $fields = array_keys($data);
         $fields = static::field($fields);
-        static::query("INSERT ".($IGNORE?'IGNORE':'')." INTO ".static::table($table)." (`" . implode('`,`',$fields) . "`) VALUES ('".implode("','",$data)."')");
+        static::query("INSERT ".($IGNORE?'IGNORE':'')." INTO `".static::table($table)."` (`" . implode('`,`',$fields) . "`) VALUES ('".implode("','",$data)."')");
         return static::$insert_id;
     }
     public static function insert_multi($table,$data,$IGNORE=false,$fields=null) {
@@ -165,7 +165,7 @@ class iDataBase {
         }
         if($datasql){
             $fields = static::field($fields);
-            return static::query("INSERT ".($IGNORE?'IGNORE':'')." INTO ".static::table($table)." (`" . implode('`,`',$fields) . "`) VALUES ".implode(',',$datasql));
+            return static::query("INSERT ".($IGNORE?'IGNORE':'')." INTO `".static::table($table)."` (`" . implode('`,`',$fields) . "`) VALUES ".implode(',',$datasql));
         }
     }
     /**
@@ -186,7 +186,7 @@ class iDataBase {
         }else{
             return false;
         }
-        return static::query("UPDATE ".static::table($table)." SET " . implode( ', ', $bits ) . ' WHERE ' . implode( ' AND ', $wheres ) . ' LIMIT 1;' );
+        return static::query("UPDATE `".static::table($table)."` SET " . implode( ', ', $bits ) . ' WHERE ' . implode( ' AND ', $wheres ) . ' LIMIT 1;' );
     }
     public static function delete($table, $where) {
         $wheres = array();
@@ -196,7 +196,7 @@ class iDataBase {
         }else{
             return false;
         }
-        return static::query("DELETE FROM ".static::table($table)." WHERE " . implode( ' AND ', $wheres ));
+        return static::query("DELETE FROM `".static::table($table)."` WHERE " . implode( ' AND ', $wheres ));
     }
     /**
      * Get one variable from the database
@@ -225,7 +225,7 @@ class iDataBase {
             }
         }
         if($fields && $wheres){
-            return static::value("SELECT ".implode( ', ', $fields )." FROM ".static::table($table)." WHERE " . implode( ' AND ', $wheres ) . ' LIMIT 1;' );
+            return static::value("SELECT ".implode( ', ', $fields )." FROM `".static::table($table)."` WHERE " . implode( ' AND ', $wheres ) . ' LIMIT 1;' );
         }else{
             return false;
         }
@@ -342,7 +342,7 @@ class iDataBase {
             array_map("iDB::field", $string) :
             preg_replace('/[^a-zA-Z0-9_\-`]/is','',$string);
     }
-    
+
     public static function server_info() {
 
     }
