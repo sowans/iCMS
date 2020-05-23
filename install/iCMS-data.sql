@@ -64,7 +64,7 @@ insert  into `icms_config`(`appid`,`name`,`value`) values
     (0,'system','{\"patch\":\"1\"}'),
     (0,'sphinx','{\"host\":\"127.0.0.1:9312\",\"index\":\"iCMS_article iCMS_article_delta\"}'),
     (0,'open','[]'),
-    (0,'template','{\"index\":{\"mode\":\"0\",\"rewrite\":\"0\",\"tpl\":\"{iTPL}\\/index.htm\",\"name\":\"index\"},\"desktop\":{\"tpl\":\"www\\/desktop\",\"index\":\"{iTPL}\\/index.htm\",\"domain\":\"https:\\/\\/www.icmsdev.com\"},\"mobile\":{\"agent\":\"WAP,Smartphone,Mobile,UCWEB,Opera Mini,Windows CE,Symbian,SAMSUNG,iPhone,Android,BlackBerry,HTC,Mini,LG,SonyEricsson,J2ME,MOT\",\"domain\":\"https:\\/\\/www.icmsdev.com\",\"tpl\":\"www\\/mobile\",\"index\":\"{iTPL}\\/index.htm\"}}'),
+    (0,'template','{\"index\":{\"mode\":\"0\",\"rewrite\":\"0\",\"tpl\":\"{iTPL}\\/index.htm\",\"name\":\"index\"},\"desktop\":{\"tpl\":\"www\\/desktop\",\"index\":\"{iTPL}\\/index.htm\",\"domain\":\"https:\\/\\/www.icmsdev.com\"},\"mobile\":{\"agent\":\"WAP,Smartphone,Mobile,UCWEB,Opera Mini,Windows CE,Symbian,SAMSUNG,iPhone,Android,BlackBerry,HTC,Mini,LG,SonyEricsson,J2ME,MOT,WindowsWechat\",\"domain\":\"https:\\/\\/www.icmsdev.com\",\"tpl\":\"www\\/mobile\",\"index\":\"{iTPL}\\/index.htm\"}}'),
     (0,'api','{\"baidu\":{\"sitemap\":{\"site\":\"\",\"access_token\":\"\",\"sync\":\"0\"}}}'),
     (0,'mail','{\"host\":\"\",\"secure\":\"\",\"port\":\"25\",\"username\":\"\",\"password\":\"\",\"setfrom\":\"\",\"replyto\":\"\"}'),
     (1,'article','{\"pic_center\":\"1\",\"pic_next\":\"0\",\"pageno_incr\":\"\",\"markdown\":\"0\",\"autoformat\":\"0\",\"catch_remote\":\"0\",\"remote\":\"0\",\"autopic\":\"1\",\"autodesc\":\"1\",\"descLen\":\"100\",\"autoPage\":\"0\",\"AutoPageLen\":\"\",\"repeatitle\":\"0\",\"showpic\":\"0\",\"filter\":\"0\",\"clink\":\"-\"}'),
